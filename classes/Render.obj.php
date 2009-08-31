@@ -68,7 +68,7 @@ class Render {
 	private static function getCacheFilename($filename) {
 		$toret = false;
 		if (is_readable($filename)) {
-			$toret = SITE_FOLDER . '/cache/' . md5($_SERVER['SCRIPT_NAME'] . $_SERVER['QUERY_STRING']) . '.' . filemtime($filename) . '.php';
+			$toret = SITE_FOLDER . '/cache/' . md5($_SERVER['SCRIPT_NAME'] . $_SERVER['QUERY_STRING'] . $filename) . '.' . filemtime($filename) . '.php';
 		} else {
 			Controller::addError('Template does not exist');
 		}
