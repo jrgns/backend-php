@@ -29,8 +29,11 @@ class Account extends AreaCtl {
 		if (Controller::$action == 'display') {
 			if ($_SESSION['user']->id == 0) {
 				Controller::$action = 'signup';
-			} else if (Controller::$id == $_SESSION['user']->id) {
+			} else {
 				Controller::$action = 'update';
+				if (Controller::$id != $_SESSION['user']->id) {
+					Controller::$id = $_SESSION['user']->id;
+				}
 			}
 		}
 		$toret = parent::action();
