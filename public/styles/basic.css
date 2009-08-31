@@ -1,0 +1,99 @@
+body {
+	background-color: #DEDEDE;
+}
+
+.container {
+	background-color: white;
+	border: 2px solid black;
+	border-top: 0px;
+}
+
+#topinfo {
+	background-color: #80b8d8;
+	border-color: #557b90;
+	color: darkblue;
+}
+
+#topnav {
+	background-color: silver;
+	border-top: 2px solid black;
+	border-bottom: 2px solid black;
+	border-right: 1px solid black;
+	border-left: 1px solid black;
+	margin-bottom: 5px;
+	margin-left: -1px;
+	height: 24px;
+	width: 950px;
+	float: left;
+	overflow: hidden;
+}
+
+#topnav_container {
+	float: left;
+	text-align:center;
+	position: relative;
+	left: 50%;
+}
+
+#loginout .text {
+	width: 180px;
+}
+
+.menu_item {
+	display: block;
+	float: left;
+	width: 110px;
+	border-right: 1px solid black;
+	border-left: 1px solid black;
+	padding: 3px 5px;
+	text-align: center;
+	position: relative;
+	right: 50%;
+	margin-left: -1px;
+}
+
+.menu_item:hover, a.active {
+	background-color: silver;
+	font-weight: bold;
+}
+
+#topnav a {
+	text-decoration: none;
+}
+
+#topnav a:hover {
+	text-decoration: underline;
+}
+
+#footer {
+	text-align: center;
+}
+
+/* Resets */
+:focus {
+	outline: 0;
+}
+
+a, a:hover, a:visited, a:active {
+	color: black;
+}
+
+pre, code, tt {
+	overflow: auto;
+}
+
+/* Blueprint mods */
+.error, .notice, .success {
+	margin-left: 7px;
+}
+
+.text {
+}
+
+.clickable {
+	cursor: pointer;
+}
+
+.image_container {
+	text-align: center;
+}
