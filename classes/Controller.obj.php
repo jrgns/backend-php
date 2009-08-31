@@ -145,7 +145,10 @@ class Controller {
 		$_SESSION['error'] = self::getError();
 		$_SESSION['notice'] = self::getNotice();
 		$_SESSION['success'] = self::getSuccess();
-		$_SESSION['previous_url'] = $_SERVER['REQUEST_URI'];
+		if (!is_array($_SESSION['previous_url'])) {
+			$_SESSION['previous_url'] = array();
+		}
+		$_SESSION['previous_url'][self::$mode] = $_SERVER['REQUEST_URI'];
 		$_SESSION['cookie_is_working'] = true;
 
 		Hook::run('finish', 'post');
@@ -189,33 +192,6 @@ class Controller {
 		return $view;
 	}
 
-	public static function serve_text_css(array $info = array()) {
-		self::$mode = 'css';
-		//Will this header always be there?
-		$filename = basename($_SERVER['REDIRECT_URL'] . '.php');
-		if (file_exists(BACKEND_FOLDER . '/styles/' . $filename)) {
-			$filename = BACKEND_FOLDER . '/styles/' . $filename;
-		} else if (file_exists(SITE_FOLDER . '/styles/' . $filename)) {
-			$filename = SITE_FOLDER . '/styles/' . $filename;
-		} else {
-			$filename = false;
-		}
-		if ($filename) {
-			include($filename);
-		}
-	}
-	
-	public static function serve_application_json(array $info = array()) {
-		self::start();
-		$content = self::action();
-		die(json_encode(array('content' => $content, 'result' => (bool)$content)));
-	}
-	
-	public static function serve_image_plain(array $info = array()) {
-		self::start();
-		self::action();
-	}
-	
 	private static function check_quotes() {
 		if (get_magic_quotes_gpc()) {
 			function stripslashes_deep($value) {
@@ -319,7 +295,14 @@ class Controller {
 	 */	
 	public static function redirect($location = false) {
 		try {
-			$location = $location ? $location : (empty($_SESSION['previous_url']) ? '' : $_SESSION['previous_url']);
+			$location = $location ? $location : (empty($_SESSION['previous_url']) ? false : $_SESSION['previous_url']);
+			if (is_array($location)) {
+				if (array_key_exists(self::$mode, $location)) {
+					$location = $location[self::$mode];
+				} else {
+					$location = current($location);
+				}
+			}
 			if (self::$debug) {
 				self::addSuccess('The script should now redirect to <a href="' . $location . '">here</a>');
 			} else {
