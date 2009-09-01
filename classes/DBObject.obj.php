@@ -54,6 +54,9 @@ class DBObject {
 	private function checkConnection() {
 		if (!$this->db instanceof PDO) {
 			$this->db = Backend::getDB($this->meta['database']);
+			if (!$this->db instanceof PDO) {
+				Controller::whoops(array('title' => 'No Database setup', 'message' => 'Please make sure that the application has been setup correctly'));
+			}
 		}
 		return ($this->db instanceof PDO);
 	}
@@ -167,86 +170,108 @@ class DBObject {
 	
 	function create($data, $options = array()) {
 		$toret = false;
-		$data = $this->validate($data, 'create', $options);
-		if ($data) {
-			$data = $this->process($data, 'in');
-			list ($query, $params) = $this->getCreateSQL($data, $options);
-			$stmt = $this->db->prepare($query);
-			$toret = $stmt->execute($params);
-			if ($toret) {
-				//TODO This will potentially break if there are triggers in use
-				$this->inserted_id = $this->db->lastInsertId();
-				$this->array = $data;
-				$this->meta['id'] = $this->inserted_id;
-				$toret = $this->inserted_id;
-			} else {
-				$this->last_error = $stmt->errorInfo();
-				if (Controller::$debug) {
-					echo 'Error Info:';
-					var_dump($stmt->errorInfo());
+		if ($this->checkConnection()) {
+			$data = $this->validate($data, 'create', $options);
+			if ($data) {
+				$data = $this->process($data, 'in');
+				list ($query, $params) = $this->getCreateSQL($data, $options);
+				$stmt = $this->db->prepare($query);
+				$toret = $stmt->execute($params);
+				if ($toret) {
+					//TODO This will potentially break if there are triggers in use
+					$this->inserted_id = $this->db->lastInsertId();
+					$this->array = $data;
+					$this->meta['id'] = $this->inserted_id;
+					$toret = $this->inserted_id;
+				} else {
+					$this->last_error = $stmt->errorInfo();
+					if (Controller::$debug) {
+						echo 'Error Info:';
+						var_dump($stmt->errorInfo());
+					}
 				}
 			}
+		} else {
+			Controller::addError('DB Connection error');
 		}
 		return $toret;
 	}
 	
 	public function retrieve($parameter) {
 		$toret = false;
-		$query = $this->getRetrieveSQL();
-		if ($query) {
-			$stmt = $this->db->prepare($query);
-			if ($stmt->execute(array(':parameter' => $parameter))) {
-				$toret = $stmt->fetch(PDO::FETCH_ASSOC);
+		if ($this->checkConnection()) {
+			$query = $this->getRetrieveSQL();
+			if ($query) {
+				$stmt = $this->db->prepare($query);
+				if ($stmt->execute(array(':parameter' => $parameter))) {
+					$toret = $stmt->fetch(PDO::FETCH_ASSOC);
+				}
+			} else {
+				die('error');
 			}
 		} else {
-			die('error');
+			Controller::addError('DB Connection error');
 		}
 		return $toret;
 	}
 	
 	public function read($mode = false) {
 		$toret = null;
-		$id = $this->meta['id'];
-		$mode = $mode ? $mode : ($id ? 'array' : 'list');
-		switch ($mode) {
-		case 'array':
-		case 'object':
-		case 'full_object':
-			$this->load(array('mode' => $mode));
-			if (in_array($mode, array('object', 'full_object'))) {
-				$toret = $this->object;
-			} else {
-				$toret = $this->array;
+		if ($this->checkConnection()) {
+			$id = $this->meta['id'];
+			$mode = $mode ? $mode : ($id ? 'array' : 'list');
+			switch ($mode) {
+			case 'array':
+			case 'object':
+			case 'full_object':
+				$this->load(array('mode' => $mode));
+				if (in_array($mode, array('object', 'full_object'))) {
+					$toret = $this->object;
+				} else {
+					$toret = $this->array;
+				}
+				break;
+			default:
+			case 'list':
+				$this->load(array('mode' => 'list'));
+				$toret = $this->list;
+				break;
 			}
-			break;
-		default:
-		case 'list':
-			$this->load(array('mode' => 'list'));
-			$toret = $this->list;
-			break;
+		} else {
+			Controller::addError('DB Connection error');
 		}
 		return $toret;
 	}
 
 	function update($data, $options = array()) {
 		$toret = false;
-		$data = $this->validate($data, 'update', $options);
-		if ($data) {
-			list ($query, $params) = $this->getUpdateSQL($data, $options);
-			$stmt = $this->db->prepare($query);
-			$toret = $stmt->execute($params);
-			if (!$toret) {
-				$this->last_error = $stmt->errorInfo();
-				if (Controller::$debug) {
-					echo 'Error Info:';
-					var_dump($stmt->errorInfo());
+		if ($this->checkConnection()) {
+			$data = $this->validate($data, 'update', $options);
+			if ($data) {
+				list ($query, $params) = $this->getUpdateSQL($data, $options);
+				$stmt = $this->db->prepare($query);
+				$toret = $stmt->execute($params);
+				if (!$toret) {
+					$this->last_error = $stmt->errorInfo();
+					if (Controller::$debug) {
+						echo 'Error Info:';
+						var_dump($stmt->errorInfo());
+					}
 				}
 			}
+		} else {
+			Controller::addError('DB Connection error');
 		}
 		return $toret;
 	}
 	
 	function delete() {
+		$toret = false;
+		if ($this->checkConnection()) {
+		} else {
+			Controller::addError('DB Connection error');
+		}
+		return $toret;
 	}
 	
 	function validate($data, $action, $options = array()) {
@@ -265,7 +290,7 @@ class DBObject {
 						$value = filter_var($value, FILTER_VALIDATE_BOOLEAN);
 					}
 					break;
-				case 'string':
+				case 'alphanumeric':
 					if ($value !== null) {
 						if (!ctype_alnum(preg_replace('/[[:space:]]/', '', $value))) {
 							Controller::addError('Please supply a valid string for ' . humanize($name));
@@ -273,9 +298,14 @@ class DBObject {
 						}
 					}
 					break;
-				case 'text':
+				case 'string':
 					if ($value !== null) {
 						$value = plain($value);
+					}
+					break;
+				case 'text':
+					if ($value !== null) {
+						$value = simple($value);
 					}
 					break;
 				case 'dateadded':
