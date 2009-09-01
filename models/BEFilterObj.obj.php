@@ -41,10 +41,10 @@ class BEFilterObj extends DBObject {
 	}
 
 	function validate($data, $action, $options = array()) {
-		$toret = false;
+		$toret = true;
 		$data = parent::validate($data, $action, $options);
 		if ($data) {
-			$toret = true;
+			$data['active'] = array_key_exists('active', $data) ? $data['active'] : 1;
 		}
 		return $toret ? $data : false;
 	}
