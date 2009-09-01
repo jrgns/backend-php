@@ -197,6 +197,36 @@ class DBObject {
 		return $toret;
 	}
 	
+	public function replace($data, $options = array()) {
+		$toret = false;
+		if ($this->checkConnection()) {
+			$data = $this->validate($data, 'create', $options);
+			if ($data) {
+				$data = $this->process($data, 'in');
+				list ($query, $params) = $this->getCreateSQL($data, $options);
+				$query = preg_replace('/^INSERT/', 'REPLACE', $query);
+				$stmt = $this->db->prepare($query);
+				$toret = $stmt->execute($params);
+				if ($toret) {
+					//TODO This will potentially break if there are triggers in use
+					$this->inserted_id = $this->db->lastInsertId();
+					$this->array = $data;
+					$this->meta['id'] = $this->inserted_id;
+					$toret = $this->inserted_id;
+				} else {
+					$this->last_error = $stmt->errorInfo();
+					if (Controller::$debug) {
+						echo 'Error Info:';
+						var_dump($stmt->errorInfo());
+					}
+				}
+			}
+		} else {
+			Controller::addError('DB Connection error');
+		}
+		return $toret;
+	}
+	
 	public function retrieve($parameter) {
 		$toret = false;
 		if ($this->checkConnection()) {
