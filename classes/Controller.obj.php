@@ -145,7 +145,7 @@ class Controller {
 		$_SESSION['error'] = self::getError();
 		$_SESSION['notice'] = self::getNotice();
 		$_SESSION['success'] = self::getSuccess();
-		if (!is_array($_SESSION['previous_url'])) {
+		if (empty($_SESSION['previous_url']) || !is_array($_SESSION['previous_url'])) {
 			$_SESSION['previous_url'] = array();
 		}
 		$_SESSION['previous_url'][self::$mode] = $_SERVER['REQUEST_URI'];
