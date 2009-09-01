@@ -278,4 +278,21 @@ END;
 		}
 		return $toret;
 	}
+
+	public static function install() {
+		$toret = true;
+		$hook = new HookObj();
+		$toret = $hook->replace(array(
+				'name'        => 'Account Pre Start',
+				'description' => '',
+				'mode'        => '*',
+				'type'        => 'pre',
+				'hook'        => 'start',
+				'class'       => 'Account',
+				'method'      => 'hook_start',
+				'sequence'    => '0',
+			)
+		) && $toret;
+		return $toret;
+	}
 }

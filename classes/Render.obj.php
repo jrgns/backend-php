@@ -222,4 +222,39 @@ class Render {
 		//$toret = $content;
 		return $toret;
 	}
+
+	public static function install() {
+		$toret = true;
+		$hook = new HookObj();
+		$toret = $hook->replace(array(
+				'name'        => 'Render Pre Output',
+				'description' => '',
+				'mode'        => '*',
+				'type'        => 'pre',
+				'hook'        => 'output',
+				'class'       => 'Render',
+				'method'      => 'runFilters',
+				'sequence'    => 100,
+			)
+		) && $toret;
+		
+		$filter = new BEFilterObj();
+		$toret = $filter->replace(array(
+				'name' => 'System Replace',
+				'description' => 'Replace system variables with their values',
+				'class' => 'Render',
+				'function' => 'replace',
+				'options' => '',
+			)
+		) && $toret;
+		$toret = $filter->replace(array(
+				'name' => 'System Links',
+				'description' => 'Update Links...',
+				'class' => 'Render',
+				'function' => 'add_links',
+				'options' => '',
+			)
+		) && $toret;
+		return $toret;
+	}
 }

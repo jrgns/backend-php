@@ -47,7 +47,7 @@ class SerializeView extends View {
 				'hook'        => 'output',
 				'class'       => 'SerializeView',
 				'method'      => 'hook_output',
-				'sequence'    => '0',
+				'sequence'    => 0,
 			)
 		) && $toret;
 		return $toret;

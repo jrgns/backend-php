@@ -46,7 +46,7 @@ class PhpView extends View {
 				'hook'        => 'output',
 				'class'       => 'PhpView',
 				'method'      => 'hook_ouput',
-				'sequence'    => '0',
+				'sequence'    => 0,
 			)
 		) && $toret;
 		return $toret;

@@ -46,7 +46,7 @@ class JsonView extends View {
 				'hook'        => 'output',
 				'class'       => 'JsonView',
 				'method'      => 'hook_output',
-				'sequence'    => '0',
+				'sequence'    => 0,
 			)
 		) && $toret;
 		return $toret;

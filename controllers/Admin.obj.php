@@ -12,11 +12,15 @@
  */
 class Admin extends AreaCtl {
 	function action_install() {
+		Backend::add('Sub Title', 'Install Backend Components');
+
 		$modules = array(
 			'HtmlView',
 			'JsonView',
 			'PhpView',
 			'SerializeView',
+			'Account',
+			'Render',
 		);
 		$toret = true;
 		foreach($modules as $module) {
@@ -27,5 +31,10 @@ class Admin extends AreaCtl {
 				}
 			}
 		}
+		if ($toret) {
+			Controller::addSuccess('Backend Install Successful');
+		}
+		//TODO Returning false at the moment, to make backend output the default HTML...
+		return false;
 	}
 }

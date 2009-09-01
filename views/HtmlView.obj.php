@@ -50,7 +50,7 @@ class HtmlView extends View {
 				'hook'        => 'display',
 				'class'       => 'HtmlView',
 				'method'      => 'hook_display',
-				'sequence'    => '100',
+				'sequence'    => 0,
 			)
 		) && $toret;
 		$toret = $hook->replace(array(
@@ -61,7 +61,7 @@ class HtmlView extends View {
 				'hook'        => 'display',
 				'class'       => 'HtmlView',
 				'method'      => 'hook_post_display',
-				'sequence'    => '100',
+				'sequence'    => 100,
 			)
 		) && $toret;
 		return $toret;
