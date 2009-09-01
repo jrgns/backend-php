@@ -34,5 +34,22 @@ class PhpView extends View {
 		}
 		return var_export($to_print, true);
 	}
+
+	public static function install() {
+		$toret = true;
+		$hook = new HookObj();
+		$toret = $hook->replace(array(
+				'name'        => 'PhpView Pre Output',
+				'description' => '',
+				'mode'        => 'php',
+				'type'        => 'pre',
+				'hook'        => 'output',
+				'class'       => 'PhpView',
+				'method'      => 'hook_ouput',
+				'sequence'    => '0',
+			)
+		) && $toret;
+		return $toret;
+	}
 }
 

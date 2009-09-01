@@ -14,6 +14,9 @@ class Admin extends AreaCtl {
 	function action_install() {
 		$modules = array(
 			'HtmlView',
+			'JsonView',
+			'PhpView',
+			'SerializeView',
 		);
 		$toret = true;
 		foreach($modules as $module) {

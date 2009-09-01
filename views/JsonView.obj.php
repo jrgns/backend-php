@@ -34,5 +34,22 @@ class JsonView extends View {
 		}
 		return json_encode($to_print);
 	}
+
+	public static function install() {
+		$toret = true;
+		$hook = new HookObj();
+		$toret = $hook->replace(array(
+				'name'        => 'JsonView Pre Output',
+				'description' => '',
+				'mode'        => 'json',
+				'type'        => 'pre',
+				'hook'        => 'output',
+				'class'       => 'JsonView',
+				'method'      => 'hook_output',
+				'sequence'    => '0',
+			)
+		) && $toret;
+		return $toret;
+	}
 }
 

@@ -42,28 +42,29 @@ class HtmlView extends View {
 	public static function install() {
 		$toret = true;
 		$hook = new HookObj();
-		$hook_display = array(
-			'name'        => 'HtmlView Pre Display',
-			'description' => '',
-			'mode'        => 'html',
-			'type'        => 'pre',
-			'hook'        => 'display',
-			'class'       => 'HtmlView',
-			'method'      => 'hook_display',
-			'sequence'    => '100',
-		);
-		$hook_post_display = array(
-			'name'        => 'HtmlView Post Display',
-			'description' => '',
-			'mode'        => 'html',
-			'type'        => 'post',
-			'hook'        => 'display',
-			'class'       => 'HtmlView',
-			'method'      => 'hook_post_display',
-			'sequence'    => '100',
-		);
-		$toret = $hook->create($hook_display) && $toret;
-		$toret = $hook->create($hook_post_display) && $toret;
+		$toret = $hook->replace(array(
+				'name'        => 'HtmlView Pre Display',
+				'description' => '',
+				'mode'        => 'html',
+				'type'        => 'pre',
+				'hook'        => 'display',
+				'class'       => 'HtmlView',
+				'method'      => 'hook_display',
+				'sequence'    => '100',
+			)
+		) && $toret;
+		$toret = $hook->replace(array(
+				'name'        => 'HtmlView Post Display',
+				'description' => '',
+				'mode'        => 'html',
+				'type'        => 'post',
+				'hook'        => 'display',
+				'class'       => 'HtmlView',
+				'method'      => 'hook_post_display',
+				'sequence'    => '100',
+			)
+		) && $toret;
+		return $toret;
 	}
 }
 

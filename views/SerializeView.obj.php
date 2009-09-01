@@ -35,5 +35,22 @@ class SerializeView extends View {
 		//TODO check options to see if it should be encoded as well
 		return serialize($to_print);
 	}
+
+	public static function install() {
+		$toret = true;
+		$hook = new HookObj();
+		$toret = $hook->replace(array(
+				'name'        => 'SerializeView Pre Output',
+				'description' => '',
+				'mode'        => 'serialize',
+				'type'        => 'pre',
+				'hook'        => 'output',
+				'class'       => 'SerializeView',
+				'method'      => 'hook_output',
+				'sequence'    => '0',
+			)
+		) && $toret;
+		return $toret;
+	}
 }
 
