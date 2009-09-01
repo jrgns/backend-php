@@ -60,6 +60,12 @@ class View {
 	function output($to_print = null) {
 		$to_print = Hook::run('output', 'pre', array($to_print), array('toret' => $to_print));
 
+		if (empty($to_print)) {
+			$default_view = Backend::getConfig('backend.default.view');
+			if ($default_view && class_exists($default_view, true) && method_exists($default_view, 'hook_output')) {
+				$to_print = call_user_func_array(array($default_view, 'hook_output'), array($to_print));
+			}
+		}
 		echo $to_print;
 		
 		$to_print = Hook::run('output', 'post', array($to_print), array('toret' => $to_print));
