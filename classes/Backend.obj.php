@@ -208,7 +208,11 @@ class Backend {
 					//This might be problematic if there shouldn't be a username/password?
 					$connection = new PDO($dsn, $username, $password);
 				} catch (Exception $e) {
-					Controller::addError($e->getMessage());
+					if (Controller::$debug) {
+						Controller::addError($e->getMessage());
+					} else {
+						Controller::addError('Could not connect to Database ' . $name);
+					}
 				}
 			}
 			if (!empty($connection) && $connection instanceof PDO) {
