@@ -83,9 +83,12 @@ class AreaCtl {
 			$object = new $obj_name();
 			$data = $object->fromPost();
 			if (is_post()) {
+				$data = Hook::run('create', 'pre', array($data, $object), array('toret' => $data));
 				if ($object->create($data)) {
 					Controller::addSuccess($object->getMeta('name') . ' Added');
-					Controller::redirect('?q=' . $object->getArea() . '/display/' . $object->getMeta('id'));
+					if (Hook::run('create', 'post', array($data, $object), array('toret' => true))) {
+						Controller::redirect('?q=' . $object->getArea() . '/display/' . $object->getMeta('id'));
+					}
 				} else {
 					Controller::addError('Could not add ' . $object->getMeta('name'));
 				}
@@ -122,9 +125,12 @@ class AreaCtl {
 			$object = new $obj_name(Controller::$id);
 			if (is_post()) {
 				$data = $object->fromPost();
+				$data = Hook::run('update', 'pre', array($data, $object), array('toret' => $data));
 				if ($object->update($data)) {
 					Controller::addSuccess($object->getMeta('name') . ' Modified');
-					Controller::redirect('?q=' . $object->getArea() . '/display/' . $object->getMeta('id'));
+					if (Hook::run('update', 'post', array($data, $object), array('toret' => true))) {
+						Controller::redirect('?q=' . $object->getArea() . '/display/' . $object->getMeta('id'));
+					}
 				} else {
 					Controller::addError('Could not update ' . $object->getMeta('name'));
 				}
