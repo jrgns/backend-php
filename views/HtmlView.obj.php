@@ -24,7 +24,7 @@ class HtmlView extends View {
 		if (!headers_sent()) {
 			header('Content-Type: text/html');
 		}
-		$to_print = Render::renderFile('templates/index.tpl.php');
+		$to_print = Render::renderFile('index.tpl.php');
 		return $to_print;
 	}
 	

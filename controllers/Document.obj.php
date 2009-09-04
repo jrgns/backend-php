@@ -15,6 +15,6 @@ class Document extends File {
 		Backend::add('Sub Title', $document->getMeta('name'));
 		Backend::add('TabLinks', $this->getTabLinks(Controller::$action));
 		Backend::add('Object', $document);
-		Controller::addContent(Render::renderFile('templates/document_list.tpl.php'));
+		Controller::addContent(Render::renderFile('document_list.tpl.php'));
 	}	
 }

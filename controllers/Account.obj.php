@@ -139,9 +139,9 @@ class Account extends AreaCtl {
 			Backend::add('gravatar', $grav_url);
 			Backend::add('TabLinks', $this->getTabLinks('update'));
 			Backend::add('obj', $_SESSION['user']);
-			Controller::addContent(Render::renderFile('templates/account_info.tpl.php'));
+			Controller::addContent(Render::renderFile('account_info.tpl.php'));
 		}
-		Controller::addContent(Render::renderFile('templates/loginout.tpl.php'));
+		Controller::addContent(Render::renderFile('loginout.tpl.php'));
 	}
 	
 	public function action_signup() {
@@ -174,7 +174,7 @@ class Account extends AreaCtl {
 	public function html_signup($object) {
 		Backend::add('Sub Title', 'Signup to Text It');
 		Backend::add('Object', $object);
-		Controller::addContent(Render::renderFile('templates/signup.tpl.php'));
+		Controller::addContent(Render::renderFile('signup.tpl.php'));
 	}
 
 	/**
@@ -218,7 +218,7 @@ class Account extends AreaCtl {
 	
 	public function html_confirm($object) {
 		Backend::add('Sub Title', 'Confirm Account');
-		Controller::addContent(Render::renderFile('templates/loginout.tpl.php'));
+		Controller::addContent(Render::renderFile('loginout.tpl.php'));
 	}
 	
 	public static function hook_start() {

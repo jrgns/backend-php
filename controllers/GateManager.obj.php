@@ -36,13 +36,13 @@ class GateManager extends AreaCtl {
 			$Role = new RoleObj(Controller::$id);
 			$Role->load();
 			Backend::add('Object', $Role);
-			Controller::addContent(Render::renderFile('templates/std_display.tpl.php'));
+			Controller::addContent(Render::renderFile('std_display.tpl.php'));
 		} else {
 			Backend::add('Sub Title', 'GateKeeper Roles');
 			$Roles = new RoleObj();
 			$Roles->load();
 			Backend::add('Object', $Roles);
-			Controller::addContent(Render::renderFile('templates/std_list.tpl.php'));
+			Controller::addContent(Render::renderFile('std_list.tpl.php'));
 		}
 	}
 	
@@ -52,7 +52,7 @@ class GateManager extends AreaCtl {
 		$Permissions = new PermissionObj();
 		$Permissions->load();
 		Backend::add('Object', $Permissions);
-		Controller::addContent(Render::renderFile('templates/std_list.tpl.php'));
+		Controller::addContent(Render::renderFile('std_list.tpl.php'));
 	}
 	
 	public function html_assignments($object) {
@@ -61,7 +61,7 @@ class GateManager extends AreaCtl {
 		$Assignments = new AssignmentObj();
 		$Assignments->load();
 		Backend::add('Object', $Assignments);
-		Controller::addContent(Render::renderFile('templates/std_list.tpl.php'));
+		Controller::addContent(Render::renderFile('std_list.tpl.php'));
 	}
 	
 	public function action_check() {

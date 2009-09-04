@@ -4,7 +4,7 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<title>#Title# - #Sub Title#</title>
-		{tpl:templates/styles.tpl.php}
+		{tpl:styles.tpl.php}
 		<link rel="shortcut icon" type="image/x-icon" href="<?php echo SITE_LINK ?>/favicon.ico">
 	</head>
 	<body>
@@ -18,12 +18,12 @@
 					Top Info
 				</div>
 				<div id="topnav" class="span-24">
-					{tpl:templates/topnav.tpl.php}
+					{tpl:topnav.tpl.php}
 				</div>
 				<div id="teaser" class="span-24">
-					{tpl:templates/backend_errors.tpl.php}
-					{tpl:templates/backend_success.tpl.php}
-					{tpl:templates/backend_notices.tpl.php}
+					{tpl:backend_errors.tpl.php}
+					{tpl:backend_success.tpl.php}
+					{tpl:backend_notices.tpl.php}
 					<?php if (!empty($Teaser)): ?><p class="bottom">#Teaser#</p><?php endif; ?>
 					<hr/>
 				</div>
@@ -31,8 +31,8 @@
 				<div id="maincol" class="span-15 prepend-1 colborder">
 					<h2 class="quiet">#Sub Title#</h2>
 					<div id="content">
-						{tpl:templates/tab_links.tpl.php}
-						{tpl:templates/maincontent.tpl.php}
+						{tpl:tab_links.tpl.php}
+						{tpl:maincontent.tpl.php}
 					</div>
 				</div>
 				<div id="rightcol" class="span-6 last">
@@ -44,7 +44,7 @@
 						<li class="loud">Something</li>
 						<li>Another</li>
 					</ul>
-					{tpl:templates/loginout.tpl.php}
+					{tpl:loginout.tpl.php}
 				</div>
 				<?php if ($debug): ?>
 					<div id="lastcontent" class="notice span-23 last">
@@ -65,7 +65,7 @@
 		<div id="lowerback">
 			&nbsp;
 		</div>
-		{tpl:templates/scripts.tpl.php}
+		{tpl:scripts.tpl.php}
 	<?php if (!$LocalSite): ?>
 		<script type="text/javascript">
 			var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");

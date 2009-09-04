@@ -195,9 +195,9 @@ class AreaCtl {
 				Controller::addError('There is a problem with the HTML Form');
 			}
 			Backend::add('Object', $object);
-			$template_file = 'templates/' . singularize(computerize(class_name(Controller::$area))) . '.import.tpl.php';
+			$template_file = singularize(computerize(class_name(Controller::$area))) . '.import.tpl.php';
 			if (!Render::checkTemplateFile($template_file)) {
-				$template_file = 'templates/std_import.tpl.php';
+				$template_file = 'std_import.tpl.php';
 			}
 			Controller::addContent(Render::renderFile($template_file));
 		} else {
@@ -218,9 +218,9 @@ class AreaCtl {
 				Backend::add('Object', $object);
 				Backend::add('TabLinks', $this->getTabLinks('display'));
 				Backend::add('Sub Title', $object->getMeta('name'));
-				$template_file = 'templates/' . $object->getArea() . '.display.tpl.php';
+				$template_file = $object->getArea() . '.display.tpl.php';
 				if (!Render::checkTemplateFile($template_file)) {
-					$template_file = 'templates/std_display.tpl.php';
+					$template_file = 'std_display.tpl.php';
 				}
 				Controller::addContent(Render::renderFile($template_file));
 			} else {
@@ -242,9 +242,9 @@ class AreaCtl {
 				Backend::add('Object', $object);
 				Backend::add('TabLinks', $this->getTabLinks('list'));
 				Backend::add('Sub Title', $object->getMeta('name'));
-				$template_file = 'templates/' . $object->getArea() . '.list.tpl.php';
+				$template_file = $object->getArea() . '.list.tpl.php';
 				if (!Render::checkTemplateFile($template_file)) {
-					$template_file = 'templates/std_list.tpl.php';
+					$template_file = 'std_list.tpl.php';
 				}
 				Controller::addContent(Render::renderFile($template_file));
 			} else {
@@ -266,9 +266,9 @@ class AreaCtl {
 				Backend::add('Object', $object);
 				Backend::add('TabLinks', $this->getTabLinks('create'));
 				Backend::add('Sub Title', 'Add ' . $object->getMeta('name'));
-				$template_file = 'templates/' . $object->getArea() . '.form.tpl.php';
+				$template_file = $object->getArea() . '.form.tpl.php';
 				if (!Render::checkTemplateFile($template_file)) {
-					$template_file = 'templates/std_form.tpl.php';
+					$template_file = 'std_form.tpl.php';
 				}
 				Controller::addContent(Render::renderFile($template_file));
 			} else {
@@ -290,9 +290,9 @@ class AreaCtl {
 				Backend::add('Object', $object);
 				Backend::add('TabLinks', $this->getTabLinks('update'));
 				Backend::add('Sub Title', 'Update ' . $object->getMeta('name'));
-				$template_file = 'templates/' . $object->getArea() . '.form.tpl.php';
+				$template_file = $object->getArea() . '.form.tpl.php';
 				if (!Render::checkTemplateFile($template_file)) {
-					$template_file = 'templates/std_form.tpl.php';
+					$template_file = 'std_form.tpl.php';
 				}
 				Controller::addContent(Render::renderFile($template_file));
 			} else {

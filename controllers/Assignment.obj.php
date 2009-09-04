@@ -26,7 +26,7 @@ class Assignment extends AreaCtl {
 		list ($query, $params) = $Assignments->getSelectSQL(array('conditions' => $conditions, 'joins' => $joins, 'fields' => $fields));
 		$Assignments->load(array('query' => $query, 'parameters' => $params));
 		Backend::add('Assignments', $Assignments);
-		Controller::addContent(Render::renderFile('templates/assignment_list.tpl.php'));
+		Controller::addContent(Render::renderFile('assignment_list.tpl.php'));
 	}
 
 	function action_display2() {
@@ -34,7 +34,7 @@ class Assignment extends AreaCtl {
 		if (Controller::$id) {
 			Backend::add('Sub Title', humanize(Controller::$id));
 			if ($this->checkPermissions()) {
-				$filename = 'templates/' . Controller::$id . '.tpl.php';
+				$filename = Controller::$id . '.tpl.php';
 				if (Render::checkTemplateFile($filename)) {
 					$toret = true;
 					Controller::addContent(Render::renderFile($filename));

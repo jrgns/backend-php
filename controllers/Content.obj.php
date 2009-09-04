@@ -17,7 +17,7 @@ class Content extends AreaCtl {
 			Backend::add('Sub Title', $content->array['title']);
 			if ($content->array['from_file']) {
 				$filename = 'content/static/' . $content->array['name'] . '.html';
-				$template = 'templates/content/' . $content->array['name'] . '.tpl.php';
+				$template = 'content/' . $content->array['name'] . '.tpl.php';
 				if (Render::checkTemplateFile($template)) {
 					Controller::addContent(Render::renderFile($template));
 					$toret = $content;
@@ -33,7 +33,7 @@ class Content extends AreaCtl {
 		}
 		if (!$toret) {
 			if (Controller::$debug) {
-				$filename = 'templates/content/' . Controller::$id . '.tpl.php';
+				$filename = 'content/' . Controller::$id . '.tpl.php';
 				if (Render::checkTemplateFile($filename)) {
 					Controller::addNotice('File available for content');
 				}
