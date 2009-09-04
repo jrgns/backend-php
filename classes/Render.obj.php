@@ -233,7 +233,7 @@ class Render {
 				'hook'        => 'output',
 				'class'       => 'Render',
 				'method'      => 'runFilters',
-				'sequence'    => 100,
+				'sequence'    => 1000,
 			)
 		) && $toret;
 		

@@ -21,10 +21,13 @@ class Content extends AreaCtl {
 				if (Render::checkTemplateFile($template)) {
 					Controller::addContent(Render::renderFile($template));
 					$toret = $content;
-				} else if (file_exists($filename)) {
-					die('Content::Finish this');
-					Controller::addContent(Render::renderFile($template));
+				} else if (file_exists(APP_FOLDER . '/' . $filename)) {
+					Controller::addContent(file_get_contents(APP_FOLDER . '/' . $filename));
 					$toret = $content;
+				} else if (file_exists(BACKEND_FOLDER . '/' . $filename)) {
+					Controller::addContent(file_get_contents(BACKEND_FOLDER . '/' . $filename));
+					$toret = $content;
+				//SITE FOLDER too?
 				}
 			} else {
 				Controller::addContent($content->array['body']);
