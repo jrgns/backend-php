@@ -20,19 +20,19 @@
  * DBObject wrapper for the `contents` table
  * @package Models
  */
-class ContentObj extends DBObject {
+class ContentRevisionObj extends DBObject {
 	function __construct($meta = array()) {
 		if (!is_array($meta) && (is_numeric($meta) || is_string($meta))) {
 			$meta = array('id' => $meta);
 		}
-		$meta['table'] = 'contents';
-		$meta['name'] = 'Content';
+		$meta['table'] = 'content_revisions';
+		$meta['name'] = 'Content Revision';
 		$meta['fields'] = array(
 			'id' => 'primarykey',
-			'name' => 'string',
-			'title' => 'title',
+			'user_id' => 'integer',
+			'content_id' => 'integer',
+			'summary' => 'title',
 			'body' => 'text',
-			'from_file' => 'boolean',
 			'active' => 'boolean',
 			'modified' => 'lastmodified',
 			'added' => 'dateadded',
@@ -44,8 +44,11 @@ class ContentObj extends DBObject {
 		$toret = false;
 		$data = parent::validate($data, $action, $options);
 		if ($data) {
-			if (!empty($data['body'])) {
-				$data['from_file'] = false;
+			if (empty($data['user_id']) && !empty($_SESSION['user']->id)) {
+				$data['user_id'] = $_SESSION['user']->id;
+			}
+			if (is_null($data['active'])) {
+				$data['active'] = 1;
 			}
 			$toret = true;
 		}

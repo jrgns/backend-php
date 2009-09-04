@@ -21,6 +21,7 @@ class Admin extends AreaCtl {
 			'SerializeView',
 			'Account',
 			'Render',
+			'ContentRevision',
 		);
 		$toret = true;
 		foreach($modules as $module) {

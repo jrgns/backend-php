@@ -180,9 +180,10 @@ class DBObject {
 				if ($toret) {
 					//TODO This will potentially break if there are triggers in use
 					$this->inserted_id = $this->db->lastInsertId();
-					$this->array = $data;
-					$this->meta['id'] = $this->inserted_id;
-					$toret = $this->inserted_id;
+					$this->array       = $data;
+					$this->array['id'] = $this->inserted_id;
+					$this->meta['id']  = $this->inserted_id;
+					$toret             = $this->inserted_id;
 				} else {
 					$this->last_error = $stmt->errorInfo();
 					if (Controller::$debug) {
