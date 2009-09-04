@@ -47,9 +47,9 @@ class HtmlView extends View {
 				'description' => '',
 				'mode'        => 'html',
 				'type'        => 'pre',
-				'hook'        => 'display',
+				'hook'        => 'output',
 				'class'       => 'HtmlView',
-				'method'      => 'hook_display',
+				'method'      => 'hook_output',
 				'sequence'    => 0,
 			)
 		) && $toret;

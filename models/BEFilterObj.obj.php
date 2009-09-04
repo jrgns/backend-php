@@ -35,7 +35,7 @@ class BEFilterObj extends DBObject {
 			'options' => 'string',
 			'active' => 'boolean',
 			'modified' => 'lastmodified',
-			'added' => 'added',
+			'added' => 'dateadded',
 		);
 		return parent::__construct($meta);
 	}

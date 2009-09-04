@@ -22,6 +22,7 @@ class HookObj extends DBObject {
 			'id' => 'primarykey',
 			'name' => 'title',
 			'description' => 'text',
+			'mode' => 'string',
 			'type' => 'string',
 			'hook' => 'string',
 			'class' => 'string',
