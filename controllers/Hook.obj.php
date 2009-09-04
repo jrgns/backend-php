@@ -15,7 +15,7 @@ class Hook extends AreaCtl {
 		$params = array(':type' => $type, ':hook' => $hook);
 		$query = 'SELECT * FROM `hooks` WHERE `hook` = :hook AND `type` = :type AND `active` = 1';
 		if (Controller::$mode) {
-			$query .= ' AND `mode` = :mode';
+			$query .= ' AND `mode` IN (:mode, \'*\')';
 			$params[':mode'] = Controller::$mode;
 		}
 		$query .= ' ORDER BY `sequence`';
