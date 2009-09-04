@@ -19,17 +19,18 @@ class HookObj extends DBObject {
 		$meta['table'] = 'hooks';
 		$meta['name'] = 'Hook';
 		$meta['fields'] = array(
-			'id' => 'primarykey',
-			'name' => 'title',
+			'id'          => 'primarykey',
+			'name'        => 'title',
 			'description' => 'text',
-			'mode' => 'string',
-			'type' => 'string',
-			'hook' => 'string',
-			'class' => 'string',
-			'method' => 'string',
-			'active' => 'boolean',
-			'modified' => 'lastmodified',
-			'added' => 'dateadded',
+			'mode'        => 'string',
+			'type'        => 'string',
+			'hook'        => 'string',
+			'class'       => 'string',
+			'method'      => 'string',
+			'sequence'    => 'integer',
+			'active'      => 'boolean',
+			'modified'    => 'lastmodified',
+			'added'       => 'dateadded',
 		);
 		return parent::__construct($meta);
 	}
