@@ -67,7 +67,7 @@ class Account extends AreaCtl {
 						$toret = $User->object;
 						$User->object->roles = empty($User->object->roles) ? array() : explode(',', $User->object->roles);
 						$_SESSION['user'] = $User->object;
-						Controller::addSuccess('Welcome to Text It!');
+						Controller::addSuccess('Welcome to ' . Backend::getConfig('application.Title') . '!');
 						$location = empty($_SESSION['previous_url']) ? SITE_LINK : $_SESSION['previous_url'];
 						Controller::redirect($location);
 					} else {
@@ -172,7 +172,7 @@ class Account extends AreaCtl {
 	}
 	
 	public function html_signup($object) {
-		Backend::add('Sub Title', 'Signup to Text It');
+		Backend::add('Sub Title', 'Signup to ' . Backend::getConfig('application.Title'));
 		Backend::add('Object', $object);
 		Controller::addContent(Render::renderFile('signup.tpl.php'));
 	}
