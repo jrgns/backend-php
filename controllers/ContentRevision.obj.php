@@ -12,7 +12,7 @@
  */
 class ContentRevision extends AreaCtl {
 	public static function hook_post_create($data, $object) {
-		if (!$data['from_file']) {
+		if ($data instanceof ContentObj && !$data['from_file']) {
 			if (self::createNewRevision(
 					$object->array['id'], 
 					$object->array['body'], 
@@ -26,7 +26,7 @@ class ContentRevision extends AreaCtl {
 	}
 
 	public static function hook_post_update($data, $object) {
-		if (!$data['from_file']) {
+		if ($data instanceof ContentObj && !$data['from_file']) {
 			if (!self::createNewRevision(
 					$object->array['id'], 
 					$object->array['body'], 
