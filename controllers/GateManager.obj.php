@@ -118,7 +118,7 @@ class GateManager extends AreaCtl {
 		$toret = array(
 			array('id' => 1, 'name' => 'nobody', 'description' => 'No one. No, really, no one.', 'active' => 1),
 			array('id' => 2, 'name' => 'anonymous', 'description' => 'The standard, anonymous user with minimum rights', 'active' => 1),
-			array('id' => 3, 'name' => 'registered', 'description' => 'A registered user', 'active' => 1),
+			array('id' => 3, 'name' => 'authenticated', 'description' => 'A registered user', 'active' => 1),
 			array('id' => 4, 'name' => 'superadmin', 'description' => 'The user with all the rights', 'active' => 1),
 			
 		);
