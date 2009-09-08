@@ -22,6 +22,7 @@ class Admin extends AreaCtl {
 			'Account',
 			'Render',
 			'ContentRevision',
+			'GateManager',
 		);
 		$toret = true;
 		foreach($modules as $module) {

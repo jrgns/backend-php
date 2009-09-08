@@ -21,6 +21,7 @@ class PhpView extends View {
 	}
 		
 	public static function hook_output($to_print) {
+		die('here');
 		if (!headers_sent()) {
 			header('Content-Type: text/plain');
 		}
@@ -32,6 +33,7 @@ class PhpView extends View {
 			$to_print = $to_print instanceof DBObject && Controller::$id ? $to_print->array : $to_print;
 			break;
 		}
+		var_dump($to_print); die;
 		return var_export($to_print, true);
 	}
 
@@ -45,7 +47,7 @@ class PhpView extends View {
 				'type'        => 'pre',
 				'hook'        => 'output',
 				'class'       => 'PhpView',
-				'method'      => 'hook_ouput',
+				'method'      => 'hook_output',
 				'sequence'    => 0,
 			)
 		) && $toret;

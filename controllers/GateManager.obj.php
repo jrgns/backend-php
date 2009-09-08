@@ -70,25 +70,7 @@ class GateManager extends AreaCtl {
 			if (Controller::$debug) {
 				Controller::addNotice('No roles setup, addings some');
 			}
-			$roles = $this->getDefaultRoles();
-			if ($roles) {
-				foreach($roles as $role) {
-					GateKeeper::assign($role['role'], $role['access_type'], $role['access_id']);
-					if (Controller::$debug) {
-						Controller::addSuccess('Added role ' . $role['role']);
-					}
-				}
-			}
-			
-			$permits = $this->getDefaultPermissions();
-			if ($permits) {
-				foreach($permits as $permit) {
-					GateKeeper::permit($permit['role'], $permit['control'], $permit['action'], $permit['subject'], $permit['subject_id']);
-					if (Controller::$debug) {
-						Controller::addSuccess('Added permission to ' . $role['action'] . ' to ' . $permit['role']);
-					}
-				}
-			}
+			self::install();
 		} else {
 			if (Controller::$debug) {
 				var_dump($roles);
@@ -96,24 +78,71 @@ class GateManager extends AreaCtl {
 		}
 	}
 	
-	protected function getDefaultPermissions() {
+	public function action_install() {
+		self::install();
+	}
+	
+	public static function install() {
+		$roles = self::getDefaultRoles();
+		if ($roles) {
+			$RoleObj = new RoleObj();
+			foreach($roles as $role) {
+				if ($RoleObj->create($role)) {
+					Controller::addSuccess('Added role ' . $role['name']);
+				}
+			}
+		}
+		
+		$assigns = self::getDefaultAssignments();
+		if ($assigns) {
+			$AssignmentObj = new AssignmentObj();
+			foreach($assigns as $assignment) {
+				if ($AssignmentObj->create($assignment)) {
+					Controller::addSuccess('Added assignment ' . $assignment['access_type'] . ' to ' . $assignment['role_id']);
+				}
+			}
+		}
+
+		$permits = self::getDefaultPermissions();
+		if ($permits) {
+			$PermissionObj = new PermissionObj();
+			foreach($permits as $permit) {
+				if ($PermissionObj->create($permit)) {
+					Controller::addSuccess('Added permission to ' . $permit['action'] . ' to ' . $permit['role']);
+				}
+			}
+		}
+	}
+	
+	protected static function getDefaultRoles() {
 		$toret = array(
-			array('role' => 'anonymous', 'control' => '100', 'action' => 'display', 'subject' => 'content', 'subject_id' => '*'),
-			array('role' => 'superadmin', 'control' => '111', 'action' => '*', 'subject' => '*', 'subject_id' => '*'),
+			array('id' => 1, 'name' => 'nobody', 'description' => 'No one. No, really, no one.', 'active' => 1),
+			array('id' => 2, 'name' => 'anonymous', 'description' => 'The standard, anonymous user with minimum rights', 'active' => 1),
+			array('id' => 3, 'name' => 'registered', 'description' => 'A registered user', 'active' => 1),
+			array('id' => 4, 'name' => 'superadmin', 'description' => 'The user with all the rights', 'active' => 1),
+			
+		);
+		return $toret;
+	}
+
+	protected static function getDefaultAssignments() {
+		$toret = array(
+			//No one will be registered as nobody
+			array('role_id' => 1, 'access_type' => 'nobody', 'access_id' => '0'),
+			//All anonymous visitors to the site will be classified as visitors
+			array('role_id' => 2, 'access_type' => 'visitor', 'access_id' => '*'),
+			//All registered visitors to the site will be classified as users
+			array('role_id' => 3, 'access_type' => 'user', 'access_id' => '*'),
+			//The user with id 1 will be super admin
+			array('role_id' => 4, 'access_type' => 'user', 'access_id' => '1'),
 		);
 		return $toret;
 	}
 	
-	protected function getDefaultRoles() {
+	protected static function getDefaultPermissions() {
 		$toret = array(
-			//All anonymous visitors to the site will be classified as visitors
-			array('role' => 'anonymous', 'access_type' => 'visitor', 'access_id' => '*'),
-			//All registered visitors to the site will be classified as users
-			array('role' => 'registered', 'access_type' => 'user', 'access_id' => '*'),
-			//No one will be registered as nobody
-			array('role' => 'nobody', 'access_type' => 'nobody', 'access_id' => '0'),
-			//The user with id 1 will be super admin
-			array('role' => 'superadmin', 'access_type' => 'user', 'access_id' => '1'),
+			array('role' => 'anonymous', 'control' => '100', 'action' => 'display', 'subject' => 'content', 'subject_id' => '*'),
+			array('role' => 'superadmin', 'control' => '111', 'action' => '*', 'subject' => '*', 'subject_id' => '*'),
 		);
 		return $toret;
 	}
