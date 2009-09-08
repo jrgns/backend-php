@@ -71,4 +71,20 @@ class Content extends AreaCtl {
 		}
 		return $toret;
 	}
+	
+	public static function install() {
+		$permission = new PermissionObj();
+		$toret = true;
+		$toret = $permission->replace(array(
+				'role'       => 'anonymous',
+				'control'    => '100',
+				'action'     => 'display',
+				'subject'    => 'content',
+				'subject_id' => 0,
+				'system'     => 0,
+				'active'     => 1,
+			)
+		) && $toret;
+		return $toret;
+	}
 }

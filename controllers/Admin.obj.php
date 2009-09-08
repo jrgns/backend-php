@@ -22,6 +22,7 @@ class Admin extends AreaCtl {
 			'Account',
 			'Render',
 			'ContentRevision',
+			'Content',
 			'GateManager',
 		);
 		$toret = true;

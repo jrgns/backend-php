@@ -293,6 +293,47 @@ END;
 				'sequence'    => '0',
 			)
 		) && $toret;
+		$permission = new PermissionObj();
+		$toret = $permission->replace(array(
+				'role'       => 'anonymous',
+				'control'    => '100',
+				'action'     => 'signup',
+				'subject'    => 'account',
+				'subject_id' => 0,
+				'system'     => 0,
+				'active'     => 1,
+			)
+		) && $toret;
+		$toret = $permission->replace(array(
+				'role'       => 'anonymous',
+				'control'    => '100',
+				'action'     => 'confirm',
+				'subject'    => 'account',
+				'subject_id' => 0,
+				'system'     => 0,
+				'active'     => 1,
+			)
+		) && $toret;
+		$toret = $permission->replace(array(
+				'role'       => 'anonymous',
+				'control'    => '100',
+				'action'     => 'login',
+				'subject'    => 'account',
+				'subject_id' => 0,
+				'system'     => 0,
+				'active'     => 1,
+			)
+		) && $toret;
+		$toret = $permission->replace(array(
+				'role'       => 'authenticated',
+				'control'    => '100',
+				'action'     => 'logout',
+				'subject'    => 'account',
+				'subject_id' => 0,
+				'system'     => 0,
+				'active'     => 1,
+			)
+		) && $toret;
 		return $toret;
 	}
 }
