@@ -10,10 +10,7 @@
 	<body>
 		<div id="middleback">
 			<div class="container">
-				<div id="header" class="span-24">
-					<h1 class="bottom"><a href="?q=">#Title#</a></h1>
-					<p class="">&nbsp;#Moto#</p>
-				</div>
+				{tpl:header.tpl.php}
 				<div id="topinfo" class="span-24 success hide">
 					Top Info
 				</div>
