@@ -154,6 +154,13 @@ class Controller {
 		Hook::run('finish', 'post');
 	}
 	
+	/**
+	 * Decide on which view to use
+	 *
+	 * In an ideal world, we will just use the first mime type in the Http-Acccept header. But IE decided
+	 * to put a lot of crud in it's Accept header, so we need some hacks.
+	 * @todo Make the process on deciding a view better / extendable!
+	 */
 	private static function getView() {
 		$view = false;
 		$mime_ranges = Parser::accept_header();
@@ -164,28 +171,39 @@ class Controller {
 			}
 		}
 		if (!$view && $mime_ranges) {
+			$types = array();
+			$main_types = array();
 			$view_name = false;
 			foreach($mime_ranges as $mime_type) {
-				$name = class_name(str_replace('+', ' ', $mime_type['main_type']) . ' ' . str_replace('+', ' ', $mime_type['sub_type'])) . 'View';
-				if (class_exists($name, true)) {
-					$view_name = $name;
-				} else {
-					$name = class_name(str_replace('+', ' ', $mime_type['main_type'])) . 'View';
+				$types[] = $mime_type['main_type'] . '/' . $mime_type['sub_type'];
+				$main_types[] = $mime_type['main_type'];
+				if (!$view_name) {
+					$name = class_name(str_replace('+', ' ', $mime_type['main_type']) . ' ' . str_replace('+', ' ', $mime_type['sub_type'])) . 'View';
 					if (class_exists($name, true)) {
 						$view_name = $name;
 					} else {
-						$name = class_name(str_replace('+', ' ', $mime_type['sub_type'])) . 'View';
+						$name = class_name(str_replace('+', ' ', $mime_type['main_type'])) . 'View';
 						if (class_exists($name, true)) {
 							$view_name = $name;
+						} else {
+							$name = class_name(str_replace('+', ' ', $mime_type['sub_type'])) . 'View';
+							if (class_exists($name, true)) {
+								$view_name = $name;
+							}
 						}
 					}
-				}
-				if ($view_name) {
-					break;
 				}
 			}
 			if (!class_exists($view_name, true)) {
 				$view_name = 'View';
+			} else {
+				if (in_array('image', $main_types) && in_array('text', $main_types)) {
+				//Probably IE
+					$view_name = 'HtmlView';
+				} else if (in_array('application/xml', $types) && in_array('application/xhtml+xml', $types) && in_array('text/html', $types)) {
+				//Maybe another confused browser that asks for XML and HTML
+					$view_name = 'HtmlView';
+				}
 			}
 			$view = new $view_name();
 		}
