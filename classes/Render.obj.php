@@ -22,10 +22,10 @@ class Render {
 	public static function checkTemplateFile($filename) {
 		$toret = false;
 		$template_loc = Backend::getConfig('backend.templates.location', 'templates');
-		if (is_readable(BACKEND_FOLDER . '/' . $template_loc . '/' . $filename)) {
-			$toret = BACKEND_FOLDER . '/'. $template_loc . '/' . $filename;
-		} else if (is_readable(APP_FOLDER . '/' . $template_loc . '/' . $filename)) {
+		if (is_readable(APP_FOLDER . '/' . $template_loc . '/' . $filename)) {
 			$toret = APP_FOLDER . '/'. $template_loc . '/' . $filename;
+		} else if (is_readable(BACKEND_FOLDER . '/' . $template_loc . '/' . $filename)) {
+			$toret = BACKEND_FOLDER . '/'. $template_loc . '/' . $filename;
 		}
 		return $toret;
 	}
