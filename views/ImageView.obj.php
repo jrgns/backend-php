@@ -20,12 +20,29 @@ class ImageView extends View {
 		$this->mode = 'image';
 	}
 	
-	function output() {
+	public static function hook_output($to_print) {
 		if (!headers_sent()) {
 			$mime_ranges = Parser::accept_header();
 			$mime_type = current($mime_ranges);
 			header('Content-Type: image/' . $mime_type['sub_type']);
 		}
+	}
+
+	public static function install() {
+		$toret = true;
+		$hook = new HookObj();
+		$toret = $hook->replace(array(
+				'name'        => 'HtmlView Pre Display',
+				'description' => '',
+				'mode'        => 'html',
+				'type'        => 'pre',
+				'hook'        => 'output',
+				'class'       => 'HtmlView',
+				'method'      => 'hook_output',
+				'sequence'    => 0,
+			)
+		) && $toret;
+		return $toret;
 	}
 }
 

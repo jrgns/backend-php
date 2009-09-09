@@ -159,7 +159,8 @@ class Controller {
 	 *
 	 * In an ideal world, we will just use the first mime type in the Http-Acccept header. But IE decided
 	 * to put a lot of crud in it's Accept header, so we need some hacks.
-	 * @todo Make the process on deciding a view better / extendable!
+	 * @todo Make the process on deciding a view better / extendable! Or, setup preferences that ignore the
+	 * Accept header, or just rely on what the client asks for (mode=[json|xml|xhtml|jpg])
 	 */
 	private static function getView() {
 		$view = false;
@@ -197,7 +198,7 @@ class Controller {
 			if (!class_exists($view_name, true)) {
 				$view_name = 'View';
 			} else {
-				if (in_array('image', $main_types) && in_array('text', $main_types)) {
+				if (in_array('image', $main_types) && in_array('application', $main_types)) {
 				//Probably IE
 					$view_name = 'HtmlView';
 				} else if (in_array('application/xml', $types) && in_array('application/xhtml+xml', $types) && in_array('text/html', $types)) {
