@@ -43,6 +43,9 @@ class Backend {
 		//Some constants
 		$url = parse_url(get_current_url());
 		$url = $url['host'] . dirname($url['path']);
+		if (substr($url, strlen($url) - 1) != '/') {
+			$url .= '/';
+		}
 		define('SITE_LINK', 'http://' . $url);
 		define('S_SITE_LINK', 'https://' . $url);
 		Backend::add('SITE_LINK', SITE_LINK);

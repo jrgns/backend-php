@@ -72,4 +72,32 @@ class View {
 		
 		$to_print = Hook::run('output', 'post', array($to_print), array('toret' => $to_print));
 	}	
+
+	public static function install() {
+		$toret = true;
+		$hook = new HookObj();
+		$toret = $hook->replace(array(
+				'name'        => 'View Pre Init',
+				'description' => '',
+				'mode'        => '*',
+				'type'        => 'pre',
+				'hook'        => 'init',
+				'class'       => 'View',
+				'method'      => 'hook_init',
+				'sequence'    => 0,
+			)
+		) && $toret;
+		$toret = $hook->replace(array(
+				'name'        => 'View Pre Display',
+				'description' => '',
+				'mode'        => '*',
+				'type'        => 'pre',
+				'hook'        => 'output',
+				'class'       => 'HtmlView',
+				'method'      => 'hook_output',
+				'sequence'    => 1000,
+			)
+		) && $toret;
+		return $toret;
+	}
 }
