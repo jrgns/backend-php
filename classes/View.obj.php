@@ -88,7 +88,7 @@ class View {
 			)
 		) && $toret;
 		$toret = $hook->replace(array(
-				'name'        => 'View Pre Display',
+				'name'        => 'View Pre Output',
 				'description' => '',
 				'mode'        => '*',
 				'type'        => 'pre',
