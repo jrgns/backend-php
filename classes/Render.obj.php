@@ -78,6 +78,7 @@ class Render {
 		$toret = false;
 
 		switch (true) {
+			case array_key_exists('nocache', $_REQUEST):
 			case array_key_exists('HTTP_PRAGMA', $_SERVER) && $_SERVER['HTTP_PRAGMA'] == 'no-cache':
 			case array_key_exists('HTTP_CACHE_CONTROL', $_SERVER) && $_SERVER['HTTP_CACHE_CONTROL'] == 'no-cache':
 				self::$do_cache = false;
@@ -92,6 +93,7 @@ class Render {
 			$cache_file = self::getCacheFilename($filename);
 			if (file_exists($cache_file)) {
 				if (array_key_exists('recache', $_REQUEST)) {
+					Controller::addNotice('Recaching Files');
 					unlink($cache_file);
 				} else {
 					//A day previous (Looks weird, but it works.)
