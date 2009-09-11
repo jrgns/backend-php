@@ -64,8 +64,8 @@ class Account extends AreaCtl {
 					$User->load(array('query' => $sql, 'parameters' => $params, 'mode' => 'object'));
 					if ($User->object) {
 						session_regenerate_id();
-						$toret = $User->object;
 						$User->object->roles = empty($User->object->roles) ? array() : explode(',', $User->object->roles);
+						$toret = $User->object;
 						$_SESSION['user'] = $User->object;
 						Controller::addSuccess('Welcome to ' . Backend::getConfig('application.Title') . '!');
 						$location = empty($_SESSION['previous_url']) ? SITE_LINK : $_SESSION['previous_url'];
