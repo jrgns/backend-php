@@ -143,3 +143,13 @@ function reseed() {
  */
 function send_email($recipient, $subject, $message, array $headers = array()) {
 }
+
+/**
+ * Checks if a module is enabled.
+ *
+ * At the moment it only checks if the class is available, but eventually
+ * it should check against a list of activated modules.
+ */
+function BE_module_active($module_name) {
+	return class_exists($module_name, true);
+}
