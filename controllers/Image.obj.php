@@ -25,8 +25,8 @@ class Image extends File {
 		Backend::add('Sub Title', $content->getMeta('name'));
 		Backend::add('TabLinks', $this->getTabLinks(Controller::$action));
 		Backend::add('Object', $content);
-		Controller::addScript(SITE_LINK . '/scripts/jquery.js');
-		Controller::addScript(SITE_LINK . '/scripts/image_list.js');
+		Controller::addScript(SITE_LINK . 'scripts/jquery.js');
+		Controller::addScript(SITE_LINK . 'scripts/image_list.js');
 		Controller::addContent(Render::renderFile('image_list.tpl.php'));
 	}
 	

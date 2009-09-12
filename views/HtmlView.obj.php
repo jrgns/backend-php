@@ -29,7 +29,7 @@ class HtmlView extends View {
 	}
 	
 	public static function hook_post_display($data, $controller) {
-		Controller::addScript(SITE_LINK . '/scripts/backend.js');
+		Controller::addScript(SITE_LINK . 'scripts/backend.js');
 		Backend::add('Styles', array_unique(array_filter(Controller::getStyles())));
 		Backend::add('Scripts', array_unique(array_filter(Controller::getScripts())));
 		$app_class = Backend::getConfig('backend.application.class', 'Application');
