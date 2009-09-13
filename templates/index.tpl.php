@@ -63,6 +63,8 @@
 			&nbsp;
 		</div>
 		{tpl:scripts.tpl.php}
-		{tpl:tracking.tpl.php}
+		<?php if (SITE_STATE == 'production'): ?>
+			{tpl:tracking.tpl.php}
+		<?php endif; ?>
 	</body>
 </html>

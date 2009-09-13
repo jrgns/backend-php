@@ -15,7 +15,7 @@ define('APP_FOLDER', BACKEND_FOLDER . '/webapp');
 define('SITE_FOLDER', BACKEND_FOLDER . '/public');
 
 switch ($_SERVER['HTTP_HOST']) {
-case 'jrgns.net':
+case 'www.liveserver.com':
 	define('SITE_STATE', 'production');
 	break;
 case 'localhost':
