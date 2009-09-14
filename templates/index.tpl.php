@@ -48,15 +48,7 @@
 						#Last Content#
 					</div>
 				<?php endif; ?>
-				<div id="footer" class="span-24 small quiet">
-					<hr class="bottom"/>
-					<p class="bottom">
-						Let us know if you need anything else...
-					</p>
-					<p>
-						&copy; <a href="http://www.jadeit.co.za">JadeIT</a> 2009
-					</p>
-				</div>
+				{tpl:footer.tpl.php}
 			</div>
 		</div>
 		<div id="lowerback">
@@ -65,6 +57,8 @@
 		{tpl:scripts.tpl.php}
 		<?php if (SITE_STATE == 'production'): ?>
 			{tpl:tracking.tpl.php}
+		<?php else: ?>
+		<?php echo (SITE_STATE); ?>
 		<?php endif; ?>
 	</body>
 </html>
