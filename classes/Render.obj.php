@@ -53,11 +53,14 @@ class Render {
 				}
 				if (is_writable(SITE_FOLDER . '/cache/')) {
 					file_put_contents($cache_filename, $toret);
+					if (Controller::$debug) {
+						var_dump('Render::Written Cache file for ' . $cache_filename);
+					}
 				} else {
 					if (Controller::$debug) {
 						var_dump($cache_filename);
 					}
-					die('Cache folder unwritable');
+					die('Render::Cache folder unwritable');
 				}
 			}
 		}
@@ -67,9 +70,16 @@ class Render {
 	private static function getCacheFilename($filename) {
 		$toret = false;
 		if (is_readable($filename)) {
-			$toret = SITE_FOLDER . '/cache/' . md5($_SERVER['SCRIPT_NAME'] . $_SERVER['QUERY_STRING'] . $filename) . '.' . filemtime($filename) . '.php';
+			parse_str($_SERVER['QUERY_STRING'], $variables);
+			if (array_key_exists('recache', $variables)) {
+				unset($variables['recache']);
+			}
+			if (array_key_exists('nocache', $variables)) {
+				unset($variables['nocache']);
+			}
+			$toret = SITE_FOLDER . '/cache/' . md5($_SERVER['SCRIPT_NAME'] . $variables . $filename) . '.' . filemtime($filename) . '.php';
 		} else {
-			Controller::addError('Template does not exist');
+			var_dump('Render::Template does not exist');
 		}
 		return $toret;
 	}
@@ -80,12 +90,12 @@ class Render {
 		switch (true) {
 			case array_key_exists('nocache', $_REQUEST):
 			case array_key_exists('HTTP_PRAGMA', $_SERVER) && $_SERVER['HTTP_PRAGMA'] == 'no-cache':
-			case array_key_exists('HTTP_CACHE_CONTROL', $_SERVER) && $_SERVER['HTTP_CACHE_CONTROL'] == 'no-cache':
+			case array_key_exists('HTTP_CACHE_CONTROL', $_SERVER) && in_array($_SERVER['HTTP_CACHE_CONTROL'], array('no-cache', 'max-age=0')):
 				self::$do_cache = false;
 				break;
 		}
 
-		if (Backend::getConfig('backend.application.renderer.use_cache', true)) {
+		if (Backend::getConfig('backend.application.renderer.use_cache', true) && self::$do_cache) {
 			//Check the cache folder
 			if (!file_exists(BACKEND_FOLDER . '/cache/')) {
 				mkdir(BACKEND_FOLDER . '/cache/', 0755);
@@ -93,7 +103,7 @@ class Render {
 			$cache_file = self::getCacheFilename($filename);
 			if (file_exists($cache_file)) {
 				if (array_key_exists('recache', $_REQUEST)) {
-					Controller::addNotice('Recaching Files');
+					var_dump('Render::Recaching File');
 					unlink($cache_file);
 				} else {
 					//A day previous (Looks weird, but it works.)
@@ -144,18 +154,6 @@ class Render {
 		return '#' . $name . '#';
 	}
 	
-	public static function shouldUseCache() {
-		$toret = true;
-		switch (true) {
-			case array_key_exists('HTTP_PRAGMA', $_SERVER) && $_SERVER['HTTP_PRAGMA'] == 'no-cache':
-			case array_key_exists('HTTP_CACHE_CONTROL', $_SERVER) && $_SERVER['HTTP_CACHE_CONTROL'] == 'no-cache':
-			case array_key_exists('nocache', $_REQUEST):
-				$toret = false;
-				break;
-		}
-		return $toret;
-	}
-
 	public static function runFilters($content) {
 		$toret = $content;
 		$BEFilter = new BEFilterObj();

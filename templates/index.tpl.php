@@ -36,11 +36,7 @@
 					<div class="box loud">
 						#HelpBoxContent#
 					</div>
-					<h3>Go...</h3>
-					<ul>
-						<li class="loud">Something</li>
-						<li>Another</li>
-					</ul>
+					{tpl:secondary_links.tpl.php}
 					{tpl:loginout.tpl.php}
 				</div>
 				<?php if ($debug): ?>
@@ -57,8 +53,6 @@
 		{tpl:scripts.tpl.php}
 		<?php if (SITE_STATE == 'production'): ?>
 			{tpl:tracking.tpl.php}
-		<?php else: ?>
-		<?php echo (SITE_STATE); ?>
 		<?php endif; ?>
 	</body>
 </html>
