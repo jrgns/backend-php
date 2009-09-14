@@ -10,7 +10,7 @@
  * Contributors:
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
-class Assignment extends AreaCtl {
+class Assignment extends TableCtl {
 	function action_list() {
 		$Assignments = new AssignmentObj();
 		$conditions = array(

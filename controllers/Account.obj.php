@@ -10,7 +10,7 @@
  * Contributors:
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
-class Account extends AreaCtl {
+class Account extends TableCtl {
 	static public $error_msgs = array(
 		1 => 'Please enable cookies. This site can\'t function properly without them',
 		2 => 'Username and password does not match',

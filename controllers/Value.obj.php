@@ -10,7 +10,7 @@
  * Contributors:
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
-class Value extends AreaCtl {
+class Value extends TableCtl {
 	function action_test() {
 		self::set('test', 'on');
 		var_dump(self::get('test'));

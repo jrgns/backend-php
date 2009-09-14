@@ -136,7 +136,7 @@ class Backend {
 			default:
 				if (
 					is_subclass_of($classname, 'DBObject')
-					|| is_subclass_of($classname, 'AreaCtl')
+					|| (is_subclass_of($classname, 'AreaCtl') && !in_array($classname, array('TableCtl')))
 				) {
 					trigger_error('Invalid class: ' . $classname . ' not under correct file structure', E_USER_ERROR);
 				}

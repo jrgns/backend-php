@@ -10,7 +10,7 @@
  * Contributors:
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
-class File extends AreaCtl {
+class File extends TableCtl {
 	public static function getMimeType($file, $default = false) {
 		$toret = false;
 		if (function_exists('finfo_open')) {

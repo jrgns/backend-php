@@ -10,7 +10,7 @@
  * Contributors:
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
-class Hook extends AreaCtl {
+class Hook extends TableCtl {
 	public static function get($hook, $type = 'pre') {
 		$params = array(':type' => $type, ':hook' => $hook);
 		$query = 'SELECT * FROM `hooks` WHERE `hook` = :hook AND `type` = :type AND `active` = 1';

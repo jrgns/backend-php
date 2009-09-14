@@ -10,7 +10,7 @@
  * Contributors:
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
-class System extends AreaCtl {
+class System extends TableCtl {
 	public function init() {
 	}
 	

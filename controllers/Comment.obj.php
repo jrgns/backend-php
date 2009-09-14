@@ -10,7 +10,7 @@
  * Contributors:
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
-class Comment extends AreaCtl {
+class Comment extends TableCtl {
 	function html_display($content) {
 		$toret = false;
 		if ($content instanceof DBObject) {

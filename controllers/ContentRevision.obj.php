@@ -10,7 +10,7 @@
  * Contributors:
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
-class ContentRevision extends AreaCtl {
+class ContentRevision extends TableCtl {
 	public static function hook_post_create($data, $object) {
 		if ($object instanceof ContentObj && !$data['from_file']) {
 			if (self::createNewRevision(
