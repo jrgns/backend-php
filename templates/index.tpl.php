@@ -33,7 +33,7 @@
 					</div>
 				</div>
 				<div id="rightcol" class="span-6 last">
-					<div class="box loud">
+					<div class="box loud" id="helpbox">
 						#HelpBoxContent#
 					</div>
 					{tpl:secondary_links.tpl.php}
