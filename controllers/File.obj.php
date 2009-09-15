@@ -43,8 +43,9 @@ class File extends TableCtl {
 		return $toret;
 	}
 	
-	function file_read($file) {
-		if ($file) {
+	/*function file_read($file) {
+		$toret = $file;
+		if ($file && $file->array) {
 			if ($file->array['from_db']) {
 				$mime_type = array_key_exists('mime_type', $file->array) ? $file->array['mime_type'] : false;
 				if (empty($mime_type)) {
@@ -58,8 +59,11 @@ class File extends TableCtl {
 			} else {
 				die('Finish this: File::file_read');
 			}
+		} else {
+			die('Invalid File');
 		}
-	}
+		return $toret;
+	}*/
 	
 	function html_read($file) {
 		if (!empty($this)) {

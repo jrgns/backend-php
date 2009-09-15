@@ -11,6 +11,11 @@
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
 class Admin extends AreaCtl {
+	/**
+	* Do the initial install for the different components.
+	*
+	* @todo Check that this function is only called once, or by the super user (Use values to record when it was ran
+	*/
 	function action_install() {
 		Backend::add('Sub Title', 'Install Backend Components');
 

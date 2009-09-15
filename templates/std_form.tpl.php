@@ -11,7 +11,11 @@
 				continue;
 			}
 			$odd = $odd ? false : true;
-			$value = array_key_exists($name, $obj_values) ? plain($obj_values[$name]) : '';
+			if ($field != 'text') {
+				$value = array_key_exists($name, $obj_values) ? plain($obj_values[$name]) : '';
+			} else {
+				$value = array_key_exists($name, $obj_values) ? $obj_values[$name] : '';
+			}
 			switch (true) {
 				case $field == 'integer':
 				case $field == 'string':

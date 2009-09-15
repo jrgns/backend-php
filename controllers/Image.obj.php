@@ -12,7 +12,7 @@
  */
 class Image extends File {
 	function image_read($image) {
-		parent::file_read($image);
+		return $image;
 	}
 	
 	function html_display($image) {

@@ -104,19 +104,12 @@ class Controller {
 	public static function action() {
 		$data = null;
 		
-		if (self::$debug) {
-			var_dump('Area:   ' . self::$area);
-			var_dump('Action: ' . self::$action);
-			var_dump('ID:     ' . self::$id);
-		}
-		
-		//Controll
+		//Control
 		$control_name = class_name(self::$area);
 		if (!class_exists($control_name, true)) {
 			$control_name = 'AreaCtl';
 		}
 		$controller = new $control_name();
-		$method = 'action_' . self::$action;
 		if ($controller instanceof AreaCtl) {
 			$data = $controller->action();
 		} else {
