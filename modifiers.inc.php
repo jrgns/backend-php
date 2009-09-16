@@ -214,7 +214,7 @@ function plain($string) {
  * Return the string with only simple HTML allowed
  */
 function simple($string) {
-	$string = trim(strip_tags($string, '<p><a><img><b><i><strong><em><ul><ol><li><dl><dt><dd><code><pre><h1><h2><h3><h4><h5><h6>'));
+	$string = trim(strip_tags($string, '<p><a><img><b><i><strong><em><ul><ol><li><dl><dt><dd><code><pre><h1><h2><h3><h4><h5><h6><del><strike>'));
 	//TODO $string = strip_attributes($string);
 	return $string;
 }
