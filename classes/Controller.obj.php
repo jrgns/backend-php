@@ -107,11 +107,13 @@ class Controller {
 		//Control
 		$control_name = class_name(self::$area);
 		if (!class_exists($control_name, true)) {
-			$control_name = 'AreaCtl';
+			$control_name = 'TableCtl';
 		}
 		$controller = new $control_name();
 		if ($controller instanceof AreaCtl) {
+			Hook::run('action', 'pre');
 			$data = $controller->action();
+			Hook::run('action', 'post');
 		} else {
 			Controller::whoops();
 		}
@@ -125,7 +127,9 @@ class Controller {
 		$view = self::getView();
 		if ($view instanceof View) {
 			self::$mode = $view->mode;
+			Hook::run('action_display', 'pre');
 			$view->display($data, $controller);
+			Hook::run('action_display', 'post');
 		} else {
 			die('Unrecognized Request');
 		}

@@ -1,6 +1,7 @@
 <?php if (!empty($Object)): ?>
 	<form method="post" action="?q=<?php echo array_key_exists('q', $_REQUEST) ? $_REQUEST['q'] : '' ?>" enctype="multipart/form-data">
 	<?php 
+		Hook::run('form', 'pre');
 		$fields = $Object->getMeta('fields');
 		$odd = false;
 		$row_width = 15;
@@ -45,7 +46,9 @@
 			?>
 			<label><?php echo humanize($name) ?></label><br/>
 			<?php echo $field_str ?><br/>
-		<?php endforeach; ?>
+		<?php endforeach;
+		Hook::run('form', 'post');
+	?>
 		<input type="submit" value="Add <?php echo $Object->getMeta('name') ?>" class=""/>
 	</form>
 <?php else: ?>
