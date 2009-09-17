@@ -105,3 +105,8 @@ pre, code, tt {
 .image_container {
 	text-align: center;
 }
+
+#maincol {
+	overflow: auto;
+}
+

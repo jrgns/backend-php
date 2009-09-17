@@ -12,10 +12,10 @@
  */
 class ContentRevision extends TableCtl {
 	public static function hook_post_create($data, $object) {
-		if ($object instanceof ContentObj && !$data['from_file']) {
+		if ($object instanceof ContentObj && !$object->array['from_file']) {
 			if (self::createNewRevision(
 					$object->array['id'], 
-					$object->array['body'], 
+					$object->array['markdown'], 
 					array_key_exists('revision_summary', $data) ? $data['revision_summary'] : false)
 			) {
 				Controller::addError('Could not add Content Revision');
@@ -26,10 +26,10 @@ class ContentRevision extends TableCtl {
 	}
 
 	public static function hook_post_update($data, $object) {
-		if ($object instanceof ContentObj && !$data['from_file']) {
+		if ($object instanceof ContentObj && !$object->array['from_file']) {
 			if (!self::createNewRevision(
 					$object->array['id'], 
-					$object->array['body'], 
+					$object->array['markdown'], 
 					array_key_exists('revision_summary', $data) ? $data['revision_summary'] : false)
 			) {
 				Controller::addError('Could not add Content Revision');
@@ -44,7 +44,7 @@ class ContentRevision extends TableCtl {
 		$revision = new ContentRevisionObj();
 		$data = array (
 			'content_id' => $content_id,
-			'body'       => $body,
+			'markdown'   => $body,
 			'summary'    => $summary,
 		);
 		return $revision->create($data);

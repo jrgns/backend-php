@@ -20,8 +20,10 @@
  * DBObject wrapper for the `contents` table
  * @package Models
  */
+
 class ContentRevisionObj extends DBObject {
 	function __construct($meta = array()) {
+		require_once(BACKEND_FOLDER . '/libraries/Markdown/markdown.php');
 		if (!is_array($meta) && (is_numeric($meta) || is_string($meta))) {
 			$meta = array('id' => $meta);
 		}
@@ -32,6 +34,7 @@ class ContentRevisionObj extends DBObject {
 			'user_id' => 'integer',
 			'content_id' => 'integer',
 			'summary' => 'title',
+			'markdown' => 'text',
 			'body' => 'text',
 			'active' => 'boolean',
 			'modified' => 'lastmodified',
@@ -47,9 +50,10 @@ class ContentRevisionObj extends DBObject {
 			if (empty($data['user_id']) && !empty($_SESSION['user']->id)) {
 				$data['user_id'] = $_SESSION['user']->id;
 			}
-			if (is_null($data['active'])) {
+			if (!isset($data['active'])) {
 				$data['active'] = 1;
 			}
+			$data['body'] = markdown($data['markdown']);
 			$toret = true;
 		}
 		return $toret ? $data : false;

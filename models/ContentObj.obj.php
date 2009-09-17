@@ -22,6 +22,7 @@
  */
 class ContentObj extends DBObject {
 	function __construct($meta = array()) {
+		require_once(BACKEND_FOLDER . '/libraries/Markdown/markdown.php');
 		if (!is_array($meta) && (is_numeric($meta) || is_string($meta))) {
 			$meta = array('id' => $meta);
 		}
@@ -31,6 +32,7 @@ class ContentObj extends DBObject {
 			'id' => 'primarykey',
 			'name' => 'string',
 			'title' => 'title',
+			'markdown' => 'text',
 			'body' => 'text',
 			'from_file' => 'boolean',
 			'active' => 'boolean',
@@ -44,9 +46,10 @@ class ContentObj extends DBObject {
 		$toret = false;
 		$data = parent::validate($data, $action, $options);
 		if ($data) {
-			if (!empty($data['body'])) {
+			if (!empty($data['body']) || !empty($data['markdown'])) {
 				$data['from_file'] = false;
 			}
+			$data['body'] = Markdown($data['markdown']);
 			$toret = true;
 		}
 		return $toret ? $data : false;
