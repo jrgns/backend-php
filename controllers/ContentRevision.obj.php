@@ -40,7 +40,7 @@ class ContentRevision extends TableCtl {
 	}
 	
 	private static function createNewRevision($content_id, $body, $summary = false) {
-		$summary = $summary ? $summary : 'New Revision created ' . date('Y-m-d h:i:s');
+		$summary = $summary ? $summary : 'New Revision created ' . date('Y-m-d H:i:s');
 		$revision = new ContentRevisionObj();
 		$data = array (
 			'content_id' => $content_id,

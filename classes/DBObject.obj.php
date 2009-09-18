@@ -184,6 +184,9 @@ class DBObject {
 					$this->array['id'] = $this->inserted_id;
 					$this->meta['id']  = $this->inserted_id;
 					$toret             = $this->inserted_id;
+					if (array_key_exists('load', $options) ? $options['load'] : false) {
+						$this->load();
+					}
 				} else {
 					$this->last_error = $stmt->errorInfo();
 					if (Controller::$debug) {
