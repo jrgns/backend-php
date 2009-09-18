@@ -13,7 +13,7 @@
 class ContentRevision extends TableCtl {
 	public static function hook_post_create($data, $object) {
 		if ($object instanceof ContentObj && !$object->array['from_file']) {
-			if (self::createNewRevision(
+			if (!self::createNewRevision(
 					$object->array['id'], 
 					$object->array['markdown'], 
 					array_key_exists('revision_summary', $data) ? $data['revision_summary'] : false)

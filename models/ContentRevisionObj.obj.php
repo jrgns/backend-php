@@ -53,7 +53,7 @@ class ContentRevisionObj extends DBObject {
 			if (!isset($data['active'])) {
 				$data['active'] = 1;
 			}
-			$data['body'] = markdown($data['markdown']);
+			$data['body'] = Markdown($data['markdown']);
 			$toret = true;
 		}
 		return $toret ? $data : false;
