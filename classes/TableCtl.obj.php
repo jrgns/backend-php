@@ -113,7 +113,11 @@ class TableCtl extends AreaCtl {
 				$data = $object->array;
 			}
 			Backend::add('obj_values', $data);
-			$toret = $object;
+			if ($data) {
+				$toret = $object;
+			} else {
+				Controller::whoops('No ' . $object->getMeta('name') . ' to update');
+			}
 		} else {
 			Controller::whoops();
 		}

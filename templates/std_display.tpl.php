@@ -1,5 +1,4 @@
 <?php if (!empty($Object)):
-	$fields = $Object->getMeta('fields');
 	if ($Object->array) {
 		$obj_values = $Object->array;
 	} else if ($Object->object) {
@@ -8,6 +7,7 @@
 		$obj_values = false;
 	}
 	if ($obj_values):
+		$fields = $Object->getMeta('fields');
 		$odd = false;
 		foreach($fields as $name => $field):
 			switch ($field) {

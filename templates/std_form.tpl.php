@@ -49,7 +49,7 @@
 		<?php endforeach;
 		Hook::run('form', 'post');
 	?>
-		<input type="submit" value="Add <?php echo $Object->getMeta('name') ?>" class=""/>
+		<input type="submit" value="<?php echo ucwords(Controller::$action) ?> <?php echo $Object->getMeta('name') ?>" class=""/>
 	</form>
 <?php else: ?>
 	No object
