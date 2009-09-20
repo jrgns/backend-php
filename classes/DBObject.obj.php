@@ -89,6 +89,14 @@ class DBObject {
 	
 	public function load($options = array()) {
 		if ($this->checkConnection()) {
+			if (!array_key_exists('mode', $options)) {
+				if (empty($this->meta['id'])) {
+					$options['mode'] = 'list';
+				} else {
+					$options['mode'] = 'array';
+				}
+			}
+
 			if (array_key_exists('query', $options)) {
 				$query = $options['query'];
 				$params = array_key_exists('parameters', $options) ? $options['parameters'] : array();
@@ -107,18 +115,7 @@ class DBObject {
 				$stmt = $this->db->prepare($query);
 				$result = $stmt->execute($params);
 				if ($result) {
-					switch (true) {
-					case array_key_exists('mode', $options):
-						$mode = $options['mode'];
-						break;
-					case !empty($this->meta['id']):
-						$mode = 'array';
-						break;
-					default:
-						$mode = 'list';
-					}
-
-					switch ($mode) {
+					switch ($options['mode']) {
 					case 'full_object':
 						$this->object = $stmt->fetch(PDO::FETCH_OBJ);
 						$this->array = $stmt->fetch(PDO::FETCH_ASSOC);
