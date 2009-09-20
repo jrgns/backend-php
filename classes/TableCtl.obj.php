@@ -59,7 +59,7 @@ class TableCtl extends AreaCtl {
 			$data = $object->fromPost();
 			if (is_post()) {
 				$data = Hook::run('create', 'pre', array($data, $object), array('toret' => $data));
-				if ($object->create($data, array('load', true))) {
+				if ($object->create($data, array('load' => true))) {
 					Controller::addSuccess($object->getMeta('name') . ' Added');
 					if (Hook::run('create', 'post', array($data, $object), array('toret' => true))) {
 						Controller::redirect('?q=' . $object->getArea() . '/display/' . $object->getMeta('id'));
@@ -101,7 +101,7 @@ class TableCtl extends AreaCtl {
 			if (is_post()) {
 				$data = $object->fromPost();
 				$data = Hook::run('update', 'pre', array($data, $object), array('toret' => $data));
-				if ($object->update($data)) {
+				if ($object->update($data, array('load' => true))) {
 					Controller::addSuccess($object->getMeta('name') . ' Modified');
 					if (Hook::run('update', 'post', array($data, $object), array('toret' => true))) {
 						Controller::redirect('?q=' . $object->getArea() . '/display/' . $object->getMeta('id'));

@@ -214,9 +214,12 @@ class DBObject {
 				if ($toret) {
 					//TODO This will potentially break if there are triggers in use
 					$this->inserted_id = $this->db->lastInsertId();
-					$this->array = $data;
-					$this->meta['id'] = $this->inserted_id;
-					$toret = $this->inserted_id;
+					$this->array       = $data;
+					$this->meta['id']  = $this->inserted_id;
+					$toret             = $this->inserted_id;
+					if (array_key_exists('load', $options) ? $options['load'] : false) {
+						$this->load();
+					}
 				} else {
 					$this->last_error = $stmt->errorInfo();
 					if (Controller::$debug) {
