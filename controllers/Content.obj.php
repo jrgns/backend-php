@@ -49,8 +49,7 @@ class Content extends TableCtl {
 		$toret = false;
 		$id = Controller::$id ? Controller::$id : 'home';
 		if (is_numeric($id)) {
-			$toret = new ContentObj(Controller::$id);
-			$toret->load(array('mode' => 'array'));
+			$toret = self::action_read();
 		} else {
 			$conds = array('`name` = :name');
 			$params = array(':name' => $id);
