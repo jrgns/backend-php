@@ -22,9 +22,7 @@ class TableCtl extends AreaCtl {
 		$toret = false;
 		$obj_name = (class_name(Controller::$area) . 'Obj');
 		if (class_exists($obj_name, true) && Controller::$id !== 'home' && Controller::$id > 0) {
-			$object = new $obj_name(Controller::$id);
-			$object->load(array('mode' => 'array'));
-			$toret = $object;
+			$toret = self::action_read();
 		} else {
 			Controller::$action = 'list';
 			$toret = $this->action_list();
@@ -80,10 +78,12 @@ class TableCtl extends AreaCtl {
 	 * Action for reading a record in an area
 	 */
 	public function action_read() {
+		$toret = null;
 		$obj_name = (class_name(Controller::$area) . 'Obj');
 		if (class_exists($obj_name, true)) {
-			$object = new $obj_name(Controller::$id);
-			$toret = $object->read();
+			$toret = new $obj_name(Controller::$id);
+			$toret->read();
+			Hook::run('read', 'post', array($toret), array('toret' => $toret));
 		} else {
 			Controller::whoops();
 		}

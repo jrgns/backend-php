@@ -21,6 +21,7 @@ class Admin extends AreaCtl {
 
 		$modules = array(
 			'HtmlView',
+			'ImageView',
 			'JsonView',
 			'PhpView',
 			'SerializeView',

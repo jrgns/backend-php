@@ -89,6 +89,14 @@ class DBObject {
 	
 	public function load($options = array()) {
 		if ($this->checkConnection()) {
+			if (!array_key_exists('mode', $options)) {
+				if (empty($this->meta['id'])) {
+					$options['mode'] = 'list';
+				} else {
+					$options['mode'] = 'array';
+				}
+			}
+
 			if (array_key_exists('query', $options)) {
 				$query = $options['query'];
 				$params = array_key_exists('parameters', $options) ? $options['parameters'] : array();
@@ -107,22 +115,21 @@ class DBObject {
 				$stmt = $this->db->prepare($query);
 				$result = $stmt->execute($params);
 				if ($result) {
-					$mode = array_key_exists('mode', $options) ? $options['mode'] : 'list';
-					switch ($mode) {
-						case 'full_object':
-							$this->object = $stmt->fetch(PDO::FETCH_OBJ);
-							$this->array = $stmt->fetch(PDO::FETCH_ASSOC);
-							$this->load_children();
-							break;
-						case 'object':
-							$this->object = $stmt->fetch(PDO::FETCH_OBJ);
-							break;
-						case 'array':
-							$this->array = $stmt->fetch(PDO::FETCH_ASSOC);
-						case 'list':
-						default:
-							$this->list = $stmt->fetchAll(PDO::FETCH_ASSOC);
-							break;
+					switch ($options['mode']) {
+					case 'full_object':
+						$this->object = $stmt->fetch(PDO::FETCH_OBJ);
+						$this->array = $stmt->fetch(PDO::FETCH_ASSOC);
+						$this->load_children();
+						break;
+					case 'object':
+						$this->object = $stmt->fetch(PDO::FETCH_OBJ);
+						break;
+					case 'array':
+						$this->array = $stmt->fetch(PDO::FETCH_ASSOC);
+					case 'list':
+					default:
+						$this->list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+						break;
 					}
 					if ($this->object) {
 						$this->object = $this->process($this->object, 'out');
@@ -137,6 +144,8 @@ class DBObject {
 						var_dump($stmt->errorInfo());
 					}
 				}
+			} else {
+				Controller::addError('No Query to load');
 			}
 		} else {
 			Controller::addError('DB Connection error');
@@ -168,7 +177,7 @@ class DBObject {
 		return $data;
 	}
 	
-	function create($data, $options = array()) {
+	public function create($data, $options = array()) {
 		$toret = false;
 		if ($this->checkConnection()) {
 			$data = $this->validate($data, 'create', $options);
@@ -184,6 +193,9 @@ class DBObject {
 					$this->array['id'] = $this->inserted_id;
 					$this->meta['id']  = $this->inserted_id;
 					$toret             = $this->inserted_id;
+					if (array_key_exists('load', $options) ? $options['load'] : true) {
+						$this->load();
+					}
 				} else {
 					$this->last_error = $stmt->errorInfo();
 					if (Controller::$debug) {
@@ -211,9 +223,11 @@ class DBObject {
 				if ($toret) {
 					//TODO This will potentially break if there are triggers in use
 					$this->inserted_id = $this->db->lastInsertId();
-					$this->array = $data;
-					$this->meta['id'] = $this->inserted_id;
-					$toret = $this->inserted_id;
+					$this->meta['id']  = $this->inserted_id;
+					$toret             = $this->inserted_id;
+					if (array_key_exists('load', $options) ? $options['load'] : true) {
+						$this->load();
+					}
 				} else {
 					$this->last_error = $stmt->errorInfo();
 					if (Controller::$debug) {
@@ -282,7 +296,11 @@ class DBObject {
 				list ($query, $params) = $this->getUpdateSQL($data, $options);
 				$stmt = $this->db->prepare($query);
 				$toret = $stmt->execute($params);
-				if (!$toret) {
+				if ($toret) {
+					if (array_key_exists('load', $options) ? $options['load'] : true) {
+						$this->load();
+					}
+				} else {
 					$this->last_error = $stmt->errorInfo();
 					if (Controller::$debug) {
 						echo 'Error Info:';

@@ -41,8 +41,8 @@ class Controller {
 	
 	public static function serve(array $info = array()) {
 		self::init();
-		self::start();
-		self::action();
+		$controller = self::start();
+		self::action($controller);
 		self::finish();
 	}
 
@@ -89,16 +89,24 @@ class Controller {
 	}
 	
 	public static function start() {
+		$toret = false;
 		if (!self::$init) {
 			self::init();
 		}
 		if (!self::$started) {
 			Hook::run('start', 'pre');
 
-			self::check_query();
+			$toret = self::parseQuery();
+			
+			foreach ($toret as $name => $value) {
+				if (property_exists('Controller', $name)) {
+					self::$$name = self::check_map($name, $value);
+					Backend::add($name, $value);
+				}
+			}
 
-			Hook::run('start', 'post');
 		}
+		return $toret;
 	}
 	
 	public static function action() {
@@ -109,7 +117,9 @@ class Controller {
 		if (!class_exists($control_name, true)) {
 			$control_name = 'TableCtl';
 		}
+	
 		$controller = new $control_name();
+
 		if ($controller instanceof AreaCtl) {
 			Hook::run('action', 'pre');
 			$data = $controller->action();
@@ -224,23 +234,26 @@ class Controller {
 		}
 	}
 
-	protected static function check_query($query = false) {
+	protected static function parseQuery($query = false) {
 		$query = $query ? $query : (array_key_exists('q', $_REQUEST) ? $_REQUEST['q'] : '');
 		$terms = explode('/', $query);
 		$terms = array_filter($terms);
-		call_user_func_array(array('Controller', 'check_tupple'), $terms);
+
+		$terms = call_user_func_array(array('Controller', 'checkTuple'), $terms);
+		
+		if (class_exists(class_name($terms['area']), true) && method_exists(class_name($terms['area']), 'parseQuery')) {
+			$terms = call_user_func(array($terms['area'], 'parseQuery'), $terms);
+		}
+		return $terms;
 	}
 
-	protected static function check_tupple($area = 'content', $action = 'display', $id = 0, $count = 30) {
-		self::$area = self::check_map('area', $area);
-		Backend::add('area', self::$area);
-		self::$action = self::check_map('action', $action);
-		Backend::add('action', self::$action);
-		self::$id = self::check_map('id', $id);
-		Backend::add('id', self::$id);
-		self::$count = self::check_map('count', $count);
-		Backend::add('count', self::$count);
-		return true;
+	protected static function checkTuple($area = 'content', $action = 'display', $id = 0, $count = 30) {
+		return array(
+			'area'   => $area,
+			'action' => $action,
+			'id'     => $id,
+			'count'  => $count,
+		);
 	}
 	
 	public static function check_map($what, $value) {
