@@ -43,34 +43,8 @@ class File extends TableCtl {
 		return $toret;
 	}
 	
-	/*function file_read($file) {
-		$toret = $file;
-		if ($file && $file->array) {
-			if ($file->array['from_db']) {
-				$mime_type = array_key_exists('mime_type', $file->array) ? $file->array['mime_type'] : false;
-				if (empty($mime_type)) {
-					$mime_type = $file->default_type;
-				}
-				header('Content-Type: ' . $mime_type);
-				header('Content-disposition: attachment; filename=' . $file->array['name']);
-				header('Last-Modified: ' . $file->array['modified']);
-				header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 60 * 60 * 24 * 7).'GMT');
-				die($file->array['content']);
-			} else {
-				die('Finish this: File::file_read');
-			}
-		} else {
-			die('Invalid File');
-		}
-		return $toret;
-	}*/
-	
 	function html_read($file) {
-		if (!empty($this)) {
-			$this->file_read($file);
-		} else {
-			self::file_read($file);
-		}
+		Controller::redirect('?q=' . $file->getArea() . '/display/' . $file->getMeta('id'));
 	}
 	
 	function html_display($file) {
