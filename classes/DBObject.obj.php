@@ -317,6 +317,9 @@ class DBObject {
 	function delete() {
 		$toret = false;
 		if ($this->checkConnection()) {
+			extract($this->meta);
+			$query = new Query("DELETE FROM `$table` WHERE `$id_field` = :id LIMIT 1");
+			$toret = $query->execute(array(':id' => $this->meta['id']));
 		} else {
 			Controller::addError('DB Connection error');
 		}

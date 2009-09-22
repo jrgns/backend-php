@@ -124,6 +124,24 @@ class TableCtl extends AreaCtl {
 		return $toret;
 	}
 	
+	public function action_delete() {
+		$toret = false;
+		if (is_post()) {
+			if (empty(Controller::$id) && !empty($_POST['delete_id'])) {
+				Controller::$id = $_POST['delete_id'];
+			}
+			$obj_name = (class_name(Controller::$area) . 'Obj');
+			$object = new $obj_name(Controller::$id);
+			if ($object->array) {
+				if ($object->delete()) {
+					Controller::addSuccess('Record has been removed');
+				}
+			} else {
+				Controller::addError('The record does not exist');
+			}
+		}
+	}
+	
 	/**
 	 * Action for importing records in an area
 	 */
@@ -227,6 +245,9 @@ class TableCtl extends AreaCtl {
 				Backend::add('Object', $object);
 				Backend::add('TabLinks', $this->getTabLinks('list'));
 				Backend::add('Sub Title', $object->getMeta('name'));
+
+				Controller::addScript(SITE_LINK . 'scripts/jquery.js');
+				Controller::addScript(SITE_LINK . 'scripts/table_list.js');
 				$template_file = $object->getArea() . '.list.tpl.php';
 				if (!Render::checkTemplateFile($template_file)) {
 					$template_file = 'std_list.tpl.php';

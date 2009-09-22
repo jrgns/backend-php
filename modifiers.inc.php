@@ -187,6 +187,9 @@ function computerize($string, $separator = '_') {
 }
 
 function class_name($string) {
+	if (is_object($string)) {
+		$string = get_class($string);
+	}
 	$string = singularize(humanize($string));
 	$string = str_replace(' ', '', $string);
 	$string = preg_replace('/Obj$/', '', $string);
@@ -194,12 +197,18 @@ function class_name($string) {
 }
 
 function table_name($string) {
+	if (is_object($string)) {
+		$string = get_class($string);
+	}
 	$string = preg_replace('/Obj$/', '', $string);
 	$string = pluralize(computerize($string));
 	return $string;
 }
 
 function class_for_url($string) {
+	if (is_object($string)) {
+		$string = get_class($string);
+	}
 	return strtolower(class_name($string));
 }
 /**
