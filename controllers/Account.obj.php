@@ -336,4 +336,12 @@ END;
 		) && $toret;
 		return $toret;
 	}
+
+	public static function checkTuple($tuple) {
+		if (!in_array($tuple['action'], array('create', 'read', 'update', 'delete', 'list', 'display', 'login', 'logout', 'confirm')) && !$tuple['id']) {
+			$tuple['id']     = $tuple['action'];
+			$tuple['action'] = 'display';
+		}
+		return $tuple;
+	}
 }
