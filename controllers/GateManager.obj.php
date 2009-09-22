@@ -83,12 +83,15 @@ class GateManager extends AreaCtl {
 	}
 	
 	public static function install() {
+		$toret = true;
 		$roles = self::getDefaultRoles();
 		if ($roles) {
 			$RoleObj = new RoleObj();
 			foreach($roles as $role) {
 				if ($RoleObj->create($role)) {
 					Controller::addSuccess('Added role ' . $role['name']);
+				} else {
+					$toret = false;
 				}
 			}
 		}
@@ -99,6 +102,8 @@ class GateManager extends AreaCtl {
 			foreach($assigns as $assignment) {
 				if ($AssignmentObj->create($assignment)) {
 					Controller::addSuccess('Added assignment ' . $assignment['access_type'] . ' to ' . $assignment['role_id']);
+				} else {
+					$toret = false;
 				}
 			}
 		}
@@ -109,9 +114,12 @@ class GateManager extends AreaCtl {
 			foreach($permits as $permit) {
 				if ($PermissionObj->create($permit)) {
 					Controller::addSuccess('Added permission to ' . $permit['action'] . ' to ' . $permit['role']);
+				} else {
+					$toret = false;
 				}
 			}
 		}
+		return $toret;
 	}
 	
 	protected static function getDefaultRoles() {
