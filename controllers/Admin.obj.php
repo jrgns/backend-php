@@ -17,11 +17,11 @@ class Admin extends AreaCtl {
 	* @todo Check that this function is only called once, or by the super user (Use values to record when it was ran
 	*/
 	function action_install() {
-		Backend::add('Sub Title', 'Install Backend Components');
-
+		$toret = false;
 		$installed = Value::get('admin_installed', false);
 		if (!$installed) {
 			$modules = array(
+				'Admin',
 				'HtmlView',
 				'ImageView',
 				'JsonView',
@@ -51,6 +51,44 @@ class Admin extends AreaCtl {
 		} else {
 			Controller::addError('Admin installation script already ran at ' . $installed);
 		}
-		return false;
+		return $toret;
+	}
+	
+	function html_install($result) {
+		Backend::add('Sub Title', 'Install Backend Components');
+	}
+	
+	function html_interface($result) {
+		Backend::add('Sub Title', 'Manage Application');
+	}
+	
+	public static function hook_post_display($data, $controller) {
+		$sec_links = Backend::get('secondary_links', array());
+		$user = Account::checkUser();
+		if (count(array_intersect(array('superadmin', 'admin'), $user->roles))) {
+			$sec_links += array(
+				array('href' => '?q=admin/interface', 'text' => 'Manage Application'),
+			);
+		}
+		Backend::add('secondary_links', $sec_links);
+		
+		return $data;
+	}
+
+	public static function install() {
+		$toret = true;
+		$hook = new HookObj();
+		$toret = $hook->replace(array(
+				'name'        => 'Admin Post Display',
+				'description' => '',
+				'mode'        => 'html',
+				'type'        => 'post',
+				'hook'        => 'display',
+				'class'       => 'Admin',
+				'method'      => 'hook_post_display',
+				'sequence'    => 0,
+			)
+		) && $toret;
+		return $toret;
 	}
 }
