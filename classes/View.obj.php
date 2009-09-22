@@ -44,9 +44,11 @@ class View {
 		
 		$display_method = $this->mode . '_' . Controller::$action;
 		if (method_exists($controller, $display_method)) {
-			if (!is_null($data) && $controller->checkPermissions()) {
+			if ($controller->checkPermissions()) {
 				$data = $controller->$display_method($data);
 			}
+		} else if (is_null($data)) {
+			Controller::whoops(array('title' => 'Unknown Request'));
 		}
 		
 		$data = Hook::run('display', 'post', array($data, $controller), array('toret' => $data));
