@@ -135,6 +135,7 @@ class TableCtl extends AreaCtl {
 			if ($object->array) {
 				if ($object->delete()) {
 					Controller::addSuccess('Record has been removed');
+					Controller::redirect();
 				}
 			} else {
 				Controller::addError('The record does not exist');

@@ -21,6 +21,10 @@
 				$image_width = ($image_width < $std_width ? $image_width : $std_width) . 'px';
 				?>
 					<td class="image_container">
+						<div class="image_controller">
+							<a href="?q=<?php echo class_for_url($Object) ?>/update/<?php echo $row['id'] ?>"><img src="<?php echo SITE_LINK ?>images/icons/pencil.png"></a>
+							<a href="#" class="delete_link" id="delete_<?php echo $row['id'] ?>"><img src="<?php echo SITE_LINK ?>images/icons/cross.png"></a>
+						</div>
 						<a href="?q=image/display/<?php echo $image['id'] ?>">
 							<img width="<?php echo $image_width ?>" src="?q=image/read/<?php echo $image['id'] ?>" 
 								title="<?php echo $image['title'] ?>" alt="<?php echo $image['title'] ?>" />
@@ -32,6 +36,9 @@
 			</tr>
 		</tbody>
 	</table>
+<form class="inline" id="form_list_delete" method="post" action="?q=<?php echo class_for_url($Object) ?>/delete">
+	<input type="hidden" id="delete_id" name="delete_id" value="false" />
+</form>
 <?php else: ?>
 	No object
 <?php endif; ?>
