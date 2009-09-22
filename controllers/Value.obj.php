@@ -27,10 +27,10 @@ class Value extends TableCtl {
 	
 	public static function set($name, $new_value) {
 		$data = self::get($name);
-		if ($data) {
+		if (!is_null($data)) {
 			$value = new ValueObj($data['id']);
 			if ($value) {
-				$value->update(array('value' => $new_value));
+				$toret = $value->update(array('value' => $new_value));
 			}
 		} else {
 			$value = new ValueObj();
@@ -38,7 +38,8 @@ class Value extends TableCtl {
 				'name' => $name,
 				'value' => $new_value,
 			);
-			$value->create($data);
+			$toret = $value->create($data);
 		}
+		return $toret;
 	}
 }

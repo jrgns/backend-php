@@ -19,31 +19,38 @@ class Admin extends AreaCtl {
 	function action_install() {
 		Backend::add('Sub Title', 'Install Backend Components');
 
-		$modules = array(
-			'HtmlView',
-			'ImageView',
-			'JsonView',
-			'PhpView',
-			'SerializeView',
-			'Account',
-			'Render',
-			'ContentRevision',
-			'Content',
-			'GateManager',
-		);
-		$toret = true;
-		foreach($modules as $module) {
-			if (class_exists($module, true) && method_exists($module, 'install')) {
-				if (!call_user_func_array(array($module, 'install'), array())) {
-					Controller::addError('Error on installing ' . $module);
-					$toret = false;
+		$installed = Value::get('admin_installed', false);
+		if (!$installed) {
+			$modules = array(
+				'HtmlView',
+				'ImageView',
+				'JsonView',
+				'PhpView',
+				'SerializeView',
+				'Account',
+				'Render',
+				'ContentRevision',
+				'Content',
+				'WMD',
+				'GateManager',
+			);
+			$toret = true;
+			foreach($modules as $module) {
+				if (class_exists($module, true) && method_exists($module, 'install')) {
+					if (!call_user_func_array(array($module, 'install'), array())) {
+						Controller::addError('Error on installing ' . $module);
+						$toret = false;
+					}
 				}
 			}
+			if ($toret) {
+				Value::set('admin_installed', date('Y-m-d H:i:s'));
+				Controller::addSuccess('Backend Install Successful');
+			}
+			//TODO Returning false at the moment, to make backend output the default HTML...
+		} else {
+			Controller::addError('Admin installation script already ran at ' . $installed);
 		}
-		if ($toret) {
-			Controller::addSuccess('Backend Install Successful');
-		}
-		//TODO Returning false at the moment, to make backend output the default HTML...
 		return false;
 	}
 }
