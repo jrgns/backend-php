@@ -65,7 +65,7 @@ class Admin extends AreaCtl {
 	public static function hook_post_display($data, $controller) {
 		$sec_links = Backend::get('secondary_links', array());
 		$user = Account::checkUser();
-		if (count(array_intersect(array('superadmin', 'admin'), $user->roles))) {
+		if ($user && count(array_intersect(array('superadmin', 'admin'), $user->roles))) {
 			$sec_links += array(
 				array('href' => '?q=admin/interface', 'text' => 'Manage Application'),
 			);
