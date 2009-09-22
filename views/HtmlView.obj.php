@@ -28,13 +28,19 @@ class HtmlView extends View {
 		return $to_print;
 	}
 	
+	/**
+	 * This function adds all styles and scripts to the HTML. It also retrieves primary and secondary links from the App
+	 *
+	 * @todo Merge primary and secondary links with already added / existing links
+	 */
 	public static function hook_post_display($data, $controller) {
 		Controller::addScript(SITE_LINK . 'scripts/backend.js');
 		Backend::add('Styles', array_unique(array_filter(Controller::getStyles())));
 		Backend::add('Scripts', array_unique(array_filter(Controller::getScripts())));
 		$app_class = Backend::getConfig('backend.application.class', 'Application');
 		if (class_exists($app_class, true) && method_exists($app_class, 'getLinks')) {
-			Backend::add('links', call_user_func(array($app_class, 'getLinks')));
+			Backend::add('primary_links', call_user_func(array($app_class, 'getLinks'), 'primary'));
+			Backend::add('secondary_links', call_user_func(array($app_class, 'getLinks'), 'secondary'));
 		}
 		return $data;
 	}
