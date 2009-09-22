@@ -71,14 +71,6 @@ class Content extends TableCtl {
 		return $toret;
 	}
 	
-	public static function parseQuery($tuple) {
-		if (!in_array($tuple['action'], array('create', 'read', 'update', 'delete', 'list', 'display'))) {
-			$tuple['id']     = $tuple['action'];
-			$tuple['action'] = 'display';
-		}
-		return $tuple;
-	}
-	
 	public static function install() {
 		$toret = true;
 

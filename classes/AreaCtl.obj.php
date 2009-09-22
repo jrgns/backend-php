@@ -103,4 +103,8 @@ class AreaCtl {
 		}
 		return $toret;
 	}
+
+	public static function checkTuple($tuple) {
+		return $tuple;
+	}
 }

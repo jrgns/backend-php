@@ -241,8 +241,8 @@ class Controller {
 
 		$terms = call_user_func_array(array('Controller', 'checkTuple'), $terms);
 		
-		if (class_exists(class_name($terms['area']), true) && method_exists(class_name($terms['area']), 'parseQuery')) {
-			$terms = call_user_func(array($terms['area'], 'parseQuery'), $terms);
+		if (class_exists(class_name($terms['area']), true) && method_exists(class_name($terms['area']), 'checkTuple')) {
+			$terms = call_user_func(array(class_name($terms['area']), 'checkTuple'), $terms);
 		}
 		return $terms;
 	}

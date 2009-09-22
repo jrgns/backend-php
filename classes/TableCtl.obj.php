@@ -286,4 +286,15 @@ class TableCtl extends AreaCtl {
 		}
 		return true;
 	}
+
+	/**
+	 * Don't know why, but the child classes actually inherits this!?
+	 */
+	public static function checkTuple($tuple) {
+		if (!in_array($tuple['action'], array('create', 'read', 'update', 'delete', 'list', 'display')) && !$tuple['id']) {
+			$tuple['id']     = $tuple['action'];
+			$tuple['action'] = 'display';
+		}
+		return $tuple;
+	}
 }
