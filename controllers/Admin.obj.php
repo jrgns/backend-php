@@ -54,21 +54,65 @@ class Admin extends AreaCtl {
 		return $toret;
 	}
 	
+	function action_update() {
+	}
+	
+	function action_components() {
+		$toret = array();
+		$toret = array_merge($toret, self::getComponents());
+		$toret = array_merge($toret, self::getViews());
+		return $toret;
+	}
+	
+	private static function getComponents() {
+		$toret = array();
+		$toret = array_merge($toret, self::filesFromFolder(BACKEND_FOLDER . '/controllers/'));
+		$toret = array_merge($toret, self::filesFromFolder(APP_FOLDER . '/controllers/'));
+		sort($toret);
+		return $toret;
+	}
+	
+	private static function getViews() {
+		$toret = array();
+		$toret = array_merge($toret, self::filesFromFolder(BACKEND_FOLDER . '/views/'));
+		$toret = array_merge($toret, self::filesFromFolder(APP_FOLDER . '/views/'));
+		sort($toret);
+		return $toret;
+	}
+	
+	private static function filesFromFolder($folder) {
+		$toret = array();
+		if (is_dir($folder)) {
+			$dh = opendir($folder);
+			while (($file = readdir($dh)) !== false) {
+				if (filetype($folder . $file) == 'file') {
+					$toret[] = $folder . $file;
+				}
+			}
+		}
+		return array_unique($toret);
+	}
+	
 	function html_install($result) {
 		Backend::add('Sub Title', 'Install Backend Components');
+		Backend::add('result', $result);
 	}
 	
 	function html_update($result) {
 		Backend::add('Sub Title', 'Update Backend Components');
+		Backend::add('result', $result);
 	}
 	
 	function html_interface($result) {
 		Backend::add('Sub Title', 'Manage Application');
+		Backend::add('result', $result);
 		Controller::addContent(Render::renderFile('admin_interface.tpl.php'));
 	}
 	
 	function html_components($result) {
 		Backend::add('Sub Title', 'Manage Components');
+		Backend::add('result', $result);
+		Controller::addContent(Render::renderFile('admin_components.tpl.php'));
 	}
 	
 	public static function hook_post_display($data, $controller) {
@@ -107,3 +151,5 @@ class Admin extends AreaCtl {
 		return $toret;
 	}
 }
+
+return 'Admin';
