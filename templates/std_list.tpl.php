@@ -21,9 +21,9 @@
 			?>
 			<tr class="<?php echo $odd ? '' : 'even' ?>">
 				<td><?php echo implode('</td><td>', $row) ?></td>
-				<td><a href="?q=<?php echo class_for_url($Object) ?>/display/<?php echo $row['id'] ?>"><img src="<?php echo SITE_LINK ?>images/icons/magnifier.png"></a></td>
-				<td><a href="?q=<?php echo class_for_url($Object) ?>/update/<?php echo $row['id'] ?>"><img src="<?php echo SITE_LINK ?>images/icons/pencil.png"></a></td>
-				<td><a href="#" class="delete_link" id="delete_<?php echo $row['id'] ?>"><img src="<?php echo SITE_LINK ?>images/icons/cross.png"></a></td>
+				<td><a href="?q=<?php echo class_for_url($Object) ?>/display/<?php echo $row['id'] ?>"><img src="#SITE_LINK#images/icons/magnifier.png"></a></td>
+				<td><a href="?q=<?php echo class_for_url($Object) ?>/update/<?php echo $row['id'] ?>"><img src="#SITE_LINK#images/icons/pencil.png"></a></td>
+				<td><a href="#" class="delete_link" id="delete_<?php echo $row['id'] ?>"><img src="#SITE_LINK#images/icons/cross.png"></a></td>
 			</tr>
 		<?php endforeach; ?>
 		</tbody>
