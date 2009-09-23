@@ -222,13 +222,16 @@ class Account extends TableCtl {
 	}
 	
 	public static function hook_start() {
-		if (!self::checkUser() && empty($_SESSION['user'])) {
+		$user = self::checkUser();
+		if (!$user && empty($_SESSION['user'])) {
 			self::setupAnonymous();
 		} else {
-			if (in_array('superadmin', $_SESSION['user']->roles)) {
+			if (in_array('superadmin', $user->roles)) {
 				Controller::addNotice('You are the super user. Be carefull, careless clicking costs lives...');
 			}
 		}
+		//@todo Maybe give this another name? user is too generic
+		Backend::add('user', $user);
 	}
 	
 	public function postSignup($object) {

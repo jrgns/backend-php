@@ -145,11 +145,11 @@ function send_email($recipient, $subject, $message, array $headers = array()) {
 }
 
 /**
- * Checks if a module is enabled.
+ * Checks if a component is enabled.
  *
  * At the moment it only checks if the class is available, but eventually
- * it should check against a list of activated modules.
+ * it should check against a list of activated components.
  */
-function BE_module_active($module_name) {
-	return class_exists($module_name, true);
+function BE_component_active($component_name) {
+	return class_exists($component_name, true);
 }

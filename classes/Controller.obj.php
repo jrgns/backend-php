@@ -15,7 +15,7 @@
  * The main controller for the Backend
  *
  * @TODO We need to check which modujles are available / enabled.
- * @TODO We need to enable different hooks for all enabled modules. The hook_start will, as an example, be called in Controller::start
+ * @TODO We need to enable different hooks for all enabled components. The hook_start will, as an example, be called in Controller::start
  */
 class Controller {
 	public static $debug;

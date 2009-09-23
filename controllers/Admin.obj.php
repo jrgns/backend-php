@@ -20,7 +20,7 @@ class Admin extends AreaCtl {
 		$toret = false;
 		$installed = Value::get('admin_installed', false);
 		if (!$installed) {
-			$modules = array(
+			$components = array(
 				'Admin',
 				'HtmlView',
 				'ImageView',
@@ -35,10 +35,10 @@ class Admin extends AreaCtl {
 				'GateManager',
 			);
 			$toret = true;
-			foreach($modules as $module) {
-				if (class_exists($module, true) && method_exists($module, 'install')) {
-					if (!call_user_func_array(array($module, 'install'), array())) {
-						Controller::addError('Error on installing ' . $module);
+			foreach($components as $component) {
+				if (class_exists($component, true) && method_exists($component, 'install')) {
+					if (!call_user_func_array(array($component, 'install'), array())) {
+						Controller::addError('Error on installing ' . $component);
 						$toret = false;
 					}
 				}
@@ -58,13 +58,28 @@ class Admin extends AreaCtl {
 		Backend::add('Sub Title', 'Install Backend Components');
 	}
 	
+	function html_update($result) {
+		Backend::add('Sub Title', 'Update Backend Components');
+	}
+	
 	function html_interface($result) {
 		Backend::add('Sub Title', 'Manage Application');
+		Controller::addContent(Render::renderFile('admin_interface.tpl.php'));
+	}
+	
+	function html_components($result) {
+		Backend::add('Sub Title', 'Manage Components');
 	}
 	
 	public static function hook_post_display($data, $controller) {
 		$sec_links = Backend::get('secondary_links', array());
 		$user = Account::checkUser();
+		$installed = Value::get('admin_installed', false);
+		if (!$installed) {
+			$sec_links += array(
+				array('href' => '?q=admin/install', 'text' => 'Install Application'),
+			);
+		}
 		if ($user && count(array_intersect(array('superadmin', 'admin'), $user->roles))) {
 			$sec_links += array(
 				array('href' => '?q=admin/interface', 'text' => 'Manage Application'),
