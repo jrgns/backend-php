@@ -16,7 +16,7 @@ class Value extends TableCtl {
 		var_dump(self::get('test'));
 		self::set('test', 'off');
 		var_dump(self::get('test'));
-		die;
+		die('Value::action_test');
 	}
 	
 	public static function get($name, $default = null) {

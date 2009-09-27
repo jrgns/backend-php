@@ -194,11 +194,11 @@ class Backend {
 			$dsn = array_key_exists('dsn', $options) ? $options['dsn'] : false;
 			if (!$dsn) {
 				$dsn = array();
+				$driver = array_key_exists('driver', $options)   ? $options['driver'] : 'mysql';
 				if (!empty($options['database'])) {
 					$dsn[] = 'dbname=' . $options['database'];
 				}
 				$dsn[] = array_key_exists('host', $options) ? $options['host'] : 'localhost';
-				$driver = array_key_exists('driver', $options)   ? $options['driver'] : 'mysql';
 				$dsn = strtolower($driver) . ':' . implode(';', $dsn);
 			}
 			$alias    = !empty($options['alias'])              ? $options['alias']    : $name;
