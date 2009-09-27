@@ -159,7 +159,7 @@ function BE_component_active($component_name) {
 
 function array_flatten(&$array, $key_field = null, $value_field = null) {
 	$toret = false;
-	if (is_array(current($array))) {
+	if (is_array($array) && is_array(current($array))) {
 		$toret = array();
 		if (is_null($value_field) && is_null($key_field)) {
 			foreach($array as $row) {
@@ -167,7 +167,19 @@ function array_flatten(&$array, $key_field = null, $value_field = null) {
 			}
 		} else if ($value_field === true && $key_field == true) {
 			foreach($array as $row) {
-				$toret[current($row)] = current($row);
+				$toret[array_shift($row)] = array_shift($row);
+			}
+		} else if ($value_field === true && $key_field == true && array_key_exists($value_field, current($array)) && array_key_exists($key_field, current($array))) {
+			foreach($array as $row) {
+				$toret[$row[$key_field]] = $row[$value_field];
+			}
+		} else if ($value_field && !$key_field && array_key_exists($value_field, current($array))) {
+			foreach($array as $row) {
+				$toret[] = $row[$value_field];
+			}
+		} else if (!$value_field && $key_field && array_key_exists($key_field, current($array))) {
+			foreach($array as $row) {
+				$toret[$row[$key_field]] = $row;
 			}
 		}
 	}
