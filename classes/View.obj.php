@@ -95,7 +95,7 @@ class View {
 				'mode'        => '*',
 				'type'        => 'pre',
 				'hook'        => 'output',
-				'class'       => 'HtmlView',
+				'class'       => 'View',
 				'method'      => 'hook_output',
 				'sequence'    => 1000,
 			)
