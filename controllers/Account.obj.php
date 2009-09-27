@@ -298,6 +298,7 @@ END;
 				'sequence'    => '0',
 			)
 		) && $toret;
+
 		$permission = new PermissionObj();
 		$toret = $permission->replace(array(
 				'role'       => 'anonymous',

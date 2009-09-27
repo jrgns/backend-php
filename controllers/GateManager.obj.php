@@ -99,6 +99,8 @@ class GateManager extends AreaCtl {
 		$assigns = self::getDefaultAssignments();
 		if ($assigns) {
 			$AssignmentObj = new AssignmentObj();
+			$AssignmentObj->truncate();
+
 			foreach($assigns as $assignment) {
 				if ($AssignmentObj->create($assignment)) {
 					Controller::addSuccess('Added assignment ' . $assignment['access_type'] . ' to ' . $assignment['role_id']);
@@ -111,6 +113,8 @@ class GateManager extends AreaCtl {
 		$permits = self::getDefaultPermissions();
 		if ($permits) {
 			$PermissionObj = new PermissionObj();
+			$PermissionObj->truncate();
+
 			foreach($permits as $permit) {
 				if ($PermissionObj->create($permit)) {
 					Controller::addSuccess('Added permission to ' . $permit['action'] . ' to ' . $permit['role']);
