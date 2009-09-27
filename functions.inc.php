@@ -140,8 +140,11 @@ function reseed() {
 
 /**
  * Wrapper for sending emails
+ *
+ * @todo Extend this to check the recipient formats, handle recipients as an array, etc.
  */
 function send_email($recipient, $subject, $message, array $headers = array()) {
+	return mail($recipient, $subject, $message, $headers);
 }
 
 /**
@@ -153,3 +156,39 @@ function send_email($recipient, $subject, $message, array $headers = array()) {
 function BE_component_active($component_name) {
 	return class_exists($component_name, true);
 }
+
+function array_flatten(&$array, $key_field = null, $value_field = null) {
+	$toret = false;
+	if (is_array(current($array))) {
+		$toret = array();
+		if (is_null($value_field) && is_null($key_field)) {
+			foreach($array as $row) {
+				$toret[] = current($row);
+			}
+		} else if ($value_field === true && $key_field == true) {
+			foreach($array as $row) {
+				$toret[current($row)] = current($row);
+			}
+		}
+	}
+	return $toret;
+}
+
+function files_from_folder($folder, array $options = array()) {
+	$toret = array();
+	$prepend_folder = array_key_exists('prepend_folder', $options) ? $options['prepend_folder'] : false;
+	if (is_dir($folder)) {
+		$dh = opendir($folder);
+		while (($file = readdir($dh)) !== false) {
+			if (filetype($folder . $file) == 'file') {
+				if ($prepend_folder) {
+					$toret[] = $folder . $file;
+				} else {
+					$toret[] = $file;
+				}
+			}
+		}
+	}
+	return array_unique($toret);
+}
+

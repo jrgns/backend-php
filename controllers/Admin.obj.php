@@ -22,6 +22,7 @@ class Admin extends AreaCtl {
 		if (!$installed) {
 			$components = array(
 				'Admin',
+				'View',
 				'HtmlView',
 				'ImageView',
 				'JsonView',
@@ -61,36 +62,15 @@ class Admin extends AreaCtl {
 		$toret = array();
 		$toret = array_merge($toret, self::getComponents());
 		$toret = array_merge($toret, self::getViews());
-		return $toret;
-	}
-	
-	private static function getComponents() {
-		$toret = array();
-		$toret = array_merge($toret, self::filesFromFolder(BACKEND_FOLDER . '/controllers/'));
-		$toret = array_merge($toret, self::filesFromFolder(APP_FOLDER . '/controllers/'));
-		sort($toret);
-		return $toret;
-	}
-	
-	private static function getViews() {
-		$toret = array();
-		$toret = array_merge($toret, self::filesFromFolder(BACKEND_FOLDER . '/views/'));
-		$toret = array_merge($toret, self::filesFromFolder(APP_FOLDER . '/views/'));
-		sort($toret);
-		return $toret;
-	}
-	
-	private static function filesFromFolder($folder) {
-		$toret = array();
-		if (is_dir($folder)) {
-			$dh = opendir($folder);
-			while (($file = readdir($dh)) !== false) {
-				if (filetype($folder . $file) == 'file') {
-					$toret[] = $folder . $file;
-				}
-			}
+		
+		$component = new ComponentObj();
+		$component->load();
+		if (Controller::$debug) {
+			$list = $component->list;
+			array_flatten($list);
+			var_dump('Component List:', $list);
 		}
-		return array_unique($toret);
+		return $toret;
 	}
 	
 	function html_install($result) {
@@ -152,4 +132,3 @@ class Admin extends AreaCtl {
 	}
 }
 
-return 'Admin';
