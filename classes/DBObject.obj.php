@@ -104,12 +104,10 @@ class DBObject {
 				list ($query, $params) = $this->getSelectSQL($options);
 			}
 			if (Controller::$debug) {
-				echo 'Options:';
-				var_dump($options);
-				echo 'Query:<br/>';
-				echo $query;
-				echo 'Params:<br/>';
-				var_dump($params);
+				var_dump('Options:', $options);
+				echo 'Query:<br/><pre>';
+				echo $query . '</pre>';
+				var_dump('Params:', $params);
 			}
 			if (!empty($query)) {
 				$stmt = $this->db->prepare($query);
@@ -141,7 +139,7 @@ class DBObject {
 					$this->last_error = $stmt->errorInfo();
 					if (Controller::$debug) {
 						echo 'Error Info:';
-						var_dump($stmt->errorInfo());
+						var_dump('Error Info:', $stmt->errorInfo());
 					}
 				}
 			} else {
@@ -167,8 +165,8 @@ class DBObject {
 					}
 					break;
 				default:
-					if (Controller::$debug) {
-						var_dump($this->meta['fields'][$name]);
+					if (Controller::$debug === 2) {
+						var_dump('DBObject::process field', $this->meta['fields'][$name]);
 					}
 					break;
 				}
@@ -320,6 +318,18 @@ class DBObject {
 			extract($this->meta);
 			$query = new Query("DELETE FROM `$table` WHERE `$id_field` = :id LIMIT 1");
 			$toret = $query->execute(array(':id' => $this->meta['id']));
+		} else {
+			Controller::addError('DB Connection error');
+		}
+		return $toret;
+	}
+	
+	function truncate() {
+		$toret = false;
+		if ($this->checkConnection()) {
+			extract($this->meta);
+			$query = new Query("TRUNCATE `$table`");
+			$toret = $query->execute();
 		} else {
 			Controller::addError('DB Connection error');
 		}
@@ -516,8 +526,7 @@ class DBObject {
 			}
 		}
 		if (Controller::$debug) {
-			echo 'Conditions:';
-			var_dump($conditions);
+			var_dump('Conditions:', $conditions);
 		}
 		$query = 'SELECT';
 		if (count($fields)) {
