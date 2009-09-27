@@ -50,10 +50,6 @@ class Component extends TableCtl {
 		return $toret;
 	}
 	
-	public function action_list() {
-		self::install();
-	}
-	
 	public static function install() {
 		$toret = true;
 
@@ -74,5 +70,12 @@ class Component extends TableCtl {
 		return $toret;
 	}
 	
+	public static function getActive() {
+		$component = new ComponentObj();
+		list ($query, $params) = $component->getSelectSQL(array('conditions' => '`active` = 1'));
+		$query = new Query($query);
+		$toret = $query->fetchAll();
+		return $toret;
+	}
 }
 

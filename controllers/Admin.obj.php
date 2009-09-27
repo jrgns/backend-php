@@ -20,27 +20,21 @@ class Admin extends AreaCtl {
 		$toret = false;
 		$installed = Value::get('admin_installed', false);
 		if (!$installed) {
-			$components = array(
-				'Admin',
-				'View',
-				'HtmlView',
-				'ImageView',
-				'JsonView',
-				'PhpView',
-				'SerializeView',
-				'Account',
-				'Render',
-				'ContentRevision',
-				'Content',
-				'WMD',
-				'GateManager',
-			);
-			$toret = true;
-			foreach($components as $component) {
-				if (class_exists($component, true) && method_exists($component, 'install')) {
-					if (!call_user_func_array(array($component, 'install'), array())) {
-						Controller::addError('Error on installing ' . $component);
-						$toret = false;
+			Component::install();
+			$components = Component::getActive();
+			if ($components) {
+				$toret = true;
+
+				$components = array_flatten($components, null, 'name');
+
+				$hook = new HookObj();
+				$hook->truncate();
+				foreach($components as $component) {
+					if (class_exists($component, true) && method_exists($component, 'install')) {
+						if (!call_user_func_array(array($component, 'install'), array())) {
+							Controller::addError('Error on installing ' . $component);
+							$toret = false;
+						}
 					}
 				}
 			}
