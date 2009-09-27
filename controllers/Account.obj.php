@@ -26,13 +26,15 @@ class Account extends TableCtl {
 
 	public function action() {
 		$toret = null;
-		if (Controller::$action == 'display') {
-			if ($_SESSION['user']->id == 0) {
-				Controller::$action = 'signup';
-			} else {
-				Controller::$action = 'update';
-				if (Controller::$id != $_SESSION['user']->id) {
-					Controller::$id = $_SESSION['user']->id;
+		if (array_key_exists('user', $_SESSION)) {
+			if (Controller::$action == 'display') {
+				if ($_SESSION['user']->id == 0) {
+					Controller::$action = 'signup';
+				} else {
+					Controller::$action = 'update';
+					if (Controller::$id != $_SESSION['user']->id) {
+						Controller::$id = $_SESSION['user']->id;
+					}
 				}
 			}
 		}
@@ -226,7 +228,7 @@ class Account extends TableCtl {
 		if (!$user && empty($_SESSION['user'])) {
 			self::setupAnonymous();
 		} else {
-			if (in_array('superadmin', $user->roles)) {
+			if ($user && in_array('superadmin', $user->roles)) {
 				Controller::addNotice('You are the super user. Be carefull, careless clicking costs lives...');
 			}
 		}
@@ -348,3 +350,4 @@ END;
 		return $tuple;
 	}
 }
+
