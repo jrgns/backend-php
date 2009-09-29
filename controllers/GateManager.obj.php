@@ -87,6 +87,8 @@ class GateManager extends AreaCtl {
 		$roles = self::getDefaultRoles();
 		if ($roles) {
 			$RoleObj = new RoleObj();
+			$RoleObj->truncate();
+
 			foreach($roles as $role) {
 				if ($RoleObj->create($role)) {
 					Controller::addSuccess('Added role ' . $role['name']);
@@ -144,9 +146,9 @@ class GateManager extends AreaCtl {
 			//All anonymous visitors to the site will be classified as visitors
 			array('role_id' => 2, 'access_type' => 'visitor', 'access_id' => '*'),
 			//All registered visitors to the site will be classified as users
-			array('role_id' => 3, 'access_type' => 'user', 'access_id' => '*'),
+			array('role_id' => 3, 'access_type' => 'users', 'access_id' => '*'),
 			//The user with id 1 will be super admin
-			array('role_id' => 4, 'access_type' => 'user', 'access_id' => '1'),
+			array('role_id' => 4, 'access_type' => 'users', 'access_id' => '1'),
 		);
 		return $toret;
 	}
