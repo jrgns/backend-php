@@ -43,6 +43,7 @@ class Component extends TableCtl {
 		$toret['JsonView']    = '/views/JsonView.obj.php';
 		$toret['SerializeView'] = '/views/SerializeView.obj.php';
 		$toret['PhpView']     = '/views/PhpView.obj.php';
+		$toret['Component']   = '/controllers/Component.obj.php';
 		$toret['Hook']        = '/controllers/Hook.obj.php';
 		$toret['GateManager'] = '/controllers/GateManager.obj.php';
 		$toret['Admin']       = '/controllers/Admin.obj.php';
@@ -53,6 +54,32 @@ class Component extends TableCtl {
 		return $toret;
 	}
 	
+	public static function getActive($refresh = false) {
+		$toret = Backend::get('Component::active', false);
+		if (!$toret || $refresh) {
+			$component = new ComponentObj();
+			list ($query, $params) = $component->getSelectSQL(array('conditions' => '`active` = 1'));
+			$query = new Query($query);
+			$toret = $query->fetchAll();
+			Backend::add('Component::active', $toret);
+		}
+		return $toret;
+	}
+	
+	public static function isActive($name) {
+		$toret = false;
+		$active = self::getActive();
+		if ($active) {
+			$active = array_flatten($active, 'id', 'name');
+			$toret = in_array($name, $active);
+		}
+		return $toret;
+	}
+	
+	public static function hook_init() {
+		self::getActive();
+	}
+	
 	public static function install() {
 		$toret = true;
 
@@ -61,7 +88,6 @@ class Component extends TableCtl {
 		$component = new ComponentObj();
 		$component->truncate();
 		foreach($components as $component_file) {
-			if (
 			$name = preg_replace('/\.obj\.php$/', '', basename($component_file));
 			$data = array(
 				'name'     => $name,
@@ -71,14 +97,19 @@ class Component extends TableCtl {
 			);
 			$component->create($data, array('load' => false));
 		}
-		return $toret;
-	}
-	
-	public static function getActive() {
-		$component = new ComponentObj();
-		list ($query, $params) = $component->getSelectSQL(array('conditions' => '`active` = 1'));
-		$query = new Query($query);
-		$toret = $query->fetchAll();
+
+		$hook = new HookObj();
+		$toret = $hook->replace(array(
+				'name'        => 'Component Pre Init',
+				'description' => '',
+				'mode'        => '*',
+				'type'        => 'pre',
+				'hook'        => 'init',
+				'class'       => 'Component',
+				'method'      => 'hook_init',
+				'sequence'    => 0,
+			)
+		) && $toret;
 		return $toret;
 	}
 }
