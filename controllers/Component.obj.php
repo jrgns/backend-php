@@ -39,7 +39,10 @@ class Component extends TableCtl {
 		$toret['GateKeeper']  = '/classes/GateKeeper.obj.php';
 		$toret['View']        = '/classes/View.obj.php';
 		$toret['HtmlView']    = '/views/HtmlView.obj.php';
+		$toret['ImageView']   = '/views/ImageView.obj.php';
 		$toret['JsonView']    = '/views/JsonView.obj.php';
+		$toret['SerializeView'] = '/views/SerializeView.obj.php';
+		$toret['PhpView']     = '/views/PhpView.obj.php';
 		$toret['Hook']        = '/controllers/Hook.obj.php';
 		$toret['GateManager'] = '/controllers/GateManager.obj.php';
 		$toret['Admin']       = '/controllers/Admin.obj.php';
@@ -58,6 +61,7 @@ class Component extends TableCtl {
 		$component = new ComponentObj();
 		$component->truncate();
 		foreach($components as $component_file) {
+			if (
 			$name = preg_replace('/\.obj\.php$/', '', basename($component_file));
 			$data = array(
 				'name'     => $name,
