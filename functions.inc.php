@@ -173,13 +173,17 @@ function array_flatten(&$array, $key_field = null, $value_field = null) {
 			foreach($array as $row) {
 				$toret[$row[$key_field]] = $row[$value_field];
 			}
-		} else if ($value_field && !$key_field && array_key_exists($value_field, current($array))) {
+		} else if ($value_field && is_null($key_field) && array_key_exists($value_field, current($array))) {
 			foreach($array as $row) {
 				$toret[] = $row[$value_field];
 			}
-		} else if (!$value_field && $key_field && array_key_exists($key_field, current($array))) {
+		} else if (is_null($value_field) && $key_field && array_key_exists($key_field, current($array))) {
 			foreach($array as $row) {
 				$toret[$row[$key_field]] = $row;
+			}
+		} else if ($value_field && array_key_exists($value_field, current($array)) && $key_field && array_key_exists($key_field, current($array))) {
+			foreach($array as $row) {
+				$toret[$row[$key_field]] = $row[$value_field];
 			}
 		}
 	}
