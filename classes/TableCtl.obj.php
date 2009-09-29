@@ -311,6 +311,9 @@ class TableCtl extends AreaCtl {
 
 	/**
 	 * Don't know why, but the child classes actually inherits this!?
+	 *
+	 * @todo This isn't entirely accurate. If you want to create a random action_something, it need's to be
+	 * added to the array below... This isn't optimal. Either get the array dynamically (get_class_methods) or refactor.
 	 */
 	public static function checkTuple($tuple) {
 		if (!in_array($tuple['action'], array('create', 'read', 'update', 'delete', 'list', 'display')) && !$tuple['id']) {
