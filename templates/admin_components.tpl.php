@@ -1,8 +1,14 @@
 <?php if ($result): ?>
-	<ul>
-	<?php foreach($result as $component_file): 
-		$component = preg_replace('/\.obj\.php$/', '', basename($component_file)); ?>
-		<li><?php echo $component ?></li>
-	<?php endforeach; ?>
-	</ul>
+	<table>
+		<tr>
+			<th>Name</th>
+			<th>Active</th>
+		</tr>
+		<?php foreach($result as $component): ?>
+			<tr>
+				<td><?php echo $component['name'] ?></td>
+				<td><a id="component_<?php echo $component['id'] ?>" href="#" class="toggleActive"><?php echo $component['active'] ? 'Yes' : 'No' ?></a></td>
+			</tr>
+		<?php endforeach; ?>
+	</table>
 <?php endif; ?>

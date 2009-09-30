@@ -54,16 +54,14 @@ class Admin extends AreaCtl {
 	
 	function action_components() {
 		$toret = array();
-		$toret = array_merge($toret, self::getComponents());
-		$toret = array_merge($toret, self::getViews());
 		
 		$component = new ComponentObj();
 		$component->load();
+		$list = $component->list;
 		if (Controller::$debug) {
-			$list = $component->list;
-			array_flatten($list);
 			var_dump('Component List:', $list);
 		}
+		$toret = $list;
 		return $toret;
 	}
 	
@@ -86,6 +84,8 @@ class Admin extends AreaCtl {
 	function html_components($result) {
 		Backend::add('Sub Title', 'Manage Components');
 		Backend::add('result', $result);
+		Controller::addScript(SITE_LINK . 'scripts/jquery.js');
+		Controller::addScript(SITE_LINK . 'scripts/admin_components.js');
 		Controller::addContent(Render::renderFile('admin_components.tpl.php'));
 	}
 	
