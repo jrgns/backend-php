@@ -20,11 +20,11 @@ class TableCtl extends AreaCtl {
 	 */
 	public function action_display() {
 		$toret = false;
-		$obj_name = (class_name(Controller::$area) . 'Obj');
-		if (class_exists($obj_name, true) && Controller::$id !== 'home' && Controller::$id > 0) {
+		$obj_name = (class_name(Controller::parameter('area')) . 'Obj');
+		if (class_exists($obj_name, true) && Controller::parameter('id') !== 'home' && Controller::parameter('id') > 0) {
 			$toret = self::action_read();
 		} else {
-			Controller::$action = 'list';
+			Controller::$parameters['action'] = 'list';
 			$toret = $this->action_list();
 		}
 		return $toret;
@@ -35,7 +35,7 @@ class TableCtl extends AreaCtl {
 	 */
 	public function action_list() {
 		$toret = false;
-		$obj_name = (class_name(Controller::$area) . 'Obj');
+		$obj_name = (class_name(Controller::parameter('area')) . 'Obj');
 		if (class_exists($obj_name, true)) {
 			$object = new $obj_name();
 			$object->load(array('limit' => Controller::$count));
@@ -51,7 +51,7 @@ class TableCtl extends AreaCtl {
 	 */
 	public function action_create() {
 		$toret = false;
-		$obj_name = (class_name(Controller::$area) . 'Obj');
+		$obj_name = (class_name(Controller::parameter('area')) . 'Obj');
 		if (class_exists($obj_name, true)) {
 			$object = new $obj_name();
 			$data = $object->fromPost();
@@ -79,9 +79,9 @@ class TableCtl extends AreaCtl {
 	 */
 	public function action_read() {
 		$toret = null;
-		$obj_name = (class_name(Controller::$area) . 'Obj');
+		$obj_name = (class_name(Controller::parameter('area')) . 'Obj');
 		if (class_exists($obj_name, true)) {
-			$toret = new $obj_name(Controller::$id);
+			$toret = new $obj_name(Controller::parameter('id'));
 			$toret->read();
 			Hook::run('read', 'post', array($toret), array('toret' => $toret));
 		} else {
@@ -95,9 +95,9 @@ class TableCtl extends AreaCtl {
 	 */
 	public function action_update() {
 		$toret = false;
-		$obj_name = (class_name(Controller::$area) . 'Obj');
-		if (class_exists($obj_name, true) && Controller::$id !== 'home' && Controller::$id > 0) {
-			$object = new $obj_name(Controller::$id);
+		$obj_name = (class_name(Controller::parameter('area')) . 'Obj');
+		if (class_exists($obj_name, true) && Controller::parameter('id') !== 'home' && Controller::parameter('id') > 0) {
+			$object = new $obj_name(Controller::parameter('id'));
 			if (is_post()) {
 				$data = $object->fromPost();
 				$data = Hook::run('update', 'pre', array($data, $object), array('toret' => $data));
@@ -127,11 +127,12 @@ class TableCtl extends AreaCtl {
 	public function action_delete() {
 		$toret = false;
 		if (is_post()) {
-			if (empty(Controller::$id) && !empty($_POST['delete_id'])) {
-				Controller::$id = $_POST['delete_id'];
+			$id = Controller::parameter('id');
+			if (empty($id) && !empty($_POST['delete_id'])) {
+				Controller::$parameters['id'] = $_POST['delete_id'];
 			}
-			$obj_name = (class_name(Controller::$area) . 'Obj');
-			$object = new $obj_name(Controller::$id);
+			$obj_name = (class_name(Controller::parameter('area')) . 'Obj');
+			$object = new $obj_name(Controller::parameter('id'));
 			if ($object->array) {
 				if ($object->delete()) {
 					Controller::addSuccess('Record has been removed');
@@ -143,13 +144,33 @@ class TableCtl extends AreaCtl {
 		}
 	}
 	
+	public function action_toggle() {
+		$toret = null;
+		$obj_name = (class_name(Controller::parameter('area')) . 'Obj');
+		if (class_exists($obj_name, true)) {
+			$toret = new $obj_name(Controller::parameter('id'));
+			$fields = $toret->getMeta('fields');
+			if (array_key_exists(Controller::parameter('field'), $fields) && $fields[Controller::parameter('field')] == 'boolean') {
+				$data = array(
+					Controller::parameter('field') => !$toret->array[Controller::parameter('field')],
+				);
+				if (!$toret->update($data)) {
+					$toret = false;
+				}
+			}
+		} else {
+			Controller::whoops();
+		}
+		return $toret;
+	}
+	
 	/**
 	 * Action for importing records in an area
 	 */
 	public function action_import() {
 		$toret = false;
 		Backend::add('Sub Title', 'Import');
-		$obj_name = (class_name(Controller::$area) . 'Obj');
+		$obj_name = (class_name(Controller::parameter('area')) . 'Obj');
 		if (class_exists($obj_name, true)) {
 			Backend::add('Sub Title', 'Import ' . $object->getMeta('name'));
 			$object = new $obj_name();
@@ -199,7 +220,7 @@ class TableCtl extends AreaCtl {
 				Controller::addError('There is a problem with the HTML Form');
 			}
 			Backend::add('Object', $object);
-			$template_file = singularize(computerize(class_name(Controller::$area))) . '.import.tpl.php';
+			$template_file = singularize(computerize(class_name(Controller::parameter('area')))) . '.import.tpl.php';
 			if (!Render::checkTemplateFile($template_file)) {
 				$template_file = 'std_import.tpl.php';
 			}
@@ -316,7 +337,10 @@ class TableCtl extends AreaCtl {
 	 * added to the array below... This isn't optimal. Either get the array dynamically (get_class_methods) or refactor.
 	 */
 	public static function checkTuple($tuple) {
-		if (!in_array($tuple['action'], array('create', 'read', 'update', 'delete', 'list', 'display')) && !$tuple['id']) {
+		if ($tuple['action'] == 'toggle') {
+			$tuple['field'] = $tuple['count'];
+			unset($tuple['count']);
+		} else if (!in_array($tuple['action'], array('create', 'read', 'update', 'delete', 'list', 'display')) && !$tuple['id']) {
 			$tuple['id']     = $tuple['action'];
 			$tuple['action'] = 'display';
 		}
