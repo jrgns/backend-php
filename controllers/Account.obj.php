@@ -26,13 +26,15 @@ class Account extends TableCtl {
 
 	public function action() {
 		$toret = null;
-		if (Controller::$action == 'display') {
-			if ($_SESSION['user']->id == 0) {
-				Controller::$action = 'signup';
-			} else {
-				Controller::$action = 'update';
-				if (Controller::$id != $_SESSION['user']->id) {
-					Controller::$id = $_SESSION['user']->id;
+		if (array_key_exists('user', $_SESSION)) {
+			if (Controller::$action == 'display') {
+				if ($_SESSION['user']->id == 0) {
+					Controller::$action = 'signup';
+				} else {
+					Controller::$action = 'update';
+					if (Controller::$id != $_SESSION['user']->id) {
+						Controller::$id = $_SESSION['user']->id;
+					}
 				}
 			}
 		}
@@ -222,13 +224,16 @@ class Account extends TableCtl {
 	}
 	
 	public static function hook_start() {
-		if (!self::checkUser() && empty($_SESSION['user'])) {
+		$user = self::checkUser();
+		if (!$user && empty($_SESSION['user'])) {
 			self::setupAnonymous();
 		} else {
-			if (in_array('superadmin', $_SESSION['user']->roles)) {
+			if ($user && in_array('superadmin', $user->roles)) {
 				Controller::addNotice('You are the super user. Be carefull, careless clicking costs lives...');
 			}
 		}
+		//@todo Maybe give this another name? user is too generic
+		Backend::add('user', $user);
 	}
 	
 	public function postSignup($object) {
@@ -274,7 +279,7 @@ END;
 	static function checkUser($user = false) {
 		$toret = false;
 		if (!empty($_SESSION) && array_key_exists('user', $_SESSION) && is_object($_SESSION['user']) && $_SESSION['user']->id > 0) {
-			$toret = true;
+			$toret = $_SESSION['user'];
 		}
 		return $toret;
 	}
@@ -293,6 +298,7 @@ END;
 				'sequence'    => '0',
 			)
 		) && $toret;
+
 		$permission = new PermissionObj();
 		$toret = $permission->replace(array(
 				'role'       => 'anonymous',
@@ -336,4 +342,13 @@ END;
 		) && $toret;
 		return $toret;
 	}
+
+	public static function checkTuple($tuple) {
+		if (!in_array($tuple['action'], array('create', 'read', 'update', 'delete', 'list', 'display', 'login', 'logout', 'confirm')) && !$tuple['id']) {
+			$tuple['id']     = $tuple['action'];
+			$tuple['action'] = 'display';
+		}
+		return $tuple;
+	}
 }
+

@@ -15,15 +15,18 @@
  * The main controller for the Backend
  *
  * @TODO We need to check which modujles are available / enabled.
- * @TODO We need to enable different hooks for all enabled modules. The hook_start will, as an example, be called in Controller::start
+ * @TODO We need to enable different hooks for all enabled components. The hook_start will, as an example, be called in Controller::start
  */
 class Controller {
 	public static $debug;
 
+	//old
 	public static $area;
 	public static $action;
 	public static $id;
 	public static $count;
+	//new
+	public static $parameters = array();
 	public static $salt = 'Change this to something random!';
 	public static $mime_type;
 	public static $mode;
@@ -87,7 +90,12 @@ class Controller {
 			Hook::run('init', 'post');
 		}
 	}
-	
+
+	/**
+	 * Startup the application by parsing the query, etc
+	 *
+	 * @todo Maybe prepend something to the variables tht get added
+	 */	
 	public static function start() {
 		$toret = false;
 		if (!self::$init) {
@@ -99,10 +107,11 @@ class Controller {
 			$toret = self::parseQuery();
 			
 			foreach ($toret as $name => $value) {
+				self::$parameters[$name] = $value;
 				if (property_exists('Controller', $name)) {
 					self::$$name = self::check_map($name, $value);
-					Backend::add($name, $value);
 				}
+				Backend::add($name, $value);
 			}
 
 		}
@@ -159,6 +168,14 @@ class Controller {
 		$_SESSION['cookie_is_working'] = true;
 
 		Hook::run('finish', 'post');
+	}
+	
+	public static function parameter($name) {
+		$toret = null;
+		if (array_key_exists($name, self::$parameters)) {
+			$toret = self::$parameters[$name];
+		}
+		return $toret;
 	}
 	
 	/**
@@ -241,8 +258,8 @@ class Controller {
 
 		$terms = call_user_func_array(array('Controller', 'checkTuple'), $terms);
 		
-		if (class_exists(class_name($terms['area']), true) && method_exists(class_name($terms['area']), 'parseQuery')) {
-			$terms = call_user_func(array($terms['area'], 'parseQuery'), $terms);
+		if (class_exists(class_name($terms['area']), true) && method_exists(class_name($terms['area']), 'checkTuple')) {
+			$terms = call_user_func(array(class_name($terms['area']), 'checkTuple'), $terms);
 		}
 		return $terms;
 	}

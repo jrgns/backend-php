@@ -19,7 +19,7 @@ class WMD extends AreaCtl {
 	public static function hook_post_display($data, $controller) {
 		if (in_array(get_class($controller), array('Content')) && in_array(Controller::$action, array('create', 'update'))) { 
 			Controller::addScript(SITE_LINK . 'scripts/jquery.js');
-			Controller::addScript(SITE_LINK . 'scripts/wmd.module.js');
+			Controller::addScript(SITE_LINK . 'scripts/wmd.component.js');
 			Controller::addScript(SITE_LINK . 'scripts/wmd/wmd.js');
 			Controller::addStyle(SITE_LINK . 'styles/wmd.css');
 		}

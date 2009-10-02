@@ -27,6 +27,7 @@ class Image extends File {
 		Backend::add('Object', $content);
 		Controller::addScript(SITE_LINK . 'scripts/jquery.js');
 		Controller::addScript(SITE_LINK . 'scripts/image_list.js');
+		Controller::addStyle(SITE_LINK . 'styles/image_list.css');
 		Controller::addContent(Render::renderFile('image_list.tpl.php'));
 	}
 	

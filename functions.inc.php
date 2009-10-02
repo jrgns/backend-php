@@ -140,16 +140,71 @@ function reseed() {
 
 /**
  * Wrapper for sending emails
+ *
+ * @todo Extend this to check the recipient formats, handle recipients as an array, etc.
  */
 function send_email($recipient, $subject, $message, array $headers = array()) {
+	return mail($recipient, $subject, $message, $headers);
 }
 
 /**
- * Checks if a module is enabled.
+ * Checks if a component is enabled.
  *
  * At the moment it only checks if the class is available, but eventually
- * it should check against a list of activated modules.
+ * it should check against a list of activated components.
  */
-function BE_module_active($module_name) {
-	return class_exists($module_name, true);
+function BE_component_active($component_name) {
+	return class_exists($component_name, true);
 }
+
+function array_flatten(&$array, $key_field = null, $value_field = null) {
+	$toret = false;
+	if (is_array($array) && is_array(current($array))) {
+		$toret = array();
+		if (is_null($value_field) && is_null($key_field)) {
+			foreach($array as $row) {
+				$toret[] = current($row);
+			}
+		} else if ($value_field === true && $key_field == true) {
+			foreach($array as $row) {
+				$toret[array_shift($row)] = array_shift($row);
+			}
+		} else if ($value_field === true && $key_field == true && array_key_exists($value_field, current($array)) && array_key_exists($key_field, current($array))) {
+			foreach($array as $row) {
+				$toret[$row[$key_field]] = $row[$value_field];
+			}
+		} else if ($value_field && is_null($key_field) && array_key_exists($value_field, current($array))) {
+			foreach($array as $row) {
+				$toret[] = $row[$value_field];
+			}
+		} else if (is_null($value_field) && $key_field && array_key_exists($key_field, current($array))) {
+			foreach($array as $row) {
+				$toret[$row[$key_field]] = $row;
+			}
+		} else if ($value_field && array_key_exists($value_field, current($array)) && $key_field && array_key_exists($key_field, current($array))) {
+			foreach($array as $row) {
+				$toret[$row[$key_field]] = $row[$value_field];
+			}
+		}
+	}
+	return $toret;
+}
+
+function files_from_folder($folder, array $options = array()) {
+	$toret = array();
+	$prepend_folder = array_key_exists('prepend_folder', $options) ? $options['prepend_folder'] : false;
+	if (is_dir($folder)) {
+		$dh = opendir($folder);
+		while (($file = readdir($dh)) !== false) {
+			if (filetype($folder . $file) == 'file') {
+				if ($prepend_folder) {
+					$toret[] = $folder . $file;
+				} else {
+					$toret[] = $file;
+				}
+			}
+		}
+	}
+	return array_unique($toret);
+}
+

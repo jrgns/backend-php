@@ -28,7 +28,7 @@ class ImageView extends View {
 			}
 			if (Controller::$debug) {
 				var_dump($mime_type);
-				var_dump($to_print->array['content']); die;
+				var_dump($to_print->array['content']); die('Image::hook_output');
 			} else {
 				header('Content-Type: ' . $mime_type);
 				//header('Content-disposition: attachment; filename=' . $file->array['name']);

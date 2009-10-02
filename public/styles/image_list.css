@@ -1,0 +1,15 @@
+.image_controller {
+	position: relative;
+	padding: 2px;
+	top: 0px;
+	left: 0px;
+	height: 18px;
+	width: 36px;
+	z-index: 1;
+	background-color: white;
+	opacity: 0.85;
+}
+
+.image_link img {
+	margin-top: -22px;
+}

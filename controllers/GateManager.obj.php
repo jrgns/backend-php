@@ -83,12 +83,17 @@ class GateManager extends AreaCtl {
 	}
 	
 	public static function install() {
+		$toret = true;
 		$roles = self::getDefaultRoles();
 		if ($roles) {
 			$RoleObj = new RoleObj();
+			$RoleObj->truncate();
+
 			foreach($roles as $role) {
 				if ($RoleObj->create($role)) {
 					Controller::addSuccess('Added role ' . $role['name']);
+				} else {
+					$toret = false;
 				}
 			}
 		}
@@ -96,9 +101,13 @@ class GateManager extends AreaCtl {
 		$assigns = self::getDefaultAssignments();
 		if ($assigns) {
 			$AssignmentObj = new AssignmentObj();
+			$AssignmentObj->truncate();
+
 			foreach($assigns as $assignment) {
 				if ($AssignmentObj->create($assignment)) {
 					Controller::addSuccess('Added assignment ' . $assignment['access_type'] . ' to ' . $assignment['role_id']);
+				} else {
+					$toret = false;
 				}
 			}
 		}
@@ -106,12 +115,17 @@ class GateManager extends AreaCtl {
 		$permits = self::getDefaultPermissions();
 		if ($permits) {
 			$PermissionObj = new PermissionObj();
+			$PermissionObj->truncate();
+
 			foreach($permits as $permit) {
 				if ($PermissionObj->create($permit)) {
 					Controller::addSuccess('Added permission to ' . $permit['action'] . ' to ' . $permit['role']);
+				} else {
+					$toret = false;
 				}
 			}
 		}
+		return $toret;
 	}
 	
 	protected static function getDefaultRoles() {
@@ -132,9 +146,9 @@ class GateManager extends AreaCtl {
 			//All anonymous visitors to the site will be classified as visitors
 			array('role_id' => 2, 'access_type' => 'visitor', 'access_id' => '*'),
 			//All registered visitors to the site will be classified as users
-			array('role_id' => 3, 'access_type' => 'user', 'access_id' => '*'),
+			array('role_id' => 3, 'access_type' => 'users', 'access_id' => '*'),
 			//The user with id 1 will be super admin
-			array('role_id' => 4, 'access_type' => 'user', 'access_id' => '1'),
+			array('role_id' => 4, 'access_type' => 'users', 'access_id' => '1'),
 		);
 		return $toret;
 	}
