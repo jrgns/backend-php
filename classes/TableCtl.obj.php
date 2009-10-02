@@ -164,15 +164,20 @@ class TableCtl extends AreaCtl {
 		return $toret;
 	}
 	
+	public function html_import($result) {
+		Backend::add('Sub Title', 'Import');
+		if ($result instanceof DBObject) {
+			Backend::add('Sub Title', 'Import ' . $object->getMeta('name'));
+		}
+	}
+	
 	/**
 	 * Action for importing records in an area
 	 */
 	public function action_import() {
 		$toret = false;
-		Backend::add('Sub Title', 'Import');
 		$obj_name = (class_name(Controller::parameter('area')) . 'Obj');
 		if (class_exists($obj_name, true)) {
-			Backend::add('Sub Title', 'Import ' . $object->getMeta('name'));
 			$object = new $obj_name();
 			$object->load();
 			if (is_post() && !empty($_FILES) && array_key_exists('import_file', $_FILES)) {
@@ -331,16 +336,12 @@ class TableCtl extends AreaCtl {
 	}
 
 	/**
-	 * Don't know why, but the child classes actually inherits this!?
-	 *
-	 * @todo This isn't entirely accurate. If you want to create a random action_something, it need's to be
-	 * added to the array below... This isn't optimal. Either get the array dynamically (get_class_methods) or refactor.
 	 */
 	public static function checkTuple($tuple) {
 		if ($tuple['action'] == 'toggle') {
 			$tuple['field'] = $tuple['count'];
 			unset($tuple['count']);
-		} else if (!in_array($tuple['action'], array('create', 'read', 'update', 'delete', 'list', 'display')) && !$tuple['id']) {
+		} else if (!$tuple['id'] && is_numeric($tuple['action'])) {
 			$tuple['id']     = $tuple['action'];
 			$tuple['action'] = 'display';
 		}

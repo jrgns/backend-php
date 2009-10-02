@@ -87,4 +87,19 @@ class Content extends TableCtl {
 		) && $toret;
 		return $toret;
 	}
+
+	/*
+	 * @todo This isn't entirely accurate. If you want to create a random action_something, it need's to be
+	 * added to the array below... This isn't optimal. Either get the array dynamically (get_class_methods) or refactor.
+	 */
+	public static function checkTuple($tuple) {
+		if ($tuple['action'] == 'toggle') {
+			$tuple['field'] = $tuple['count'];
+			unset($tuple['count']);
+		} else if (!$tuple['id'] && !in_array($tuple['action'], array('create', 'read', 'update', 'delete', 'list', 'display', 'toggle'))) {
+			$tuple['id']     = $tuple['action'];
+			$tuple['action'] = 'display';
+		}
+		return $tuple;
+	}
 }
