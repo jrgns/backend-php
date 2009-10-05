@@ -147,16 +147,6 @@ function send_email($recipient, $subject, $message, array $headers = array()) {
 	return mail($recipient, $subject, $message, $headers);
 }
 
-/**
- * Checks if a component is enabled.
- *
- * At the moment it only checks if the class is available, but eventually
- * it should check against a list of activated components.
- */
-function BE_component_active($component_name) {
-	return class_exists($component_name, true);
-}
-
 function array_flatten(&$array, $key_field = null, $value_field = null) {
 	$toret = false;
 	if (is_array($array) && is_array(current($array))) {
