@@ -183,18 +183,46 @@ class Controller {
 	 *
 	 * In an ideal world, we will just use the first mime type in the Http-Acccept header. But IE decided
 	 * to put a lot of crud in it's Accept header, so we need some hacks.
+	 *
+	 * Mode takes precedence over the extension, which takes precedence over the accept headers
 	 * @todo Make the process on deciding a view better / extendable! Or, setup preferences that ignore the
 	 * Accept header, or just rely on what the client asks for (mode=[json|xml|xhtml|jpg])
 	 */
 	private static function getView() {
 		$view = false;
-		$mime_ranges = Parser::accept_header();
+		$view_name = false;
 		if (array_key_exists('mode', $_REQUEST)) {
 			$view_name = ucwords($_REQUEST['mode']) . 'View';
-			if (class_exists($view_name, true)) {
-				$view = new $view_name();
+		} else {
+			//Check for an extension
+			$extension = explode('.', str_replace(dirname($_SERVER['SCRIPT_NAME']), '', $_SERVER['REQUEST_URI']));
+			if (count($extension) > 1) {
+				$extension = end($extension);
+				switch (true) {
+				case $extension == 'css':
+					$view_name = 'CssView';
+					break;
+				case $extension == 'json':
+					$view_name = 'JsonView';
+					break;
+				case $extension == 'txt':
+					$view_name = 'TextView';
+					break;
+				//Extend the image array!
+				case in_array($extension, array('png', 'jpg', 'jpeg', 'gif', 'bmp')):
+					$view_name = 'ImageView';
+					break;
+				case in_array($extension, array('html', 'htm')):
+					$view_name = 'HtmlView';
+					break;
+				}
 			}
 		}
+		if (class_exists($view_name, true)) {
+			$view = new $view_name();
+		}
+
+		$mime_ranges = Parser::accept_header();
 		if (!$view && $mime_ranges) {
 			$types = array();
 			$main_types = array();
