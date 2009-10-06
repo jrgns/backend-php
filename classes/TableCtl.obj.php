@@ -343,7 +343,18 @@ class TableCtl extends AreaCtl {
 			unset($tuple['count']);
 		} else if (!$tuple['id'] && is_numeric($tuple['action'])) {
 			$tuple['id']     = $tuple['action'];
-			$tuple['action'] = 'display';
+			switch (strtoupper($_SERVER['REQUEST_METHOD'])) {
+			case 'DELETE':
+				$tuple['action'] = 'delete';
+				break;
+			case 'PUT':
+				$tuple['action'] = 'update';
+				break;
+			case 'GET':
+			default:
+				$tuple['action'] = 'display';
+				break;
+			}
 		}
 		return $tuple;
 	}

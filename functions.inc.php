@@ -29,6 +29,18 @@ function is_post() {
 	return strtoupper(array_key_exists('REQUEST_METHOD', $_SERVER) ? $_SERVER['REQUEST_METHOD'] : 'GET') == 'POST';
 }
 
+function is_get() {
+	return strtoupper(array_key_exists('REQUEST_METHOD', $_SERVER) ? $_SERVER['REQUEST_METHOD'] : 'GET') == 'GET';
+}
+
+function is_put() {
+	return strtoupper(array_key_exists('REQUEST_METHOD', $_SERVER) ? $_SERVER['REQUEST_METHOD'] : 'GET') == 'PUT';
+}
+
+function is_delete() {
+	return strtoupper(array_key_exists('REQUEST_METHOD', $_SERVER) ? $_SERVER['REQUEST_METHOD'] : 'GET') == 'DELETE';
+}
+
 function update_links($content, $new_vars) {
 	$toret = $content;
 	if (count($new_vars)) {
