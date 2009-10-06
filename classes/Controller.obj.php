@@ -189,7 +189,6 @@ class Controller {
 	 * Accept header, or just rely on what the client asks for (mode=[json|xml|xhtml|jpg])
 	 */
 	private static function getView() {
-		$view = false;
 		$view_name = false;
 		if (array_key_exists('mode', $_REQUEST)) {
 			$view_name = ucwords($_REQUEST['mode']) . 'View';
@@ -218,12 +217,9 @@ class Controller {
 				}
 			}
 		}
-		if (class_exists($view_name, true)) {
-			$view = new $view_name();
-		}
 
 		$mime_ranges = Parser::accept_header();
-		if (!$view && $mime_ranges) {
+		if (!$view_name && $mime_ranges) {
 			$types = array();
 			$main_types = array();
 			$view_name = false;
@@ -247,19 +243,19 @@ class Controller {
 					}
 				}
 			}
-			if (!class_exists($view_name, true)) {
-				$view_name = 'View';
-			} else {
-				if (in_array('image', $main_types) && in_array('application', $main_types)) {
-				//Probably IE
-					$view_name = 'HtmlView';
-				} else if (in_array('application/xml', $types) && in_array('application/xhtml+xml', $types) && in_array('text/html', $types)) {
-				//Maybe another confused browser that asks for XML and HTML
-					$view_name = 'HtmlView';
-				}
+			if (in_array('image', $main_types) && in_array('application', $main_types)) {
+			//Probably IE
+				$view_name = 'HtmlView';
+			} else if (in_array('application/xml', $types) && in_array('application/xhtml+xml', $types) && in_array('text/html', $types)) {
+			//Maybe another confused browser that asks for XML and HTML
+				$view_name = 'HtmlView';
 			}
-			$view = new $view_name();
 		}
+		if (!(class_exists($view_name, true) && Component::isActive($view_name))) {
+			$view_name = 'View';
+		}
+		$view = new $view_name();
+
 		return $view;
 	}
 
