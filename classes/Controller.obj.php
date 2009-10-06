@@ -184,7 +184,9 @@ class Controller {
 	 * In an ideal world, we will just use the first mime type in the Http-Acccept header. But IE decided
 	 * to put a lot of crud in it's Accept header, so we need some hacks.
 	 *
-	 * Mode takes precedence over the extension, which takes precedence over the accept headers
+	 * Mode takes precedence over the extension, which takes precedence over the accept headers/
+	 *
+	 * @todo the extension screws up requests such as ?q=content/display/2.txt, as the id is now 2.txt, and not 2 as expected.
 	 * @todo Make the process on deciding a view better / extendable! Or, setup preferences that ignore the
 	 * Accept header, or just rely on what the client asks for (mode=[json|xml|xhtml|jpg])
 	 */
