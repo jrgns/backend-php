@@ -1,6 +1,6 @@
 <?php
 /**
- * The file that defines the Controller class.
+ * The file that defines the DBObject class.
  *
  * @author J Jurgens du Toit (JadeIT cc) <jurgens.dutoit@gmail.com> - initial API and implementation
  * @copyright Copyright (c) 2009 JadeIT cc.
@@ -34,14 +34,15 @@ class DBObject {
 			}
 		}
 		$options = $options ? $options : array();
-		$load_type = array_key_exists('load_type', $options) ? $options['load_type'] : 'array';
-		$meta['id'] = array_key_exists('id', $meta) ? $meta['id'] : false;
+		$load_type        = array_key_exists('load_type', $options) ? $options['load_type'] : 'array';
+		$meta['id']       = array_key_exists('id', $meta) ? $meta['id'] : false;
 		$meta['id_field'] = array_key_exists('id_field', $meta) ? $meta['id_field'] : 'id';
-		$meta['table'] = array_key_exists('table', $meta) ? $meta['table'] : table_name(get_class($this));
+		$meta['table']    = array_key_exists('table', $meta) ? $meta['table'] : table_name(get_class($this));
 		$meta['database'] = array_key_exists('database', $meta) ? $meta['database'] : Backend::getConfig('backend.dbs.default.alias', 'default');
-		$meta['fields'] = array_key_exists('fields', $meta) ? $meta['fields'] : array();
-		$meta['name'] = array_key_exists('name', $meta) ? $meta['name'] : class_name(get_class($this));
-		$meta['objname'] = array_key_exists('objname', $meta) ? $meta['objname'] : get_class($this);
+		$meta['provider'] = array_key_exists('provider', $meta) ? $meta['provider'] : Backend::getConfig('backend.provider', 'MySQL');
+		$meta['fields']   = array_key_exists('fields', $meta) ? $meta['fields'] : array();
+		$meta['name']     = array_key_exists('name', $meta) ? $meta['name'] : class_name(get_class($this));
+		$meta['objname']  = array_key_exists('objname', $meta) ? $meta['objname'] : get_class($this);
 		$meta['children'] = array_key_exists('children', $meta) ? $meta['children'] : array();
 		$this->meta = $meta;
 		if ($this->checkConnection()) {
@@ -165,7 +166,7 @@ class DBObject {
 					}
 					break;
 				default:
-					if (Controller::$debug === 2) {
+					if (Controller::$debug >= 3) {
 						var_dump('DBObject::process field', $this->meta['fields'][$name]);
 					}
 					break;
@@ -316,7 +317,7 @@ class DBObject {
 		$toret = false;
 		if ($this->checkConnection()) {
 			extract($this->meta);
-			$query = new Query("DELETE FROM `$table` WHERE `$id_field` = :id LIMIT 1");
+			$query = new CustomQuery("DELETE FROM `$table` WHERE `$id_field` = :id LIMIT 1");
 			$toret = $query->execute(array(':id' => $this->meta['id']));
 		} else {
 			Controller::addError('DB Connection error');
@@ -328,7 +329,7 @@ class DBObject {
 		$toret = false;
 		if ($this->checkConnection()) {
 			extract($this->meta);
-			$query = new Query("TRUNCATE `$table`");
+			$query = new CustomQuery("TRUNCATE `$table`");
 			$toret = $query->execute();
 		} else {
 			Controller::addError('DB Connection error');
@@ -525,7 +526,7 @@ class DBObject {
 				$parameters = array_merge($parameters, $options['parameters']);
 			}
 		}
-		if (Controller::$debug) {
+		if (Controller::$debug >= 2) {
 			var_dump('Conditions:', $conditions);
 		}
 		$query = 'SELECT';

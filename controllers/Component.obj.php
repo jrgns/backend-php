@@ -59,7 +59,7 @@ class Component extends TableCtl {
 		if (!$toret || $refresh) {
 			$component = new ComponentObj();
 			list ($query, $params) = $component->getSelectSQL(array('conditions' => '`active` = 1'));
-			$query = new Query($query);
+			$query = new CustomQuery($query);
 			$toret = $query->fetchAll();
 			Backend::add('Component::active', $toret);
 		}

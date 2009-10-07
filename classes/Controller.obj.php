@@ -64,7 +64,9 @@ class Controller {
 			self::$debug = false;
 			switch (true) {
 				case array_key_exists('debug', $_REQUEST):
-					self::$debug = true;
+					//Default to lowest level
+					self::$debug = is_numeric($_REQUEST['debug']) ? (int)$_REQUEST['debug'] : 1;
+					break;
 			}
 
 			Backend::add('debug', self::$debug);
@@ -123,7 +125,7 @@ class Controller {
 		
 		//Control
 		$control_name = class_name(self::$area);
-		if (!class_exists($control_name, true)) {
+		if (!Component::isActive($control_name, true)) {
 			$control_name = 'TableCtl';
 		}
 	
@@ -230,15 +232,15 @@ class Controller {
 				$main_types[] = $mime_type['main_type'];
 				if (!$view_name) {
 					$name = class_name(str_replace('+', ' ', $mime_type['main_type']) . ' ' . str_replace('+', ' ', $mime_type['sub_type'])) . 'View';
-					if (class_exists($name, true)) {
+					if (Component::isActive($name)) {
 						$view_name = $name;
 					} else {
 						$name = class_name(str_replace('+', ' ', $mime_type['main_type'])) . 'View';
-						if (class_exists($name, true)) {
+						if (Component::isActive($name)) {
 							$view_name = $name;
 						} else {
 							$name = class_name(str_replace('+', ' ', $mime_type['sub_type'])) . 'View';
-							if (class_exists($name, true)) {
+							if (Component::isActive($name)) {
 								$view_name = $name;
 							}
 						}
@@ -253,7 +255,7 @@ class Controller {
 				$view_name = 'HtmlView';
 			}
 		}
-		if (!(class_exists($view_name, true) && Component::isActive($view_name))) {
+		if (!Component::isActive($view_name)) {
 			$view_name = 'View';
 		}
 		$view = new $view_name();
@@ -284,7 +286,7 @@ class Controller {
 
 		$terms = call_user_func_array(array('Controller', 'checkTuple'), $terms);
 		
-		if (class_exists(class_name($terms['area']), true) && method_exists(class_name($terms['area']), 'checkTuple')) {
+		if (Component::isActive(class_name($terms['area'])) && method_exists(class_name($terms['area']), 'checkTuple')) {
 			$terms = call_user_func(array(class_name($terms['area']), 'checkTuple'), $terms);
 		}
 		return $terms;
