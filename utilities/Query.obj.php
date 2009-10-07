@@ -14,30 +14,29 @@
  * Base class to handle queries
  */
 class Query {
-	var $db;
-	var $sql;
+	var $connection;
+	var $query = false;
 	
-	function __construct($sql) {
-		$this->sql = $sql;
+	function __construct($action, $table, array $options = array()) {
 	}
 
 	private function checkConnection() {
-		if (!$this->db instanceof PDO) {
-			$this->db = Backend::getDB();
+		if (!$this->connection instanceof PDO) {
+			$this->connection = Backend::getDB();
 		}
-		return ($this->db instanceof PDO);
+		return ($this->connection instanceof PDO);
 	}
 	
 	public function execute(array $parameters = array()) {
 		$toret = false;
-		if ($this->checkConnection()) {
-			$stmt = $this->db->prepare($this->sql);
+		if ($this->checkConnection() && !empty($this->query)) {
+			$stmt = $this->connection->prepare($this->query);
 			if ($stmt) {
 				if ($stmt->execute($parameters)) {
 					$toret = $stmt;
 				} else {
 					if (Controller::$debug) {
-						echo $this->sql;
+						echo $this->query;
 						var_dump($stmt->errorInfo());
 					}
 					Controller::addError('Could not execute statement');
@@ -75,5 +74,9 @@ class Query {
 			$toret = $toret->fetchColumn($column);
 		}
 		return $toret;
+	}
+
+	public function setQuery($query) {
+		$this->query = $query;
 	}
 }
