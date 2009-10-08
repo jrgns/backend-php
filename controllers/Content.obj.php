@@ -68,6 +68,9 @@ class Content extends TableCtl {
 			Controller::whoops(array('title' => 'Unknown Content', 'message' => 'The page you requested could not be found.'));
 			$toret = false;
 		}
+		if ($toret && Controller::$debug) {
+			var_dump('Content ID: ' . $toret->array['id']);
+		}
 		return $toret;
 	}
 	
