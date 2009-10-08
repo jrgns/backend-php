@@ -44,6 +44,14 @@ class Content extends TableCtl {
 		}
 		return $toret;
 	}
+	
+	function html_update($content) {
+		$toret = parent::html_update($content);
+		if ($toret) {
+			Backend::add('Sub Title', 'Update: ' . $content->array['title']);
+		}
+		return $toret;
+	}
 
 	function action_display() {
 		$toret = false;
