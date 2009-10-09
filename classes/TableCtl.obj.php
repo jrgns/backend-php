@@ -164,13 +164,6 @@ class TableCtl extends AreaCtl {
 		return $toret;
 	}
 	
-	public function html_import($result) {
-		Backend::add('Sub Title', 'Import');
-		if ($result instanceof DBObject) {
-			Backend::add('Sub Title', 'Import ' . $object->getMeta('name'));
-		}
-	}
-	
 	/**
 	 * Action for importing records in an area
 	 */
@@ -335,6 +328,47 @@ class TableCtl extends AreaCtl {
 		return true;
 	}
 
+	public function html_import($result) {
+		Backend::add('Sub Title', 'Import');
+		if ($result instanceof DBObject) {
+			Backend::add('Sub Title', 'Import ' . $object->getMeta('name'));
+		}
+	}
+	
+	public static function retrieve($options = array()) {
+		$toret = false;
+		if (!(is_array($options) || is_object($options))) {
+			$options = array('id' => $options);
+		}
+		$id     = array_key_exists('id', $options) ? $options['id'] : false;
+		$return = array_key_exists('return', $options) ? $options['return'] : false;
+
+		//We've defined get_called_class in functions.inc.php for servers with PHP < 5.3.0
+		$obj_name = get_called_class() . 'Obj';
+		if (class_exists($obj_name, true)) {
+			if ($id) {
+				$toret = new $obj_name($id);
+			} else {
+				$toret = new $obj_name();
+			}
+			$toret->load();
+			switch ($return) {
+			case 'list':
+				$toret = $toret->list;
+				break;
+			case 'array':
+				$toret = $toret->array;
+				break;
+			case 'object':
+				$toret = $toret->object;
+				break;
+			default:
+				break;
+			}
+		}
+		return $toret;
+	}
+	
 	/**
 	 */
 	public static function checkTuple($tuple) {
