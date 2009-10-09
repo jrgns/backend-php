@@ -25,7 +25,9 @@ class Component extends TableCtl {
 		$toret  = array_merge($toret, files_from_folder(APP_FOLDER . '/controllers/', array('prepend_folder' => true)));
 		$toret  = array_merge($toret, files_from_folder(BACKEND_FOLDER . '/views/', array('prepend_folder' => true)));
 		$toret  = array_merge($toret, files_from_folder(APP_FOLDER . '/views/', array('prepend_folder' => true)));
-		$toret  = preg_replace('/' . str_replace('/', '\/', BACKEND_FOLDER) . '/', '', $toret);
+		$toret  = array_merge($toret, files_from_folder(APP_FOLDER . '/classes/', array('prepend_folder' => true)));
+		$toret  = preg_replace('/(' . str_replace('/', '\/', BACKEND_FOLDER) . '\/|' . str_replace('/', '\/', APP_FOLDER) . '\/)/', '/', $toret);
+
 		$toret  = array_unique(array_merge(array_values($base_c), $toret));
 		
 		return $toret;
@@ -89,11 +91,14 @@ class Component extends TableCtl {
 		$component->truncate();
 		foreach($components as $component_file) {
 			$name = preg_replace('/\.obj\.php$/', '', basename($component_file));
+			$active = in_array($name, array_keys(self::getBaseComponents())) ||
+					  $name == Backend::getConfig('backend.application.class');
+
 			$data = array(
 				'name'     => $name,
 				'filename' => $component_file,
 				'options'  => '',
-				'active'   => in_array($name, array_keys(self::getBaseComponents())),
+				'active'   => $active,
 			);
 			$component->create($data, array('load' => false));
 		}
@@ -111,6 +116,10 @@ class Component extends TableCtl {
 			)
 		) && $toret;
 		return $toret;
+	}
+	
+	public static function check() {
+		$toret = false;
 	}
 }
 
