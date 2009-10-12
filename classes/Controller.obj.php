@@ -382,6 +382,10 @@ class Controller {
 					$location = current($location);
 				}
 			}
+			//This should fix most redirects, but it may happen that location == '?debug=true&q=something/or/another' or something similiar
+			if (Value::get('clean_urls', false) && substr($location, 0, 3) == '?q=') {
+				$location = SITE_LINK . substr($location, 3);
+			}
 			if (self::$debug) {
 				self::addSuccess('The script should now redirect to <a href="' . $location . '">here</a>');
 			} else {
