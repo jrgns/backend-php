@@ -615,6 +615,9 @@ class DBObject {
 				$field_str = implode(', ', $field_data);
 				$value_str = implode(', ', $value_data);
 				$query = "INSERT INTO `$database`.`$table` ($field_str) VALUES ($value_str)";
+				if (!empty($options['on_duplicate'])) {
+					$query .= ' ON DUPLICATE KEY UPDATE ' . $options['on_duplicate'];
+				}
 			} else {
 				throw new Exception('Insert Query Fields and Values don\'t match');
 			}
