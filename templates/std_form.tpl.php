@@ -17,35 +17,39 @@
 			} else {
 				$value = array_key_exists($name, $obj_values) ? $obj_values[$name] : '';
 			}
+			$input_id = 'obj_' . $name;
+			$input_name = 'obj[' . $name . ']';
 			switch (true) {
 				case $field == 'integer':
 				case $field == 'string':
 				case $field == 'email':
 				case $field == 'telnumber':
-					$field_str = '<input id="obj_' . $name . '" name="obj[' . $name . ']" type="text" class="text" value="' . $value . '">';
+					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="text" class="text" value="' . $value . '">';
 					break;
 				case $field == 'title':
-					$field_str = '<input id="obj_' . $name . '" name="obj[' . $name . ']" type="text" class="text title" value="' . $value . '">';
+					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="text" class="text title" value="' . $value . '">';
 					break;
 				case $field == 'text':
-					$field_str = '<textarea id="obj_' . $name . '" name="obj[' . $name . ']" class="textarea">' . $value . '</textarea>';
+					$field_str = '<textarea id="' . $input_id . '" name="' . $input_name . '" class="textarea">' . $value . '</textarea>';
 					break;
 				case $field == 'boolean':
-					$field_str = '<select id="obj_' . $name . '" name="obj[' . $name . ']" class="">';
+					$field_str = '<select id="' . $input_id . '" name="' . $input_name . '" class="">';
 					$field_str .= '<option value="1">Yes</option>';
 					$field_str .= '<option value="0">No</option>';
 					$field_str .= '</select>';
 					break;
 				case $field == 'blob':
-					$field_str = '<input id="obj_' . $name . '" name="obj[' . $name . ']" type="file" class="text" value="' . $value . '">';
+					$field_str = '<input id="' . $input_id . '" name="' . $name . '" type="file" class="text" value="' . $value . '">';
 					break;
 				default:
 					$field_str = '';
 					break;
 			}
 			?>
-			<label><?php echo humanize($name) ?></label><br/>
-			<?php echo $field_str ?><br/>
+			<div id="<?php echo $input_id ?>_container">
+				<label id="<?php echo $input_id ?>_label" for="<?php echo $input_id ?>"><?php echo humanize($name) ?></label><br/>
+				<?php echo $field_str ?>
+			</div>
 		<?php endforeach;
 		Hook::run('form', 'post');
 	?>
