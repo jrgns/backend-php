@@ -29,6 +29,7 @@ class Controller {
 	public static $parameters = array();
 	public static $salt = 'Change this to something random!';
 	public static $mime_type;
+	protected static $view = false;
 	public static $mode;
 		
 	protected static $error = array();
@@ -87,9 +88,15 @@ class Controller {
 			if (array_key_exists('success', $_SESSION)) {
 				self::$success = $_SESSION['success'];
 			}
-			self::$init = true;
-
+			
+			//View
+			self::$view = self::getView();
+			if (self::$view instanceof View) {
+				self::$mode = self::$view->mode;
+			}
+			
 			Hook::run('init', 'post');
+			self::$init = true;
 		}
 	}
 
@@ -145,11 +152,9 @@ class Controller {
 		Backend::add('BackendNotices', array_unique(array_filter(self::$notice)));
 		self::$notice = array();
 		
-		$view = self::getView();
-		if ($view instanceof View) {
-			self::$mode = $view->mode;
+		if (self::$view instanceof View) {
 			Hook::run('action_display', 'pre');
-			$view->display($data, $controller);
+			self::$view->display($data, $controller);
 			Hook::run('action_display', 'post');
 		} else {
 			die('Unrecognized Request');
