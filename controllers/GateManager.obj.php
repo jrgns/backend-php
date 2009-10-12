@@ -30,19 +30,36 @@ class GateManager extends AreaCtl {
 		return true;
 	}
 	
+	public function action_roles() {
+		$toret = new stdClass();
+		$id = Controller::parameter('id');
+		if ($id) {
+			$toret->role = Role::retrieve(array('id' => $id));
+			if ($toret->role) {
+				$query = new CustomQuery("SELECT * FROM `assignments` WHERE `role_id` = :id");
+				$toret->assignments = $query->fetchAll(array(':id' => $id));
+			} else {
+				$toret->assignments = null;
+			}
+		} else {
+			$toret->roles = Role::retrieve();
+		}
+		return $toret;
+	}
+	
 	public function html_roles($object) {
 		Backend::add('TabLinks', $this->getTabLinks('permissions'));
 		if (Controller::$id) {
-			$Role = new RoleObj(Controller::$id);
-			$Role->load();
-			Backend::add('Object', $Role);
-			Controller::addContent(Render::renderFile('std_display.tpl.php'));
+			Backend::add('Sub Title', 'GateKeeper Roles');
+			if ($object->role) {
+				Backend::add('Sub Title', 'Role: ' . $object->role->array['name']);
+				Backend::add('Object', $object->role);
+				Controller::addContent(Render::renderFile('role_display.tpl.php'));
+			}
 		} else {
 			Backend::add('Sub Title', 'GateKeeper Roles');
-			$Roles = new RoleObj();
-			$Roles->load();
-			Backend::add('Object', $Roles);
-			Controller::addContent(Render::renderFile('std_list.tpl.php'));
+			Backend::add('Object', $object->roles);
+			Controller::addContent(Render::renderFile('role_list.tpl.php'));
 		}
 	}
 	
