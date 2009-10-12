@@ -11,9 +11,33 @@
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
 class Tag extends TableCtl {
-	public static function hook_form() {
+	public static function addTags($content_id, array $tags) {
+		$Tag = new TagObj();
+		foreach($tags as $tag) {
+			$data = array(
+				'name'   => $tag,
+				'active' => 1,
+				'weight' => 0,
+			);
+			$Tag->create($data, array('ignore' => true));
+			//If you want to keep track of the last time a tag was added to content, do this
+			//$Tag->create($data, array('on_duplicate' => '`modified` = NOW()'));
+		}
+		$query = new CustomQuery('UPDATE `contents` SET `contents`.`tags` = (SELECT GROUP_CONCAT(DISTINCT `tags`.`id` ORDER BY `tags`.`id` SEPARATOR \',\') FROM `tags` WHERE `tags`.`name` IN (' . implode(', ', array_fill(0, count($tags), '?')) . ')) WHERE `contents`.`id` = ?');
+		$tags[] = $content_id;
+		return $query->execute($tags);
+	}
+	
+	public static function getTags($content_id) {
+		$query = new CustomQuery('SELECT `tags`.* FROM `tags` LEFT JOIN `contents` ON FIND_IN_SET(`tags`.`id`, `contents`.`tags`) WHERE `contents`.`id` = :id');
+		return $query->fetchAll(array(':id' => $content_id));
+	}
+	
+	public static function hook_form($object) {
 		if (Controller::$area == 'content' && in_array(Controller::$action, array('create', 'update'))) {
+			$tags = self::getTags($object->array['id']);
 			//Don't add Content, only render it.
+			Backend::add('obj_tags', $tags);
 			echo Render::renderFile('tags.tpl.php');
 		}
 		return true;
@@ -23,15 +47,7 @@ class Tag extends TableCtl {
 		$tags = array_key_exists('tags', $_POST) ? $_POST['tags'] : false;
 		if (!empty($tags) && $object instanceof ContentObj) {
 			$tags = array_filter(array_map('trim', explode(',', $tags)));
-			$Tag = new TagObj();
-			foreach($tags as $tag) {
-				$data = array(
-					'name'   => $tag,
-					'active' => 1,
-					'weight' => 0,
-				);
-				$Tag->replace($data);
-			}
+			self::addTags($object->array['id'], $tags);
 		}
 		return true;
 	}
@@ -40,19 +56,11 @@ class Tag extends TableCtl {
 		$tags = array_key_exists('tags', $_POST) ? $_POST['tags'] : false;
 		if (!empty($tags) && $object instanceof ContentObj) {
 			$tags = array_filter(array_map('trim', explode(',', $tags)));
-			$Tag = new TagObj();
-			foreach($tags as $tag) {
-				$data = array(
-					'name'   => $tag,
-					'active' => 1,
-					'weight' => 0,
-				);
-				$Tag->replace($data);
-			}
+			self::addTags($object->array['id'], $tags);
 		}
 		return true;
 	}
-
+	
 	public static function install() {
 		$toret = true;
 		$hook = new HookObj();
