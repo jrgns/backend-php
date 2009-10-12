@@ -79,4 +79,9 @@ class Query {
 	public function setQuery($query) {
 		$this->query = $query;
 	}
+	
+	public function __toString() {
+		$toret = empty($this->query) ? 'Empty Query' : $this->query;
+		return $toret;
+	}
 }
