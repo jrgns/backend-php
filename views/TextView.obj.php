@@ -14,35 +14,29 @@
 /**
  * Default class to handle JsonView specific functions
  */
-class JsonView extends TextView {
+class TextView extends View {
 	function __construct() {
 		parent::__construct();
-		$this->mode = 'json';
+		$this->mode = 'text';
 	}
 	
 	public static function hook_output($to_print) {
-		$to_print = parent::hook_output($to_print);
-		switch (Controller::$action) {
-		case 'list':
-			$to_print = $to_print instanceof DBObject ? $to_print->list : $to_print;
-			break;
-		case 'display':
-			$to_print = $to_print instanceof DBObject && Controller::$id ? $to_print->array : $to_print;
-			break;
+		if (!headers_sent()) {
+			header('Content-Type: text/plain');
 		}
-		return json_encode($to_print);
+		return $to_print;
 	}
 
 	public static function install() {
 		$toret = true;
 		$hook = new HookObj();
 		$toret = $hook->replace(array(
-				'name'        => 'JsonView Pre Output',
+				'name'        => 'TextView Pre Output',
 				'description' => '',
-				'mode'        => 'json',
+				'mode'        => 'text',
 				'type'        => 'pre',
 				'hook'        => 'output',
-				'class'       => 'JsonView',
+				'class'       => 'TextView',
 				'method'      => 'hook_output',
 				'sequence'    => 0,
 			)

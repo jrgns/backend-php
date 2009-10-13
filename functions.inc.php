@@ -29,6 +29,18 @@ function is_post() {
 	return strtoupper(array_key_exists('REQUEST_METHOD', $_SERVER) ? $_SERVER['REQUEST_METHOD'] : 'GET') == 'POST';
 }
 
+function is_get() {
+	return strtoupper(array_key_exists('REQUEST_METHOD', $_SERVER) ? $_SERVER['REQUEST_METHOD'] : 'GET') == 'GET';
+}
+
+function is_put() {
+	return strtoupper(array_key_exists('REQUEST_METHOD', $_SERVER) ? $_SERVER['REQUEST_METHOD'] : 'GET') == 'PUT';
+}
+
+function is_delete() {
+	return strtoupper(array_key_exists('REQUEST_METHOD', $_SERVER) ? $_SERVER['REQUEST_METHOD'] : 'GET') == 'DELETE';
+}
+
 function update_links($content, $new_vars) {
 	$toret = $content;
 	if (count($new_vars)) {
@@ -147,16 +159,6 @@ function send_email($recipient, $subject, $message, array $headers = array()) {
 	return mail($recipient, $subject, $message, $headers);
 }
 
-/**
- * Checks if a component is enabled.
- *
- * At the moment it only checks if the class is available, but eventually
- * it should check against a list of activated components.
- */
-function BE_component_active($component_name) {
-	return class_exists($component_name, true);
-}
-
 function array_flatten(&$array, $key_field = null, $value_field = null) {
 	$toret = false;
 	if (is_array($array) && is_array(current($array))) {
@@ -208,3 +210,36 @@ function files_from_folder($folder, array $options = array()) {
 	return array_unique($toret);
 }
 
+/**
+ * For servers not running PHP 5.3 and later.
+ * Copied from http://www.septuro.com/2009/07/php-5-2-late-static-binding-get_called_class-and-self-new-self/
+ */
+if(!function_exists('get_called_class')) {
+    class class_tools {
+		static $i = 0;
+		static $fl = null;
+
+	    static function get_called_class() {
+	        $bt = debug_backtrace();
+
+		    if (self::$fl == $bt[2]['file'].$bt[2]['line']) {
+		        self::$i++;
+		    } else {
+		        self::$i = 0;
+		        self::$fl = $bt[2]['file'].$bt[2]['line'];
+		    }
+
+		    $lines = file($bt[2]['file']);
+
+		    preg_match_all('/([a-zA-Z0-9\_]+)::'.$bt[2]['function'].'/',
+		        $lines[$bt[2]['line']-1],
+		        $matches);
+
+            return $matches[1][self::$i];
+        }
+    }
+
+    function get_called_class() {
+        return class_tools::get_called_class();
+    }
+}

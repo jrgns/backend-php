@@ -26,12 +26,22 @@ class AreaCtl {
 			Controller::addError(self::getError($_REQUEST['msg']));
 		}
 		
-		$method = 'action_' . Controller::$action;
+		$method = 'action_' . Controller::parameter('action');
 		if (method_exists($this, $method)) {
 			if ($this->checkPermissions()) {
+				$comp_script = '/scripts/' . Controller::parameter('area') . '.component.js';
+				$comp_style  = '/styles/' . Controller::parameter('area') . '.component.css';
+				if (Controller::$mode == 'html') {
+					if (file_exists(SITE_FOLDER . $comp_script)) {
+						Controller::addScript(SITE_LINK . $comp_script);
+					}
+					if (file_exists(SITE_FOLDER . $comp_style)) {
+						Controller::addStyle(SITE_LINK . $comp_style);
+					}
+				}
 				$toret = $this->$method();
 			} else {
-				Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to ' . Controller::$action . ' ' . get_class($this)));
+				Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to ' . Controller::parameter('action') . ' ' . get_class($this)));
 				$toret = false;
 			}
 		}
@@ -45,7 +55,7 @@ class AreaCtl {
 	 */
 	public static function getError($num, $class_name = false) {
 		$msg = false;
-		$class_name = $class_name ? $class_name : class_name(Controller::$area);
+		$class_name = $class_name ? $class_name : class_name(Controller::parameter('area'));
 		if (class_exists($class_name, true)) {
 			$vars = get_class_vars($class_name);
 			var_dump($vars);
@@ -63,10 +73,10 @@ class AreaCtl {
 		$links = array();
 		//TODO Check permissions!
 		if ($this->checkPermissions(array('action' => 'list'))) {
-			$links[] = array('link' => '?q=' . Controller::$area . '/list', 'text' => 'List');
+			$links[] = array('link' => '?q=' . Controller::parameter('area') . '/list', 'text' => 'List');
 		}
 		if ($this->checkPermissions(array('action' => 'create'))) {
-			$links[] = array('link' => '?q=' . Controller::$area . '/create', 'text' => 'Create');
+			$links[] = array('link' => '?q=' . Controller::parameter('area') . '/create', 'text' => 'Create');
 		}
 		return $links;
 	}
@@ -78,9 +88,15 @@ class AreaCtl {
 	 */
 	public function checkPermissions(array $options = array()) {
 		$toret = true;
-		$action = !empty($options['action']) ? $options['action'] : (!empty(Controller::$action) ? Controller::check_reverse_map('action', Controller::$action) : '*');
-		$subject = !empty($options['subject']) ? $options['subject'] : (!empty(Controller::$area) ? Controller::check_reverse_map('area', Controller::$area) : '*');
-		$subject_id = !empty($options['subject_id']) ? $options['subject_id'] : (!empty(Controller::$id) ? Controller::check_reverse_map('id', Controller::$id) : 0);
+		$action = !empty($options['action']) ? $options['action'] : (
+			!empty(Controller::$parameters['action']) ? Controller::check_reverse_map('action', Controller::$parameters['action']) : '*'
+		);
+		$subject = !empty($options['subject']) ? $options['subject'] : (
+			!empty(Controller::$parameters['area']) ? Controller::check_reverse_map('area', Controller::$parameters['area']) : '*'
+		);
+		$subject_id = !empty($options['subject_id']) ? $options['subject_id'] : (
+			!empty(Controller::$parameters['id']) ? Controller::check_reverse_map('id', Controller::$parameters['id']) : 0
+		);
 
 		$roles = GateKeeper::permittedRoles($action, $subject, $subject_id);
 		if (!empty($_SESSION['user'])) {

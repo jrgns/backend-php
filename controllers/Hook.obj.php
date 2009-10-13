@@ -13,13 +13,13 @@
 class Hook extends TableCtl {
 	public static function get($hook, $type = 'pre') {
 		$params = array(':type' => $type, ':hook' => $hook);
-		$query = 'SELECT * FROM `hooks` WHERE `hook` = :hook AND `type` = :type AND `active` = 1';
+		$query = 'SELECT * FROM `hooks` LEFT JOIN `components` ON `hooks`.`class` = `components`.`name` WHERE `hook` = :hook AND `type` = :type AND `hooks`.`active` = 1 AND `components`.`active` = 1';
 		if (Controller::$mode) {
 			$query .= ' AND `mode` IN (:mode, \'*\')';
 			$params[':mode'] = Controller::$mode;
 		}
 		$query .= ' ORDER BY `sequence`';
-		$query = new Query($query);
+		$query = new CustomQuery($query);
 		$toret = $query->fetchAll($params);
 		return $toret;
 	}
@@ -32,7 +32,7 @@ class Hook extends TableCtl {
 		}
 		if ($hooks = self::get($hook_name, $type)) {
 			foreach($hooks as $hook) {
-				if (class_exists($hook['class'], true) && method_exists($hook['class'], $hook['method'])) {
+				if (Component::isActive($hook['class']) && method_exists($hook['class'], $hook['method'])) {
 					//var_dump('Running ' . $hook['class'] . '::' . $hook['method'] . ' for hook ' . $hook_name . '-' . $type);
 					$toret = call_user_func_array(array($hook['class'], $hook['method']), $parameters);
 					if (count($parameters) && !is_null($return_index)) {

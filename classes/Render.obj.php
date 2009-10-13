@@ -163,6 +163,7 @@ class Render {
 		$filters += array(
 			array('class' => 'Render', 'function' => 'replace'),
 			array('class' => 'Render', 'function' => 'addLinks'),
+			array('class' => 'Render', 'function' => 'rewriteLinks'),
 		);
 
 		//Added Filters
@@ -219,6 +220,54 @@ class Render {
 		}
 		$toret = update_links($content, $new_vars);
 		//$toret = $content;
+		return $toret;
+	}
+	
+	protected static function rewriteLinks($content) {
+		$toret = $content;
+		if (Value::get('clean_urls', false)) {
+			preg_match_all('/(<a\s+.*?href=[\'\"]|<form\s+.*?action=[\'"]|<link\s+.*?href=[\'"])(.*?[\?&]q=.*?&?.*?)[\'"]/', $toret, $matches);
+			if (count($matches) == 3) {
+				$matched = $matches[0];
+				$links = $matches[1];
+				$urls = $matches[2];
+				$replacements = array();
+				foreach ($urls as $key => $url) {
+					//workaround for parse_url acting funky with a url = ?q=something/another/
+					if (substr($url, 0, 3) == '?q=') {
+						$query = array('query' => substr($url, 1));
+					} else {
+						$query = parse_url($url);
+					}
+					if (array_key_exists('scheme', $query)) {
+						$query['scheme'] = $query['scheme'] . '://';
+					}
+					if (array_key_exists('query', $query)) {
+						parse_str($query['query'], $vars);
+					} else {
+						$vars = array();
+					}
+					if (array_key_exists('q', $vars)) {
+						if (!array_key_exists('path', $query)) {
+							$query['path'] = dirname($_SERVER['SCRIPT_NAME']);
+						}
+						if (substr($query['path'], -1) != '/') {
+							$query['path'] .= '/';
+						}
+						$query['path'] .= $vars['q'];
+						unset($vars['q']);
+					}
+					if (count($vars)) {
+						$query['query'] = '?' . http_build_query($vars);
+					} else {
+						$query['query'] = '';
+					}
+					$to_rep = $links[$key] . implode('', $query) . '"';
+					$replacements[] = $to_rep;
+				}
+				$toret = str_replace($matched, $replacements, $toret);
+			}
+		}
 		return $toret;
 	}
 

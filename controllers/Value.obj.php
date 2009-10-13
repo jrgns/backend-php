@@ -22,10 +22,12 @@ class Value extends TableCtl {
 	public static function get($name, $default = null) {
 		$toret = new ValueObj();
 		$toret = $toret->retrieve($name);
-		return !empty($toret['value']) ? $toret['value'] : $default;
+		$toret = !empty($toret['value']) ? unserialize(base64_decode($toret['value'])) : $default;
+		return $toret;
 	}
 	
 	public static function set($name, $new_value) {
+		$new_value = base64_encode(serialize($new_value));
 		$data = self::get($name);
 		if (!is_null($data)) {
 			$value = new ValueObj($data['id']);

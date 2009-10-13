@@ -29,6 +29,7 @@ class Controller {
 	public static $parameters = array();
 	public static $salt = 'Change this to something random!';
 	public static $mime_type;
+	protected static $view = false;
 	public static $mode;
 		
 	protected static $error = array();
@@ -64,7 +65,9 @@ class Controller {
 			self::$debug = false;
 			switch (true) {
 				case array_key_exists('debug', $_REQUEST):
-					self::$debug = true;
+					//Default to lowest level
+					self::$debug = is_numeric($_REQUEST['debug']) ? (int)$_REQUEST['debug'] : 1;
+					break;
 			}
 
 			Backend::add('debug', self::$debug);
@@ -85,9 +88,15 @@ class Controller {
 			if (array_key_exists('success', $_SESSION)) {
 				self::$success = $_SESSION['success'];
 			}
-			self::$init = true;
-
+			
+			//View
+			self::$view = self::getView();
+			if (self::$view instanceof View) {
+				self::$mode = self::$view->mode;
+			}
+			
 			Hook::run('init', 'post');
+			self::$init = true;
 		}
 	}
 
@@ -123,7 +132,7 @@ class Controller {
 		
 		//Control
 		$control_name = class_name(self::$area);
-		if (!class_exists($control_name, true)) {
+		if (!Component::isActive($control_name, true)) {
 			$control_name = 'TableCtl';
 		}
 	
@@ -131,7 +140,7 @@ class Controller {
 
 		if ($controller instanceof AreaCtl) {
 			Hook::run('action', 'pre');
-			$data = $controller->action();
+			$result = $controller->action();
 			Hook::run('action', 'post');
 		} else {
 			Controller::whoops();
@@ -143,16 +152,14 @@ class Controller {
 		Backend::add('BackendNotices', array_unique(array_filter(self::$notice)));
 		self::$notice = array();
 		
-		$view = self::getView();
-		if ($view instanceof View) {
-			self::$mode = $view->mode;
-			Hook::run('action_display', 'pre');
-			$view->display($data, $controller);
-			Hook::run('action_display', 'post');
+		if (self::$view instanceof View) {
+			Hook::run('action_display', 'pre', array($result));
+			self::$view->display($result, $controller);
+			Hook::run('action_display', 'post', array($result));
 		} else {
 			die('Unrecognized Request');
 		}
-		return $data;
+		return $result;
 	}
 	
 	public static function finish() {
@@ -183,19 +190,45 @@ class Controller {
 	 *
 	 * In an ideal world, we will just use the first mime type in the Http-Acccept header. But IE decided
 	 * to put a lot of crud in it's Accept header, so we need some hacks.
+	 *
+	 * Mode takes precedence over the extension, which takes precedence over the accept headers/
+	 *
+	 * @todo the extension screws up requests such as ?q=content/display/2.txt, as the id is now 2.txt, and not 2 as expected.
 	 * @todo Make the process on deciding a view better / extendable! Or, setup preferences that ignore the
 	 * Accept header, or just rely on what the client asks for (mode=[json|xml|xhtml|jpg])
 	 */
 	private static function getView() {
-		$view = false;
-		$mime_ranges = Parser::accept_header();
+		$view_name = false;
 		if (array_key_exists('mode', $_REQUEST)) {
 			$view_name = ucwords($_REQUEST['mode']) . 'View';
-			if (class_exists($view_name, true)) {
-				$view = new $view_name();
+		} else {
+			//Check for an extension
+			$extension = explode('.', str_replace(dirname($_SERVER['SCRIPT_NAME']), '', $_SERVER['REQUEST_URI']));
+			if (count($extension) > 1) {
+				$extension = end($extension);
+				switch (true) {
+				case $extension == 'css':
+					$view_name = 'CssView';
+					break;
+				case $extension == 'json':
+					$view_name = 'JsonView';
+					break;
+				case $extension == 'txt':
+					$view_name = 'TextView';
+					break;
+				//Extend the image array!
+				case in_array($extension, array('png', 'jpg', 'jpeg', 'gif', 'bmp')):
+					$view_name = 'ImageView';
+					break;
+				case in_array($extension, array('html', 'htm')):
+					$view_name = 'HtmlView';
+					break;
+				}
 			}
 		}
-		if (!$view && $mime_ranges) {
+
+		$mime_ranges = Parser::accept_header();
+		if (!$view_name && $mime_ranges) {
 			$types = array();
 			$main_types = array();
 			$view_name = false;
@@ -204,34 +237,34 @@ class Controller {
 				$main_types[] = $mime_type['main_type'];
 				if (!$view_name) {
 					$name = class_name(str_replace('+', ' ', $mime_type['main_type']) . ' ' . str_replace('+', ' ', $mime_type['sub_type'])) . 'View';
-					if (class_exists($name, true)) {
+					if (Component::isActive($name)) {
 						$view_name = $name;
 					} else {
 						$name = class_name(str_replace('+', ' ', $mime_type['main_type'])) . 'View';
-						if (class_exists($name, true)) {
+						if (Component::isActive($name)) {
 							$view_name = $name;
 						} else {
 							$name = class_name(str_replace('+', ' ', $mime_type['sub_type'])) . 'View';
-							if (class_exists($name, true)) {
+							if (Component::isActive($name)) {
 								$view_name = $name;
 							}
 						}
 					}
 				}
 			}
-			if (!class_exists($view_name, true)) {
-				$view_name = 'View';
-			} else {
-				if (in_array('image', $main_types) && in_array('application', $main_types)) {
-				//Probably IE
-					$view_name = 'HtmlView';
-				} else if (in_array('application/xml', $types) && in_array('application/xhtml+xml', $types) && in_array('text/html', $types)) {
-				//Maybe another confused browser that asks for XML and HTML
-					$view_name = 'HtmlView';
-				}
+			if (in_array('image', $main_types) && in_array('application', $main_types)) {
+			//Probably IE
+				$view_name = 'HtmlView';
+			} else if (in_array('application/xml', $types) && in_array('application/xhtml+xml', $types) && in_array('text/html', $types)) {
+			//Maybe another confused browser that asks for XML and HTML
+				$view_name = 'HtmlView';
 			}
-			$view = new $view_name();
 		}
+		if (!Component::isActive($view_name)) {
+			$view_name = 'View';
+		}
+		$view = new $view_name();
+
 		return $view;
 	}
 
@@ -258,7 +291,7 @@ class Controller {
 
 		$terms = call_user_func_array(array('Controller', 'checkTuple'), $terms);
 		
-		if (class_exists(class_name($terms['area']), true) && method_exists(class_name($terms['area']), 'checkTuple')) {
+		if (Component::isActive(class_name($terms['area'])) && method_exists(class_name($terms['area']), 'checkTuple')) {
 			$terms = call_user_func(array(class_name($terms['area']), 'checkTuple'), $terms);
 		}
 		return $terms;
@@ -349,6 +382,19 @@ class Controller {
 					$location = current($location);
 				}
 			}
+			//This should fix most redirects, but it may happen that location == '?debug=true&q=something/or/another' or something similiar
+			if (Value::get('clean_urls', false) && substr($location, 0, 3) == '?q=') {
+				$location = SITE_LINK . substr($location, 3);
+			}
+			//There's some other variables that should also be transported, but I need this NOW
+			if (array_key_exists('debug', $_REQUEST)) {
+				if (strpos($location, '?') !== false) {
+					$location .= '&debug=' . $_REQUEST['debug'];
+				} else {
+					$location .= '?debug=' . $_REQUEST['debug'];
+				}
+			}
+			
 			if (self::$debug) {
 				self::addSuccess('The script should now redirect to <a href="' . $location . '">here</a>');
 			} else {

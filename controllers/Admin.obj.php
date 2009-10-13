@@ -52,16 +52,16 @@ class Admin extends AreaCtl {
 	function action_update() {
 	}
 	
+	function action_check() {
+	}
+	
 	function action_components() {
 		$toret = array();
 		
-		$component = new ComponentObj();
-		$component->load();
-		$list = $component->list;
+		$toret = Component::retrieve(array('return' => 'list'));
 		if (Controller::$debug) {
-			var_dump('Component List:', $list);
+			var_dump('Component List:', $toret);
 		}
-		$toret = $list;
 		return $toret;
 	}
 	

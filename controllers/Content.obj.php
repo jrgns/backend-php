@@ -44,6 +44,14 @@ class Content extends TableCtl {
 		}
 		return $toret;
 	}
+	
+	function html_update($content) {
+		$toret = parent::html_update($content);
+		if ($toret) {
+			Backend::add('Sub Title', 'Update: ' . $content->array['title']);
+		}
+		return $toret;
+	}
 
 	function action_display() {
 		$toret = false;
@@ -67,6 +75,9 @@ class Content extends TableCtl {
 		} else {
 			Controller::whoops(array('title' => 'Unknown Content', 'message' => 'The page you requested could not be found.'));
 			$toret = false;
+		}
+		if ($toret && Controller::$debug) {
+			var_dump('Content ID: ' . $toret->array['id']);
 		}
 		return $toret;
 	}
