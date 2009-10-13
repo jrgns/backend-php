@@ -140,7 +140,7 @@ class Controller {
 
 		if ($controller instanceof AreaCtl) {
 			Hook::run('action', 'pre');
-			$data = $controller->action();
+			$result = $controller->action();
 			Hook::run('action', 'post');
 		} else {
 			Controller::whoops();
@@ -153,13 +153,13 @@ class Controller {
 		self::$notice = array();
 		
 		if (self::$view instanceof View) {
-			Hook::run('action_display', 'pre');
-			self::$view->display($data, $controller);
-			Hook::run('action_display', 'post');
+			Hook::run('action_display', 'pre', array($result));
+			self::$view->display($result, $controller);
+			Hook::run('action_display', 'post', array($result));
 		} else {
 			die('Unrecognized Request');
 		}
-		return $data;
+		return $result;
 	}
 	
 	public static function finish() {
@@ -386,6 +386,15 @@ class Controller {
 			if (Value::get('clean_urls', false) && substr($location, 0, 3) == '?q=') {
 				$location = SITE_LINK . substr($location, 3);
 			}
+			//There's some other variables that should also be transported, but I need this NOW
+			if (array_key_exists('debug', $_REQUEST)) {
+				if (strpos($location, '?') !== false) {
+					$location .= '&debug=' . $_REQUEST['debug'];
+				} else {
+					$location .= '?debug=' . $_REQUEST['debug'];
+				}
+			}
+			
 			if (self::$debug) {
 				self::addSuccess('The script should now redirect to <a href="' . $location . '">here</a>');
 			} else {
