@@ -1,7 +1,7 @@
 <?php if (!empty($Object)): ?>
 	<form method="post" action="?q=<?php echo array_key_exists('q', $_REQUEST) ? $_REQUEST['q'] : '' ?>" enctype="multipart/form-data">
 	<?php 
-		Hook::run('form', 'pre');
+		Hook::run('form', 'pre', array($Object));
 		$fields = $Object->getMeta('fields');
 		$odd = false;
 		$row_width = 15;
