@@ -38,7 +38,17 @@ class Tag extends TableCtl {
 			$tags = self::getTags($object->array['id']);
 			//Don't add Content, only render it.
 			Backend::add('obj_tags', $tags);
-			echo Render::renderFile('tags.tpl.php');
+			echo Render::renderFile('tags_form.tpl.php');
+		}
+		return true;
+	}
+
+	public static function hook_post_display($object) {
+		if (Controller::$area == 'content' && in_array(Controller::$action, array('display'))) {
+			$tags = self::getTags($object->array['id']);
+			//Don't add Content, only render it.
+			Backend::add('obj_tags', $tags);
+			Controller::addContent(Render::renderFile('tags.tpl.php'));
 		}
 		return true;
 	}
@@ -72,6 +82,17 @@ class Tag extends TableCtl {
 				'hook'        => 'form',
 				'class'       => 'Tag',
 				'method'      => 'hook_form',
+				'sequence'    => 0,
+			)
+		) && $toret;
+		$toret = $hook->replace(array(
+				'name'        => 'Tag Post Action Display',
+				'description' => '',
+				'mode'        => '*',
+				'type'        => 'post',
+				'hook'        => 'display',
+				'class'       => 'Tag',
+				'method'      => 'hook_post_display',
 				'sequence'    => 0,
 			)
 		) && $toret;
