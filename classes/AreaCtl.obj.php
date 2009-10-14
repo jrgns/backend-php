@@ -25,8 +25,10 @@ class AreaCtl {
 		if (array_key_exists('msg', $_REQUEST)) {
 			Controller::addError(self::getError($_REQUEST['msg']));
 		}
-		
 		$method = 'action_' . Controller::parameter('action');
+		if (Controller::$debug) {
+			var_dump('Checking Method ' . $method);
+		}
 		if (method_exists($this, $method)) {
 			if ($this->checkPermissions()) {
 				$comp_script = '/scripts/' . Controller::parameter('area') . '.component.js';
