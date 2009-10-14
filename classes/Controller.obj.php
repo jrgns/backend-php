@@ -134,7 +134,7 @@ class Controller {
 		$control_name = class_name(self::$area);
 		if (!Component::isActive($control_name, true)) {
 			if (Controller::$debug) {
-				Backend::addError('Component is Inactive');
+				Controller::addError('Component is Inactive');
 			}
 			$control_name = 'TableCtl';
 		}

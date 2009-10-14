@@ -46,6 +46,8 @@ class AreaCtl {
 				Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to ' . Controller::parameter('action') . ' ' . get_class($this)));
 				$toret = false;
 			}
+		} else if (Controller::$debug) {
+			Controller::addError('Method ' . get_class($this) . '::' . $method . ' does not exist');
 		}
 		return $toret;
 	}
