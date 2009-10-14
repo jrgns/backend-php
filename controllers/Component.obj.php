@@ -70,10 +70,14 @@ class Component extends TableCtl {
 	
 	public static function isActive($name) {
 		$toret = false;
-		$active = self::getActive();
-		if ($active) {
-			$active = array_flatten($active, 'id', 'name');
-			$toret = in_array($name, $active);
+		if (Value::get('admin_installed', false)) {
+			$active = self::getActive();
+			if ($active) {
+				$active = array_flatten($active, 'id', 'name');
+				$toret = in_array($name, $active);
+			}
+		} else if ($name == 'Admin') {
+			$toret = true;
 		}
 		return $toret;
 	}
