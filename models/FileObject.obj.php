@@ -57,10 +57,47 @@ class FileObject extends DBObject {
 				//Overwrite content with file contents
 				if ($data['from_db']) {
 					$data['content'] = file_get_contents($data['content']['tmp_name']);
+				} else {
+					$folder = self::checkUploadFolder($this->meta['table']);
+					if ($folder) {
+						//We add the timestamp to ensure that the name is unique
+						$destination = $folder . time() . '.' . basename($data['content']['name']);
+						if (move_uploaded_file($data['content']['tmp_name'], $destination)) {
+							$data['content'] = $destination;
+						} else {
+							Controller::addError('Could not upload file');
+							$data = false;
+						}
+					} else {
+						$data = false;
+					}
 				}
 			}
 		}
 		return $data;
+	}
+	
+	private static function checkUploadFolder($sub_folder = false) {
+		$folder = Backend::getConfig('backend.application.file_store', SITE_FOLDER . '/files/');
+		if ($sub_folder) {
+			if (substr($folder, -1) != '/') {
+				$folder .= '/';
+			}
+			$folder .= $sub_folder;
+		}
+		if (substr($folder, -1) != '/') {
+			$folder .= '/';
+		}
+
+		if (!file_exists($folder)) {
+			if (!@mkdir($folder, 0775)) {
+				Controller::addError('Cannot create File Store');
+				$folder = false;
+			}
+		} else if (!is_writeable($folder)) {
+			$folder = false;
+		}
+		return $folder;
 	}
 
 	function validate($data, $action, $options = array()) {

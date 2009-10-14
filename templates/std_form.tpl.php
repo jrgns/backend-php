@@ -39,7 +39,7 @@
 					$field_str .= '</select>';
 					break;
 				case $field == 'blob':
-					$field_str = '<input id="' . $input_id . '" name="' . $name . '" type="file" class="text" value="' . $value . '">';
+					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="file" class="text" value="' . $value . '">';
 					break;
 				default:
 					$field_str = '';

@@ -55,6 +55,7 @@ class TableCtl extends AreaCtl {
 		if (class_exists($obj_name, true)) {
 			$object = new $obj_name();
 			$data = $object->fromPost();
+			//We need to check if the post data is valid in some way?
 			if (is_post()) {
 				$data = Hook::run('create', 'pre', array($data, $object), array('toret' => $data));
 				if ($object->create($data)) {
@@ -98,6 +99,7 @@ class TableCtl extends AreaCtl {
 		$obj_name = (class_name(Controller::parameter('area')) . 'Obj');
 		if (class_exists($obj_name, true) && Controller::parameter('id') !== 'home' && Controller::parameter('id') > 0) {
 			$object = new $obj_name(Controller::parameter('id'));
+			//We need to check if the post data is valid in some way?
 			if (is_post()) {
 				$data = $object->fromPost();
 				$data = Hook::run('update', 'pre', array($data, $object), array('toret' => $data));
