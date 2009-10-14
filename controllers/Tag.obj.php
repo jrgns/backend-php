@@ -40,7 +40,7 @@ class Tag extends TableCtl {
 			Backend::add('obj_tags', $tags);
 			echo Render::renderFile('tags_form.tpl.php');
 		}
-		return true;
+		return $object;
 	}
 
 	public static function hook_post_display($object) {
@@ -50,7 +50,7 @@ class Tag extends TableCtl {
 			Backend::add('obj_tags', $tags);
 			Controller::addContent(Render::renderFile('tags.tpl.php'));
 		}
-		return true;
+		return $object;
 	}
 
 	public static function hook_post_create($data, $object) {
