@@ -220,6 +220,7 @@ if(!function_exists('get_called_class')) {
 		static $fl = null;
 
 	    static function get_called_class() {
+	    	$toret = '(Unknown)';
 			$bt = debug_backtrace();
 			
 			if (array_key_exists('file', $bt[2]) && array_key_exists('line', $bt[2])) {
@@ -235,9 +236,11 @@ if(!function_exists('get_called_class')) {
 				preg_match_all('/([a-zA-Z0-9\_]+)::'.$bt[2]['function'].'/',
 					$lines[$bt[2]['line']-1],
 					$matches);
-				return $matches[1][self::$i];
+				if (array_key_exists(1, $matches) && array_key_exists(self::$i, $matches[1])) {
+					$toret = $matches[1][self::$i];
+				}
 			}
-			return '(Unknown)';
+			return $toret;
         }
     }
 
