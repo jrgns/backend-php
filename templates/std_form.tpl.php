@@ -51,7 +51,7 @@
 				<?php echo $field_str ?>
 			</div>
 		<?php endforeach;
-		Hook::run('form', 'post');
+		Hook::run('form', 'post', array($Object));
 	?>
 		<input type="submit" value="<?php echo ucwords(Controller::$action) ?> <?php echo $Object->getMeta('name') ?>" class=""/>
 	</form>

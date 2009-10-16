@@ -11,60 +11,87 @@
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
 class Comment extends TableCtl {
-	function html_display($content) {
-		$toret = false;
-		if ($content instanceof DBObject) {
-			Backend::add('Sub Title', $content->array['title']);
-			if ($content->array['from_file']) {
-				$filename = 'content/static/' . $content->array['name'] . '.html';
-				$template = 'content/' . $content->array['name'] . '.tpl.php';
-				if (Render::checkTemplateFile($template)) {
-					Controller::addContent(Render::renderFile($template));
-					$toret = true;
-				} else if (file_exists($filename)) {
-					die('Content::Finish this');
-					Controller::addContent(Render::renderFile($template));
-					$toret = true;
-				}
-			} else {
-				Controller::addContent($content->array['body']);
-				$toret = true;
-			}
+	public static function addComments($content_id, array $comments) {
+		$Comment = new CommentObj();
+		foreach($comments as $comment) {
+			$data = array(
+				'title'   => $comment['title'],
+				'content' => $comment['content'],
+				'active' => 1,
+				'weight' => 0,
+			);
+			$Tag->create($data, array('ignore' => true));
+			//If you want to keep track of the last time a tag was added to content, do this
+			//$Tag->create($data, array('on_duplicate' => '`modified` = NOW()'));
 		}
-		if (!$toret) {
-			if (Controller::$debug) {
-				$filename = 'content/' . Controller::$id . '.tpl.php';
-				if (Render::checkTemplateFile($filename)) {
-					Controller::addNotice('File available for content');
-				}
-			}
+		$query = new CustomQuery('UPDATE `contents` SET `contents`.`tags` = (SELECT GROUP_CONCAT(DISTINCT `tags`.`id` ORDER BY `tags`.`id` SEPARATOR \',\') FROM `tags` WHERE `tags`.`name` IN (' . implode(', ', array_fill(0, count($tags), '?')) . ')) WHERE `contents`.`id` = ?');
+		$tags[] = $content_id;
+		return $query->execute($tags);
+	}
+	
+	public static function getComments($content_id) {
+		$query = new CustomQuery('SELECT `comments`.* FROM `comments` LEFT JOIN `contents` ON FIND_IN_SET(`comments`.`id`, `contents`.`comments`) WHERE `contents`.`id` = :id');
+		return $query->fetchAll(array(':id' => $content_id));
+	}
+	
+	public static function hook_post_display($object) {
+		if (Controller::parameter('area') == 'content' && in_array(Controller::parameter('action'), array('display'))) {
+			$comments = self::getComments($object->array['id']);
+			//Don't add Content, only render it.
+			Backend::add('obj_comments', $comments);
+			Controller::addContent(Render::renderFile('comments.tpl.php'));
 		}
+		return $object;
 	}
 
-	function action_display() {
-		$toret = false;
-		$id = Controller::$id ? Controller::$id : 'home';
-		if (is_numeric($id)) {
-			$toret = new ContentObj(Controller::$id);
-			$toret->load(array('mode' => 'array'));
-		} else {
-			$conds = array('`name` = :name');
-			$params = array(':name' => $id);
-
-			$toret = new ContentObj();
-			list($query, $params) = $toret->getSelectSQL(array('parameters' => $params, 'conditions' => $conds));
-			$toret->load(array('mode' => 'array', 'query' => $query, 'parameters' => $params));
-		}
-
-		if ($toret && !empty($toret->array)) {
-			if (!$this->checkPermissions(array('subject_id' => $toret->array['id'], 'subject' => 'content'))) {
-				Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to display ' . $toret->array['title']));
-				$toret = false;
-			}
-		} else {
-			Controller::whoops(array('title' => 'Unknown Content', 'message' => 'The page you requested could not be found.'));
-			$toret = false;
-		}
+	
+	public static function install() {
+		$toret = true;
+		$hook = new HookObj();
+		$toret = $hook->replace(array(
+				'name'        => 'Comment Post Form',
+				'description' => '',
+				'mode'        => '*',
+				'type'        => 'post',
+				'hook'        => 'form',
+				'class'       => 'Comment',
+				'method'      => 'hook_post_form',
+				'sequence'    => 0,
+			)
+		) && $toret;
+		$toret = $hook->replace(array(
+				'name'        => 'Comment Post Display',
+				'description' => '',
+				'mode'        => '*',
+				'type'        => 'post',
+				'hook'        => 'display',
+				'class'       => 'Comment',
+				'method'      => 'hook_post_display',
+				'sequence'    => 0,
+			)
+		) && $toret;
+		$toret = $hook->replace(array(
+				'name'        => 'Comment Post Update',
+				'description' => '',
+				'mode'        => '*',
+				'type'        => 'post',
+				'hook'        => 'update',
+				'class'       => 'Comment',
+				'method'      => 'hook_post_update',
+				'sequence'    => 0,
+			)
+		) && $toret;
+		$toret = $hook->replace(array(
+				'name'        => 'Comment Post Create',
+				'description' => '',
+				'mode'        => '*',
+				'type'        => 'post',
+				'hook'        => 'create',
+				'class'       => 'Comment',
+				'method'      => 'hook_post_create',
+				'sequence'    => 0,
+			)
+		) && $toret;
 		return $toret;
 	}
 }

@@ -34,7 +34,7 @@ class Tag extends TableCtl {
 	}
 	
 	public static function hook_form($object) {
-		if (Controller::$area == 'content' && in_array(Controller::$action, array('create', 'update'))) {
+		if (Controller::parameter('area') == 'content' && in_array(Controller::parameter('action'), array('create', 'update'))) {
 			$tags = self::getTags($object->array['id']);
 			//Don't add Content, only render it.
 			Backend::add('obj_tags', $tags);
@@ -44,7 +44,7 @@ class Tag extends TableCtl {
 	}
 
 	public static function hook_post_display($object) {
-		if (Controller::$area == 'content' && in_array(Controller::$action, array('display'))) {
+		if (Controller::parameter('area') == 'content' && in_array(Controller::parameter('action'), array('display'))) {
 			$tags = self::getTags($object->array['id']);
 			//Don't add Content, only render it.
 			Backend::add('obj_tags', $tags);
@@ -86,7 +86,7 @@ class Tag extends TableCtl {
 			)
 		) && $toret;
 		$toret = $hook->replace(array(
-				'name'        => 'Tag Post Action Display',
+				'name'        => 'Tag Post Display',
 				'description' => '',
 				'mode'        => '*',
 				'type'        => 'post',
