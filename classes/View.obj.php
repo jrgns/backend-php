@@ -62,6 +62,14 @@ class View {
 	 * Actually output the information
 	 */
 	function output($to_print = null) {
+		if (!headers_sent()) {
+			if ($content_type = $this->mime_type) {
+				if ($this->charset) {
+					$content_type .= '; charset=' . $this->charset;
+				}
+				header('Content-Type: ' . $content_type);
+			}
+		}
 		$to_print = Hook::run('output', 'pre', array($to_print), array('toret' => $to_print));
 
 		//We're assuming that there's nothing to handle output, so output the default view

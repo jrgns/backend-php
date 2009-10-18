@@ -1,6 +1,5 @@
-		<meta content="text/html; charset=utf-8">
 		<?php if ($content_type = Controller::$view->mime_type): ?>
-			<?php if (!empty(Controller::$view->charset)) { $content_type .= '; charset=' . Controller::$view->charset . ';'; } ?>
+			<?php if (!empty(Controller::$view->charset)) { $content_type .= ';charset=' . Controller::$view->charset; } ?>
 			 <meta http-equiv="Content-Type" content="<?php echo $content_type ?>" />
 		<?php endif; ?>
 		<?php if ($author = Backend::getConfig('application.author')): ?>
