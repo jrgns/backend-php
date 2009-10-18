@@ -264,6 +264,8 @@ class Controller {
 			} else if (in_array('application/xml', $types) && in_array('application/xhtml+xml', $types) && in_array('text/html', $types)) {
 			//Maybe another confused browser that asks for XML and HTML
 				$view_name = 'HtmlView';
+			} else if (count($mime_ranges) == 1 && $mime_ranges[0]['main_type'] == '*' && $mime_ranges[0]['sub_type'] == '*') {
+				$view_name = Backend::getConfig('backend.default.view', 'HtmlView');
 			}
 		}
 		if (!Component::isActive($view_name)) {
