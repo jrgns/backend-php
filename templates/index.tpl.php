@@ -22,7 +22,7 @@
 					{tpl:backend_success.tpl.php}
 					{tpl:backend_notices.tpl.php}
 					<?php if (!empty($Teaser)): ?><p class="bottom">#Teaser#</p><?php endif; ?>
-					<hr/>
+					<hr>
 				</div>
 
 				<div id="maincol" class="span-15 prepend-1 colborder">
