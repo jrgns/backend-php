@@ -9,4 +9,7 @@
 			<meta name="description" content="<?php echo $description ?>">
 		<?php endif; ?>
 		<meta name="generator" content="backend-php.net">
+		<?php if (!empty($keywords)): $keywords = is_array($keywords) ? implode(', ', $keywords) : $keywords; ?>
+			<meta name="keywords" content="<?php echo $keywords ?>">
+		<?php endif; ?>
 		
