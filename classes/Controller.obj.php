@@ -27,10 +27,9 @@ class Controller {
 	public static $count;
 	//new
 	public static $parameters = array();
+
 	public static $salt = 'Change this to something random!';
-	public static $mime_type;
-	protected static $view = false;
-	public static $mode;
+	public static $view = false;
 		
 	protected static $error = array();
 	protected static $notice = array();
@@ -91,9 +90,6 @@ class Controller {
 			
 			//View
 			self::$view = self::getView();
-			if (self::$view instanceof View) {
-				self::$mode = self::$view->mode;
-			}
 			
 			Hook::run('init', 'post');
 			self::$init = true;
@@ -177,7 +173,7 @@ class Controller {
 		if (empty($_SESSION['previous_url']) || !is_array($_SESSION['previous_url'])) {
 			$_SESSION['previous_url'] = array();
 		}
-		$_SESSION['previous_url'][self::$mode] = $_SERVER['REQUEST_URI'];
+		$_SESSION['previous_url'][self::$view->mode] = $_SERVER['REQUEST_URI'];
 		$_SESSION['cookie_is_working'] = true;
 
 		Hook::run('finish', 'post');

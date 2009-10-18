@@ -15,7 +15,9 @@
  * Default class to handle View specific functions
  */
 class View {
-	public $mode = false;
+	public $mode      = false;
+	public $mime_type = false;
+	public $charset   = false;
 	
 	function __construct() {
 		$this->mode = Backend::getConfig('application.default.type', 'view');

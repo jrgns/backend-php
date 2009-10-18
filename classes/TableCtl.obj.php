@@ -16,6 +16,26 @@
  */
 class TableCtl extends AreaCtl {
 	/**
+	 * Return Tab Links for this area
+	 *
+	 * Override this function if you want to customize the Tab Links for an area.
+	 */
+	protected function getTabLinks($action) {
+		$links = array();
+		//TODO Check permissions!
+		if ($this->checkPermissions(array('action' => 'list'))) {
+			$links[] = array('link' => '?q=' . Controller::parameter('area') . '/list', 'text' => 'List');
+		}
+		if (Controller::parameter('action') == 'display' && $this->checkPermissions(array('action' => 'update'))) {
+			$links[] = array('link' => '?q=' . Controller::parameter('area') . '/update/' . Controller::parameter('id'), 'text' => 'Update');
+		}
+		if ($this->checkPermissions(array('action' => 'create'))) {
+			$links[] = array('link' => '?q=' . Controller::parameter('area') . '/create', 'text' => 'Create');
+		}
+		return $links;
+	}
+	
+	/**
 	 * Display does nothing but display (hahaha) the content fetched by DBObject::read
 	 */
 	public function action_display() {

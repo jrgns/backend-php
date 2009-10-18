@@ -18,6 +18,7 @@ class PhpView extends View {
 	function __construct() {
 		parent::__construct();
 		$this->mode = 'php';
+		$this->mime_type = 'text/plain';
 	}
 		
 	public static function hook_output($to_print) {

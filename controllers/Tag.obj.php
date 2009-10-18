@@ -44,7 +44,7 @@ class Tag extends TableCtl {
 	}
 
 	public static function hook_post_display($object) {
-		if (Controller::parameter('area') == 'content' && in_array(Controller::parameter('action'), array('display'))) {
+		if ($object instanceof DBObject && Controller::parameter('area') == 'content' && in_array(Controller::parameter('action'), array('display'))) {
 			$tags = self::getTags($object->array['id']);
 			//Don't add Content, only render it.
 			Backend::add('obj_tags', $tags);

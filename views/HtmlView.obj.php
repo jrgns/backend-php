@@ -17,7 +17,9 @@
 class HtmlView extends View {
 	function __construct() {
 		parent::__construct();
-		$this->mode = 'html';
+		$this->mode      = 'html';
+		$this->mime_type = 'text/html';
+		$this->charset   = 'utf-8';
 	}
 	
 	public static function hook_output($to_print) {

@@ -18,6 +18,7 @@ class JsonView extends TextView {
 	function __construct() {
 		parent::__construct();
 		$this->mode = 'json';
+		$this->mime_type = 'text/json';
 	}
 	
 	public static function hook_output($to_print) {

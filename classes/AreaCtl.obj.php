@@ -31,9 +31,9 @@ class AreaCtl {
 		}
 		if (method_exists($this, $method)) {
 			if ($this->checkPermissions()) {
-				$comp_script = '/scripts/' . Controller::parameter('area') . '.component.js';
-				$comp_style  = '/styles/' . Controller::parameter('area') . '.component.css';
-				if (Controller::$mode == 'html') {
+				if (Controller::$view->mode == 'html') {
+					$comp_script = '/scripts/' . Controller::parameter('area') . '.component.js';
+					$comp_style  = '/styles/' . Controller::parameter('area') . '.component.css';
 					if (file_exists(SITE_FOLDER . $comp_script)) {
 						Controller::addScript(SITE_LINK . $comp_script);
 					}
@@ -75,13 +75,6 @@ class AreaCtl {
 	 */
 	protected function getTabLinks($action) {
 		$links = array();
-		//TODO Check permissions!
-		if ($this->checkPermissions(array('action' => 'list'))) {
-			$links[] = array('link' => '?q=' . Controller::parameter('area') . '/list', 'text' => 'List');
-		}
-		if ($this->checkPermissions(array('action' => 'create'))) {
-			$links[] = array('link' => '?q=' . Controller::parameter('area') . '/create', 'text' => 'Create');
-		}
 		return $links;
 	}
 	

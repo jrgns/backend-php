@@ -2,8 +2,8 @@
    "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<title>#Title# - #Sub Title#</title>
+		{tpl:head.tpl.php}
 		{tpl:styles.tpl.php}
 		<link rel="shortcut icon" type="image/x-icon" href="<?php echo SITE_LINK ?>/favicon.ico">
 	</head>
