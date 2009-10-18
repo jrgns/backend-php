@@ -47,7 +47,7 @@
 			}
 			?>
 			<div id="<?php echo $input_id ?>_container">
-				<label id="<?php echo $input_id ?>_label" for="<?php echo $input_id ?>"><?php echo humanize($name) ?></label><br/>
+				<label id="<?php echo $input_id ?>_label" for="<?php echo $input_id ?>"><?php echo humanize($name) ?></label><br>
 				<?php echo $field_str ?>
 			</div>
 		<?php endforeach;
