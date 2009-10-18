@@ -382,8 +382,8 @@ class Controller {
 		try {
 			$location = $location ? $location : (empty($_SESSION['previous_url']) ? false : $_SESSION['previous_url']);
 			if (is_array($location)) {
-				if (array_key_exists(self::$mode, $location)) {
-					$location = $location[self::$mode];
+				if (array_key_exists(self::$view->mode, $location)) {
+					$location = $location[self::$view->mode];
 				} else {
 					$location = current($location);
 				}
