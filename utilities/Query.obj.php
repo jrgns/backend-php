@@ -14,8 +14,13 @@
  * Base class to handle queries
  */
 class Query {
-	var $connection;
-	var $query = false;
+	private $connection;
+
+	private $query      = false;
+	private $parameters = array();
+
+	private $last_stmt   = false;
+	private $last_params = array();
 	
 	function __construct($action, $table, array $options = array()) {
 	}
@@ -27,22 +32,33 @@ class Query {
 		return ($this->connection instanceof PDO);
 	}
 	
-	public function execute(array $parameters = array()) {
+	public function execute(array $parameters = array(), array $options = array()) {
 		$toret = false;
 		if ($this->checkConnection() && !empty($this->query)) {
-			$stmt = $this->connection->prepare($this->query);
-			if ($stmt) {
-				if ($stmt->execute($parameters)) {
-					$toret = $stmt;
-				} else {
-					if (Controller::$debug) {
-						echo $this->query;
-						var_dump($stmt->errorInfo());
-					}
-					Controller::addError('Could not execute statement');
+			$parameters = array_merge($this->parameters, $parameters);
+			//Check if we've already executed this query, and that the parameters are the same
+			$check_cache = array_key_exists('check_cache', $options) ? $options['check_cache'] : true;
+			if ($check_cache && $this->last_stmt && serialize($parameters) == serialize($this->last_params)) {
+				if (Controller::$debug >= 2) {
+					var_dump('Executing Cached statement');
 				}
+				$toret = $this->last_stmt;
 			} else {
-				Controller::addError('Could not prepare statement');
+				$stmt = $this->connection->prepare($this->query);
+				if ($stmt) {
+					if ($stmt->execute($parameters)) {
+						$toret = $stmt;
+						$this->last_stmt = $stmt;
+					} else {
+						if (Controller::$debug) {
+							echo $this->query;
+							var_dump($stmt->errorInfo());
+						}
+						Controller::addError('Could not execute statement');
+					}
+				} else {
+					Controller::addError('Could not prepare statement');
+				}
 			}
 		} else {
 			Controller::addError('Could not execute query');
@@ -77,7 +93,8 @@ class Query {
 	}
 
 	public function setQuery($query) {
-		$this->query = $query;
+		$this->last_stmt = false;
+		$this->query     = $query;
 	}
 	
 	public function __toString() {
