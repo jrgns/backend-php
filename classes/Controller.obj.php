@@ -229,40 +229,42 @@ class Controller {
 			}
 		}
 
-		$mime_ranges = Parser::accept_header();
-		if (!$view_name && $mime_ranges) {
-			$types = array();
-			$main_types = array();
-			$view_name = false;
-			foreach($mime_ranges as $mime_type) {
-				$types[] = $mime_type['main_type'] . '/' . $mime_type['sub_type'];
-				$main_types[] = $mime_type['main_type'];
-				if (!$view_name) {
-					$name = class_name(str_replace('+', ' ', $mime_type['main_type']) . ' ' . str_replace('+', ' ', $mime_type['sub_type'])) . 'View';
-					if (Component::isActive($name)) {
-						$view_name = $name;
-					} else {
-						$name = class_name(str_replace('+', ' ', $mime_type['main_type'])) . 'View';
+		if (!$view_name) {
+			$mime_ranges = Parser::accept_header();
+			if ($mime_ranges) {
+				$types = array();
+				$main_types = array();
+				$view_name = false;
+				foreach($mime_ranges as $mime_type) {
+					$types[] = $mime_type['main_type'] . '/' . $mime_type['sub_type'];
+					$main_types[] = $mime_type['main_type'];
+					if (!$view_name) {
+						$name = class_name(str_replace('+', ' ', $mime_type['main_type']) . ' ' . str_replace('+', ' ', $mime_type['sub_type'])) . 'View';
 						if (Component::isActive($name)) {
 							$view_name = $name;
 						} else {
-							$name = class_name(str_replace('+', ' ', $mime_type['sub_type'])) . 'View';
+							$name = class_name(str_replace('+', ' ', $mime_type['main_type'])) . 'View';
 							if (Component::isActive($name)) {
 								$view_name = $name;
+							} else {
+								$name = class_name(str_replace('+', ' ', $mime_type['sub_type'])) . 'View';
+								if (Component::isActive($name)) {
+									$view_name = $name;
+								}
 							}
 						}
 					}
 				}
-			}
-			if (in_array('image', $main_types) && in_array('application', $main_types)) {
-			//Probably IE
-				$view_name = 'HtmlView';
-			} else if (in_array('application/xml', $types) && in_array('application/xhtml+xml', $types) && in_array('text/html', $types)) {
-			//Maybe another confused browser that asks for XML and HTML
-				$view_name = 'HtmlView';
-			} else if (count($mime_ranges) == 1 && $mime_ranges[0]['main_type'] == '*' && $mime_ranges[0]['sub_type'] == '*') {
-				$view_name = Backend::getConfig('backend.default.view', 'HtmlView');
-			} else if (empty($mime_ranges)) {
+				if (in_array('image', $main_types) && in_array('application', $main_types)) {
+				//Probably IE
+					$view_name = 'HtmlView';
+				} else if (in_array('application/xml', $types) && in_array('application/xhtml+xml', $types) && in_array('text/html', $types)) {
+				//Maybe another confused browser that asks for XML and HTML
+					$view_name = 'HtmlView';
+				} else if (count($mime_ranges) == 1 && $mime_ranges[0]['main_type'] == '*' && $mime_ranges[0]['sub_type'] == '*') {
+					$view_name = Backend::getConfig('backend.default.view', 'HtmlView');
+				}
+			} else {
 				$view_name = Backend::getConfig('backend.default.view', 'HtmlView');
 			}
 		}
