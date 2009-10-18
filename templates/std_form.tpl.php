@@ -39,7 +39,7 @@
 					$field_str .= '</select>';
 					break;
 				case $field == 'blob':
-					$field_str = '<input id="' . $input_id . '" name="' . $name . '" type="file" class="text" value="' . $value . '">';
+					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="file" class="text" value="' . $value . '">';
 					break;
 				default:
 					$field_str = '';
@@ -47,11 +47,11 @@
 			}
 			?>
 			<div id="<?php echo $input_id ?>_container">
-				<label id="<?php echo $input_id ?>_label" for="<?php echo $input_id ?>"><?php echo humanize($name) ?></label><br/>
+				<label id="<?php echo $input_id ?>_label" for="<?php echo $input_id ?>"><?php echo humanize($name) ?></label><br>
 				<?php echo $field_str ?>
 			</div>
 		<?php endforeach;
-		Hook::run('form', 'post');
+		Hook::run('form', 'post', array($Object));
 	?>
 		<input type="submit" value="<?php echo ucwords(Controller::$action) ?> <?php echo $Object->getMeta('name') ?>" class=""/>
 	</form>

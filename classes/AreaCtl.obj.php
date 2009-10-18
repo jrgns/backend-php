@@ -25,13 +25,15 @@ class AreaCtl {
 		if (array_key_exists('msg', $_REQUEST)) {
 			Controller::addError(self::getError($_REQUEST['msg']));
 		}
-		
 		$method = 'action_' . Controller::parameter('action');
+		if (Controller::$debug) {
+			var_dump('Checking Method ' . $method);
+		}
 		if (method_exists($this, $method)) {
 			if ($this->checkPermissions()) {
-				$comp_script = '/scripts/' . Controller::parameter('area') . '.component.js';
-				$comp_style  = '/styles/' . Controller::parameter('area') . '.component.css';
-				if (Controller::$mode == 'html') {
+				if (Controller::$view->mode == 'html') {
+					$comp_script = '/scripts/' . Controller::parameter('area') . '.component.js';
+					$comp_style  = '/styles/' . Controller::parameter('area') . '.component.css';
 					if (file_exists(SITE_FOLDER . $comp_script)) {
 						Controller::addScript(SITE_LINK . $comp_script);
 					}
@@ -44,6 +46,8 @@ class AreaCtl {
 				Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to ' . Controller::parameter('action') . ' ' . get_class($this)));
 				$toret = false;
 			}
+		} else if (Controller::$debug) {
+			Controller::addError('Method ' . get_class($this) . '::' . $method . ' does not exist');
 		}
 		return $toret;
 	}
@@ -71,13 +75,6 @@ class AreaCtl {
 	 */
 	protected function getTabLinks($action) {
 		$links = array();
-		//TODO Check permissions!
-		if ($this->checkPermissions(array('action' => 'list'))) {
-			$links[] = array('link' => '?q=' . Controller::parameter('area') . '/list', 'text' => 'List');
-		}
-		if ($this->checkPermissions(array('action' => 'create'))) {
-			$links[] = array('link' => '?q=' . Controller::parameter('area') . '/create', 'text' => 'Create');
-		}
 		return $links;
 	}
 	

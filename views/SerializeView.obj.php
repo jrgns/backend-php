@@ -18,6 +18,7 @@ class SerializeView extends View {
 	function __construct() {
 		parent::__construct();
 		$this->mode = 'serialize';
+		$this->mime_type = 'text/plain';
 	}
 	
 	public static function hook_output($to_print) {

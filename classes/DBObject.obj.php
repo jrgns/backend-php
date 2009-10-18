@@ -716,4 +716,10 @@ class DBObject {
 		return class_for_url(get_class($this));
 	}
 	
+	public function __toString() {
+		if (get_called_class() == '(Unknown)') {
+			print_stacktrace();
+		}
+		return get_called_class();
+	}
 }

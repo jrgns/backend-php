@@ -6,6 +6,6 @@ if (!empty($obj_tags)) {
 }
 ?>
 <div class="tags_container">
-	<label>Tags</label><br/>
+	<label>Tags</label><br>
 	<input type="text" class="text" name="tags" value="<?php echo $obj_tags ?>"/>
 </div>

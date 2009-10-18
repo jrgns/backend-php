@@ -46,13 +46,18 @@ class Backend {
 		if (substr($url, strlen($url) - 1) != '/') {
 			$url .= '/';
 		}
-		define('SITE_LINK', 'http://' . $url);
-		define('S_SITE_LINK', 'https://' . $url);
-		Backend::add('SITE_LINK', SITE_LINK);
-		Backend::add('S_SITE_LINK', S_SITE_LINK);
 
 		//Configs
 		self::initConfigs();
+
+		define('SITE_LINK', 'http://' . $url);
+		if (Backend::getConfig('backend.application.use_ssl', false)) {
+			define('S_SITE_LINK', 'https://' . $url);
+		} else {
+			define('S_SITE_LINK', 'http://' . $url);
+		}
+		Backend::add('SITE_LINK', SITE_LINK);
+		Backend::add('S_SITE_LINK', S_SITE_LINK);
 		
 		//Application Values
 		$values = self::$config->getValue('application');

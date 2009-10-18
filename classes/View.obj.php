@@ -15,7 +15,9 @@
  * Default class to handle View specific functions
  */
 class View {
-	public $mode = false;
+	public $mode      = false;
+	public $mime_type = false;
+	public $charset   = false;
 	
 	function __construct() {
 		$this->mode = Backend::getConfig('application.default.type', 'view');
@@ -60,11 +62,19 @@ class View {
 	 * Actually output the information
 	 */
 	function output($to_print = null) {
+		if (!headers_sent()) {
+			if ($content_type = $this->mime_type) {
+				if ($this->charset) {
+					$content_type .= '; charset=' . $this->charset;
+				}
+				header('Content-Type: ' . $content_type);
+			}
+		}
 		$to_print = Hook::run('output', 'pre', array($to_print), array('toret' => $to_print));
 
 		//We're assuming that there's nothing to handle output, so output the default view
-		if (empty($to_print)) {
-			$default_view = Backend::getConfig('backend.default.view');
+		if ($to_print instanceof DBObject) {
+			$default_view = Backend::getConfig('backend.default.view', 'HtmlView');
 			if ($default_view && class_exists($default_view, true) && method_exists($default_view, 'hook_output')) {
 				$to_print = call_user_func_array(array($default_view, 'hook_output'), array($to_print));
 				$to_print = Render::runFilters($to_print);

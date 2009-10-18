@@ -16,6 +16,26 @@
  */
 class TableCtl extends AreaCtl {
 	/**
+	 * Return Tab Links for this area
+	 *
+	 * Override this function if you want to customize the Tab Links for an area.
+	 */
+	protected function getTabLinks($action) {
+		$links = array();
+		//TODO Check permissions!
+		if ($this->checkPermissions(array('action' => 'list'))) {
+			$links[] = array('link' => '?q=' . Controller::parameter('area') . '/list', 'text' => 'List');
+		}
+		if (Controller::parameter('action') == 'display' && $this->checkPermissions(array('action' => 'update'))) {
+			$links[] = array('link' => '?q=' . Controller::parameter('area') . '/update/' . Controller::parameter('id'), 'text' => 'Update');
+		}
+		if ($this->checkPermissions(array('action' => 'create'))) {
+			$links[] = array('link' => '?q=' . Controller::parameter('area') . '/create', 'text' => 'Create');
+		}
+		return $links;
+	}
+	
+	/**
 	 * Display does nothing but display (hahaha) the content fetched by DBObject::read
 	 */
 	public function action_display() {
@@ -55,6 +75,7 @@ class TableCtl extends AreaCtl {
 		if (class_exists($obj_name, true)) {
 			$object = new $obj_name();
 			$data = $object->fromPost();
+			//We need to check if the post data is valid in some way?
 			if (is_post()) {
 				$data = Hook::run('create', 'pre', array($data, $object), array('toret' => $data));
 				if ($object->create($data)) {
@@ -98,6 +119,7 @@ class TableCtl extends AreaCtl {
 		$obj_name = (class_name(Controller::parameter('area')) . 'Obj');
 		if (class_exists($obj_name, true) && Controller::parameter('id') !== 'home' && Controller::parameter('id') > 0) {
 			$object = new $obj_name(Controller::parameter('id'));
+			//We need to check if the post data is valid in some way?
 			if (is_post()) {
 				$data = $object->fromPost();
 				$data = Hook::run('update', 'pre', array($data, $object), array('toret' => $data));

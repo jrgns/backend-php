@@ -6,5 +6,5 @@
 	<?php endforeach; ?>
 </ul>
 <?php else: ?>
-<hr/>
+<hr>
 <?php endif; ?>

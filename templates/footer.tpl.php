@@ -1,5 +1,5 @@
 <div id="footer" class="span-24 small quiet">					
-	<hr class="bottom"/>
+	<hr class="bottom">
 	<p class="bottom">
 		The backend for your website - info at backend-php.net
 	</p>

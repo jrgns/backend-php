@@ -18,6 +18,7 @@ class TextView extends View {
 	function __construct() {
 		parent::__construct();
 		$this->mode = 'text';
+		$this->mime_type = 'text/plain';
 	}
 	
 	public static function hook_output($to_print) {

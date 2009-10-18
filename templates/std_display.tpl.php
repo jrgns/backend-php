@@ -27,7 +27,7 @@
 				<div class="span-3" style="text-align: right;">
 					<label><?php echo humanize($name) ?>:</label>
 				</div>
-				<span><?php echo $value ?></span>
+				<span><?php echo empty($value) ? '&nbsp;' : $value ?></span>
 			</div>
 		<?php endforeach;
 	else: ?>
