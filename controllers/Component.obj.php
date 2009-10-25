@@ -71,6 +71,7 @@ class Component extends TableCtl {
 	public static function isActive($name) {
 		$toret = false;
 		if (Value::get('admin_installed', false)) {
+			$name = preg_replace('/Obj$/', '', $name);
 			$active = self::getActive();
 			if ($active) {
 				$active = array_flatten($active, 'id', 'name');

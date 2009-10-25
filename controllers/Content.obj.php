@@ -30,7 +30,8 @@ class Content extends TableCtl {
 				//SITE FOLDER too?
 				}
 			} else {
-				Controller::addContent($content->array['body']);
+				Backend::add('Content', $content);
+				Controller::addContent(Render::renderFile('content.display.tpl.php'));
 				$toret = $content;
 			}
 		}
@@ -83,7 +84,7 @@ class Content extends TableCtl {
 
 			$toret = new ContentObj();
 			list($query, $params) = $toret->getSelectSQL(array('parameters' => $params, 'conditions' => $conds));
-			$toret->load(array('mode' => 'array', 'query' => $query, 'parameters' => $params));
+			$toret->load(array('query' => $query, 'parameters' => $params));
 		}
 
 		if ($toret && !empty($toret->array)) {
