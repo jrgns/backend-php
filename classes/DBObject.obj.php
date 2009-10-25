@@ -65,64 +65,80 @@ class DBObject {
 	
 	private function load_deep() {
 		if ($this->object) {
-			foreach ($this->meta['parents'] as $name => $options) {
-				$class_name = array_key_exists('model', $options) ? $options['model'] . 'Obj' : $name . 'Obj';
+			foreach ($this->meta['parents'] as $class => $options) {
+				$class_name = array_key_exists('model', $options) ? $options['model'] . 'Obj' : $class . 'Obj';
 				if (Component::isActive($class_name)) {
 					$conds = array();
 					$params = array();
-					$object = new $class_name();
+					$parent = new $class_name();
 					$conditions = array_key_exists('conditions', $options) ? $options['conditions'] : false;
 					if ($conditions) {
-						foreach($conditions as $field => $value) {
-							if (is_array($value)) {
-								$operator = key($value);
-								$value    = current($value);
+						foreach($conditions as $field => $name) {
+							if (is_array($name)) {
+								$operator = key($name);
+								$name     = current($name);
 							} else {
 								$operator = '=';
 							}
 							
-							if (array_key_exists($value, $this->object)) {
-								switch ($operator) {
-								case '=':
-									$conds[] = '`' . $field . '` = :' . $value;
-									break;
-								case 'FIND_IN_SET':
-								case 'in_set':
-									$conds[] = 'FIND_IN_SET(:' . $value . ', `' . $field . '`)';
-									break;
-								case 'IN':
-									$conds[] = '`' . $field . '` IN (' . $this->object->$value . ')';
-									break;
-								}
-								$params[':' . $value] = $this->object->$value;
+							$value = array_key_exists($name, $this->object) ? $this->object->$name : $name;
+							switch ($operator) {
+							case '=':
+								$conds[] = '`' . $field . '` = :' . $name;
+								break;
+							case 'FIND_IN_SET':
+							case 'in_set':
+								$conds[] = 'FIND_IN_SET(:' . $name . ', `' . $field . '`)';
+								break;
+							case 'IN':
+								$conds[] = '`' . $field . '` IN (' . $value . ')';
+								break;
 							}
+							$params[':' . $name] = $value;
 						}
 					}
-					$object->load(array('conditions' => $conds, 'parameters' => $params, 'mode' => 'list'));
-					if ($object->list) {
-						$this->object->$name = $object->list;
+					$parent->load(array('conditions' => $conds, 'parameters' => $params, 'mode' => 'list'));
+					if ($parent->list) {
+						$this->object->$class = $parent->list;
 					}
 				}
 			}
 			
-			foreach ($this->meta['children'] as $name => $options) {
-				$class_name = array_key_exists('model', $options) ? $options['model'] . 'Obj' : $name . 'Obj';
+			foreach ($this->meta['children'] as $class => $options) {
+				$class_name = array_key_exists('model', $options) ? $options['model'] . 'Obj' : $class . 'Obj';
 				if (Component::isActive($class_name)) {
 					$conds = array();
 					$params = array();
-					$object = new $class_name();
+					$child = new $class_name();
 					$conditions = array_key_exists('conditions', $options) ? $options['conditions'] : false;
 					if ($conditions) {
-						foreach($conditions as $field => $value) {
-							if (array_key_exists($value, $this->object)) {
-								$conds[] = '`' . $field . '` = :' . $value;
-								$params[':' . $value] = $this->object->$value;
+						foreach($conditions as $field => $name) {
+							if (is_array($name)) {
+								$operator = key($name);
+								$name     = current($name);
+							} else {
+								$operator = '=';
 							}
+							
+							$value = array_key_exists($name, $this->object) ? $this->object->$name : $name;
+							switch ($operator) {
+							case '=':
+								$conds[] = '`' . $field . '` = :' . $name;
+								break;
+							case 'FIND_IN_SET':
+							case 'in_set':
+								$conds[] = 'FIND_IN_SET(:' . $name . ', `' . $field . '`)';
+								break;
+							case 'IN':
+								$conds[] = '`' . $field . '` IN (' . $value . ')';
+								break;
+							}
+							$params[':' . $name] = $value;
 						}
 					}
-					$object->load(array('conditions' => $conds, 'parameters' => $params, 'mode' => 'list'));
-					if ($object->list) {
-						$this->object->$name = $object->list;
+					$child->load(array('conditions' => $conds, 'parameters' => $params, 'mode' => 'list'));
+					if ($child->list) {
+						$this->object->$class = $child->list;
 					}
 				}
 			}

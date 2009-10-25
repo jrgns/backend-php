@@ -45,7 +45,10 @@ class ContentObj extends DBObject {
 		$meta['parents'] = array();
 		//@jrgns 2009-10-25: Don't know if this is the right place to add these. Shouldn't this component be unaware of other components impacting it?
 		if (Component::isActive('Comment')) {
-			$meta['children']['Comment'] = array('conditions' => array());
+			/*
+			 * Conditions should be: array(child_field => should be what)
+			 */
+			$meta['children']['Comment'] = array('conditions' => array('foreign_id' => 'id', 'foreign_table' => 'contents'));
 		}
 		if (Component::isActive('Tag')) {
 			/*
