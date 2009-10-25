@@ -18,8 +18,8 @@ class DBObject {
 	private $db;
 	protected $meta;
 	protected $last_error;
+	protected $load_mode = 'array';
 	
-
 	public $list = null;
 	public $array = null;
 	public $object = null;
@@ -34,7 +34,7 @@ class DBObject {
 			}
 		}
 		$options = $options ? $options : array();
-		$load_type        = array_key_exists('load_type', $options) ? $options['load_type'] : 'array';
+		$load_type        = array_key_exists('load_mode', $options) ? $options['load_mode'] : $this->load_mode;
 		$meta['id']       = array_key_exists('id', $meta) ? $meta['id'] : false;
 		$meta['id_field'] = array_key_exists('id_field', $meta) ? $meta['id_field'] : 'id';
 		$meta['table']    = array_key_exists('table', $meta) ? $meta['table'] : table_name(get_class($this));
@@ -43,6 +43,7 @@ class DBObject {
 		$meta['fields']   = array_key_exists('fields', $meta) ? $meta['fields'] : array();
 		$meta['name']     = array_key_exists('name', $meta) ? $meta['name'] : class_name(get_class($this));
 		$meta['objname']  = array_key_exists('objname', $meta) ? $meta['objname'] : get_class($this);
+		$meta['parents']  = array_key_exists('parents', $meta) ? $meta['parents'] : array();
 		$meta['children'] = array_key_exists('children', $meta) ? $meta['children'] : array();
 		$this->meta = $meta;
 		if ($this->checkConnection()) {
@@ -62,30 +63,82 @@ class DBObject {
 		return ($this->db instanceof PDO);
 	}
 	
-	private function load_children() {
+	private function load_deep() {
 		if ($this->object) {
-			foreach ($this->meta['children'] as $name => $options) {
-				$class_name = array_key_exists('model', $options) ? $options['model'] . 'Obj' : false;
-				if ($class_name && class_exists($class_name, true)) {
+			foreach ($this->meta['parents'] as $name => $options) {
+				$class_name = array_key_exists('model', $options) ? $options['model'] . 'Obj' : $name . 'Obj';
+				if (Component::isActive($class_name)) {
+					$conds = array();
+					$params = array();
 					$object = new $class_name();
 					$conditions = array_key_exists('conditions', $options) ? $options['conditions'] : false;
 					if ($conditions) {
-						$conds = array();
-						$params = array();
+						foreach($conditions as $field => $value) {
+							if (is_array($value)) {
+								$operator = key($value);
+								$value    = current($value);
+							} else {
+								$operator = '=';
+							}
+							
+							if (array_key_exists($value, $this->object)) {
+								switch ($operator) {
+								case '=':
+									$conds[] = '`' . $field . '` = :' . $value;
+									break;
+								case 'FIND_IN_SET':
+								case 'in_set':
+									$conds[] = 'FIND_IN_SET(:' . $value . ', `' . $field . '`)';
+									break;
+								case 'IN':
+									$conds[] = '`' . $field . '` IN (' . $this->object->$value . ')';
+									break;
+								}
+								$params[':' . $value] = $this->object->$value;
+							}
+						}
+					}
+					$object->load(array('conditions' => $conds, 'parameters' => $params, 'mode' => 'list'));
+					if ($object->list) {
+						$this->object->$name = $object->list;
+					}
+				}
+			}
+			
+			foreach ($this->meta['children'] as $name => $options) {
+				$class_name = array_key_exists('model', $options) ? $options['model'] . 'Obj' : $name . 'Obj';
+				if (Component::isActive($class_name)) {
+					$conds = array();
+					$params = array();
+					$object = new $class_name();
+					$conditions = array_key_exists('conditions', $options) ? $options['conditions'] : false;
+					if ($conditions) {
 						foreach($conditions as $field => $value) {
 							if (array_key_exists($value, $this->object)) {
 								$conds[] = '`' . $field . '` = :' . $value;
 								$params[':' . $value] = $this->object->$value;
 							}
 						}
-						$object->load(array('conditions' => $conds, 'parameters' => $params, 'mode' => 'list'));
-						if ($object->list) {
-							$this->object->$name = $object->list;
-						}
+					}
+					$object->load(array('conditions' => $conds, 'parameters' => $params, 'mode' => 'list'));
+					if ($object->list) {
+						$this->object->$name = $object->list;
 					}
 				}
 			}
 		}
+	}
+	
+	public function loadArray() {
+		$this->load(array('mode' => 'array'));
+	}
+	
+	public function loadObject() {
+		$this->load(array('mode' => 'object'));
+	}
+	
+	public function loadList() {
+		$this->load(array('mode' => 'list'));
 	}
 	
 	public function load($options = array()) {
@@ -94,7 +147,7 @@ class DBObject {
 				if (empty($this->meta['id'])) {
 					$options['mode'] = 'list';
 				} else {
-					$options['mode'] = 'array';
+					$options['mode'] = $this->load_mode;
 				}
 			}
 
@@ -115,13 +168,11 @@ class DBObject {
 				$result = $stmt->execute($params);
 				if ($result) {
 					switch ($options['mode']) {
+					case 'object':
 					case 'full_object':
 						$this->object = $stmt->fetch(PDO::FETCH_OBJ);
-						$this->array = $stmt->fetch(PDO::FETCH_ASSOC);
-						$this->load_children();
-						break;
-					case 'object':
-						$this->object = $stmt->fetch(PDO::FETCH_OBJ);
+						$this->array = (array)$this->object;
+						$this->load_deep();
 						break;
 					case 'array':
 						$this->array = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -263,7 +314,7 @@ class DBObject {
 		$toret = null;
 		if ($this->checkConnection()) {
 			$id = $this->meta['id'];
-			$mode = $mode ? $mode : ($id ? 'array' : 'list');
+			$mode = $mode ? $mode : ($id ? $this->load_mode : 'list');
 			switch ($mode) {
 			case 'array':
 			case 'object':
