@@ -1,6 +1,6 @@
 <?php
 /**
- * The file that defines the SerializeView class.
+ * The file that defines the RssView class.
  *
  * @author J Jurgens du Toit (JadeIT cc) <jurgens.dutoit@gmail.com> - initial API and implementation
  * @copyright Copyright (c) 2009 JadeIT cc.
@@ -12,43 +12,33 @@
  */
  
 /**
- * Default class to handle SerializeView specific functions
+ * Default class to handle RssView specific functions
  */
-class SerializeView extends View {
+class RssView extends View {
 	function __construct() {
 		parent::__construct();
-		$this->mode = 'serialize';
-		$this->mime_type = 'text/plain';
+		$this->mode = 'rss';
+		$this->mime_type = 'application/xml';
 	}
 	
 	public static function hook_output($to_print) {
 		if (!headers_sent()) {
-			header('Content-Type: text/plain');
+			header('Content-Type: application/xml');
 		}
-		switch (Controller::$action) {
-		case 'list':
-			$to_print = $to_print instanceof DBObject ? $to_print->list : $to_print;
-			break;
-		case 'display':
-			if ($to_print instanceof DBObject && Controller::$id) {
-				$to_print = !empty($to_print->object) ? $to_print->object : $to_print->array;
-			}
-			break;
-		}
-		//TODO check options to see if it should be encoded as well
-		return serialize($to_print);
+		$to_print = Render::renderFile('rss2.tpl.php');
+		return $to_print;
 	}
 
 	public static function install() {
 		$toret = true;
 		$hook = new HookObj();
 		$toret = $hook->replace(array(
-				'name'        => 'SerializeView Pre Output',
+				'name'        => 'RssView Pre Output',
 				'description' => '',
-				'mode'        => 'serialize',
+				'mode'        => 'rss',
 				'type'        => 'pre',
 				'hook'        => 'output',
-				'class'       => 'SerializeView',
+				'class'       => 'RssView',
 				'method'      => 'hook_output',
 				'sequence'    => 0,
 			)

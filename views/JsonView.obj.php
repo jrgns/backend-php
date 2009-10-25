@@ -23,12 +23,14 @@ class JsonView extends TextView {
 	
 	public static function hook_output($to_print) {
 		$to_print = parent::hook_output($to_print);
-		switch (Controller::$action) {
+		switch (Controller::parameter('action')) {
 		case 'list':
 			$to_print = $to_print instanceof DBObject ? $to_print->list : $to_print;
 			break;
 		case 'display':
-			$to_print = $to_print instanceof DBObject && Controller::$id ? $to_print->array : $to_print;
+			if ($to_print instanceof DBObject && Controller::$id) {
+				$to_print = !empty($to_print->object) ? $to_print->object : $to_print->array;
+			}
 			break;
 		}
 		return json_encode($to_print);

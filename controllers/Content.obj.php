@@ -30,7 +30,8 @@ class Content extends TableCtl {
 				//SITE FOLDER too?
 				}
 			} else {
-				Controller::addContent($content->array['body']);
+				Backend::add('Content', $content);
+				Controller::addContent(Render::renderFile('content.display.tpl.php'));
 				$toret = $content;
 			}
 		}
@@ -52,6 +53,25 @@ class Content extends TableCtl {
 		}
 		return $toret;
 	}
+	
+	function rss_list($result) {
+		if ($result instanceof DBObject) {
+			Backend::add('title', Backend::getConfig('application.Title'));
+			Backend::add('link', SITE_LINK . '?q=content');
+			Backend::add('description', Backend::getConfig('application.description'));
+			if (!empty($result->list) && is_array($result->list)) {
+				$list = array();
+				foreach($result->list as $item) {
+					$item['link'] = SITE_LINK . '?q=content/' . $item['id'];
+					$list[] = $item;
+				}
+			} else {
+				$list = false;
+			}
+			Backend::add('list', $list);
+		}
+		return $result;
+	}
 
 	function action_display() {
 		$toret = false;
@@ -64,7 +84,7 @@ class Content extends TableCtl {
 
 			$toret = new ContentObj();
 			list($query, $params) = $toret->getSelectSQL(array('parameters' => $params, 'conditions' => $conds));
-			$toret->load(array('mode' => 'array', 'query' => $query, 'parameters' => $params));
+			$toret->load(array('query' => $query, 'parameters' => $params));
 		}
 
 		if ($toret && !empty($toret->array)) {
@@ -80,6 +100,25 @@ class Content extends TableCtl {
 			var_dump('Content ID: ' . $toret->array['id']);
 		}
 		return $toret;
+	}
+	
+	/**
+	 * Trim content to a certain number of words
+	 *
+	 * Copied from http://www.lullabot.com/articles/trim_a_string_to_a_given_word_count
+	 */
+	public static function createPreview($content, $count, $ellips = true) {
+		$words = explode(' ', $content);
+		if (count($words) > $count) {
+			array_splice($words, $count);
+			$content = implode(' ', $words);
+			if (is_string($ellips)) {
+				$content .= $ellips;
+			} elseif ($ellips) {
+				$content .= '&hellip;';
+			}
+		}
+		return $content;		
 	}
 	
 	public static function install() {

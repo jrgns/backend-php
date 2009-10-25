@@ -23,6 +23,8 @@
 class ContentObj extends DBObject {
 	function __construct($meta = array()) {
 		require_once(BACKEND_FOLDER . '/libraries/Markdown/markdown.php');
+		$this->load_mode = 'object';
+
 		if (!is_array($meta) && (is_numeric($meta) || is_string($meta))) {
 			$meta = array('id' => $meta);
 		}
@@ -39,6 +41,21 @@ class ContentObj extends DBObject {
 			'modified' => 'lastmodified',
 			'added' => 'dateadded',
 		);
+		$meta['children'] = array();
+		$meta['parents'] = array();
+		//@jrgns 2009-10-25: Don't know if this is the right place to add these. Shouldn't this component be unaware of other components impacting it?
+		if (Component::isActive('Comment')) {
+			/*
+			 * Conditions should be: array(child_field => should be what)
+			 */
+			$meta['children']['Comment'] = array('conditions' => array('foreign_id' => 'id', 'foreign_table' => 'contents'));
+		}
+		if (Component::isActive('Tag')) {
+			/*
+			 * Conditions should be: array(parent_field => should be what)
+			 */
+			$meta['parents']['Tag'] = array('conditions' => array('id' => array('IN' => 'tags')));
+		}
 		return parent::__construct($meta);
 	}
 

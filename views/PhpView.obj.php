@@ -30,7 +30,9 @@ class PhpView extends View {
 			$to_print = $to_print instanceof DBObject ? $to_print->list : $to_print;
 			break;
 		case 'display':
-			$to_print = $to_print instanceof DBObject && Controller::$id ? $to_print->array : $to_print;
+			if ($to_print instanceof DBObject && Controller::$id) {
+				$to_print = !empty($to_print->object) ? $to_print->object : $to_print->array;
+			}
 			break;
 		}
 		return var_export($to_print, true);

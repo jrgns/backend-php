@@ -11,6 +11,42 @@
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
 class Tag extends TableCtl {
+	public function action_display() {
+		$toret = parent::action_display();
+		if ($toret instanceof DBObject) {
+			$query = new CustomQuery('SELECT * FROM `contents` WHERE FIND_IN_SET(:tag_id, `tags`)');
+			$toret->array['content_list'] = $query->fetchAll(array(':tag_id' => $toret->array['id']));
+		}
+		return $toret;
+	}
+	
+	public function html_display($result) {
+		$toret = parent::html_display($result);
+		if ($result instanceof DBObject) {
+			Backend::add('Sub Title', $result->array['name']);
+		}
+		return $toret;
+	}
+	
+	public function rss_display($result) {
+		if ($result instanceof DBObject) {
+			Backend::add('title', $result->array['name']);
+			Backend::add('link', SITE_LINK . '?q=tag/' . $result->array['id']);
+			Backend::add('description', $result->array['description']);
+			if (!empty($result->array['content_list']) && is_array($result->array['content_list'])) {
+				$list = array();
+				foreach($result->array['content_list'] as $item) {
+					$item['link'] = SITE_LINK . '?q=content/' . $item['id'];
+					$list[] = $item;
+				}
+			} else {
+				$list = false;
+			}
+			Backend::add('list', $list);
+		}
+		return $result;
+	}
+
 	public static function addTags($content_id, array $tags) {
 		$Tag = new TagObj();
 		foreach($tags as $tag) {
