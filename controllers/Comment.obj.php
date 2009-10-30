@@ -37,8 +37,7 @@ class Comment extends TableCtl {
 	public static function hook_post_display($object) {
 		if ($object instanceof DBObject && Controller::parameter('area') == 'content' && in_array(Controller::parameter('action'), array('display'))) {
 			$comments = self::getComments($object->array['id']);
-			//Don't add Content, only render it.
-			Backend::add('obj_comments', $comments);
+			Backend::add('comment_list', $comments);
 			Controller::addContent(Render::renderFile('comments.tpl.php'));
 		}
 		return $object;
@@ -46,7 +45,8 @@ class Comment extends TableCtl {
 
 	
 	public static function install() {
-		$toret = true;
+		$toret = self::installModel(__CLASS__ . 'Obj');
+
 		$hook = new HookObj();
 		$toret = $hook->replace(array(
 				'name'        => 'Comment Post Form',

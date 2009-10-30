@@ -41,4 +41,20 @@ class AssignmentObj extends DBObject {
 		}
 		return $toret ? $data : false;
 	}
+	
+	public function getInstallSQL() {
+		$toret = <<< END_SQL
+CREATE TABLE `assignments` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `access_type` varchar(30) NOT NULL,
+  `access_id` bigint(20) NOT NULL,
+  `role_id` bigint(20) NOT NULL,
+  `active` tinyint(1) NOT NULL,
+  `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `added` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) COMMENT='Defines Roles for different accessors.'
+END_SQL;
+		return $toret;
+	}
 }

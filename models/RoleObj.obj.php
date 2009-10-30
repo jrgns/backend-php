@@ -40,4 +40,19 @@ class RoleObj extends DBObject {
 		}
 		return $toret ? $data : false;
 	}
+
+	public function getInstallSQL() {
+		$toret = <<< END_SQL
+CREATE TABLE `roles` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `active` tinyint(1) NOT NULL,
+  `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `added` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+)
+END_SQL;
+		return $toret;
+	}
 }

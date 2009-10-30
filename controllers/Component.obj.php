@@ -88,7 +88,7 @@ class Component extends TableCtl {
 	}
 	
 	public static function install() {
-		$toret = true;
+		$toret = self::installModel(__CLASS__ . 'Obj');
 
 		$components = self::fromFolder();
 

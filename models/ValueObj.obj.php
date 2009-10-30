@@ -47,5 +47,19 @@ class ValueObj extends DBObject {
 		$database = Backend::get('DB_' . $database, $database);
 		return 'SELECT * FROM `' . $database . '`.`' . $table . '` WHERE `id` = :parameter OR `name` = :parameter';
 	}
+
+	public function getInstallSQL() {
+		$toret = <<< END_SQL
+		CREATE TABLE `values` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `value` text NOT NULL,
+  `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+)
+END_SQL;
+		return $toret;
+	}
 }
 
