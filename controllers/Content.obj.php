@@ -122,7 +122,7 @@ class Content extends TableCtl {
 	}
 	
 	public static function install() {
-		$toret = true;
+		$toret = self::installModel(__CLASS__ . 'Obj');
 
 		$permission = new PermissionObj();
 		$toret = $permission->replace(array(
