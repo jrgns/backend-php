@@ -95,21 +95,28 @@ class AreaCtl {
 			!empty(Controller::$parameters['id']) ? Controller::check_reverse_map('id', Controller::$parameters['id']) : 0
 		);
 
-		$roles = GateKeeper::permittedRoles($action, $subject, $subject_id);
-		if (!empty($_SESSION['user'])) {
-			if (Controller::$debug) {
-				if (is_object($_SESSION['user']) && property_exists($_SESSION['user'], 'roles')) {
-					Controller::addNotice('Current user roles: ' . serialize($_SESSION['user']->roles));
+		$installed = Value::get('admin_installed', false);
+		if ($installed) {
+			$roles = GateKeeper::permittedRoles($action, $subject, $subject_id);
+			if (!empty($_SESSION['user'])) {
+				if (Controller::$debug) {
+					if (is_object($_SESSION['user']) && property_exists($_SESSION['user'], 'roles')) {
+						Controller::addNotice('Current user roles: ' . serialize($_SESSION['user']->roles));
+					} else {
+						Controller::addError('No user roles');
+						$_SESSION['user']->roles = array();
+					}
+				}
+				if ($roles) {
+					$intersect = array_intersect($_SESSION['user']->roles, $roles);
+					$toret = count($intersect) ? true : false;
 				} else {
-					Controller::addError('No user roles');
-					$_SESSION['user']->roles = array();
+					$toret = $_SESSION['user']->roles;
 				}
 			}
-			if ($roles) {
-				$intersect = array_intersect($_SESSION['user']->roles, $roles);
-				$toret = count($intersect) ? true : false;
-			} else {
-				$toret = $_SESSION['user']->roles;
+		} else {
+			if (!($subject == 'admin' && in_array($action, array('install', 'post_install')))) {
+				$toret = false;
 			}
 		}
 		return $toret;
