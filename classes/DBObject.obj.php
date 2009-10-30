@@ -404,6 +404,22 @@ class DBObject {
 		return $toret;
 	}
 	
+	public function install(array $options = array()) {
+		$toret = false;
+		$drop_table = array_key_exists('drop_table', $options) ? $options['drop_table'] : true;
+		$query = $this->getInstallSQL();
+		if ($query) {
+			if ($drop_table) {
+				$table = $this->meta['table'];
+				$drop_query = new CustomQuery('DROP TABLE IF EXISTS `' . $table . '`');
+				$drop_query->execute();
+			}
+			$query = new CustomQuery($query);
+			$toret = $query->execute();
+		}
+		return $toret;
+	}
+	
 	function validate($data, $action, $options = array()) {
 		$ret_data = array();
 		$toret = true;
@@ -767,6 +783,11 @@ class DBObject {
 			$query = "DELETE FROM `$database`.`$table`";
 			$query .= " WHERE `$table`.`$id_field` = :{$table}_id LIMIT 1";
 		}
+		return $query;
+	}
+	
+	public function getInstallSQL() {
+		$query = false;
 		return $query;
 	}
 	
