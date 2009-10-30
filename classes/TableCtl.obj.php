@@ -414,4 +414,20 @@ class TableCtl extends AreaCtl {
 		}
 		return $tuple;
 	}
+	
+	public function action_install() {
+		self::install();
+		return true;
+	}
+	
+	public static function installModel($model) {
+		$toret = false;
+		if (class_exists($model, true)) {
+			$model = new $model();
+			$toret = $model->install();
+		} else {
+			Controller::addError($model . ' does not exist');
+		}
+		return $toret;
+	}
 }
