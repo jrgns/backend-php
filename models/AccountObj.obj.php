@@ -75,4 +75,29 @@ class AccountObj extends DBObject {
 		}
 		return $toret ? $data : false;
 	}
+
+	public function getInstallSQL() {
+		$toret = <<< END_SQL
+CREATE TABLE `users` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `surname` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `mobile` varchar(255) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(32) NOT NULL,
+  `salt` varchar(32) NOT NULL,
+  `confirmed` tinyint(1) NOT NULL,
+  `active` tinyint(1) NOT NULL,
+  `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `added` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UniqueEmail` (`email`),
+  UNIQUE KEY `UniqueMobile` (`mobile`),
+  UNIQUE KEY `UniqueUsername` (`username`),
+  KEY `password` (`password`)
+)
+END_SQL;
+		return $toret;
+	}
 }

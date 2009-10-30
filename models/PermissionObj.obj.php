@@ -44,4 +44,25 @@ class PermissionObj extends DBObject {
 		}
 		return $toret ? $data : false;
 	}
+		
+	public function getInstallSQL() {
+		$toret = <<< END_SQL
+CREATE TABLE `permissions` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `role` varchar(60) NOT NULL,
+  `control` tinyint(3) NOT NULL,
+  `action` varchar(60) NOT NULL,
+  `subject` varchar(60) NOT NULL,
+  `subject_id` int(11) NOT NULL,
+  `system` smallint(5) NOT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT '1',
+  `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `added` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `role_type` (`role`,`action`,`subject`,`subject_id`),
+  KEY `subaction` (`subject`,`action`,`subject_id`)
+)
+END_SQL;
+		return $toret;
+	}
 }
