@@ -27,6 +27,7 @@ class Admin extends AreaCtl {
 
 				$components = array_flatten($components, null, 'name');
 
+				//Why is this here?
 				$hook = new HookObj();
 				$hook->truncate();
 				foreach($components as $component) {
@@ -42,11 +43,20 @@ class Admin extends AreaCtl {
 				Value::set('admin_installed', date('Y-m-d H:i:s'));
 				Controller::addSuccess('Backend Install Successful');
 			}
-			//TODO Returning false at the moment, to make backend output the default HTML...
+			Controller::redirect('?q=admin/post_install');
 		} else {
 			Controller::addError('Admin installation script already ran at ' . $installed);
 		}
 		return $toret;
+	}
+	
+	function action_post_install() {
+		if (Value::get('admin_installed', false)) {
+			Backend::add('Sub Title', 'Installation Successfull');
+		} else {
+			Backend::add('Sub Title', 'Installation Failed');
+		}
+		return true;
 	}
 	
 	function action_update() {
@@ -122,6 +132,19 @@ class Admin extends AreaCtl {
 				'sequence'    => 0,
 			)
 		) && $toret;
+
+		$permission = new PermissionObj();
+		$toret = $permission->replace(array(
+				'role'       => 'anonymous',
+				'control'    => '100',
+				'action'     => 'post_install',
+				'subject'    => 'admin',
+				'subject_id' => 0,
+				'system'     => 0,
+				'active'     => 1,
+			)
+		) && $toret;
+
 		return $toret;
 	}
 }
