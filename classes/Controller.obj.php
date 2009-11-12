@@ -293,7 +293,11 @@ class Controller {
 	}
 
 	protected static function parseQuery($query = false) {
-		$query = $query ? $query : (array_key_exists('q', $_REQUEST) ? $_REQUEST['q'] : Value::get('default_query', 'content/list'));
+		if (empty($_REQUEST['q'])) {
+			$query = Value::get('default_query', 'content/list/' . Value::get('list_length', 5));
+		} else {
+			$query = $_REQUEST['q'];
+		}
 		$terms = explode('/', $query);
 		$terms = array_filter($terms);
 
@@ -305,13 +309,17 @@ class Controller {
 		return $terms;
 	}
 
-	protected static function checkTuple($area = 'content', $action = 'display', $id = 0, $count = 30) {
-		return array(
+	protected static function checkTuple($area = 'content', $action = 'display', $id = null) {
+		$toret = array(
 			'area'   => $area,
 			'action' => $action,
-			'id'     => $id,
-			'count'  => $count,
 		);
+		if ($action == 'list') {
+			$toret['count'] = $id;
+		} else {
+			$toret['id'] = $id;
+		}
+		return $toret;
 	}
 	
 	public static function check_map($what, $value) {
