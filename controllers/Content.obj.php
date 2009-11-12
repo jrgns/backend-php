@@ -11,6 +11,15 @@
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
 class Content extends TableCtl {
+	protected function getTabLinks($action) {
+		return array();
+	}
+	
+	public function html_list($content) {
+		parent::html_list($content);
+		Backend::add('Sub Title', '');
+	}
+
 	function html_display($content) {
 		$toret = false;
 		if ($content instanceof DBObject) {
@@ -156,7 +165,7 @@ class Content extends TableCtl {
 		if ($tuple['action'] == 'toggle') {
 			$tuple['field'] = $tuple['count'];
 			unset($tuple['count']);
-		} else if (!$tuple['id'] && !in_array($tuple['action'], array('create', 'read', 'update', 'delete', 'list', 'display', 'toggle'))) {
+		} else if (empty($tuple['id']) && !in_array($tuple['action'], array('create', 'read', 'update', 'delete', 'list', 'display', 'toggle'))) {
 			$tuple['id']     = $tuple['action'];
 			$tuple['action'] = 'display';
 		}
