@@ -142,7 +142,10 @@ class Render {
 		$toret = false;
 		if (file_exists($template)) {
 			$vars = $vars ? $vars : Backend::getAll();
-			extract($vars);
+
+			$keys = array_keys($vars);
+			$keys = array_map(create_function('$elm', "return str_replace(' ', '_', \$elm);"), $keys);
+			extract(array_combine($keys, array_values($vars)));
 			ob_start();
 			include($template);
 			$toret = ob_get_clean();

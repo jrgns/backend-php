@@ -40,7 +40,8 @@ class CommentObj extends DBObject {
 	}
 
 	public function getInstallSQL() {
-		$toret <<< "CREATE TABLE `comments` (
+		$toret = <<< END_SQL
+CREATE TABLE `comments` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `user_id` bigint(20) NOT NULL,
   `foreign_table` varchar(255) NOT NULL,
@@ -52,7 +53,8 @@ class CommentObj extends DBObject {
   `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `added` datetime NOT NULL,
   PRIMARY KEY (`id`)
-)";
+)
+END_SQL;
 		return $toret;
 	}
 }
