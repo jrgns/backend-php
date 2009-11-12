@@ -28,9 +28,11 @@ class Value extends TableCtl {
 	
 	public static function set($name, $new_value) {
 		$new_value = base64_encode(serialize($new_value));
-		$data = self::get($name);
-		if (!is_null($data)) {
-			$value = new ValueObj($data['id']);
+
+		$old_val = new ValueObj();
+		$old_val = $old_val->retrieve($name);
+		if (!is_null($old_val)) {
+			$value = new ValueObj($old_val['id']);
 			if ($value) {
 				$toret = $value->update(array('value' => $new_value));
 			}
