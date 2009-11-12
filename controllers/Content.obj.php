@@ -135,6 +135,16 @@ class Content extends TableCtl {
 				'active'     => 1,
 			)
 		) && $toret;
+		$toret = $permission->replace(array(
+				'role'       => 'anonymous',
+				'control'    => '100',
+				'action'     => 'list',
+				'subject'    => 'content',
+				'subject_id' => 0,
+				'system'     => 0,
+				'active'     => 1,
+			)
+		) && $toret;
 		return $toret;
 	}
 
