@@ -293,7 +293,7 @@ class Controller {
 	}
 
 	protected static function parseQuery($query = false) {
-		$query = $query ? $query : (array_key_exists('q', $_REQUEST) ? $_REQUEST['q'] : '');
+		$query = $query ? $query : (array_key_exists('q', $_REQUEST) ? $_REQUEST['q'] : Value::get('default_query', 'content/list'));
 		$terms = explode('/', $query);
 		$terms = array_filter($terms);
 
