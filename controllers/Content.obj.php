@@ -11,10 +11,6 @@
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
 class Content extends TableCtl {
-	protected function getTabLinks($action) {
-		return array();
-	}
-	
 	public function html_list($content) {
 		parent::html_list($content);
 		Backend::add('Sub Title', '');
@@ -132,28 +128,8 @@ class Content extends TableCtl {
 	
 	public static function install() {
 		$toret = self::installModel(__CLASS__ . 'Obj');
-
-		$permission = new PermissionObj();
-		$toret = $permission->replace(array(
-				'role'       => 'anonymous',
-				'control'    => '100',
-				'action'     => 'display',
-				'subject'    => 'content',
-				'subject_id' => 0,
-				'system'     => 0,
-				'active'     => 1,
-			)
-		) && $toret;
-		$toret = $permission->replace(array(
-				'role'       => 'anonymous',
-				'control'    => '100',
-				'action'     => 'list',
-				'subject'    => 'content',
-				'subject_id' => 0,
-				'system'     => 0,
-				'active'     => 1,
-			)
-		) && $toret;
+		$toret = Permission::add('anonymous', 'display', 'content') && $toret;
+		$toret = Permission::add('anonymous', 'list', 'content') && $toret;
 		return $toret;
 	}
 
