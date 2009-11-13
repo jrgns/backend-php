@@ -11,6 +11,29 @@
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
 class Hook extends TableCtl {
+	public static function add($hook, $type, $class, array $options = array()) {
+		
+		$mode        = array_key_exists('mode', $options)        ? $options['mode'] : '*';
+		$name        = array_key_exists('name', $options)        ? $options['name'] : ucwords($class . ' ' . $type . ' ' . $hook);
+		$description = array_key_exists('description', $options) ? $options['description'] : '';
+		$method      = array_key_exists('method', $options)      ? $options['method'] : 'hook_' . ($type == 'post' ? 'post_' : '') . strtolower($hook);
+		$sequence    = array_key_exists('sequence', $options)    ? $options['sequence'] : 0;
+
+		$hook = new HookObj();
+		return $hook->replace(
+			array(
+				'class'       => $class,
+				'hook'        => $hook,
+				'type'        => $type,
+				'mode'        => $mode,
+				'name'        => $name,
+				'description' => $description,
+				'method'      => $method,
+				'sequence'    => $sequence,
+			)
+		);
+	}
+
 	public static function get($hook, $type = 'pre') {
 		$params = array(':type' => $type, ':hook' => $hook);
 		$query = 'SELECT * FROM `hooks` LEFT JOIN `components` ON `hooks`.`class` = `components`.`name` WHERE `hook` = :hook AND `type` = :type AND `hooks`.`active` = 1 AND `components`.`active` = 1';
