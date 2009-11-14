@@ -309,13 +309,14 @@ class DBObject {
 	}
 	
 	public function retrieve($parameter) {
-		$toret = false;
+		$toret = null;
 		if ($this->checkConnection()) {
 			$query = $this->getRetrieveSQL();
 			if ($query) {
 				$stmt = $this->db->prepare($query);
 				if ($stmt->execute(array(':parameter' => $parameter))) {
 					$toret = $stmt->fetch(PDO::FETCH_ASSOC);
+					$toret = $toret ? $toret : null;
 				}
 			} else {
 				die('error');
