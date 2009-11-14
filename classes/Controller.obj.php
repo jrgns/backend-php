@@ -143,6 +143,9 @@ class Controller {
 		if ($controller instanceof AreaCtl) {
 			Hook::run('action', 'pre');
 			$result = $controller->action();
+			if (Controller::$debug) {
+				Controller::addNotice('Code for this page is in the ' . get_class($controller) . ' Controller');
+			}
 			Hook::run('action', 'post');
 		} else {
 			Controller::whoops();
