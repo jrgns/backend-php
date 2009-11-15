@@ -87,29 +87,8 @@ class View {
 
 	public static function install() {
 		$toret = true;
-		$hook = new HookObj();
-		$toret = $hook->replace(array(
-				'name'        => 'View Pre Init',
-				'description' => '',
-				'mode'        => '*',
-				'type'        => 'pre',
-				'hook'        => 'init',
-				'class'       => 'View',
-				'method'      => 'hook_init',
-				'sequence'    => 0,
-			)
-		) && $toret;
-		$toret = $hook->replace(array(
-				'name'        => 'View Pre Output',
-				'description' => '',
-				'mode'        => '*',
-				'type'        => 'pre',
-				'hook'        => 'output',
-				'class'       => 'View',
-				'method'      => 'hook_output',
-				'sequence'    => 1000,
-			)
-		) && $toret;
+		Hook::add('init', 'pre', __CLASS__, array('global' => 1)) && $toret;
+		Hook::add('output', 'pre', __CLASS__, array('global' => 1)) && $toret;
 		return $toret;
 	}
 }
