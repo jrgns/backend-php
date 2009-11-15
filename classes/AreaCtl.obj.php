@@ -20,7 +20,7 @@ class AreaCtl {
 	/**
 	 * The standard action for an Area
 	 */
-	public function action() {
+	public final function action() {
 		$toret = null;
 		if (array_key_exists('msg', $_REQUEST)) {
 			Controller::addError(self::getError($_REQUEST['msg']));
@@ -115,7 +115,7 @@ class AreaCtl {
 				}
 			}
 		} else {
-			if (!($subject == 'admin' && in_array($action, array('install', 'post_install')))) {
+			if (!($subject == 'admin' && in_array($action, array('install', 'pre_install', 'post_install')))) {
 				$toret = false;
 			}
 		}

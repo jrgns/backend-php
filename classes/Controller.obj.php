@@ -1,4 +1,5 @@
 <?php
+//die('Fix permissions for account login / logout, Account::action / Account::hook_action');
 /**
  * The file that defines the Controller class.
  *
@@ -296,11 +297,18 @@ class Controller {
 	}
 
 	protected static function parseQuery($query = false) {
-		if (empty($_REQUEST['q'])) {
-			$query = Value::get('default_query', 'content/list/' . Value::get('list_length', 5));
-		} else {
-			$query = $_REQUEST['q'];
+		if (!$query) {
+			if (empty($_REQUEST['q'])) {
+				$query = Value::get('default_query', 'content/list/' . Value::get('list_length', 5));
+			} else {
+				$query = $_REQUEST['q'];
+			}
 		}
+		
+		if (!Value::get('admin_installed', false) && !in_array($query, array('admin/pre_install', 'admin/install'))) {
+			$query = 'admin/pre_install';
+		}
+
 		$terms = explode('/', $query);
 		$terms = array_filter($terms);
 

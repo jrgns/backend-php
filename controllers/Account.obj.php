@@ -24,24 +24,6 @@ class Account extends TableCtl {
 		return $toret;
 	}
 
-	public function action() {
-		$toret = null;
-		if (array_key_exists('user', $_SESSION)) {
-			if (Controller::$action == 'display') {
-				if ($_SESSION['user']->id == 0) {
-					Controller::$action = 'signup';
-				} else {
-					Controller::$action = 'update';
-					if (Controller::$id != $_SESSION['user']->id) {
-						Controller::$id = $_SESSION['user']->id;
-					}
-				}
-			}
-		}
-		$toret = parent::action();
-		return $toret;
-	}
-	
 	function action_login($username = false, $password = false) {
 		$toret = false;
 		if (is_post()) {
@@ -74,12 +56,12 @@ class Account extends TableCtl {
 						Controller::redirect($location);
 					} else {
 						Controller::addError(Account::getError(2));
-						Controller::redirect('?q=account&msg=2');
+						Controller::redirect();
 						$toret = false;
 					}
 				} else if (empty($_SESSION['cookie_is_working'])) {
 					Controller::addError(Account::getError(1));
-					Controller::redirect('?q=account&msg=1');
+					Controller::redirect();
 					$toret = false;
 				} else {
 					Controller::addError('Please supply a username and password');
@@ -151,10 +133,14 @@ class Account extends TableCtl {
 		$object = new AccountObj();
 		$data = $object->fromPost();
 		if (is_post()) {
-			if ($object->create($data)) {
+			$options = array('confirmed' => !empty($_SESSION['just_installed']));
+			if ($object->create($data, $options)) {
+				if (!empty($_SESSION['just_installed'])) {
+					unset($_SESSION['just_installed']);
+				}
 				$toret = true;
 				Controller::addSuccess('Signed up!');
-				$this->postSignup($object);
+				$this->postSignup($object, $options);
 			} else {
 				$error = $object->getLastError();
 				if (!empty($error[1])) {
@@ -168,7 +154,10 @@ class Account extends TableCtl {
 					}
 				}
 			}
+		} else if (!empty($_SESSION['just_installed'])) {
+			$data['username'] = 'admin';
 		}
+		
 		Backend::add('obj_values', $data);
 		return $toret ? $object : false;
 	}
@@ -236,8 +225,25 @@ class Account extends TableCtl {
 		Backend::add('user', $user);
 	}
 	
-	public function postSignup($object) {
-		if (Backend::getConfig('backend.application.user.confirm')) {
+	public static function hook_action() {
+		$toret = null;
+		if (array_key_exists('user', $_SESSION)) {
+			if (Controller::$action == 'display') {
+				if ($_SESSION['user']->id == 0) {
+					Controller::$action = 'signup';
+				} else {
+					Controller::$action = 'update';
+					if (Controller::$id != $_SESSION['user']->id) {
+						Controller::$id = $_SESSION['user']->id;
+					}
+				}
+			}
+		}
+		return $toret;
+	}
+	
+	public function postSignup($object, array $options = array()) {
+		if (Backend::getConfig('backend.application.user.confirm') && empty($options['confirmed'])) {
 			$this->confirmUser($object);
 		}
 	}
@@ -287,69 +293,14 @@ END;
 	public static function install() {
 		$toret = self::installModel(__CLASS__ . 'Obj');
 
-		$hook = new HookObj();
-		$toret = $hook->replace(array(
-				'name'        => 'Account Pre Start',
-				'description' => '',
-				'mode'        => '*',
-				'type'        => 'pre',
-				'hook'        => 'start',
-				'class'       => 'Account',
-				'method'      => 'hook_start',
-				'sequence'    => '0',
-			)
-		) && $toret;
-
-		$permission = new PermissionObj();
-		$toret = $permission->replace(array(
-				'role'       => 'anonymous',
-				'control'    => '100',
-				'action'     => 'signup',
-				'subject'    => 'account',
-				'subject_id' => 0,
-				'system'     => 0,
-				'active'     => 1,
-			)
-		) && $toret;
-		$toret = $permission->replace(array(
-				'role'       => 'anonymous',
-				'control'    => '100',
-				'action'     => 'confirm',
-				'subject'    => 'account',
-				'subject_id' => 0,
-				'system'     => 0,
-				'active'     => 1,
-			)
-		) && $toret;
-		$toret = $permission->replace(array(
-				'role'       => 'anonymous',
-				'control'    => '100',
-				'action'     => 'login',
-				'subject'    => 'account',
-				'subject_id' => 0,
-				'system'     => 0,
-				'active'     => 1,
-			)
-		) && $toret;
-		$toret = $permission->replace(array(
-				'role'       => 'authenticated',
-				'control'    => '100',
-				'action'     => 'logout',
-				'subject'    => 'account',
-				'subject_id' => 0,
-				'system'     => 0,
-				'active'     => 1,
-			)
-		) && $toret;
+		$toret = Hook::add('start', 'pre', __CLASS__) && $toret;
+		$toret = Hook::add('action', 'pre', __CLASS__) && $toret;
+		
+		$toret = Permission::add('anonymous', 'signup', 'account') && $toret;
+		$toret = Permission::add('anonymous', 'confirm', 'account') && $toret;
+		$toret = Permission::add('anonymous', 'login', 'account') && $toret;
+		$toret = Permission::add('authenticated', 'logout', 'account') && $toret;
 		return $toret;
-	}
-
-	public static function checkTuple($tuple) {
-		if (!in_array($tuple['action'], array('create', 'read', 'update', 'delete', 'list', 'display', 'login', 'logout', 'confirm')) && !$tuple['id']) {
-			$tuple['id']     = $tuple['action'];
-			$tuple['action'] = 'display';
-		}
-		return $tuple;
 	}
 }
 

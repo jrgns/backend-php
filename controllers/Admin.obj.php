@@ -11,12 +11,18 @@
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
 class Admin extends AreaCtl {
+	public function action_pre_install() {
+		Controller::addNotice('This application has not been installed yet');
+		Controller::addContent(Render::renderFile('uninstalled_msg.tpl.php'));
+		return true;
+	}
+	
 	/**
 	* Do the initial install for the different components.
 	*
 	* @todo Check that this function is only called once, or by the super user (Use values to record when it was ran
 	*/
-	function action_install() {
+	public function action_install() {
 		$toret = false;
 		$installed = Value::get('admin_installed', false);
 		if (!$installed) {
@@ -42,13 +48,15 @@ class Admin extends AreaCtl {
 				}
 			}
 			if ($toret) {
+				$_SESSION['just_installed'] = true;
 				Value::set('admin_installed', date('Y-m-d H:i:s'));
 				Controller::addSuccess('Backend Install Successful');
+				Controller::redirect('?q=account/signup');
 			}
 		} else {
 			Controller::addError('Admin installation script already ran at ' . $installed);
+			Controller::redirect('?q=admin/post_install');
 		}
-		Controller::redirect('?q=admin/post_install');
 		return $toret;
 	}
 	
@@ -127,6 +135,7 @@ class Admin extends AreaCtl {
 		$toret = Hook::add('display', 'post', __CLASS__, array('mode' => 'html')) && $toret;
 
 		$toret = Permission::add('anonymous', 'post_install', 'admin') && $toret;
+		$toret = Permission::add('anonymous', 'pre_install', 'admin') && $toret;
 
 		return $toret;
 	}
