@@ -22,18 +22,26 @@ class Permission extends TableCtl {
 		}
 		$control = array_key_exists('control', $options) ? $options['control'] : '100';
 		$system  = array_key_exists('system',  $options) ? $options['system']  : 0;
-		$permission = new PermissionObj();
-		return $permission->replace(
-			array(
-				'role'       => $role,
-				'action'     => $action,
-				'subject'    => $subject,
-				'subject_id' => $subject_id,
-				'control'    => $control,
-				'system'     => $system,
-				'active'     => 1,
-			)
+		
+		$data = array(
+			'role'       => $role,
+			'action'     => $action,
+			'subject'    => $subject,
+			'subject_id' => $subject_id,
+			'control'    => $control,
+			'system'     => $system,
+			'active'     => 1,
 		);
+
+		$permission = new PermissionObj();
+		if ($permission->replace($data)) {
+			Controller::addSuccess('Added permission to ' . $action . ' for ' . $role);
+			$toret = true;
+		} else {
+			Controller::addError('Could not add permission to ' . $action . ' for ' . $role);
+			$toret = false;
+		}
+		return $toret;
 	}
 
 	public static function install() {

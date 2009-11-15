@@ -36,10 +36,10 @@ class GateManager extends AreaCtl {
 		if ($id) {
 			$toret->role = Role::retrieve(array('id' => $id));
 			if ($toret->role) {
-				$query = new CustomQuery("SELECT * FROM `assignments` WHERE `role_id` = :id");
-				$toret->assignments = $query->fetchAll(array(':id' => $id));
+				$query = new CustomQuery("SELECT * FROM `permissions` WHERE `role` = :role");
+				$toret->permissions = $query->fetchAll(array(':role' => $toret->role->array['name']));
 			} else {
-				$toret->assignments = null;
+				$toret->permissions = null;
 			}
 		} else {
 			$toret->roles = Role::retrieve();
@@ -47,18 +47,18 @@ class GateManager extends AreaCtl {
 		return $toret;
 	}
 	
-	public function html_roles($object) {
+	public function html_roles($result) {
 		Backend::add('TabLinks', $this->getTabLinks('permissions'));
 		if (Controller::$id) {
 			Backend::add('Sub Title', 'GateKeeper Roles');
-			if ($object->role) {
-				Backend::add('Sub Title', 'Role: ' . $object->role->array['name']);
-				Backend::add('Object', $object->role);
+			if ($result->role) {
+				Backend::add('Sub Title', 'Role: ' . $result->role->array['name']);
+				Backend::add('Result', $result);
 				Controller::addContent(Render::renderFile('role_display.tpl.php'));
 			}
 		} else {
 			Backend::add('Sub Title', 'GateKeeper Roles');
-			Backend::add('Object', $object->roles);
+			Backend::add('Object', $result->roles);
 			Controller::addContent(Render::renderFile('role_list.tpl.php'));
 		}
 	}
@@ -135,11 +135,7 @@ class GateManager extends AreaCtl {
 			$PermissionObj->truncate();
 
 			foreach($permits as $permit) {
-				if ($PermissionObj->create($permit)) {
-					Controller::addSuccess('Added permission to ' . $permit['action'] . ' to ' . $permit['role']);
-				} else {
-					$toret = false;
-				}
+				$toret = Permission::add($permit['role'], $permit['action'], $permit['subject'], $permit['subject_id']) && $toret;
 			}
 		}
 		return $toret;
