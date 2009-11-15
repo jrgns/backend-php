@@ -28,6 +28,7 @@ class HookObj extends DBObject {
 			'class'       => 'string',
 			'method'      => 'string',
 			'sequence'    => 'integer',
+			'global'      => 'boolean',
 			'active'      => 'boolean',
 			'modified'    => 'lastmodified',
 			'added'       => 'dateadded',
