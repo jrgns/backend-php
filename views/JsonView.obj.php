@@ -18,7 +18,6 @@ class JsonView extends TextView {
 	function __construct() {
 		parent::__construct();
 		$this->mode = 'json';
-		$this->mime_type = 'text/json';
 	}
 	
 	public static function hook_output($to_print) {
@@ -32,24 +31,15 @@ class JsonView extends TextView {
 				$to_print = !empty($to_print->object) ? $to_print->object : $to_print->array;
 			}
 			break;
+		default:
+			break;
 		}
 		return json_encode($to_print);
 	}
 
 	public static function install() {
 		$toret = true;
-		$hook = new HookObj();
-		$toret = $hook->replace(array(
-				'name'        => 'JsonView Pre Output',
-				'description' => '',
-				'mode'        => 'json',
-				'type'        => 'pre',
-				'hook'        => 'output',
-				'class'       => 'JsonView',
-				'method'      => 'hook_output',
-				'sequence'    => 0,
-			)
-		) && $toret;
+		$toret = Hook::add('output', 'pre', __CLASS__, array('mode' => 'json', 'global' => 1)) && $toret;
 		return $toret;
 	}
 }

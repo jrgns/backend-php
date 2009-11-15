@@ -11,6 +11,11 @@
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
 class Tag extends TableCtl {
+	protected function getTabLinks($action) {
+		$links = $action == 'display' ? array() : parent::getTabLinks($action);
+		return $links;
+	}
+	
 	public function action_display() {
 		$toret = parent::action_display();
 		if ($toret instanceof DBObject) {
@@ -110,51 +115,13 @@ class Tag extends TableCtl {
 	public static function install() {
 		$toret = self::installModel(__CLASS__ . 'Obj');
 
-		$hook = new HookObj();
-		$toret = $hook->replace(array(
-				'name'        => 'Tag Pre Form',
-				'description' => '',
-				'mode'        => '*',
-				'type'        => 'pre',
-				'hook'        => 'form',
-				'class'       => 'Tag',
-				'method'      => 'hook_form',
-				'sequence'    => 0,
-			)
-		) && $toret;
-		$toret = $hook->replace(array(
-				'name'        => 'Tag Post Display',
-				'description' => '',
-				'mode'        => '*',
-				'type'        => 'post',
-				'hook'        => 'display',
-				'class'       => 'Tag',
-				'method'      => 'hook_post_display',
-				'sequence'    => 0,
-			)
-		) && $toret;
-		$toret = $hook->replace(array(
-				'name'        => 'Tag Post Update',
-				'description' => '',
-				'mode'        => '*',
-				'type'        => 'post',
-				'hook'        => 'update',
-				'class'       => 'Tag',
-				'method'      => 'hook_post_update',
-				'sequence'    => 0,
-			)
-		) && $toret;
-		$toret = $hook->replace(array(
-				'name'        => 'Tag Post Create',
-				'description' => '',
-				'mode'        => '*',
-				'type'        => 'post',
-				'hook'        => 'create',
-				'class'       => 'Tag',
-				'method'      => 'hook_post_create',
-				'sequence'    => 0,
-			)
-		) && $toret;
+		$toret = Permission::add('anonymous', 'display', class_name(__CLASS__)) && $toret;
+		
+		$toret = Hook::add('form',    'pre',  __CLASS__);
+		$toret = Hook::add('display', 'post', __CLASS__);
+		$toret = Hook::add('update',  'post', __CLASS__);
+		$toret = Hook::add('create',  'post', __CLASS__);
+
 		return $toret;
 	}
 }

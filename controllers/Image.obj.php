@@ -44,4 +44,11 @@ class Image extends File {
 		}
 		return $toret;
 	}
+
+	public static function install() {
+		$toret = self::installModel(__CLASS__ . 'Obj');
+
+		$toret = Permission::add('anonymous', 'display', 'image') && $toret;
+		return $toret;
+	}
 }

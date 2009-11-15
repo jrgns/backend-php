@@ -55,28 +55,8 @@ class HtmlView extends View {
 	public static function install() {
 		$toret = true;
 		$hook = new HookObj();
-		$toret = $hook->replace(array(
-				'name'        => 'HtmlView Pre Display',
-				'description' => '',
-				'mode'        => 'html',
-				'type'        => 'pre',
-				'hook'        => 'output',
-				'class'       => 'HtmlView',
-				'method'      => 'hook_output',
-				'sequence'    => 0,
-			)
-		) && $toret;
-		$toret = $hook->replace(array(
-				'name'        => 'HtmlView Post Display',
-				'description' => '',
-				'mode'        => 'html',
-				'type'        => 'post',
-				'hook'        => 'display',
-				'class'       => 'HtmlView',
-				'method'      => 'hook_post_display',
-				'sequence'    => 100,
-			)
-		) && $toret;
+		Hook::add('output', 'pre', __CLASS__, array('mode' => 'html', 'global' => 1)) && $toret;
+		Hook::add('display', 'post', __CLASS__, array('mode' => 'html', 'global' => 1, 'sequence' => 100)) && $toret;
 		return $toret;
 	}
 }

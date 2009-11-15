@@ -30,18 +30,7 @@ class TextView extends View {
 
 	public static function install() {
 		$toret = true;
-		$hook = new HookObj();
-		$toret = $hook->replace(array(
-				'name'        => 'TextView Pre Output',
-				'description' => '',
-				'mode'        => 'text',
-				'type'        => 'pre',
-				'hook'        => 'output',
-				'class'       => 'TextView',
-				'method'      => 'hook_output',
-				'sequence'    => 0,
-			)
-		) && $toret;
+		$toret = Hook::add('output', 'pre', __CLASS__, array('mode' => 'text', 'global' => 1)) && $toret;
 		return $toret;
 	}
 }

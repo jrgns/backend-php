@@ -64,14 +64,12 @@ class AccountObj extends DBObject {
 		}
 		if ($toret && $action == 'create') {
 			$data['salt'] = get_random('numeric');
-			var_dump($data);
 			$data['password'] = md5($data['salt'] . $data['password'] . Controller::$salt);
-			if (Backend::getConfig('backend.application.user.confirm')) {
+			if (Backend::getConfig('backend.application.user.confirm') && empty($options['confirmed'])) {
 				$data['confirmed'] = false;
 			} else {
 				$data['confirmed'] = true;
 			}
-			var_dump($data);
 		}
 		return $toret ? $data : false;
 	}

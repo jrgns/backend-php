@@ -77,7 +77,7 @@ class View {
 			$default_view = Backend::getConfig('backend.default.view', 'HtmlView');
 			if ($default_view && class_exists($default_view, true) && method_exists($default_view, 'hook_output')) {
 				$to_print = call_user_func_array(array($default_view, 'hook_output'), array($to_print));
-				$to_print = Render::runFilters($to_print);
+				$to_print = Render::hook_output($to_print);
 			}
 		}
 		echo $to_print;
@@ -87,29 +87,8 @@ class View {
 
 	public static function install() {
 		$toret = true;
-		$hook = new HookObj();
-		$toret = $hook->replace(array(
-				'name'        => 'View Pre Init',
-				'description' => '',
-				'mode'        => '*',
-				'type'        => 'pre',
-				'hook'        => 'init',
-				'class'       => 'View',
-				'method'      => 'hook_init',
-				'sequence'    => 0,
-			)
-		) && $toret;
-		$toret = $hook->replace(array(
-				'name'        => 'View Pre Output',
-				'description' => '',
-				'mode'        => '*',
-				'type'        => 'pre',
-				'hook'        => 'output',
-				'class'       => 'View',
-				'method'      => 'hook_output',
-				'sequence'    => 1000,
-			)
-		) && $toret;
+		Hook::add('init', 'pre', __CLASS__, array('global' => 1)) && $toret;
+		Hook::add('output', 'pre', __CLASS__, array('global' => 1, 'sequence' => 1000)) && $toret;
 		return $toret;
 	}
 }

@@ -1,4 +1,5 @@
 <?php
+//die('Fix permissions for account login / logout, Account::action / Account::hook_action');
 /**
  * The file that defines the Controller class.
  *
@@ -127,7 +128,7 @@ class Controller {
 		$data = null;
 		
 		//Control
-		$control_name = class_name(self::$area);
+		$control_name = class_name(self::parameter('area'));
 		if (!Component::isActive($control_name, true)) {
 			if (Controller::$debug) {
 				Controller::addError('Component is Inactive');
@@ -143,6 +144,9 @@ class Controller {
 		if ($controller instanceof AreaCtl) {
 			Hook::run('action', 'pre');
 			$result = $controller->action();
+			if (Controller::$debug) {
+				Controller::addNotice('Code for this page is in the ' . get_class($controller) . ' Controller');
+			}
 			Hook::run('action', 'post');
 		} else {
 			Controller::whoops();
@@ -293,35 +297,37 @@ class Controller {
 	}
 
 	protected static function parseQuery($query = false) {
-		if (empty($_REQUEST['q'])) {
-			$query = Value::get('default_query', 'content/list/' . Value::get('list_length', 5));
-		} else {
-			$query = $_REQUEST['q'];
+		if (!$query) {
+			if (empty($_REQUEST['q'])) {
+				$query = Value::get('default_query', 'content/list/' . Value::get('list_length', 5));
+			} else {
+				$query = $_REQUEST['q'];
+			}
 		}
+		
+		if (!Value::get('admin_installed', false) && !in_array($query, array('admin/pre_install', 'admin/install'))) {
+			$query = 'admin/pre_install';
+		}
+
 		$terms = explode('/', $query);
 		$terms = array_filter($terms);
-
-		$terms = call_user_func_array(array('Controller', 'checkTuple'), $terms);
 		
-		if (Component::isActive(class_name($terms['area'])) && method_exists(class_name($terms['area']), 'checkTuple')) {
-			$terms = call_user_func(array(class_name($terms['area']), 'checkTuple'), $terms);
+		$default_parameters = array('area', 'action');
+		
+		foreach($terms as $key => $value) {
+			if (array_key_exists($key, $default_parameters)) {
+				$parameters[$default_parameters[$key]] = $value;
+			} else {
+				$parameters[] = $value;
+			}
 		}
-		return $terms;
+
+		if (Component::isActive(class_name($parameters['area'])) && method_exists(class_name($parameters['area']), 'checkParameters')) {
+			$parameters = call_user_func(array(class_name($parameters['area']), 'checkParameters'), $parameters);
+		}
+		return $parameters;
 	}
 
-	protected static function checkTuple($area = 'content', $action = 'display', $id = null) {
-		$toret = array(
-			'area'   => $area,
-			'action' => $action,
-		);
-		if ($action == 'list') {
-			$toret['count'] = $id;
-		} else {
-			$toret['id'] = $id;
-		}
-		return $toret;
-	}
-	
 	public static function check_map($what, $value) {
 		$map = Backend::get($what . '_maps');
 		if (is_array($map)) {

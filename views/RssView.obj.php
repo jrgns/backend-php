@@ -31,18 +31,7 @@ class RssView extends View {
 
 	public static function install() {
 		$toret = true;
-		$hook = new HookObj();
-		$toret = $hook->replace(array(
-				'name'        => 'RssView Pre Output',
-				'description' => '',
-				'mode'        => 'rss',
-				'type'        => 'pre',
-				'hook'        => 'output',
-				'class'       => 'RssView',
-				'method'      => 'hook_output',
-				'sequence'    => 0,
-			)
-		) && $toret;
+		$toret = Hook::add('output', 'pre', __CLASS__, array('mode' => 'rss', 'global' => 1)) && $toret;
 		return $toret;
 	}
 }

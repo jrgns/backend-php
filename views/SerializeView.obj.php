@@ -14,17 +14,14 @@
 /**
  * Default class to handle SerializeView specific functions
  */
-class SerializeView extends View {
+class SerializeView extends TextView {
 	function __construct() {
 		parent::__construct();
 		$this->mode = 'serialize';
-		$this->mime_type = 'text/plain';
 	}
 	
 	public static function hook_output($to_print) {
-		if (!headers_sent()) {
-			header('Content-Type: text/plain');
-		}
+		$to_print = parent::hook_output($to_print);
 		switch (Controller::$action) {
 		case 'list':
 			$to_print = $to_print instanceof DBObject ? $to_print->list : $to_print;
@@ -34,6 +31,8 @@ class SerializeView extends View {
 				$to_print = !empty($to_print->object) ? $to_print->object : $to_print->array;
 			}
 			break;
+		default:
+			break;
 		}
 		//TODO check options to see if it should be encoded as well
 		return serialize($to_print);
@@ -41,18 +40,7 @@ class SerializeView extends View {
 
 	public static function install() {
 		$toret = true;
-		$hook = new HookObj();
-		$toret = $hook->replace(array(
-				'name'        => 'SerializeView Pre Output',
-				'description' => '',
-				'mode'        => 'serialize',
-				'type'        => 'pre',
-				'hook'        => 'output',
-				'class'       => 'SerializeView',
-				'method'      => 'hook_output',
-				'sequence'    => 0,
-			)
-		) && $toret;
+		$toret = Hook::add('output', 'pre', __CLASS__, array('mode' => 'serialize', 'global' => 1)) && $toret;
 		return $toret;
 	}
 }

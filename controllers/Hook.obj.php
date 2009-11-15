@@ -11,9 +11,56 @@
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
 class Hook extends TableCtl {
+	public static function add($hook, $type, $class, array $options = array()) {
+		$mode        = array_key_exists('mode', $options)        ? $options['mode'] : '*';
+		$name        = array_key_exists('name', $options)        ? $options['name'] : ucwords($class . ' ' . $type . ' ' . $hook);
+		$description = array_key_exists('description', $options) ? $options['description'] : '';
+		$method      = array_key_exists('method', $options)      ? $options['method'] : 'hook_' . ($type == 'post' ? 'post_' : '') . strtolower($hook);
+		$global      = array_key_exists('global', $options)      ? $options['global'] : 0;
+		$sequence    = array_key_exists('sequence', $options)    ? $options['sequence'] : 0;
+		
+		//Certain hooks should be global
+		if (in_array($hook, array('init'))) {
+			$global = 1;
+		}
+		
+		$data = array(
+			'class'       => $class,
+			'hook'        => $hook,
+			'type'        => $type,
+			'mode'        => $mode,
+			'name'        => $name,
+			'description' => $description,
+			'method'      => $method,
+			'global'      => $global,
+			'sequence'    => $sequence,
+		);
+		$hook = new HookObj();
+		if ($hook->replace($data)) {
+			Controller::addSuccess('Added hook ' . $name . '(' . $class . '::' . $method . ')');
+			$toret = true;
+		} else {
+			Controller::addError('Could not add hook ' . $name . '(' . $class . '::' . $method . ')');
+			$toret = false;
+		}
+		return $toret;
+	}
+
 	public static function get($hook, $type = 'pre') {
 		$params = array(':type' => $type, ':hook' => $hook);
-		$query = 'SELECT * FROM `hooks` LEFT JOIN `components` ON `hooks`.`class` = `components`.`name` WHERE `hook` = :hook AND `type` = :type AND `hooks`.`active` = 1 AND `components`.`active` = 1';
+		$query = '
+SELECT *
+FROM `hooks`
+LEFT JOIN `components` ON `hooks`.`class` = `components`.`name`
+WHERE
+	`hook` = :hook AND
+	`type` = :type AND
+	`hooks`.`active` = 1 AND
+	`components`.`active` = 1';
+		if (Controller::parameter('area')) {
+			$query .= ' AND (`global` = 1 OR `class` = :area)';
+			$params[':area'] = Controller::parameter('area');
+		}
 		if (Controller::$view && Controller::$view->mode) {
 			$query .= ' AND `mode` IN (:mode, \'*\')';
 			$params[':mode'] = Controller::$view->mode;
@@ -41,6 +88,11 @@ class Hook extends TableCtl {
 				}
 			}
 		}
+		return $toret;
+	}
+
+	public static function pre_install() {
+		$toret = self::installModel(__CLASS__ . 'Obj');
 		return $toret;
 	}
 }

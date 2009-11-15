@@ -23,14 +23,16 @@ class TableCtl extends AreaCtl {
 	protected function getTabLinks($action) {
 		$links = array();
 		//TODO Check permissions!
-		if ($this->checkPermissions(array('action' => 'list'))) {
-			$links[] = array('link' => '?q=' . Controller::parameter('area') . '/list', 'text' => 'List');
-		}
-		if (Controller::parameter('action') == 'display' && $this->checkPermissions(array('action' => 'update'))) {
-			$links[] = array('link' => '?q=' . Controller::parameter('area') . '/update/' . Controller::parameter('id'), 'text' => 'Update');
-		}
-		if ($this->checkPermissions(array('action' => 'create'))) {
-			$links[] = array('link' => '?q=' . Controller::parameter('area') . '/create', 'text' => 'Create');
+		if ($action != 'list') {
+			if ($this->checkPermissions(array('action' => 'list'))) {
+				$links[] = array('link' => '?q=' . Controller::parameter('area') . '/list', 'text' => 'List');
+			}
+			if (Controller::parameter('action') == 'display' && $this->checkPermissions(array('action' => 'update'))) {
+				$links[] = array('link' => '?q=' . Controller::parameter('area') . '/update/' . Controller::parameter('id'), 'text' => 'Update');
+			}
+			if ($this->checkPermissions(array('action' => 'create'))) {
+				$links[] = array('link' => '?q=' . Controller::parameter('area') . '/create', 'text' => 'Create');
+			}
 		}
 		return $links;
 	}
@@ -393,26 +395,51 @@ class TableCtl extends AreaCtl {
 	
 	/**
 	 */
-	public static function checkTuple($tuple) {
-		if ($tuple['action'] == 'toggle') {
-			$tuple['field'] = $tuple['count'];
-			unset($tuple['count']);
-		} else if (!$tuple['id'] && is_numeric($tuple['action'])) {
-			$tuple['id']     = $tuple['action'];
-			switch (strtoupper($_SERVER['REQUEST_METHOD'])) {
-			case 'DELETE':
-				$tuple['action'] = 'delete';
-				break;
-			case 'PUT':
-				$tuple['action'] = 'update';
-				break;
-			case 'GET':
-			default:
-				$tuple['action'] = 'display';
-				break;
+	public static function checkParameters($parameters) {
+		switch($parameters['action']) {
+		case 'toggle':
+			if (count($parameters) >= 4) {
+				$parameters['id']    = $parameters[0];
+				$parameters['field'] = $parameters[1];
+				unset($parameters[0]);
+				unset($parameters[1]);
+			} else {
+				$parameters['id']    = 0;
+				$parameters['field'] = 'active';
 			}
+			break;
+		case 'list':
+			if (count($parameters) >= 3) {
+				$parameters['count'] = $parameters[0];
+				unset($parameters[0]);
+			} else {
+				$parameters['count'] = 0;
+			}
+			break;
+		default:
+			if (count($parameters) >= 3) {
+				$parameters['id'] = $parameters[0];
+				unset($parameters[0]);
+			} else if (is_numeric($parameters['action'])) {
+				$parameters['id'] = $parameters['action'];
+				switch (strtoupper($_SERVER['REQUEST_METHOD'])) {
+				case 'DELETE':
+					$parameters['action'] = 'delete';
+					break;
+				case 'PUT':
+					$parameters['action'] = 'update';
+					break;
+				case 'GET':
+				default:
+					$parameters['action'] = 'display';
+					break;
+				}
+			} else {
+				$parameters['id'] = 0;
+			}
+			break;
 		}
-		return $tuple;
+		return $parameters;
 	}
 	
 	public function action_install() {

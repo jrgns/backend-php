@@ -87,7 +87,7 @@ class Component extends TableCtl {
 		self::getActive();
 	}
 	
-	public static function install() {
+	public static function pre_install() {
 		$toret = self::installModel(__CLASS__ . 'Obj');
 
 		$components = self::fromFolder();
@@ -105,21 +105,19 @@ class Component extends TableCtl {
 				'options'  => '',
 				'active'   => $active,
 			);
-			$component->create($data, array('load' => false));
+			if ($component->create($data, array('load' => false))) {
+				//TODO Move this to a install log file
+				//echo 'Installed ' . $name;
+			} else {
+				$toret = false;
+			}
 		}
-
-		$hook = new HookObj();
-		$toret = $hook->replace(array(
-				'name'        => 'Component Pre Init',
-				'description' => '',
-				'mode'        => '*',
-				'type'        => 'pre',
-				'hook'        => 'init',
-				'class'       => 'Component',
-				'method'      => 'hook_init',
-				'sequence'    => 0,
-			)
-		) && $toret;
+		return $toret;
+	}
+		
+	public static function install() {
+		$toret = true;
+		Hook::add('init', 'pre', __CLASS__) && $toret;
 		return $toret;
 	}
 	
