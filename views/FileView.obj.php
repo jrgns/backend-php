@@ -21,7 +21,6 @@ class FileView extends View {
 	}
 	
 	public static function hook_output($to_print) {
-		die('here');
 		if ($to_print && $to_print->array && !headers_sent()) {
 			$mime_type = array_key_exists('mime_type', $to_print->array) ? $to_print->array['mime_type'] : false;
 			if (empty($mime_type)) {
