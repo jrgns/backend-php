@@ -64,8 +64,6 @@ WHERE
 		if (Controller::$view && Controller::$view->mode) {
 			$query .= ' AND `mode` IN (:mode, \'*\')';
 			$params[':mode'] = Controller::$view->mode;
-		} else if (!in_array($hook, array('init'))) {
-			print_stacktrace(); die('Hooks');
 		}
 		$query .= ' ORDER BY `sequence`';
 		$query = new CustomQuery($query);

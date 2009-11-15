@@ -56,7 +56,7 @@ class HtmlView extends View {
 		$toret = true;
 		$hook = new HookObj();
 		Hook::add('output', 'pre', __CLASS__, array('mode' => 'html', 'global' => 1)) && $toret;
-		Hook::add('output', 'post', __CLASS__, array('mode' => 'html', 'global' => 1, 'sequence' => 100)) && $toret;
+		Hook::add('display', 'post', __CLASS__, array('mode' => 'html', 'global' => 1, 'sequence' => 100)) && $toret;
 		return $toret;
 	}
 }

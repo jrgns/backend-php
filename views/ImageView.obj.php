@@ -23,29 +23,8 @@ class ImageView extends FileView {
 	
 	public static function install() {
 		$toret = true;
-		$hook = new HookObj();
-		$toret = $hook->replace(array(
-				'name'        => 'ImageView Pre Display',
-				'description' => '',
-				'mode'        => 'image',
-				'type'        => 'pre',
-				'hook'        => 'output',
-				'class'       => 'ImageView',
-				'method'      => 'hook_output',
-				'sequence'    => 0,
-			)
-		) && $toret;
-		$toret = $hook->replace(array(
-				'name'        => 'ImageView Post Start',
-				'description' => '',
-				'mode'        => '*',
-				'type'        => 'post',
-				'hook'        => 'start',
-				'class'       => 'ImageView',
-				'method'      => 'hook_post_start',
-				'sequence'    => 0,
-			)
-		) && $toret;
+		$toret = Hook::add('output', 'pre', __CLASS__, array('mode' => 'image', 'global' => 1)) && $toret;
+		$toret = Hook::add('start', 'post', __CLASS__, array('global' => 1)) && $toret;
 		return $toret;
 	}
 }

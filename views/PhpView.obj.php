@@ -14,18 +14,15 @@
 /**
  * Default class to handle PhpView specific functions
  */
-class PhpView extends View {
+class PhpView extends TextView {
 	function __construct() {
 		parent::__construct();
 		$this->mode = 'php';
-		$this->mime_type = 'text/plain';
 	}
 		
 	public static function hook_output($to_print) {
-		if (!headers_sent()) {
-			header('Content-Type: text/plain');
-		}
-		switch (Controller::$action) {
+		$to_print = parent::hook_output($to_print);
+		switch (Controller::parameter('action')) {
 		case 'list':
 			$to_print = $to_print instanceof DBObject ? $to_print->list : $to_print;
 			break;
@@ -34,24 +31,15 @@ class PhpView extends View {
 				$to_print = !empty($to_print->object) ? $to_print->object : $to_print->array;
 			}
 			break;
+		default:
+			break;
 		}
 		return var_export($to_print, true);
 	}
 
 	public static function install() {
 		$toret = true;
-		$hook = new HookObj();
-		$toret = $hook->replace(array(
-				'name'        => 'PhpView Pre Output',
-				'description' => '',
-				'mode'        => 'php',
-				'type'        => 'pre',
-				'hook'        => 'output',
-				'class'       => 'PhpView',
-				'method'      => 'hook_output',
-				'sequence'    => 0,
-			)
-		) && $toret;
+		$toret = Hook::add('output', 'pre', __CLASS__, array('mode' => 'pre', 'global' => 1)) && $toret;
 		return $toret;
 	}
 }
