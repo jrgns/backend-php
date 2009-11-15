@@ -20,7 +20,9 @@ class Admin extends AreaCtl {
 		$toret = false;
 		$installed = Value::get('admin_installed', false);
 		if (!$installed) {
-			Component::install();
+			Component::pre_install();
+			Hook::pre_install();
+			
 			$components = Component::getActive();
 			if ($components) {
 				$toret = true;
@@ -43,10 +45,10 @@ class Admin extends AreaCtl {
 				Value::set('admin_installed', date('Y-m-d H:i:s'));
 				Controller::addSuccess('Backend Install Successful');
 			}
-			Controller::redirect('?q=admin/post_install');
 		} else {
 			Controller::addError('Admin installation script already ran at ' . $installed);
 		}
+		Controller::redirect('?q=admin/post_install');
 		return $toret;
 	}
 	
@@ -100,6 +102,7 @@ class Admin extends AreaCtl {
 	}
 	
 	public static function hook_post_display($data, $controller) {
+		
 		$sec_links = Backend::get('secondary_links', array());
 		$user = Account::checkUser();
 		$installed = Value::get('admin_installed', false);
@@ -120,30 +123,10 @@ class Admin extends AreaCtl {
 
 	public static function install() {
 		$toret = true;
-		$hook = new HookObj();
-		$toret = $hook->replace(array(
-				'name'        => 'Admin Post Display',
-				'description' => '',
-				'mode'        => 'html',
-				'type'        => 'post',
-				'hook'        => 'display',
-				'class'       => 'Admin',
-				'method'      => 'hook_post_display',
-				'sequence'    => 0,
-			)
-		) && $toret;
 
-		$permission = new PermissionObj();
-		$toret = $permission->replace(array(
-				'role'       => 'anonymous',
-				'control'    => '100',
-				'action'     => 'post_install',
-				'subject'    => 'admin',
-				'subject_id' => 0,
-				'system'     => 0,
-				'active'     => 1,
-			)
-		) && $toret;
+		$toret = Hook::add('display', 'post', __CLASS__, array('mode' => 'html')) && $toret;
+
+		$toret = Permission::add('anonymous', 'post_install', 'admin') && $toret;
 
 		return $toret;
 	}
