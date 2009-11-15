@@ -122,7 +122,7 @@ class AreaCtl {
 		return $toret;
 	}
 
-	public static function checkTuple($tuple) {
-		return $tuple;
+	public static function checkParameters($parameters) {
+		return $parameters;
 	}
 }

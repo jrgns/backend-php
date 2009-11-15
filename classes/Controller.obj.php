@@ -128,7 +128,7 @@ class Controller {
 		$data = null;
 		
 		//Control
-		$control_name = class_name(self::$area);
+		$control_name = class_name(self::parameter('area'));
 		if (!Component::isActive($control_name, true)) {
 			if (Controller::$debug) {
 				Controller::addError('Component is Inactive');
@@ -311,28 +311,23 @@ class Controller {
 
 		$terms = explode('/', $query);
 		$terms = array_filter($terms);
-
-		$terms = call_user_func_array(array('Controller', 'checkTuple'), $terms);
 		
-		if (Component::isActive(class_name($terms['area'])) && method_exists(class_name($terms['area']), 'checkTuple')) {
-			$terms = call_user_func(array(class_name($terms['area']), 'checkTuple'), $terms);
+		$default_parameters = array('area', 'action');
+		
+		foreach($terms as $key => $value) {
+			if (array_key_exists($key, $default_parameters)) {
+				$parameters[$default_parameters[$key]] = $value;
+			} else {
+				$parameters[] = $value;
+			}
 		}
-		return $terms;
+
+		if (Component::isActive(class_name($parameters['area'])) && method_exists(class_name($parameters['area']), 'checkParameters')) {
+			$parameters = call_user_func(array(class_name($parameters['area']), 'checkParameters'), $parameters);
+		}
+		return $parameters;
 	}
 
-	protected static function checkTuple($area = 'content', $action = 'display', $id = null) {
-		$toret = array(
-			'area'   => $area,
-			'action' => $action,
-		);
-		if ($action == 'list') {
-			$toret['count'] = $id;
-		} else {
-			$toret['id'] = $id;
-		}
-		return $toret;
-	}
-	
 	public static function check_map($what, $value) {
 		$map = Backend::get($what . '_maps');
 		if (is_array($map)) {
