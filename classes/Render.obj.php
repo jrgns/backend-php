@@ -157,19 +157,12 @@ class Render {
 		return '#' . $name . '#';
 	}
 	
-	public static function runFilters($content) {
+	public static function hook_output($content) {
 		$toret = $content;
 		$BEFilter = new BEFilterObj();
 		$BEFilter->load();
 		$filters = $BEFilter->list ? $BEFilter->list : array();
-		//Standard Filters
-		$filters += array(
-			array('class' => 'Render', 'function' => 'replace'),
-			array('class' => 'Render', 'function' => 'addLinks'),
-			array('class' => 'Render', 'function' => 'rewriteLinks'),
-		);
-
-		//Added Filters
+		
 		if (count($filters)) {
 			foreach($filters as $row) {
 				if (class_exists($row['class'], true) && method_exists($row['class'], $row['function'])) {
@@ -276,18 +269,7 @@ class Render {
 
 	public static function install() {
 		$toret = true;
-		$hook = new HookObj();
-		$toret = $hook->replace(array(
-				'name'        => 'Render Pre Output',
-				'description' => '',
-				'mode'        => '*',
-				'type'        => 'pre',
-				'hook'        => 'output',
-				'class'       => 'Render',
-				'method'      => 'runFilters',
-				'sequence'    => 1000,
-			)
-		) && $toret;
+		Hook::add('output', 'pre', __CLASS__, array('global' => 1, 'sequence' => 1000)) && $toret;
 		
 		$filter = new BEFilterObj();
 		$toret = $filter->replace(array(
@@ -302,7 +284,15 @@ class Render {
 				'name' => 'System Links',
 				'description' => 'Update Links...',
 				'class' => 'Render',
-				'function' => 'add_links',
+				'function' => 'addLinks',
+				'options' => '',
+			)
+		) && $toret;
+		$toret = $filter->replace(array(
+				'name' => 'System Rewrite Links',
+				'description' => 'Rewrite Links...',
+				'class' => 'Render',
+				'function' => 'rewriteLinks',
 				'options' => '',
 			)
 		) && $toret;
