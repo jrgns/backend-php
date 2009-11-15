@@ -88,7 +88,7 @@ class View {
 	public static function install() {
 		$toret = true;
 		Hook::add('init', 'pre', __CLASS__, array('global' => 1)) && $toret;
-		Hook::add('output', 'pre', __CLASS__, array('global' => 1)) && $toret;
+		Hook::add('output', 'pre', __CLASS__, array('global' => 1, 'sequence' => 1000)) && $toret;
 		return $toret;
 	}
 }
