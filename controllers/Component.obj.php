@@ -105,13 +105,18 @@ class Component extends TableCtl {
 				'options'  => '',
 				'active'   => $active,
 			);
-			$toret = $component->create($data, array('load' => false)) && $toret;
+			if ($component->create($data, array('load' => false))) {
+				//TODO Move this to a install log file
+				//echo 'Installed ' . $name;
+			} else {
+				$toret = false;
+			}
 		}
 		return $toret;
 	}
 		
 	public static function install() {
-		$toret = self::installModel(__CLASS__ . 'Obj');
+		$toret = true;
 		Hook::add('init', 'pre', __CLASS__) && $toret;
 		return $toret;
 	}
