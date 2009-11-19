@@ -112,12 +112,14 @@ class Controller {
 
 			$toret = self::parseQuery();
 			
-			foreach ($toret as $name => $value) {
-				self::$parameters[$name] = $value;
-				if (property_exists('Controller', $name)) {
-					self::$$name = self::check_map($name, $value);
+			if ($toret) {
+				foreach ($toret as $name => $value) {
+					self::$parameters[$name] = $value;
+					if (property_exists('Controller', $name)) {
+						self::$$name = self::check_map($name, $value);
+					}
+					Backend::add($name, $value);
 				}
-				Backend::add($name, $value);
 			}
 
 		}
@@ -297,13 +299,7 @@ class Controller {
 	}
 
 	protected static function parseQuery($query = false) {
-		if (!$query) {
-			if (empty($_REQUEST['q'])) {
-				$query = Value::get('default_query', 'content/list/' . Value::get('list_length', 5));
-			} else {
-				$query = $_REQUEST['q'];
-			}
-		}
+		$query = Request::getQuery($query);
 		
 		if (!Value::get('admin_installed', false) && !in_array($query, array('admin/pre_install', 'admin/install'))) {
 			$query = 'admin/pre_install';

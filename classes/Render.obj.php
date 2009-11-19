@@ -1,5 +1,6 @@
 <?php
 /**
+ * This file defines the Render Class
  * Copyright (c) 2009 JadeIT cc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -10,6 +11,11 @@
  * Contributors:
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
+ 
+ /**
+  * The Render class renders HTML template files.
+  *
+  */
 class Render {
 	public static $do_cache = true;
 
@@ -19,10 +25,26 @@ class Render {
 		return $toret;
 	}
 	
+	/**
+	 * This function retrieves the absolute location of a template file
+	 *
+	 * A template can be defined on three levels (in order of specificity):
+	 * + Framework level
+	 * + Application level
+	 * + Theme level
+	 * Should a template not exist on Theme level, the Application level template will be used.
+	 * If it does not exist on Application level, the Framework level template will be used.
+	 * @todo TODO Consider caching the template locations for faster lookups?
+	 */
 	public static function checkTemplateFile($filename) {
 		$toret = false;
 		$template_loc = Backend::getConfig('backend.templates.location', 'templates');
-		if (is_readable(APP_FOLDER . '/' . $template_loc . '/' . $filename)) {
+		$theme = Theme::get();
+
+		//Check the theme first.
+		if ($theme && is_readable($theme['path'] . '/' . $filename)) {
+			$toret = $theme['path'] . '/' . $filename;
+		} else if (is_readable(APP_FOLDER . '/' . $template_loc . '/' . $filename)) {
 			$toret = APP_FOLDER . '/'. $template_loc . '/' . $filename;
 		} else if (is_readable(BACKEND_FOLDER . '/' . $template_loc . '/' . $filename)) {
 			$toret = BACKEND_FOLDER . '/'. $template_loc . '/' . $filename;
@@ -229,36 +251,46 @@ class Render {
 				$urls = $matches[2];
 				$replacements = array();
 				foreach ($urls as $key => $url) {
+					//Build query array
 					//workaround for parse_url acting funky with a url = ?q=something/another/
 					if (substr($url, 0, 3) == '?q=') {
 						$query = array('query' => substr($url, 1));
 					} else {
 						$query = parse_url($url);
 					}
+					if (!array_key_exists('path', $query)) {
+						$query['path'] = dirname($_SERVER['SCRIPT_NAME']);
+					}
+					if (substr($query['path'], -1) != '/') {
+						$query['path'] .= '/';
+					}
 					if (array_key_exists('scheme', $query)) {
 						$query['scheme'] = $query['scheme'] . '://';
 					}
+					
+					//Get the old vars
 					if (array_key_exists('query', $query)) {
 						parse_str($query['query'], $vars);
 					} else {
 						$vars = array();
 					}
+					
+					//append q to the URL
 					if (array_key_exists('q', $vars)) {
-						if (!array_key_exists('path', $query)) {
-							$query['path'] = dirname($_SERVER['SCRIPT_NAME']);
-						}
+						$query['path'] .= $vars['q'];
+						unset($vars['q']);
 						if (substr($query['path'], -1) != '/') {
 							$query['path'] .= '/';
 						}
-						$query['path'] .= $vars['q'];
-						unset($vars['q']);
 					}
+					
+					//Create query string
 					if (count($vars)) {
 						$query['query'] = '?' . http_build_query($vars);
 					} else {
 						$query['query'] = '';
 					}
-					$to_rep = $links[$key] . implode('', $query) . '"';
+					$to_rep = $links[$key] . $query['path'] . $query['query'] . '"';
 					$replacements[] = $to_rep;
 				}
 				$toret = str_replace($matched, $replacements, $toret);
