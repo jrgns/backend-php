@@ -413,6 +413,9 @@ class TableCtl extends AreaCtl {
 				break;
 			}
 		}
+		if (Controller::$action == 'list' && empty(Controller::$parameters[0])) {
+			$parameters['0'] = Value::get('list_length', 5);
+		}
 		return $parameters;
 	}
 	
