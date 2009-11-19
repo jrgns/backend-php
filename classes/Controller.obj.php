@@ -391,36 +391,38 @@ class Controller {
 	 * If the location is omitted, go to the previous URL
 	 */	
 	public static function redirect($location = false) {
-		try {
-			$location = $location ? $location : (empty($_SESSION['previous_url']) ? false : $_SESSION['previous_url']);
-			if (is_array($location)) {
-				if (array_key_exists(self::$view->mode, $location)) {
-					$location = $location[self::$view->mode];
-				} else {
-					$location = current($location);
-				}
+		$location = $location ? $location : (empty($_SESSION['previous_url']) ? false : $_SESSION['previous_url']);
+		if (is_array($location)) {
+			if (array_key_exists(self::$view->mode, $location)) {
+				$location = $location[self::$view->mode];
+			} else {
+				$location = current($location);
 			}
-			//This should fix most redirects, but it may happen that location == '?debug=true&q=something/or/another' or something similiar
-			if (Value::get('clean_urls', false) && substr($location, 0, 3) == '?q=') {
-				$location = SITE_LINK . substr($location, 3);
+		}
+		//This should fix most redirects, but it may happen that location == '?debug=true&q=something/or/another' or something similiar
+		if (Value::get('clean_urls', false) && substr($location, 0, 3) == '?q=') {
+			$location = SITE_LINK . substr($location, 3);
+		}
+		//There's some other variables that should also be transported, but I need this NOW
+		if (array_key_exists('debug', $_REQUEST)) {
+			if (strpos($location, '?') !== false) {
+				$location .= '&debug=' . $_REQUEST['debug'];
+			} else {
+				$location .= '?debug=' . $_REQUEST['debug'];
 			}
-			//There's some other variables that should also be transported, but I need this NOW
-			if (array_key_exists('debug', $_REQUEST)) {
-				if (strpos($location, '?') !== false) {
-					$location .= '&debug=' . $_REQUEST['debug'];
-				} else {
-					$location .= '?debug=' . $_REQUEST['debug'];
-				}
-			}
+		}
 			
+		try {
 			if (self::$debug) {
 				self::addSuccess('The script should now redirect to <a href="' . $location . '">here</a>');
 			} else {
-				redirect($location, true);
+				//Redirect
 				self::finish();
+				header('Location: ' . $location);
 				die('redirecting');
 			}
 		} catch (Exception $e) {
+			Controller::addError('Could not redirect');
 		}
 		return true;
 	}

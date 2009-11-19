@@ -12,3 +12,4 @@ $queries = array();
 //Stop editing here.
 //Some system defined queries:
 $queries[':table_ctl/:num'] = '$1/display/$2';
+return $queries;

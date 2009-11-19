@@ -58,12 +58,11 @@ class AreaCtl {
 	 * Override this function if you want to customize the errors returned for an area.
 	 */
 	public static function getError($num, $class_name = false) {
-		$msg = false;
+		$msg = 'Unknown Error Message';
 		$class_name = $class_name ? $class_name : class_name(Controller::parameter('area'));
 		if (class_exists($class_name, true)) {
-			$vars = get_class_vars($class_name);
-			var_dump($vars);
-			$msg = empty($vars['error_msgs'][$num]) ? false : $vars['error_msgs'][$num];
+			$vars = eval('return ' . $class_name . '::$error_msgs;');
+			$msg = empty($vars[$num]) ? 'Unknown Error Message for ' . $class_name : $vars[$num];
 		}
 		return $msg;
 	}
