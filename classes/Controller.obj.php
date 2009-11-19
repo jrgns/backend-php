@@ -21,14 +21,11 @@
 class Controller {
 	public static $debug;
 
-	//old
-	public static $area;
-	public static $action;
-	public static $id;
-	public static $count;
-	//new
-	public static $parameters = array();
+	public static $area = 'home';
+	public static $action = 'index';
 
+	public static $parameters = array();
+	
 	public static $salt = 'Change this to something random!';
 	public static $view = false;
 		
@@ -130,7 +127,7 @@ class Controller {
 		$data = null;
 		
 		//Control
-		$control_name = class_name(self::parameter('area'));
+		$control_name = class_name(self::$area);
 		if (!Component::isActive($control_name, true)) {
 			if (Controller::$debug) {
 				Controller::addError('Component is Inactive');
@@ -183,14 +180,6 @@ class Controller {
 		$_SESSION['cookie_is_working'] = true;
 
 		Hook::run('finish', 'post');
-	}
-	
-	public static function parameter($name) {
-		$toret = null;
-		if (array_key_exists($name, self::$parameters)) {
-			$toret = self::$parameters[$name];
-		}
-		return $toret;
 	}
 	
 	/**
@@ -308,20 +297,14 @@ class Controller {
 		$terms = explode('/', $query);
 		$terms = array_filter($terms);
 		
-		$default_parameters = array('area', 'action');
+		self::$area   = count($terms) ? array_shift($terms) : Value::get('default_controller', 'home');
+		self::$action = count($terms) ? array_shift($terms) : Value::get('default_action', 'index');
 		
-		foreach($terms as $key => $value) {
-			if (array_key_exists($key, $default_parameters)) {
-				$parameters[$default_parameters[$key]] = $value;
-			} else {
-				$parameters[] = $value;
-			}
+		self::$parameters = !empty($terms) ? $terms : array();
+		if (Component::isActive(class_name(self::$area)) && method_exists(class_name(self::$area), 'checkParameters')) {
+			self::$parameters = call_user_func(array(class_name(self::$area), 'checkParameters'), self::$parameters);
 		}
-
-		if (Component::isActive(class_name($parameters['area'])) && method_exists(class_name($parameters['area']), 'checkParameters')) {
-			$parameters = call_user_func(array(class_name($parameters['area']), 'checkParameters'), $parameters);
-		}
-		return $parameters;
+		return self::$parameters;
 	}
 
 	public static function check_map($what, $value) {

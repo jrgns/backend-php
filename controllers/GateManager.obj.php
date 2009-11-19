@@ -30,9 +30,8 @@ class GateManager extends AreaCtl {
 		return true;
 	}
 	
-	public function action_roles() {
+	public function action_roles($id) {
 		$toret = new stdClass();
-		$id = Controller::parameter('id');
 		if ($id) {
 			$toret->role = Role::retrieve(array('id' => $id));
 			if ($toret->role) {
@@ -47,9 +46,9 @@ class GateManager extends AreaCtl {
 		return $toret;
 	}
 	
-	public function html_roles($result) {
+	public function html_roles($id) {
 		Backend::add('TabLinks', $this->getTabLinks('permissions'));
-		if (Controller::$id) {
+		if ($id) {
 			Backend::add('Sub Title', 'GateKeeper Roles');
 			if ($result->role) {
 				Backend::add('Sub Title', 'Role: ' . $result->role->array['name']);

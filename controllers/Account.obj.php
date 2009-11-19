@@ -19,7 +19,7 @@ class Account extends TableCtl {
 	public function checkPermissions(array $options = array()) {
 		$toret = parent::checkPermissions();
 		if (!$toret && in_array(Controller::$action, array('update', 'display'))) {
-			$toret = Controller::$id == $_SESSION['user']->id || Controller::$id == 0;
+			$toret = Controller::$parameters[0] == $_SESSION['user']->id || Controller::$parameters[0] == 0;
 		}
 		return $toret;
 	}
@@ -92,7 +92,7 @@ class Account extends TableCtl {
 		return true;
 	}
 	
-	public function action_update() {
+	public function action_update($id) {
 		$toret = false;
 		if (self::checkUser()) {
 			$User = new AccountObj($_SESSION['user']->id);
@@ -173,14 +173,14 @@ class Account extends TableCtl {
 	 *
 	 * @TODO Find a way to disable an account permanently, in other words, prevent this code from working in some way
 	 */
-	public function action_confirm() {
+	public function action_confirm($salt) {
 		$toret = false;
 		$account = new AccountObj();
 		$db = Backend::getDB($account->getMeta('database'));
 		if ($db instanceof PDO) {
 			$query = 'SELECT * FROM `' . $account->getMeta('table') . '` WHERE `salt` = :salt AND `confirmed` = 0 AND `active` = 1';
 			$stmt = $db->prepare($query);
-			if ($stmt && $stmt->execute(array(':salt' => Controller::$id))) {
+			if ($stmt && $stmt->execute(array(':salt' => $salt))) {
 				$user = $stmt->fetch(PDO::FETCH_ASSOC);
 				if ($user) {
 					$data = array(
@@ -223,23 +223,6 @@ class Account extends TableCtl {
 		}
 		//@todo Maybe give this another name? user is too generic
 		Backend::add('user', $user);
-	}
-	
-	public static function hook_action() {
-		$toret = null;
-		if (array_key_exists('user', $_SESSION)) {
-			if (Controller::$action == 'display') {
-				if ($_SESSION['user']->id == 0) {
-					Controller::$action = 'signup';
-				} else {
-					Controller::$action = 'update';
-					if (Controller::$id != $_SESSION['user']->id) {
-						Controller::$id = $_SESSION['user']->id;
-					}
-				}
-			}
-		}
-		return $toret;
 	}
 	
 	public function postSignup($object, array $options = array()) {
@@ -288,6 +271,18 @@ END;
 			$toret = $_SESSION['user'];
 		}
 		return $toret;
+	}
+	
+	public static function checkParameters($parameters) {
+		if (array_key_exists('user', $_SESSION) && $_SESSION['user']->id > 0) {
+			Controller::$action = 'update';
+			if ($parameters[0] != $_SESSION['user']->id) {
+				$parameters[0] = $_SESSION['user']->id;
+			}
+			return $parameters;
+		}
+		Controller::$action = 'signup';
+		return array();
 	}
 
 	public static function install() {

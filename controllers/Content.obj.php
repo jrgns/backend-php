@@ -40,6 +40,8 @@ class Content extends TableCtl {
 				$toret = $content;
 			}
 		}
+		/**
+		 * Is this necessary?
 		if (!$toret) {
 			if (Controller::$debug) {
 				$filename = 'content/' . Controller::$id . '.tpl.php';
@@ -48,6 +50,7 @@ class Content extends TableCtl {
 				}
 			}
 		}
+		 */
 		return $toret;
 	}
 	
@@ -78,9 +81,8 @@ class Content extends TableCtl {
 		return $result;
 	}
 
-	function action_display() {
+	function action_display($id) {
 		$toret = false;
-		$id = Controller::$id ? Controller::$id : 'home';
 		if (is_numeric($id)) {
 			$toret = self::action_read();
 		} else {

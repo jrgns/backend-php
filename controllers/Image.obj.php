@@ -31,13 +31,13 @@ class Image extends File {
 		Controller::addContent(Render::renderFile('image_list.tpl.php'));
 	}
 	
-	public function action_list() {
+	public function action_list($count) {
 		$toret = false;
 		Backend::add('Sub Title', 'List');
 		$obj_name = (class_name(Controller::$area) . 'Obj');
 		if (class_exists($obj_name, true)) {
 			$object = new $obj_name();
-			$object->load(array('limit' => Controller::$count));
+			$object->load(array('limit' => $count));
 			$toret = $object;
 		} else {
 			Controller::whoops();

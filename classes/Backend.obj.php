@@ -39,6 +39,8 @@ class Backend {
 		require(BACKEND_FOLDER . '/functions.inc.php');
 		require(BACKEND_FOLDER . '/modifiers.inc.php');
 		spl_autoload_register(array('Backend', '__autoload'));
+		set_error_handler    (array('Backend', '__error_handler'));
+		set_exception_handler(array('Backend', '__exception_handler'));
 		
 		//Some constants
 		$url = parse_url(get_current_url());
@@ -95,6 +97,24 @@ class Backend {
 		}
 	}
 	
+	static public function __error_handler($number, $string, $file = false, $line = false, $context = false) {
+		switch ($number) {
+		case 2:
+			preg_match_all('/Missing argument ([0-9]+) for ([^:]+)::([^\(\)]+)\(\), called in ([\S]+) on line ([0-9]+)/', $string, $vars, PREG_SET_ORDER);
+			if (!empty($vars)) {
+				list($matches, $arg_num, $class, $method, $file, $line) = current($vars);
+			}
+			Controller::addError("Missing parameter $arg_num for $class::$method, called in $file line $line");
+			return true;
+			break;
+		}
+		return false;
+	}
+	
+	private static function __exception_handler($exception) {
+		echo "Uncaught exception: " , $exception->getMessage(), "\n";
+	}
+
 	static public function __autoload($classname) {
 		$included = false;
 		//TODO eventually cache / determine by class name exactly where the file should be to improve performance

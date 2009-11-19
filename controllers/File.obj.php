@@ -24,11 +24,11 @@ class File extends TableCtl {
 		return $toret;
 	}
 
-	public function action_read() {
+	public function action_read($id) {
 		$toret = false;
 		$obj_name = (class_name(Controller::$area) . 'Obj');
 		if (class_exists($obj_name, true)) {
-			$toret = new $obj_name(Controller::$id);
+			$toret = new $obj_name($id);
 			if ($toret->array) {
 				$mime_type = array_key_exists('mime_type', $toret->array) ? $toret->array['mime_type'] : false;
 				if (!empty($mime_type)) {
@@ -54,13 +54,13 @@ class File extends TableCtl {
 		Controller::addContent('<a href="?q=' . class_for_url(get_class($this)) . '/read/' . $file->array['id'] . '" title="' . $file->array['name'] . '">' . $file->array['name'] . '</a>');
 	}
 	
-	public function action_list() {
+	public function action_list($count) {
 		$toret = false;
 		Backend::add('Sub Title', 'List');
 		$obj_name = (class_name(Controller::$area) . 'Obj');
 		if (class_exists($obj_name, true)) {
 			$object = new $obj_name();
-			$object->load(array('limit' => Controller::$count));
+			$object->load(array('limit' => $count));
 			$toret = $object;
 		} else {
 			Controller::whoops();

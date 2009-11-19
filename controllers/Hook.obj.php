@@ -57,9 +57,9 @@ WHERE
 	`type` = :type AND
 	`hooks`.`active` = 1 AND
 	`components`.`active` = 1';
-		if (Controller::parameter('area')) {
+		if (Controller::$area) {
 			$query .= ' AND (`global` = 1 OR `class` = :area)';
-			$params[':area'] = Controller::parameter('area');
+			$params[':area'] = Controller::$area;
 		}
 		if (Controller::$view && Controller::$view->mode) {
 			$query .= ' AND `mode` IN (:mode, \'*\')';

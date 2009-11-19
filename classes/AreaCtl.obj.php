@@ -25,15 +25,15 @@ class AreaCtl {
 		if (array_key_exists('msg', $_REQUEST)) {
 			Controller::addError(self::getError($_REQUEST['msg']));
 		}
-		$method = 'action_' . Controller::parameter('action');
+		$method = 'action_' . Controller::$action;
 		if (Controller::$debug) {
 			var_dump('Checking Method ' . $method);
 		}
 		if (method_exists($this, $method)) {
 			if ($this->checkPermissions()) {
 				if (Controller::$view->mode == 'html') {
-					$comp_script = '/scripts/' . Controller::parameter('area') . '.component.js';
-					$comp_style  = '/styles/' . Controller::parameter('area') . '.component.css';
+					$comp_script = '/scripts/' . Controller::$area . '.component.js';
+					$comp_style  = '/styles/' . Controller::$area . '.component.css';
 					if (file_exists(SITE_FOLDER . $comp_script)) {
 						Controller::addScript(SITE_LINK . $comp_script);
 					}
@@ -41,9 +41,9 @@ class AreaCtl {
 						Controller::addStyle(SITE_LINK . $comp_style);
 					}
 				}
-				$toret = $this->$method();
+				$toret = call_user_func_array(array($this, $method), Controller::$parameters);
 			} else {
-				Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to ' . Controller::parameter('action') . ' ' . get_class($this)));
+				Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to ' . Controller::$action . ' ' . get_class($this)));
 				$toret = false;
 			}
 		} else if (Controller::$debug) {
@@ -59,7 +59,7 @@ class AreaCtl {
 	 */
 	public static function getError($num, $class_name = false) {
 		$msg = 'Unknown Error Message';
-		$class_name = $class_name ? $class_name : class_name(Controller::parameter('area'));
+		$class_name = $class_name ? $class_name : class_name(Controller::$area);
 		if (class_exists($class_name, true)) {
 			$vars = eval('return ' . $class_name . '::$error_msgs;');
 			$msg = empty($vars[$num]) ? 'Unknown Error Message for ' . $class_name : $vars[$num];
@@ -85,13 +85,13 @@ class AreaCtl {
 	public function checkPermissions(array $options = array()) {
 		$toret = true;
 		$action = !empty($options['action']) ? $options['action'] : (
-			!empty(Controller::$parameters['action']) ? Controller::check_reverse_map('action', Controller::$parameters['action']) : '*'
+			!empty(Controller::$action) ? Controller::check_reverse_map('action', Controller::$action) : '*'
 		);
 		$subject = !empty($options['subject']) ? $options['subject'] : (
-			!empty(Controller::$parameters['area']) ? Controller::check_reverse_map('area', Controller::$parameters['area']) : '*'
+			!empty(Controller::$area) ? Controller::check_reverse_map('area', Controller::$area) : '*'
 		);
 		$subject_id = !empty($options['subject_id']) ? $options['subject_id'] : (
-			!empty(Controller::$parameters['id']) ? Controller::check_reverse_map('id', Controller::$parameters['id']) : 0
+			!empty(Controller::$parameters[0]) ? Controller::check_reverse_map('id', Controller::$parameters[0]) : 0
 		);
 
 		$installed = Value::get('admin_installed', false);

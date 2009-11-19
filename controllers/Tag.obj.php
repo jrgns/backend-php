@@ -16,8 +16,8 @@ class Tag extends TableCtl {
 		return $links;
 	}
 	
-	public function action_display() {
-		$toret = parent::action_display();
+	public function action_display($id) {
+		$toret = parent::action_display($id);
 		if ($toret instanceof DBObject) {
 			$query = new CustomQuery('SELECT * FROM `contents` WHERE FIND_IN_SET(:tag_id, `tags`)');
 			$toret->array['content_list'] = $query->fetchAll(array(':tag_id' => $toret->array['id']));
@@ -75,7 +75,7 @@ class Tag extends TableCtl {
 	}
 	
 	public static function hook_form($object) {
-		if (Controller::parameter('area') == 'content' && in_array(Controller::parameter('action'), array('create', 'update'))) {
+		if (Controller::$area == 'content' && in_array(Controller::$action, array('create', 'update'))) {
 			$tags = self::getTags($object->array['id']);
 			//Don't add Content, only render it.
 			Backend::add('obj_tags', $tags);
@@ -85,7 +85,7 @@ class Tag extends TableCtl {
 	}
 
 	public static function hook_post_display($object) {
-		if ($object instanceof DBObject && Controller::parameter('area') == 'content' && in_array(Controller::parameter('action'), array('display'))) {
+		if ($object instanceof DBObject && Controller::$area == 'content' && in_array(Controller::$action, array('display'))) {
 			$tags = self::getTags($object->array['id']);
 			//Don't add Content, only render it.
 			Backend::add('obj_tags', $tags);

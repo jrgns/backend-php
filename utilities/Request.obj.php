@@ -3,7 +3,7 @@ class Request {
 	public static function getQuery($query = false) {
 		if (!$query) {
 			if (empty($_REQUEST['q'])) {
-				$query = Value::get('default_query', 'content/list/' . Value::get('list_length', 5));
+				$query = '';
 			} else {
 				$query = $_REQUEST['q'];
 			}
@@ -21,21 +21,25 @@ class Request {
 			return $aliases[$query];
 		}
 		foreach($aliases as $test => $new_query) {
-			$search  = array('/', ':any', ':num', ':area_ctl', ':table_ctl');
-			$replace = array(
-				'\/',
-				'([^\/]+)',
-				'([0-9]+)',
-				'(admin)',
-				'(content|comment|content_revision|tag|image|account|hook)',
-			);
-			$pattern = '/^' . str_replace($search, $replace, $test) . '\/?$/';
-			preg_match_all($pattern, $query, $matches);
-			if (count($matches[0])) {
-				foreach($matches as $key => $match) {
-					$new_query = str_replace('$' . $key, current($match), $new_query);
-				}
+			if ($test == $query) {
 				return $new_query;
+			} else {
+				$search  = array('/', ':any', ':num', ':area_ctl', ':table_ctl');
+				$replace = array(
+					'\/',
+					'([^\/]+)',
+					'([0-9]+)',
+					'(admin)',
+					'(content|comment|content_revision|tag|image|account|hook)',
+				);
+				$pattern = '/^' . str_replace($search, $replace, $test) . '\/?$/';
+				preg_match_all($pattern, $query, $matches);
+				if (count($matches[0])) {
+					foreach($matches as $key => $match) {
+						$new_query = str_replace('$' . $key, current($match), $new_query);
+					}
+					return $new_query;
+				}
 			}
 		}
 		return $query;

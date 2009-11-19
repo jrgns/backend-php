@@ -27,7 +27,7 @@ class SerializeView extends TextView {
 			$to_print = $to_print instanceof DBObject ? $to_print->list : $to_print;
 			break;
 		case 'display':
-			if ($to_print instanceof DBObject && Controller::$id) {
+			if ($to_print instanceof DBObject && !empty(Controller::$parameters[0])) {
 				$to_print = !empty($to_print->object) ? $to_print->object : $to_print->array;
 			}
 			break;

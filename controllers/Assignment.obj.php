@@ -28,26 +28,4 @@ class Assignment extends TableCtl {
 		Backend::add('Assignments', $Assignments);
 		Controller::addContent(Render::renderFile('assignment_list.tpl.php'));
 	}
-
-	function action_display2() {
-		$toret = false;
-		if (Controller::$id) {
-			Backend::add('Sub Title', humanize(Controller::$id));
-			if ($this->checkPermissions()) {
-				$filename = Controller::$id . '.tpl.php';
-				if (Render::checkTemplateFile($filename)) {
-					$toret = true;
-					Controller::addContent(Render::renderFile($filename));
-				}
-			} else {
-				Controller::addNotice('You cannot access this content');
-			}
-		}
-		if (!$toret) {
-			if (Backend::get('Sub Title') == '') {
-				Backend::add('Sub Title', 'Content');
-			}
-		}
-		return $toret;
-	}
 }
