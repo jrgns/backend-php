@@ -100,12 +100,18 @@ class Backend {
 	static public function __error_handler($number, $string, $file = false, $line = false, $context = false) {
 		switch ($number) {
 		case 2:
-			preg_match_all('/Missing argument ([0-9]+) for ([^:]+)::([^\(\)]+)\(\), called in ([\S]+) on line ([0-9]+)/', $string, $vars, PREG_SET_ORDER);
+			preg_match_all('/Missing argument ([0-9]+) for ([\S]+)::([^\(\)]+)\(\), called in ([\S]+) on line ([0-9]+)/', $string, $vars, PREG_SET_ORDER);
 			if (!empty($vars)) {
-				list($matches, $arg_num, $class, $method, $file, $line) = current($vars);
+				list($matches, $arg_num, $class, $method, $call_file, $call_line) = current($vars);
+				Controller::addError("Missing parameter $arg_num for $class::$method, called in $call_file line $call_line, defined in $file line $line");
+				return true;
 			}
-			Controller::addError("Missing parameter $arg_num for $class::$method, called in $file line $line");
-			return true;
+			preg_match_all('/Missing argument ([0-9]+) for ([\S]+)::([^\(\)]+)\(\)/', $string, $vars, PREG_SET_ORDER);
+			if (!empty($vars)) {
+				list($matches, $arg_num, $class, $method) = current($vars);
+				Controller::addError("Missing parameter $arg_num for $class::$method, defined in $file line $line");
+				return true;
+			}
 			break;
 		}
 		return false;
