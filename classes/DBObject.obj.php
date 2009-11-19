@@ -360,6 +360,7 @@ class DBObject {
 		if ($this->checkConnection()) {
 			$data = $this->validate($data, 'update', $options);
 			if ($data) {
+				$data = $this->process($data, 'in');
 				list ($query, $params) = $this->getUpdateSQL($data, $options);
 				$stmt = $this->db->prepare($query);
 				$toret = $stmt->execute($params);
