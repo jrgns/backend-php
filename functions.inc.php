@@ -60,7 +60,7 @@ function update_links($content, $new_vars) {
 				} else {
 					$vars = array();
 				}
-				$query['query'] = '?' . http_build_query(array_merge($new_vars, $vars));
+				$query['query'] = '?' . http_build_query(array_merge($vars, $new_vars));
 				$to_rep = $links[$key] . implode('', $query) . '"';
 				$replacements[] = $to_rep;
 			}
