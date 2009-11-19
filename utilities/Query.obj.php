@@ -51,10 +51,21 @@ class Query {
 						$this->last_stmt = $stmt;
 					} else {
 						if (Controller::$debug) {
-							echo $this->query;
-							var_dump($stmt->errorInfo());
+							$error_info = $stmt->errorInfo();
+							
+							$error = array('Query Error:');
+							if (!empty($error_info[2])) {
+								$error[] = $error_info[2];
+							}
+							if (!empty($error_info[1])) {
+								$error[] = '(' . $error_info[1] . ')';
+							}
+							$error = implode(' ', $error);
+							echo 'Error executing query:<pre>' . PHP_EOL . $this->query . '</pre>';
+						} else {
+							$error = 'Error executing statement';
 						}
-						Controller::addError('Could not execute statement');
+						Controller::addError($error);
 					}
 				} else {
 					Controller::addError('Could not prepare statement');
