@@ -28,18 +28,7 @@ class WMD extends AreaCtl {
 
 	public static function install() {
 		$toret = true;
-		$hook = new HookObj();
-		$toret = $hook->replace(array(
-				'name'        => 'WMD Post Display',
-				'description' => '',
-				'mode'        => '*',
-				'type'        => 'post',
-				'hook'        => 'display',
-				'class'       => 'WMD',
-				'method'      => 'hook_post_display',
-				'sequence'    => '0',
-			)
-		) && $toret;
+		Hook::add('display', 'post', __CLASS__, array('global' => 1));
 		return $toret;
 	}
 }

@@ -66,7 +66,9 @@ class ContentObj extends DBObject {
 			if (!empty($data['body']) || !empty($data['markdown'])) {
 				$data['from_file'] = false;
 			}
-			$data['body'] = Markdown($data['markdown']);
+			if (!empty($data['markdown'])) {
+				$data['body'] = Markdown($data['markdown']);
+			}
 			$toret = true;
 		}
 		return $toret ? $data : false;
