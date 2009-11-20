@@ -18,6 +18,19 @@
  * This is the controller for the table components.
  */
 class Component extends TableCtl {
+
+	public function action_toggle($id, $field) {
+		$toret = parent::action_toggle($id, $field);
+		if ($toret) {
+			if ($toret->array['active']) {
+				if (!call_user_func(array($toret->array['name'], 'install'))) {
+					Controller::addError('Could not install component');
+				}
+			}
+		}
+		return $toret;
+	}
+	
 	public static function fromFolder() {
 		$toret = array();
 		$base_c = self::getBaseComponents(array('filenames' => true));
