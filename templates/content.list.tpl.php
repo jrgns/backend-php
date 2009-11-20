@@ -1,4 +1,4 @@
-<?php if (!empty($Object)): ?>
+<?php if (!empty($Object) && !empty($Object->list)): ?>
 	<div id="content_container">
 		<?php foreach($Object->list as $content): ?>
 			{tpl:content_preview.tpl.php}
