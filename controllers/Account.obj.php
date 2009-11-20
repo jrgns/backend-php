@@ -16,14 +16,6 @@ class Account extends TableCtl {
 		2 => 'Username and password does not match',
 	);
 
-	public function checkPermissions(array $options = array()) {
-		$toret = parent::checkPermissions();
-		if (!$toret && in_array(Controller::$action, array('update', 'display'))) {
-			$toret = Controller::$parameters[0] == $_SESSION['user']->id || Controller::$parameters[0] == 0;
-		}
-		return $toret;
-	}
-
 	function action_login($username = false, $password = false) {
 		$toret = false;
 		if (is_post()) {
@@ -273,23 +265,28 @@ END;
 		return $toret;
 	}
 	
+	public function checkPermissions(array $options = array()) {
+		$toret = parent::checkPermissions();
+		if (!$toret && in_array(Controller::$action, array('update', 'display'))) {
+			$toret = Controller::$parameters[0] == $_SESSION['user']->id || Controller::$parameters[0] == 0;
+		}
+		return $toret;
+	}
+
 	public static function checkParameters($parameters) {
 		if (array_key_exists('user', $_SESSION) && $_SESSION['user']->id > 0) {
-			Controller::$action = 'update';
-			if ($parameters[0] != $_SESSION['user']->id) {
+			if (in_array(Controller::$action, array('update', 'display')) && !empty($parameters['0']) && $parameters[0] != $_SESSION['user']->id) {
 				$parameters[0] = $_SESSION['user']->id;
 			}
 			return $parameters;
 		}
-		Controller::$action = 'signup';
 		return array();
 	}
 
 	public static function install() {
 		$toret = self::installModel(__CLASS__ . 'Obj');
 
-		$toret = Hook::add('start', 'pre', __CLASS__) && $toret;
-		$toret = Hook::add('action', 'pre', __CLASS__) && $toret;
+		$toret = Hook::add('start', 'pre', __CLASS__, array('global' => true)) && $toret;
 		
 		$toret = Permission::add('anonymous', 'signup', 'account') && $toret;
 		$toret = Permission::add('anonymous', 'confirm', 'account') && $toret;
