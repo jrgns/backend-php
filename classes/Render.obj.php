@@ -20,8 +20,12 @@ class Render {
 	public static $do_cache = true;
 
 	public static function renderFile($filename) {
+		//Build the template
 		$cache_file = self::buildTemplate($filename);
+		//Run the PHP in the template
 		$toret = self::evalTemplate($cache_file);
+		//Parse the #Variables# in the template
+		$toret = self::parseVariables($toret);
 		return $toret;
 	}
 	
@@ -56,28 +60,37 @@ class Render {
 		$filename = self::checkTemplateFile($filename);
 		$toret = false;
 		if ($filename) {
+			$cached_file = self::getCacheFile($filename);
 			$cache_filename = self::getCacheFilename($filename);
-			$toret = self::getCacheFile($filename);
-			if (!$toret) {
-				$toret = file_get_contents($filename);
-				while (preg_match_all('/{tpl:(.*\.tpl.php)}/', $toret, $templates) && is_array($templates) && count($templates) == 2) {
+			if ($cached_file) {
+				$toret = true;
+			} else {
+				$content = file_get_contents($filename);
+				//Check for other templates within the template
+				while (preg_match_all('/{tpl:(.*\.tpl.php)}/', $content, $templates) && is_array($templates) && count($templates) == 2) {
 					foreach ($templates[1] as $key => $temp_file) {
-						$content = self::decodeTemplate($temp_file);
-						if (Controller::$debug) {
-							 if (!empty($_REQUEST['debug']) && $_REQUEST['debug'] == 'templates') {
-								$content = '<code class="template_name">{' . basename($temp_file) . '}</code>' . $content;
-							} else {
-								$content = '<!--' . basename($temp_file) . '-->' . $content . '<!-- End of ' . basename($temp_file) . '-->';
+						$inner_filename = self::buildTemplate($temp_file);
+						if ($inner_filename) {
+							$inner_content  = file_get_contents($inner_filename);
+							if (Controller::$debug) {
+								 if (!empty($_REQUEST['debug']) && $_REQUEST['debug'] == 'templates') {
+									$inner_content = '<code class="template_name">{' . basename($temp_file) . '}</code>' . $inner_content;
+								} else {
+									$inner_content = '<!--' . basename($temp_file) . '-->' . $inner_content . '<!-- End of ' . basename($temp_file) . '-->';
+								}
 							}
+							$content = str_replace($templates[0][$key], $inner_content, $content);
+						//} else {
+							//Controller::addError('Unknown Inner Template: ' . $temp_file);
 						}
-						$toret = str_replace($templates[0][$key], $content, $toret);
 					}
 				}
 				if (is_writable(SITE_FOLDER . '/cache/')) {
-					file_put_contents($cache_filename, $toret);
+					file_put_contents($cache_filename, $content);
 					if (Controller::$debug) {
 						var_dump('Render::Written Cache file for ' . $cache_filename);
 					}
+					$toret = true;
 				} else {
 					if (Controller::$debug) {
 						var_dump($cache_filename);
@@ -141,25 +154,24 @@ class Render {
 		return $toret;
 	}
 
-	private static function decodeTemplate($filename) {
-		$toret = '';
-		$filename = self::checkTemplateFile($filename);
-		if ($filename) {
-			$content = file_get_contents($filename);
-			if ($content) {
-				$vars = Backend::getAll();
-				foreach($vars as $name => $value) {
-					if (is_string($name) && is_string($value)) {
-						$search[] = self::getTemplateVarName($name);
-						$replace[] = $value;
-					}
-				}
-				$toret = str_replace($search, $replace, $content);
+	/**
+	 * This function translates all #Variables# into their Backend values
+	 */
+	private static function parseVariables($content, $vars = false) {
+			$vars = $vars ? $vars : Backend::getAll();
+		foreach($vars as $name => $value) {
+			if (is_string($name) && is_string($value)) {
+				$search[] = self::getTemplateVarName($name);
+				$replace[] = $value;
 			}
 		}
+		$toret = str_replace($search, $replace, $content);
 		return $toret;
 	}
 
+	/**
+	 * This function runs a template, making all the Backend variables available as PHP vars
+	 */
 	private static function evalTemplate($template, $vars = false) {
 		$toret = false;
 		if (file_exists($template)) {
