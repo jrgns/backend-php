@@ -80,7 +80,7 @@ class AreaCtl {
 	/**
 	 * Check permissions for this area
 	 *
-	 * Override this function if you want to customize the permissions for an area.
+	 * Override this function if you want to customize the permissions for an area. BUT preferably use the DB...
 	 */
 	public function checkPermissions(array $options = array()) {
 		$toret = true;
@@ -94,8 +94,7 @@ class AreaCtl {
 			!empty(Controller::$parameters[0]) ? Controller::check_reverse_map('id', Controller::$parameters[0]) : 0
 		);
 
-		$installed = Value::get('admin_installed', false);
-		if ($installed) {
+		if (Value::get('admin_installed', false)) {
 			$roles = GateKeeper::permittedRoles($action, $subject, $subject_id);
 			if (!empty($_SESSION['user'])) {
 				if (Controller::$debug) {
@@ -112,11 +111,11 @@ class AreaCtl {
 				} else {
 					$toret = $_SESSION['user']->roles;
 				}
-			}
-		} else {
-			if (!($subject == 'admin' && in_array($action, array('install', 'pre_install', 'post_install')))) {
+			} else if (!in_array('anonymous', $roles)) {
 				$toret = false;
 			}
+		} else if (!($subject == 'admin' && in_array($action, array('install', 'pre_install', 'post_install')))) {
+			$toret = false;
 		}
 		return $toret;
 	}
