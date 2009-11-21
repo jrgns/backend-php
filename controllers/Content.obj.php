@@ -140,6 +140,7 @@ class Content extends TableCtl {
 	 * added to the array below... This isn't optimal. Either get the array dynamically (get_class_methods) or refactor.
 	 */
 	public static function checkParameters($parameters) {
+		$parameters = parent::checkParameters($parameters);
 		if (!method_exists(__CLASS__, 'action_' . Controller::$action)) {
 			$parameters[0] = Controller::$action;
 			Controller::setAction('display');
