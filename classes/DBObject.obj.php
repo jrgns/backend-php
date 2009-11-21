@@ -145,16 +145,16 @@ class DBObject {
 		}
 	}
 	
-	public function loadArray() {
-		$this->load(array('mode' => 'array'));
+	public function loadArray(array $options = array()) {
+		$this->load(array_merge($options, array('mode' => 'array')));
 	}
 	
-	public function loadObject() {
-		$this->load(array('mode' => 'object'));
+	public function loadObject(array $options = array()) {
+		$this->load(array_merge($options, array('mode' => 'object')));
 	}
 	
-	public function loadList() {
-		$this->load(array('mode' => 'list'));
+	public function loadList(array $options = array()) {
+		$this->load(array_merge($options, array('mode' => 'list')));
 	}
 	
 	public function load($options = array()) {
