@@ -286,7 +286,23 @@ class Controller {
 			$_REQUEST = array_map('stripslashes_deep', $_REQUEST);
 		}
 	}
+	
+	public function setArea($area) {
+		if (!self::$started) {
+			self::$area = $area;
+		} else {
+			trigger_error('Application already started, can\'t set area', E_USER_ERROR);
+		}
+	}
 
+	public function setAction($action) {
+		if (!self::$started) {
+			self::$action = $action;
+		} else {
+			trigger_error('Application already started, can\'t set action', E_USER_ERROR);
+		}
+	}
+	
 	protected static function parseQuery($query = false) {
 		$query = Request::getQuery($query);
 		
@@ -338,32 +354,6 @@ class Controller {
 				$toret = true;
 				array_push(self::$$what, $string);
 			}
-		}
-		return $toret;
-	}
-
-	public function __call($function, $params) {
-		$toret = false;
-	/*
-		if (substr($function, 0, 3) == 'add') {
-			switch (strtolower(substr($function, 3))) {
-				case 'content':
-				case 'error':
-				case 'notice':
-				case 'success':
-					$toret = $this->addSomething(strtolower(substr($function, 3)), array_shift($params), array_shift($params));
-					break;
-				default:
-					break;
-			}
-		} else 
-	*/
-			if (substr($function, 0, 3) == 'get') {
-				$toret = null;
-				$what = strtolower(substr($function, 3));
-				if (property_exists('Controller', $what)) {
-					return self::$$what;
-				}
 		}
 		return $toret;
 	}

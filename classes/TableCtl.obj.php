@@ -402,16 +402,19 @@ class TableCtl extends AreaCtl {
 			$parameters[0] = Controller::$action;
 			switch (strtoupper($_SERVER['REQUEST_METHOD'])) {
 			case 'DELETE':
-				Controller::$action = 'delete';
+				Controller::setAction('delete');
 				break;
 			case 'PUT':
-				Controller::$action = 'update';
+				Controller::setAction('update');
 				break;
 			case 'GET':
 			default:
-				Controller::$action = 'display';
+				Controller::setAction('display');
 				break;
 			}
+		}
+		if (Controller::$action == 'index') {
+			Controller::setAction('list');
 		}
 		if (Controller::$action == 'list' && empty(Controller::$parameters[0])) {
 			$parameters['0'] = Value::get('list_length', 5);
