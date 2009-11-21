@@ -95,7 +95,7 @@ class Admin extends AreaCtl {
 		Backend::add('result', $result);
 	}
 	
-	function html_interface($result) {
+	function html_index($result) {
 		Backend::add('Sub Title', 'Manage Application');
 		Backend::add('result', $result);
 		Controller::addContent(Render::renderFile('admin_interface.tpl.php'));
@@ -121,7 +121,7 @@ class Admin extends AreaCtl {
 		}
 		if ($user && count(array_intersect(array('superadmin', 'admin'), $user->roles))) {
 			$sec_links += array(
-				array('href' => '?q=admin/interface', 'text' => 'Manage Application'),
+				array('href' => '?q=admin', 'text' => 'Manage Application'),
 			);
 		}
 		Backend::add('secondary_links', $sec_links);

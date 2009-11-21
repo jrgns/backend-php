@@ -43,7 +43,7 @@ class TableCtl extends AreaCtl {
 	public function action_display($id) {
 		$toret = false;
 		$obj_name = (class_name(Controller::$area) . 'Obj');
-		if (class_exists($obj_name, true) && $id !== 'home' && $id > 0) {
+		if (class_exists($obj_name, true) && $id > 0) {
 			$toret = self::action_read($id);
 		} else {
 			Controller::$parameters['action'] = 'list';

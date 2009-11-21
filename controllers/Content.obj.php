@@ -84,19 +84,19 @@ class Content extends TableCtl {
 	function action_display($id) {
 		$toret = false;
 		if (is_numeric($id)) {
-			$toret = self::action_read();
+			$toret = self::action_read($id);
 		} else {
 			$conds = array('`name` = :name');
 			$params = array(':name' => $id);
 
 			$toret = new ContentObj();
 			list($query, $params) = $toret->getSelectSQL(array('parameters' => $params, 'conditions' => $conds));
-			$toret->load(array('query' => $query, 'parameters' => $params));
+			$toret->loadObject(array('query' => $query, 'parameters' => $params));
 		}
 
-		if ($toret && !empty($toret->array)) {
-			if (!$this->checkPermissions(array('subject_id' => $toret->array['id'], 'subject' => 'content'))) {
-				Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to display ' . $toret->array['title']));
+		if ($toret && !empty($toret->object)) {
+			if (!$this->checkPermissions(array('subject_id' => $toret->object->id, 'subject' => 'content'))) {
+				Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to display ' . $toret->object->title));
 				$toret = false;
 			}
 		} else {
@@ -104,7 +104,7 @@ class Content extends TableCtl {
 			$toret = false;
 		}
 		if ($toret && Controller::$debug) {
-			var_dump('Content ID: ' . $toret->array['id']);
+			var_dump('Content ID: ' . $toret->object->id);
 		}
 		return $toret;
 	}
@@ -139,14 +139,11 @@ class Content extends TableCtl {
 	 * @todo This isn't entirely accurate. If you want to create a random action_something, it need's to be
 	 * added to the array below... This isn't optimal. Either get the array dynamically (get_class_methods) or refactor.
 	 */
-	public static function checkTuple($tuple) {
-		if ($tuple['action'] == 'toggle') {
-			$tuple['field'] = $tuple['count'];
-			unset($tuple['count']);
-		} else if (empty($tuple['id']) && !in_array($tuple['action'], array('create', 'read', 'update', 'delete', 'list', 'display', 'toggle'))) {
-			$tuple['id']     = $tuple['action'];
-			$tuple['action'] = 'display';
+	public static function checkParameters($parameters) {
+		if (!method_exists(__CLASS__, 'action_' . Controller::$action)) {
+			$parameters[0] = Controller::$action;
+			Controller::setAction('display');
 		}
-		return $tuple;
+		return $parameters;
 	}
 }
