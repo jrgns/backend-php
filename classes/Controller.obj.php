@@ -287,7 +287,7 @@ class Controller {
 		}
 	}
 	
-	public function setArea($area) {
+	public static function setArea($area) {
 		if (!self::$started) {
 			self::$area = $area;
 		} else {
@@ -295,7 +295,7 @@ class Controller {
 		}
 	}
 
-	public function setAction($action) {
+	public static function setAction($action) {
 		if (!self::$started) {
 			self::$action = $action;
 		} else {
