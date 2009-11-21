@@ -67,22 +67,24 @@ class Render {
 			} else {
 				$content = file_get_contents($filename);
 				//Check for other templates within the template
-				while (preg_match_all('/{tpl:(.*\.tpl.php)}/', $content, $templates) && is_array($templates) && count($templates) == 2) {
-					foreach ($templates[1] as $key => $temp_file) {
+				while (preg_match_all('/{tpl:(.*\.tpl.php)}/', $content, $templates, PREG_SET_ORDER) && is_array($templates) && count($templates) > 0) {
+					foreach ($templates as $temp_arr) {
+						$temp_file = $temp_arr[1];
 						$inner_filename = self::buildTemplate($temp_file);
 						if ($inner_filename) {
-							$inner_content  = file_get_contents($inner_filename);
-							if (Controller::$debug) {
-								 if (!empty($_REQUEST['debug']) && $_REQUEST['debug'] == 'templates') {
-									$inner_content = '<code class="template_name">{' . basename($temp_file) . '}</code>' . $inner_content;
-								} else {
-									$inner_content = '<!--' . basename($temp_file) . '-->' . $inner_content . '<!-- End of ' . basename($temp_file) . '-->';
-								}
-							}
-							$content = str_replace($templates[0][$key], $inner_content, $content);
-						//} else {
+							$inner_content = file_get_contents($inner_filename);
+						} else {
+							$inner_content = '<!--Missing Template-->';
 							//Controller::addError('Unknown Inner Template: ' . $temp_file);
 						}
+						if (Controller::$debug) {
+							 if (!empty($_REQUEST['debug']) && $_REQUEST['debug'] == 'templates') {
+								$inner_content = '<code class="template_name">{' . basename($temp_file) . '}</code>' . $inner_content;
+							} else {
+								$inner_content = '<!--' . basename($temp_file) . '-->' . $inner_content . '<!-- End of ' . basename($temp_file) . '-->';
+							}
+						}
+						$content = str_replace($temp_arr[0], $inner_content, $content);
 					}
 				}
 				if (is_writable(SITE_FOLDER . '/cache/')) {
