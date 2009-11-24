@@ -12,6 +12,14 @@ class Links extends AreaCtl {
 	private static function set($name, $links) {
 		self::$links[$name] = $links;
 	}
+	
+	public static function add($text, $href, $options = array()) {
+		if (is_string($options)) {
+			$options = array('name' => $options);
+		}
+		$name = array_key_exists('name', $options) ? $options['name'] : 'primary';
+		return self::append(array('text' => $text, 'href' => $href), $name);
+	}
 
 	public static function append($link, $name = 'primary') {
 		$existing_links = self::get($name);

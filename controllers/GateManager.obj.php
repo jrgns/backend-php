@@ -98,8 +98,20 @@ class GateManager extends AreaCtl {
 		self::install();
 	}
 	
+	public static function hook_post_display($data, $controller) {
+		$user = Account::checkUser();
+		if ($user && count(array_intersect(array('superadmin', 'admin'), $user->roles))) {
+			Links::add('Manage Roles', '?q=gate_manager/roles', 'secondary');
+			Links::add('Manage Permissions', '?q=gate_manager/permissions', 'secondary');
+			Links::add('Manage Assignments', '?q=gate_manager/assignments', 'secondary');
+		}
+		return $data;
+	}
+
 	public static function install() {
 		$toret = true;
+		$toret = Hook::add('display', 'post', __CLASS__, array('global' => true, 'mode' => 'html')) && $toret;
+
 		$roles = self::getDefaultRoles();
 		if ($roles) {
 			$RoleObj = new RoleObj();

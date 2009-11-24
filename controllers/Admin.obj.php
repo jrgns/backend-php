@@ -113,10 +113,10 @@ class Admin extends AreaCtl {
 		$user = Account::checkUser();
 		$installed = Value::get('admin_installed', false);
 		if (!$installed) {
-			Links::append(array('href' => '?q=admin/install', 'text' => 'Install Application'), 'secondary');
+			Links::add('Install Application', '?q=admin/install', 'secondary');
 		}
 		if ($user && count(array_intersect(array('superadmin', 'admin'), $user->roles))) {
-			Links::append(array('href' => '?q=admin', 'text' => 'Manage Application'), 'secondary');
+			Links::add('Manage Application', '?q=admin', 'secondary');
 		}
 		
 		return $data;
