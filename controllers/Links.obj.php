@@ -32,6 +32,10 @@ class Links extends AreaCtl {
 		self::set($name, $existing_links);
 		return self::get($name);
 	}
+	
+	public static function render($link) {
+		echo '<a href="', $link['href'], '">', $link['text'], '</a>';
+	}
 
 	function html_index() {
 		Backend::add('Sub Title', 'Links');
