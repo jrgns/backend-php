@@ -26,9 +26,9 @@
 				</div>
 
 				<div id="maincol" class="span-15 prepend-1 colborder">
+					{tpl:tab_links.tpl.php}
 					<?php if (!empty($Sub_Title)): ?><h2 class="quiet">#Sub Title#</h2><?php endif; ?>
 					<div id="content">
-						{tpl:tab_links.tpl.php}
 						{tpl:maincontent.tpl.php}
 					</div>
 				</div>

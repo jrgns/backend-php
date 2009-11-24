@@ -30,7 +30,7 @@ class GateManager extends AreaCtl {
 		return true;
 	}
 	
-	public function action_roles($id) {
+	public function action_roles($id = false) {
 		$toret = new stdClass();
 		if ($id) {
 			$toret->role = Role::retrieve(array('id' => $id));
@@ -46,9 +46,9 @@ class GateManager extends AreaCtl {
 		return $toret;
 	}
 	
-	public function html_roles($id) {
+	public function html_roles($result) {
 		Backend::add('TabLinks', $this->getTabLinks('permissions'));
-		if ($id) {
+		if (!empty($result->role)) {
 			Backend::add('Sub Title', 'GateKeeper Roles');
 			if ($result->role) {
 				Backend::add('Sub Title', 'Role: ' . $result->role->array['name']);
@@ -106,6 +106,14 @@ class GateManager extends AreaCtl {
 			Links::add('Manage Assignments', '?q=gate_manager/assignments', 'secondary');
 		}
 		return $data;
+	}
+	
+	public static function admin_links() {
+		return array(
+			array('text' => 'Manage Roles'      , 'href' => '?q=gate_manager/roles'),
+			array('text' => 'Manage Permissions', 'href' => '?q=gate_manager/permissions'),
+			array('text' => 'Manage Assignments', 'href' => '?q=gate_manager/assignments'),
+		);
 	}
 
 	public static function install() {

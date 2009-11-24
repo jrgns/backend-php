@@ -98,6 +98,15 @@ class Admin extends AreaCtl {
 	function html_index($result) {
 		Backend::add('Sub Title', 'Manage Application');
 		Backend::add('result', $result);
+
+		$admin_links = array();
+		$components = Component::getActive();
+		foreach($components as $component) {
+			if (method_exists($component['name'], 'admin_links')) {
+				$admin_links[$component['name']] = call_user_func(array($component['name'], 'admin_links'));
+			}
+		}
+		Backend::add('admin_links', $admin_links);
 		Controller::addContent(Render::renderFile('admin_interface.tpl.php'));
 	}
 	

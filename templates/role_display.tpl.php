@@ -2,9 +2,6 @@
 $Role = property_exists($Result, 'role') ? $Result->role : false;
 $Permissions = property_exists($Result, 'permissions') ? $Result->permissions : false;
 if (!empty($Role)): ?>
-	<h3 class="loud bottom">
-		<?php echo $Role->array['name']; ?>
-	</h3>
 	<div>
 		<?php echo $Role->array['description']; ?>
 	</div>
@@ -20,18 +17,23 @@ if (!empty($Role)): ?>
 			<tbody>
 				<?php foreach($Permissions as $permission): ?>
 					<tr>
-						<td><?php echo $permission['action'] == '*'   ? 'Anything' : $permission['action'] ?></td>
-						<td><?php echo $permission['subject'] == '*'  ? 'Everything' : $permission['subject'] ?></td>
-						<td><?php echo $permission['subject_id'] == 0 ? 'All' :  $permission['subject_id']?></td>
+						<td><?php echo $permission['action'] == '*'   ? 'Anything'   : ucwords($permission['action']) ?></td>
+						<td><?php echo $permission['subject'] == '*'  ? 'Everything' : ucwords($permission['subject']) ?></td>
+						<td><?php echo $permission['subject_id'] == 0 ? 'All'        : $permission['subject_id'] ?></td>
 					</tr>
 				<?php endforeach; ?>
 			<tbody>
 		</table>
 	<?php endif; ?>
+	<hr>
 	<form>
-		<h3>Add a Permission to <?php echo $Role->array['name'] ?></h3>
-		
+		<span class="large loud">Add a Permission for <?php echo $Role->array['name'] ?> users</span>
+	
 	</form>
 <?php else: ?>
 	No Role to display
 <?php endif; ?>
+<hr>
+<p>
+	<a href="?q=gate_manager/roles/">Back</a>
+</p>

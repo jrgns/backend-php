@@ -9,4 +9,14 @@
 			<li><a href="?q=admin/update">Update Application</a></li>
 		</ul>
 	</dd>
+	<?php foreach($admin_links as $name => $links): ?>
+	<dt><?php echo $name ?></dt>
+	<dd>
+		<ul>
+			<?php foreach($links as $link): ?>
+				<li><?php echo Links::render($link) ?></li>
+			<?php endforeach; ?>
+		</ul>
+	</dd>
+	<?php endforeach; ?>
 </dl>
