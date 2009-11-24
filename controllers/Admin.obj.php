@@ -110,21 +110,14 @@ class Admin extends AreaCtl {
 	}
 	
 	public static function hook_post_display($data, $controller) {
-		
-		$sec_links = Backend::get('secondary_links', array());
 		$user = Account::checkUser();
 		$installed = Value::get('admin_installed', false);
 		if (!$installed) {
-			$sec_links += array(
-				array('href' => '?q=admin/install', 'text' => 'Install Application'),
-			);
+			Links::append(array('href' => '?q=admin/install', 'text' => 'Install Application'), 'secondary');
 		}
 		if ($user && count(array_intersect(array('superadmin', 'admin'), $user->roles))) {
-			$sec_links += array(
-				array('href' => '?q=admin', 'text' => 'Manage Application'),
-			);
+			Links::append(array('href' => '?q=admin', 'text' => 'Manage Application'), 'secondary');
 		}
-		Backend::add('secondary_links', $sec_links);
 		
 		return $data;
 	}
@@ -132,7 +125,7 @@ class Admin extends AreaCtl {
 	public static function install() {
 		$toret = true;
 
-		$toret = Hook::add('display', 'post', __CLASS__, array('mode' => 'html')) && $toret;
+		$toret = Hook::add('display', 'post', __CLASS__, array('global' => true, 'mode' => 'html')) && $toret;
 
 		$toret = Permission::add('anonymous', 'post_install', 'admin') && $toret;
 		$toret = Permission::add('anonymous', 'pre_install', 'admin') && $toret;

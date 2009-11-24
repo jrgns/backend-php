@@ -39,8 +39,8 @@ class HtmlView extends View {
 		Backend::add('Styles', array_unique(array_filter(Controller::getStyles())));
 		Backend::add('Scripts', array_unique(array_filter(Controller::getScripts())));
 		$app_class = Backend::getConfig('backend.application.class', 'Application');
-		$primary = Backend::get('primary_links', array());
-		$secondary = Backend::get('secondary_links', array());
+		$primary = Links::get('primary');
+		$secondary = Links::get('secondary');
 		if (class_exists($app_class, true) && method_exists($app_class, 'getLinks')) {
 			$app_pri = call_user_func(array($app_class, 'getLinks'), 'primary');
 			$app_sec = call_user_func(array($app_class, 'getLinks'), 'secondary');

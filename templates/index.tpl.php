@@ -2,7 +2,7 @@
    "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 	<head>
-		<title>#Title# - #Sub Title#</title>
+		<title>#Title#<?php if (!empty($Sub_Title)): ?> - #Sub Title#<?php endif; ?></title>
 		{tpl:head.tpl.php}
 		{tpl:styles.tpl.php}
 		<link rel="shortcut icon" type="image/x-icon" href="<?php echo SITE_LINK ?>/favicon.ico">
