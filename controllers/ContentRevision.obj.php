@@ -11,6 +11,26 @@
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
 class ContentRevision extends TableCtl {
+	public function action_display($id) {
+		$query = new CustomQuery('SELECT * FROM `content_revisions` WHERE `content_id` = :id ORDER BY `added` DESC');
+		$revisions = $query->fetchAll(array(':id' => $id));
+		$content = new ContentObj($id);
+		if ($content->object) {
+			$content->object->revisions = $revisions;
+		} else {
+			$content = false;
+		}
+		return $content;
+	}
+
+	public function html_display($content) {
+		Backend::add('Sub Title', 'Revisions for ' . $content->array['name']);
+		Backend::add('content', $content);
+		Backend::add('revisions', $content->object->revisions);
+		Controller::addContent(Render::renderFile('content_revision.display.tpl.php'));
+		return true;
+	}
+
 	public static function hook_post_create($data, $object) {
 		if ($object instanceof ContentObj && !$object->array['from_file']) {
 			if (!self::createNewRevision(
@@ -52,30 +72,9 @@ class ContentRevision extends TableCtl {
 
 	public static function install() {
 		$toret = self::installModel(__CLASS__ . 'Obj');
-
-		$hook = new HookObj();
-		$toret = $hook->replace(array(
-				'name'        => 'ContentRevision Post Update',
-				'description' => 'Create the following revision of a post after the content has been updated',
-				'mode'        => '*',
-				'type'        => 'post',
-				'hook'        => 'update',
-				'class'       => 'ContentRevision',
-				'method'      => 'hook_post_update',
-				'sequence'    => 0,
-			)
-		) && $toret;
-		$toret = $hook->replace(array(
-				'name'        => 'ContentRevision Post Create',
-				'description' => 'Add the first revision of the content after the content has been created ',
-				'mode'        => '*',
-				'type'        => 'post',
-				'hook'        => 'create',
-				'class'       => 'ContentRevision',
-				'method'      => 'hook_post_create',
-				'sequence'    => 0,
-			)
-		) && $toret;
+		
+		Hook::add('update', 'post', __CLASS__, array('global' => true, 'description' => 'Create the following revision of a post after the content has been updated.')) && $toret;
+		Hook::add('create', 'post', __CLASS__, array('global' => true, 'description' => 'Add the first revision of the content after the content has been created.')) && $toret;
 		return $toret;
 	}
 }
