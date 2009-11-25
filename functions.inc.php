@@ -240,12 +240,19 @@ if(!function_exists('get_called_class')) {
 					$toret = $matches[1][self::$i];
 				}
 			}
-			if (!$toret && array_key_exists(3, $bt)
-				&& array_key_exists('function', $bt[3])
-				&& in_array($bt[3]['function'], array('call_user_func', 'call_user_func_array'))
-			) {
-				if (is_array($bt[3]['args'][0])) {
-					$toret = $bt[3]['args'][0][0];
+			if (!$toret || $toret == 'parent') {
+				$toret = false;
+				$num = 3;
+				while (!$toret && array_key_exists($num, $bt)) {
+					if (array_key_exists('function', $bt[$num])
+						&& in_array($bt[$num]['function'], array('call_user_func', 'call_user_func_array'))
+						&& is_array($bt[$num]['args'][0])
+						&& $bt[$num]['args'][0][0] != 'parent'
+					) {
+						$toret = $bt[$num]['args'][0][0];
+					} else {
+						$num++;
+					}
 				}
 			}
 			return $toret;
