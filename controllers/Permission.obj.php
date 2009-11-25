@@ -43,10 +43,5 @@ class Permission extends TableCtl {
 		}
 		return $toret;
 	}
-
-	public static function install() {
-		$toret = self::installModel(__CLASS__ . 'Obj');
-		return $toret;
-	}
 }
 

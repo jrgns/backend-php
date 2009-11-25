@@ -26,6 +26,8 @@ class Admin extends AreaCtl {
 		$toret = false;
 		$installed = Value::get('admin_installed', false);
 		if (!$installed) {
+			$original = Value::get('log_to_file', false);
+			Value::set('log_to_file', 'install_log_' . date('Ymd_His') . '.txt');
 			Component::pre_install();
 			Hook::pre_install();
 			
@@ -53,6 +55,7 @@ class Admin extends AreaCtl {
 				Controller::addSuccess('Backend Install Successful');
 				Controller::redirect('?q=account/signup');
 			}
+			Value::set('log_to_file', $original);
 		} else {
 			Controller::addError('Admin installation script already ran at ' . $installed);
 			Controller::redirect('?q=admin/post_install');
