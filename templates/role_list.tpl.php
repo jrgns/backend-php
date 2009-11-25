@@ -1,6 +1,6 @@
 <?php if (!empty($Object)): 
 	$list = $Object->list;
-	$odd = false;
+	$odd = true;
 ?>
 	<table>
 		<thead>
