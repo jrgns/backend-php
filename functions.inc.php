@@ -220,7 +220,7 @@ if(!function_exists('get_called_class')) {
 		static $fl = null;
 
 	    static function get_called_class() {
-	    	$toret = '(Unknown)';
+	    	$toret = false;
 			$bt = debug_backtrace();
 			
 			if (array_key_exists('file', $bt[2]) && array_key_exists('line', $bt[2])) {
@@ -238,6 +238,14 @@ if(!function_exists('get_called_class')) {
 					$matches);
 				if (array_key_exists(1, $matches) && array_key_exists(self::$i, $matches[1])) {
 					$toret = $matches[1][self::$i];
+				}
+			}
+			if (!$toret && array_key_exists(3, $bt)
+				&& array_key_exists('function', $bt[3])
+				&& in_array($bt[3]['function'], array('call_user_func', 'call_user_func_array'))
+			) {
+				if (is_array($bt[3]['args'][0])) {
+					$toret = $bt[3]['args'][0][0];
 				}
 			}
 			return $toret;
