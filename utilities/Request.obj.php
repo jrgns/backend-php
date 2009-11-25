@@ -8,7 +8,11 @@ class Request {
 				$query = $_REQUEST['q'];
 			}
 		}
-		return self::checkAliases($query);
+		$query = self::checkAliases($query);
+		if (substr($query, -1) == '/') {
+			$query = substr($query, 0, strlen($query) - 1);
+		}
+		return $query;
 	}
 	
 	private static function checkAliases($query) {
