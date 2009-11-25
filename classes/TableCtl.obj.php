@@ -427,6 +427,15 @@ class TableCtl extends AreaCtl {
 		return true;
 	}
 	
+	public static function install() {
+		$toret = parent::install();
+		$class = get_called_class();
+		if ($class) {
+			$toret = self::installModel(__CLASS__ . 'Obj');
+		}
+		return $toret;
+	}
+
 	public static function installModel($model) {
 		$toret = false;
 		if (class_exists($model, true)) {

@@ -123,4 +123,19 @@ class AreaCtl {
 	public static function checkParameters($parameters) {
 		return $parameters;
 	}
+	
+	public static function install() {
+		$toret = false;
+		$class = get_called_class();
+		if ($class && class_exists($class, true)) {
+			$toret = true;
+			$methods = get_class_methods($class);
+			$methods = array_filter($methods, create_function('$var', 'return substr($var, 0, strlen(\'action_\')) == \'action_\';'));
+			$methods = array_map(create_function('$var', 'return substr($var, strlen(\'action_\'));'), $methods);
+			foreach($methods as $action) {
+				Permission::add('nobody', $action, $class);
+			}
+		}
+		return $toret;
+	}
 }
