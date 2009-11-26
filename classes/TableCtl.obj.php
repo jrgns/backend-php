@@ -417,7 +417,7 @@ class TableCtl extends AreaCtl {
 			Controller::setAction('list');
 		}
 		if (Controller::$action == 'list' && empty(Controller::$parameters[0])) {
-			$parameters['0'] = Value::get('list_length', 5);
+			$parameters[0] = Value::get('list_length', 5);
 		}
 		return $parameters;
 	}
@@ -427,11 +427,15 @@ class TableCtl extends AreaCtl {
 		return true;
 	}
 	
-	public static function install() {
-		$toret = parent::install();
+	public static function install(array $options = array()) {
+		$install_model = array_key_exists('install_model', $options) ? $options['install_model'] : true;
+
+		$toret = parent::install($options);
 		$class = get_called_class();
 		if ($class) {
-			$toret = self::installModel(__CLASS__ . 'Obj');
+			if ($install_model) {
+				$toret = self::installModel($class . 'Obj');
+			}
 		}
 		return $toret;
 	}

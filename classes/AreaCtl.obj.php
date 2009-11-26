@@ -124,7 +124,7 @@ class AreaCtl {
 		return $parameters;
 	}
 	
-	public static function install() {
+	public static function install(array $options = array()) {
 		$toret = false;
 		$class = get_called_class();
 		if ($class && class_exists($class, true)) {
@@ -133,7 +133,7 @@ class AreaCtl {
 			$methods = array_filter($methods, create_function('$var', 'return substr($var, 0, strlen(\'action_\')) == \'action_\';'));
 			$methods = array_map(create_function('$var', 'return substr($var, strlen(\'action_\'));'), $methods);
 			foreach($methods as $action) {
-				Permission::add('nobody', $action, $class);
+				Permission::add('nobody', $action, class_for_url($class));
 			}
 		}
 		return $toret;
