@@ -52,8 +52,8 @@ class FileView extends View {
 
 	public static function install() {
 		$toret = true;
-		$toret = Hook::add('output', 'pre', __CLASS__, array('global' => 1)) && $toret;
-		$toret = Hook::add('start', 'post', __CLASS__, array('global' => 1)) && $toret;
+		$toret = Hook::add('output', 'pre', __CLASS__, array('mode' => 'file', 'global' => 1)) && $toret;
+		$toret = Hook::add('start', 'post', __CLASS__, array('mode' => 'file', 'global' => 1)) && $toret;
 		return $toret;
 	}
 }
