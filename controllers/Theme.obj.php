@@ -27,10 +27,5 @@ class Theme extends TableCtl {
 		}
 		return $theme;
 	}
-
-	public static function install() {
-		$toret = true;
-		return $toret;
-	}
 }
 

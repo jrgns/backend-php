@@ -283,8 +283,8 @@ END;
 		return array();
 	}
 
-	public static function install() {
-		$toret = self::installModel(__CLASS__ . 'Obj');
+	public static function install(array $options = array()) {
+		$toret = parent::install($options);
 
 		$toret = Hook::add('start', 'pre', __CLASS__, array('global' => true)) && $toret;
 		

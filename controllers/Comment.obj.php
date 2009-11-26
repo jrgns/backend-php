@@ -44,54 +44,13 @@ class Comment extends TableCtl {
 	}
 
 	
-	public static function install() {
-		$toret = self::installModel(__CLASS__ . 'Obj');
-
-		$hook = new HookObj();
-		$toret = $hook->replace(array(
-				'name'        => 'Comment Post Form',
-				'description' => '',
-				'mode'        => '*',
-				'type'        => 'post',
-				'hook'        => 'form',
-				'class'       => 'Comment',
-				'method'      => 'hook_post_form',
-				'sequence'    => 0,
-			)
-		) && $toret;
-		$toret = $hook->replace(array(
-				'name'        => 'Comment Post Display',
-				'description' => '',
-				'mode'        => '*',
-				'type'        => 'post',
-				'hook'        => 'display',
-				'class'       => 'Comment',
-				'method'      => 'hook_post_display',
-				'sequence'    => 0,
-			)
-		) && $toret;
-		$toret = $hook->replace(array(
-				'name'        => 'Comment Post Update',
-				'description' => '',
-				'mode'        => '*',
-				'type'        => 'post',
-				'hook'        => 'update',
-				'class'       => 'Comment',
-				'method'      => 'hook_post_update',
-				'sequence'    => 0,
-			)
-		) && $toret;
-		$toret = $hook->replace(array(
-				'name'        => 'Comment Post Create',
-				'description' => '',
-				'mode'        => '*',
-				'type'        => 'post',
-				'hook'        => 'create',
-				'class'       => 'Comment',
-				'method'      => 'hook_post_create',
-				'sequence'    => 0,
-			)
-		) && $toret;
+	public static function install(array $options = array()) {
+		$toret = parent::install($options);
+		
+		$toret = Hook::add('form',    'post', __CLASS__, array('global' => true)) && $toret;
+		$toret = Hook::add('display', 'post', __CLASS__, array('global' => true)) && $toret;
+		$toret = Hook::add('update',  'post', __CLASS__, array('global' => true)) && $toret;
+		$toret = Hook::add('create',  'post', __CLASS__, array('global' => true)) && $toret;
 		return $toret;
 	}
 }

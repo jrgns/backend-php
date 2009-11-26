@@ -116,8 +116,8 @@ class GateManager extends AreaCtl {
 		);
 	}
 
-	public static function install() {
-		$toret = true;
+	public static function install(array $options = array()) {
+		$toret = parent::install($options);
 		$toret = Hook::add('display', 'post', __CLASS__, array('global' => true, 'mode' => 'html')) && $toret;
 
 		$roles = self::getDefaultRoles();

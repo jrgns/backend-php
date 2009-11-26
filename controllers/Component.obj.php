@@ -48,25 +48,31 @@ class Component extends TableCtl {
 
 	private static function getBaseComponents() {
 		$toret = array();
+		$toret['Backend']     = '/classes/Backend.obj.php';
+
 		$toret['Controller']  = '/classes/Controller.obj.php';
 		$toret['Render']      = '/classes/Render.obj.php';
-		$toret['Backend']     = '/classes/Backend.obj.php';
-		$toret['GateKeeper']  = '/classes/GateKeeper.obj.php';
 		$toret['View']        = '/classes/View.obj.php';
-		$toret['HtmlView']    = '/views/HtmlView.obj.php';
-		$toret['ImageView']   = '/views/ImageView.obj.php';
-		$toret['JsonView']    = '/views/JsonView.obj.php';
-		$toret['SerializeView'] = '/views/SerializeView.obj.php';
-		$toret['PhpView']     = '/views/PhpView.obj.php';
+		$toret['GateKeeper']  = '/classes/GateKeeper.obj.php';
+
 		$toret['Component']   = '/controllers/Component.obj.php';
 		$toret['Hook']        = '/controllers/Hook.obj.php';
+
+		$toret['Role']        = '/controllers/Role.obj.php';
+		$toret['Assignment']  = '/controllers/Assignment.obj.php';
+		$toret['Permission']  = '/controllers/Permission.obj.php';
 		$toret['GateManager'] = '/controllers/GateManager.obj.php';
 		$toret['Admin']       = '/controllers/Admin.obj.php';
 		$toret['Content']     = '/controllers/Content.obj.php';
 		$toret['Value']       = '/controllers/Value.obj.php';
 		$toret['Account']     = '/controllers/Account.obj.php';
-		$toret['Assignment']  = '/controllers/Assignment.obj.php';
 		$toret['Home']        = '/controllers/Home.obj.php';
+		//Views
+		$toret['HtmlView']    = '/views/HtmlView.obj.php';
+		$toret['ImageView']   = '/views/ImageView.obj.php';
+		$toret['JsonView']    = '/views/JsonView.obj.php';
+		$toret['SerializeView'] = '/views/SerializeView.obj.php';
+		$toret['PhpView']     = '/views/PhpView.obj.php';
 		return $toret;
 	}
 	
@@ -129,8 +135,9 @@ class Component extends TableCtl {
 		return $toret;
 	}
 		
-	public static function install() {
-		$toret = true;
+	public static function install(array $options = array()) {
+		$options['install_model'] = array_key_exists('install_model', $options) ? $optinos['install_model'] : false;
+		$toret = parent::install($options);
 		Hook::add('init', 'pre', __CLASS__) && $toret;
 		return $toret;
 	}

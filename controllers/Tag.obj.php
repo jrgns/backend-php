@@ -112,15 +112,15 @@ class Tag extends TableCtl {
 		return true;
 	}
 	
-	public static function install() {
-		$toret = self::installModel(__CLASS__ . 'Obj');
+	public static function install(array $options = array()) {
+		$toret = parent::install($options);
 
-		$toret = Permission::add('anonymous', 'display', class_name(__CLASS__)) && $toret;
+		$toret = Permission::add('anonymous', 'display', __CLASS__) && $toret;
 		
-		$toret = Hook::add('form',    'pre',  __CLASS__);
-		$toret = Hook::add('display', 'post', __CLASS__);
-		$toret = Hook::add('update',  'post', __CLASS__);
-		$toret = Hook::add('create',  'post', __CLASS__);
+		$toret = Hook::add('form',    'pre',  __CLASS__) && $toret;
+		$toret = Hook::add('display', 'post', __CLASS__) && $toret;
+		$toret = Hook::add('update',  'post', __CLASS__) && $toret;
+		$toret = Hook::add('create',  'post', __CLASS__) && $toret;
 
 		return $toret;
 	}

@@ -70,11 +70,15 @@ class ContentRevision extends TableCtl {
 		return $revision->create($data);
 	}
 
-	public static function install() {
-		$toret = self::installModel(__CLASS__ . 'Obj');
+	public static function install(array $options = array()) {
+		$toret = parent::install($options);
 		
-		Hook::add('update', 'post', __CLASS__, array('global' => true, 'description' => 'Create the following revision of a post after the content has been updated.')) && $toret;
-		Hook::add('create', 'post', __CLASS__, array('global' => true, 'description' => 'Add the first revision of the content after the content has been created.')) && $toret;
+		$toret = Hook::add('update', 'post', __CLASS__,
+							array('global' => true, 'description' => 'Create the following revision of a post after the content has been updated.')
+						) && $toret;
+		$toret = Hook::add('create', 'post', __CLASS__,
+							array('global' => true, 'description' => 'Add the first revision of the content after the content has been created.')
+						) && $toret;
 		return $toret;
 	}
 }

@@ -90,6 +90,12 @@ WHERE
 		}
 		return $toret;
 	}
+	
+	public static function install(array $options = array()) {
+		$options['install_model'] = array_key_exists('install_model', $options) ? $optinos['install_model'] : false;
+		$toret = parent::install($options);
+		return $toret;
+	}
 
 	public static function pre_install() {
 		$toret = self::installModel(__CLASS__ . 'Obj');

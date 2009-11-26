@@ -18,9 +18,5 @@
  * This is the controller for the table roles.
  */
 class Role extends TableCtl {
-	public static function install() {
-		$toret = self::installModel(__CLASS__ . 'Obj');
-		return $toret;
-	}
 }
 

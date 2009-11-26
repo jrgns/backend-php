@@ -128,8 +128,9 @@ class Content extends TableCtl {
 		return $content;		
 	}
 	
-	public static function install() {
-		$toret = self::installModel(__CLASS__ . 'Obj');
+	public static function install(array $options = array()) {
+		$toret = parent::install($options);
+
 		$toret = Permission::add('anonymous', 'display', 'content') && $toret;
 		$toret = Permission::add('anonymous', 'list', 'content') && $toret;
 		return $toret;
