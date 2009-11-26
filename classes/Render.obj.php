@@ -137,7 +137,7 @@ class Render {
 			if (!file_exists(BACKEND_FOLDER . '/cache/')) {
 				mkdir(BACKEND_FOLDER . '/cache/', 0755);
 			}
-			$cache_file = self::getCacheFilename($filename);
+				$cache_file = self::getCacheFilename($filename);
 			if (file_exists($cache_file)) {
 				if (array_key_exists('recache', $_REQUEST)) {
 					var_dump('Render::Recaching File');
@@ -199,11 +199,9 @@ class Render {
 		$BEFilter->load();
 		$filters = $BEFilter->list ? $BEFilter->list : array();
 		
-		if (count($filters)) {
-			foreach($filters as $row) {
-				if (class_exists($row['class'], true) && method_exists($row['class'], $row['function'])) {
-					$toret = call_user_func(array($row['class'], $row['function']), $toret);
-				}
+		foreach($filters as $row) {
+			if (class_exists($row['class'], true) && method_exists($row['class'], $row['function'])) {
+				$toret = call_user_func(array($row['class'], $row['function']), $toret);
 			}
 		}
 		return $toret;
@@ -315,7 +313,7 @@ class Render {
 
 	public static function install() {
 		$toret = true;
-		Hook::add('output', 'pre', __CLASS__, array('global' => 1, 'sequence' => 1000)) && $toret;
+		Hook::add('output', 'pre', __CLASS__, array('mode' => 'html', 'global' => 1, 'sequence' => 1000)) && $toret;
 		
 		$filter = new BEFilterObj();
 		$toret = $filter->replace(array(
@@ -327,18 +325,18 @@ class Render {
 			)
 		) && $toret;
 		$toret = $filter->replace(array(
-				'name' => 'System Links',
-				'description' => 'Update Links...',
-				'class' => 'Render',
-				'function' => 'addLinks',
-				'options' => '',
-			)
-		) && $toret;
-		$toret = $filter->replace(array(
 				'name' => 'System Rewrite Links',
 				'description' => 'Rewrite Links...',
 				'class' => 'Render',
 				'function' => 'rewriteLinks',
+				'options' => '',
+			)
+		) && $toret;
+		$toret = $filter->replace(array(
+				'name' => 'System Links',
+				'description' => 'Update Links...',
+				'class' => 'Render',
+				'function' => 'addLinks',
 				'options' => '',
 			)
 		) && $toret;
