@@ -313,10 +313,14 @@ class Render {
 
 	public static function install() {
 		$toret = true;
+		
 		Hook::add('output', 'pre', __CLASS__, array('mode' => 'html', 'global' => 1, 'sequence' => 1000)) && $toret;
 		
+		Value::set('clean_urls', false);
+		
 		$filter = new BEFilterObj();
-		$toret = $filter->replace(array(
+		$filter->truncate();
+		$toret = $filter->create(array(
 				'name' => 'System Replace',
 				'description' => 'Replace system variables with their values',
 				'class' => 'Render',
@@ -324,7 +328,7 @@ class Render {
 				'options' => '',
 			)
 		) && $toret;
-		$toret = $filter->replace(array(
+		$toret = $filter->create(array(
 				'name' => 'System Rewrite Links',
 				'description' => 'Rewrite Links...',
 				'class' => 'Render',
@@ -332,7 +336,7 @@ class Render {
 				'options' => '',
 			)
 		) && $toret;
-		$toret = $filter->replace(array(
+		$toret = $filter->create(array(
 				'name' => 'System Links',
 				'description' => 'Update Links...',
 				'class' => 'Render',
