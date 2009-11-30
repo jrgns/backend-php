@@ -16,13 +16,30 @@
 class Query {
 	private $connection;
 
+	private $action     = false;
+	private $table      = false;
 	private $query      = false;
+	private $fields     = array();
+	private $conditions = array();
 	private $parameters = array();
+	private $group      = array();
+	private $order      = array();
+	private $limit      = array();
 
 	private $last_stmt   = false;
 	private $last_params = array();
 	
 	function __construct($action, $table, array $options = array()) {
+		$action = strtoupper($action);
+		if (!in_array($action, array('SELECT', 'INSERT', 'DELETE', 'UPDATE', 'SHOW'))) {
+			trigger_error('Unknown Query Action', E_USER_ERROR);
+			return false;
+		}
+		$this->action = $action;
+		if ($table instanceof DBObject) {
+			$table = $table->getSource();
+		}
+		$this->table = $table;
 	}
 
 	private function checkConnection() {
@@ -77,6 +94,51 @@ class Query {
 		return $toret;
 	}
 	
+	public function field($field) {
+		if (is_array($field)) {
+			$this->fields = array_merge($this->fields, $field);
+		} else {
+			$this->fields[] = $field;
+		}
+		return $this;
+	}
+	
+	public function filter($condition) {
+		if (is_array($condition)) {
+			$this->conditions = array_merge($this->conditions, $condition);
+		} else {
+			$this->conditions[] = $condition;
+		}
+		return $this;
+	}
+	
+	public function group($group_field) {
+		if (is_array($group_field)) {
+			$this->group = array_merge($this->group, $group_field);
+		} else {
+			$this->group[] = $group_field;
+		}
+		return $this;
+	}
+	
+	public function order($order_field) {
+		if (is_array($order_field)) {
+			$this->order = array_merge($this->group, $order_field);
+		} else {
+			$this->order[] = $order_field;
+		}
+		return $this;
+	}
+	
+	public function limit($one, $two = false) {
+		if ($two !== false) {
+			$this->limit = array($one, $two);
+		} else {
+			$this->limit = array(0, $one);
+		}
+		return $this;
+	}
+	
 	public function fetchAssoc(array $parameters = array()) {
 		$toret = $this->execute($parameters);
 		if ($toret) {
@@ -108,8 +170,38 @@ class Query {
 		$this->query     = $query;
 	}
 	
+	private function buildQuery() {
+		switch ($this->action) {
+		case 'DELETE':
+			$query = $this->action . ' FROM ' . $this->table;
+			break;
+		case 'SELECT':
+			$query = $this->action;
+			if (empty($this->fields)) {
+				$query .= ' * ';
+			} else {
+				$query .= ' ' . implode(', ', $this->fields);
+			}
+			$query .= ' FROM ' . $this->table;
+			break;
+		}
+		if (!empty($this->conditions)) {
+			$query .= ' WHERE (' . implode(') AND (', $this->conditions) . ')';
+		}
+		if (!empty($this->group)) {
+			$query .= ' GROUP BY ' . implode(', ', $this->group);
+		}
+		if (!empty($this->order)) {
+			$query .= ' ORDER BY ' . implode(', ', $this->order);
+		}
+		if (!empty($this->limit)) {
+			$query .= ' LIMIT ' . implode(', ', $this->limit);
+		}
+		return $query;
+	}
+	
 	public function __toString() {
-		$toret = empty($this->query) ? 'Empty Query' : $this->query;
+		$toret = empty($this->query) ? $this->buildQuery() : $this->query;
 		return $toret;
 	}
 }
