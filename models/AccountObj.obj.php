@@ -81,7 +81,7 @@ CREATE TABLE `users` (
   `name` varchar(255) NOT NULL,
   `surname` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
-  `mobile` varchar(255) NOT NULL,
+  `mobile` varchar(255) NULL DEFAULT NULL,
   `username` varchar(255) NOT NULL,
   `password` varchar(32) NOT NULL,
   `salt` varchar(32) NOT NULL,
