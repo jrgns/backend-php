@@ -569,6 +569,10 @@ class DBObject {
 		return $this->last_error;
 	}
 	
+	public function getSource() {
+		return '`' . $this->meta['database'] . '`.`' . $this->meta['table'] . '`';
+	}
+	
 	public function getSelectSQL($options = array()) {
 		extract($this->meta);
 		$database = Backend::get('DB_' . $database, $database);
