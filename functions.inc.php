@@ -156,7 +156,7 @@ function reseed() {
  * @todo Extend this to check the recipient formats, handle recipients as an array, etc.
  */
 function send_email($recipient, $subject, $message, array $headers = array()) {
-	return mail($recipient, $subject, $message, $headers);
+	return mail($recipient, $subject, $message, implode("\r\n", $headers));
 }
 
 function array_flatten(&$array, $key_field = null, $value_field = null) {
