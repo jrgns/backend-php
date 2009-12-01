@@ -255,6 +255,9 @@ if(!function_exists('get_called_class')) {
 					}
 				}
 			}
+			if (is_object($toret)) {
+				$toret = class_name($toret);
+			}
 			return $toret;
         }
     }
