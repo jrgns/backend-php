@@ -31,6 +31,46 @@ class Image extends File {
 		Controller::addContent(Render::renderFile('image_list.tpl.php'));
 	}
 	
+	function rss_list($result) {
+		if ($result instanceof DBObject) {
+			Backend::add('title', Backend::getConfig('application.Title'));
+			Backend::add('link', SITE_LINK . '?q=content');
+			Backend::add('description', Backend::getConfig('application.description'));
+			if (!empty($result->list) && is_array($result->list)) {
+				$list = array();
+				foreach($result->list as $item) {
+					$item['link'] = SITE_LINK . '?q=image/' . $item['id'];
+					$item['body'] = $item['name'] . ': <![CDATA[<img src="' . SITE_LINK . '?q=image/' . $item['id'] . '"> ]]>';
+					$list[] = $item;
+				}
+			} else {
+				$list = false;
+			}
+			Backend::add('list', $list);
+		}
+		return $result;
+	}
+
+	function atom_list($result) {
+		if ($result instanceof DBObject) {
+			Backend::add('title', Backend::getConfig('application.Title'));
+			Backend::add('link', SITE_LINK . '?q=content');
+			Backend::add('description', Backend::getConfig('application.description'));
+			if (!empty($result->list) && is_array($result->list)) {
+				$list = array();
+				foreach($result->list as $item) {
+					$item['link'] = SITE_LINK . '?q=image/' . $item['id'];
+					$item['body'] = htmlentities('<img src="' . SITE_LINK . '?q=image/' . $item['id'] . '" />');
+					$list[] = $item;
+				}
+			} else {
+				$list = false;
+			}
+			Backend::add('list', $list);
+		}
+		return $result;
+	}
+
 	public function action_list($count) {
 		$toret = false;
 		Backend::add('Sub Title', 'List');

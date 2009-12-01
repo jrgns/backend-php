@@ -81,6 +81,25 @@ class Content extends TableCtl {
 		return $result;
 	}
 
+	function atom_list($result) {
+		if ($result instanceof DBObject) {
+			Backend::add('title', Backend::getConfig('application.Title'));
+			Backend::add('link', SITE_LINK . '?q=content');
+			Backend::add('description', Backend::getConfig('application.description'));
+			if (!empty($result->list) && is_array($result->list)) {
+				$list = array();
+				foreach($result->list as $item) {
+					$item['link'] = SITE_LINK . '?q=content/' . $item['id'];
+					$list[] = $item;
+				}
+			} else {
+				$list = false;
+			}
+			Backend::add('list', $list);
+		}
+		return $result;
+	}
+
 	function action_display($id) {
 		$toret = false;
 		if (is_numeric($id)) {
