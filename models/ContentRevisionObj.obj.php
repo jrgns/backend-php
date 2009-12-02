@@ -58,5 +58,23 @@ class ContentRevisionObj extends DBObject {
 		}
 		return $toret ? $data : false;
 	}
+
+	public function getInstallSQL() {
+		$toret = <<< END_SQL
+CREATE TABLE `content_revisions` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `content_id` bigint(20) NOT NULL,
+  `summary` varchar(1024) NOT NULL,
+  `markdown` text NOT NULL,
+  `body` text NOT NULL,
+  `active` tinyint(1) NOT NULL,
+  `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `added` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) COMMENT='Store revisions for content stored in the DB'
+END_SQL;
+		return $toret;
+	}
 }
 
