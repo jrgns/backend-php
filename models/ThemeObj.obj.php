@@ -43,12 +43,6 @@ class ThemeObj extends DBObject {
 		return $toret ? $data : false;
 	}
 
-	public function getRetrieveSQL() {
-		extract($this->meta);
-		$database = Backend::get('DB_' . $database, $database);
-		return 'SELECT * FROM `' . $database . '`.`' . $table . '` WHERE `id` = :parameter OR `name` = :parameter';
-	}
-
 	public function getInstallSQL() {
 		$toret = <<< END_SQL
 CREATE TABLE `themes` (

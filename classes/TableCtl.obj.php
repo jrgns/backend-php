@@ -368,13 +368,8 @@ class TableCtl extends AreaCtl {
 
 		$toret = null;
 		//We've defined get_called_class in functions.inc.php for servers with PHP < 5.3.0
-		try {
-			$obj_name = get_called_class() . 'Obj';
-			var_dump($obj_name);
-		} catch (Exception $e) {
-			var_dump($e->getMessage()); die;
-		}
-		if (class_exists($obj_name, true)) {
+		$obj_name = get_called_class() . 'Obj';
+		if ($obj_name && class_exists($obj_name, true)) {
 			$toret = new $obj_name();
 			if ($parameter) {
 				$query = $toret->getRetrieveSQL();
@@ -442,13 +437,8 @@ class TableCtl extends AreaCtl {
 		$install_model = array_key_exists('install_model', $options) ? $options['install_model'] : true;
 
 		$toret = parent::install($options);
-		try {
-			$class = get_called_class();
-			var_dump($class);
-		} catch (Exception $e) {
-			var_dump($e->getMessage()); die;
-		}
-		if ($class) {
+		$class = get_called_class();
+		if ($class && class_exists($class, true)) {
 			if ($install_model) {
 				$toret = self::installModel($class . 'Obj');
 			}

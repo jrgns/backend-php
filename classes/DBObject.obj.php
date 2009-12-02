@@ -648,7 +648,14 @@ class DBObject {
 	public function getRetrieveSQL() {
 		extract($this->meta);
 		$database = Backend::get('DB_' . $database, $database);
-		return 'SELECT * FROM `' . $database . '`.`' . $table . '` WHERE `id` = :parameter';
+		$query = 'SELECT * FROM `' . $database . '`.`' . $table . '` WHERE `id` = :parameter';
+		if (array_key_exists('name', $fields)) {
+			$query .= ' OR `name` = :parameter';
+		}
+		if (array_key_exists('title', $fields)) {
+			$query .= ' OR `title` = :parameter';
+		}
+		return $query;
 	}
 
 	public function getCreateSQL($data, array $options = array()) {
