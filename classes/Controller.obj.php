@@ -357,7 +357,7 @@ class Controller {
 					$fp = fopen(APP_FOLDER . '/logs/' . $file, 'a');
 					if ($fp) {
 						$query = Controller::$area . '/' . Controller::$action . '/' . implode('/', Controller::$parameters);
-						fwrite($fp, time() . "\t" . $query . "\t" . $string . PHP_EOL);
+						fwrite($fp, time() . "\t" . $query . "\t" . $what . "\t" . $string . PHP_EOL);
 					}
 				}
 			}
