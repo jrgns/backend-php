@@ -319,7 +319,7 @@ class DBObject {
 					$toret = $toret ? $toret : null;
 				}
 			} else {
-				die('error');
+				Controller::addError('No retrieve SQL for ' . class_name($this));
 			}
 		} else {
 			Controller::addError('DB Connection error');
@@ -418,6 +418,8 @@ class DBObject {
 			}
 			$query = new CustomQuery($query);
 			$toret = $query->execute();
+		} else {
+			Controller::addError('No Install SQL for ' . class_name($this));
 		}
 		return $toret;
 	}
@@ -811,9 +813,11 @@ class DBObject {
 	}
 	
 	public function __toString() {
-		if (get_called_class() == '(Unknown)') {
+		$class = get_called_class();
+		if (!$class) {
 			print_stacktrace();
+			return '(Unknown)';
 		}
-		return get_called_class();
+		return $class;
 	}
 }

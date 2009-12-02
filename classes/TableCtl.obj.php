@@ -361,35 +361,46 @@ class TableCtl extends AreaCtl {
 		}
 	}
 	
-	public static function retrieve($options = array()) {
-		$toret = false;
-		if (!(is_array($options) || is_object($options))) {
-			$options = array('id' => $options);
+	public static function retrieve($parameter = false, $return = 'array') {
+		if (!$parameter && $return == 'array') {
+			$return = 'dbobject';
 		}
-		$id     = array_key_exists('id', $options) ? $options['id'] : false;
-		$return = array_key_exists('return', $options) ? $options['return'] : false;
 
+		$toret = null;
 		//We've defined get_called_class in functions.inc.php for servers with PHP < 5.3.0
-		$obj_name = get_called_class() . 'Obj';
+		try {
+			$obj_name = get_called_class() . 'Obj';
+			var_dump($obj_name);
+		} catch (Exception $e) {
+			var_dump($e->getMessage()); die;
+		}
 		if (class_exists($obj_name, true)) {
-			if ($id) {
-				$toret = new $obj_name($id);
+			$toret = new $obj_name();
+			if ($parameter) {
+				$query = $toret->getRetrieveSQL();
+				if ($query) {
+					$toret->load(array('query' => $query, 'parameters' => array(':parameter' => $parameter), 'mode' => $return));
+				} else {
+					$toret = null;
+				}
 			} else {
-				$toret = new $obj_name();
+				$toret->load();
 			}
-			$toret->load();
-			switch ($return) {
-			case 'list':
-				$toret = $toret->list;
-				break;
-			case 'array':
-				$toret = $toret->array;
-				break;
-			case 'object':
-				$toret = $toret->object;
-				break;
-			default:
-				break;
+			if ($toret) {
+				switch ($return) {
+				case 'list':
+					$toret = $toret->list;
+					break;
+				case 'array':
+					$toret = $toret->array;
+					break;
+				case 'object':
+					$toret = $toret->object;
+					break;
+				case 'dbobject':
+				default:
+					break;
+				}
 			}
 		}
 		return $toret;
@@ -431,7 +442,12 @@ class TableCtl extends AreaCtl {
 		$install_model = array_key_exists('install_model', $options) ? $options['install_model'] : true;
 
 		$toret = parent::install($options);
-		$class = get_called_class();
+		try {
+			$class = get_called_class();
+			var_dump($class);
+		} catch (Exception $e) {
+			var_dump($e->getMessage()); die;
+		}
 		if ($class) {
 			if ($install_model) {
 				$toret = self::installModel($class . 'Obj');
