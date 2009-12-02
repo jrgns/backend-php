@@ -20,8 +20,7 @@ class Value extends TableCtl {
 	}
 	
 	public static function get($name, $default = null) {
-		$toret = new ValueObj();
-		$toret = $toret->retrieve($name);
+		$toret = Value::retrieve($name);
 		$toret = !empty($toret['value']) ? unserialize(base64_decode($toret['value'])) : $default;
 		return $toret;
 	}
@@ -29,8 +28,7 @@ class Value extends TableCtl {
 	public static function set($name, $new_value) {
 		$new_value = base64_encode(serialize($new_value));
 
-		$old_val = new ValueObj();
-		$old_val = $old_val->retrieve($name);
+		$old_val = Value::retrieve($name);
 		if (!is_null($old_val)) {
 			$value = new ValueObj($old_val['id']);
 			if ($value) {

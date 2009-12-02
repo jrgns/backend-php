@@ -27,7 +27,11 @@ class Admin extends AreaCtl {
 		$installed = Value::get('admin_installed', false);
 		if (!$installed) {
 			$original = Value::get('log_to_file', false);
+			//Value::set('log_to_file', 'install_log.txt');
 			Value::set('log_to_file', 'install_log_' . date('Ymd_His') . '.txt');
+
+			Controller::addNotice(PHP_EOL . PHP_EOL . 'Installation started at ' . date('Y-m-d H:i:s'));
+
 			Component::pre_install();
 			Hook::pre_install();
 			
@@ -37,10 +41,8 @@ class Admin extends AreaCtl {
 
 				$components = array_flatten($components, null, 'name');
 
-				//Why is this here?
-				$hook = new HookObj();
-				$hook->truncate();
 				foreach($components as $component) {
+					Controller::addNotice('Installing ' . $component);
 					if (class_exists($component, true) && method_exists($component, 'install')) {
 						if (!call_user_func_array(array($component, 'install'), array())) {
 							Controller::addError('Error on installing ' . $component);
@@ -81,7 +83,7 @@ class Admin extends AreaCtl {
 	function action_components() {
 		$toret = array();
 		
-		$toret = Component::retrieve(array('return' => 'list'));
+		$toret = Component::retrieve(false, 'list');
 		if (Controller::$debug) {
 			var_dump('Component List:', $toret);
 		}

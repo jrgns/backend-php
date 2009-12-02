@@ -20,8 +20,7 @@
 class Theme extends TableCtl {
 	public static function get($name = false) {
 		$name = $name ? $name : Value::get('default_theme', 'backend');
-		$theme = new ThemeObj();
-		$theme = $theme->retrieve($name);
+		$theme = Theme::retrieve($name);
 		if ($theme) {
 			$theme['path'] = str_replace(array('#BACKEND_FOLDER#', '#APP_FOLDER#', '#SITE_FOLDER#'), array(BACKEND_FOLDER, APP_FOLDER, SITE_FOLDER), $theme['path']);
 		}
