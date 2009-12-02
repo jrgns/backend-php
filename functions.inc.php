@@ -210,59 +210,69 @@ function files_from_folder($folder, array $options = array()) {
 	return array_unique($toret);
 }
 
-/**
- * For servers not running PHP 5.3 and later.
- * Copied from http://www.septuro.com/2009/07/php-5-2-late-static-binding-get_called_class-and-self-new-self/
- */
-if(!function_exists('get_called_class')) {
-    class class_tools {
-		static $i = 0;
-		static $fl = null;
-
-	    static function get_called_class() {
-	    	$toret = false;
-			$bt = debug_backtrace();
-			
-			if (array_key_exists('file', $bt[2]) && array_key_exists('line', $bt[2])) {
-				if (self::$fl == $bt[2]['file'].$bt[2]['line']) {
-					self::$i++;
-				} else {
-					self::$i = 0;
-					self::$fl = $bt[2]['file'].$bt[2]['line'];
-				}
-
-				$lines = file($bt[2]['file']);
-
-				preg_match_all('/([a-zA-Z0-9\_]+)::'.$bt[2]['function'].'/',
-					$lines[$bt[2]['line']-1],
-					$matches);
-				if (array_key_exists(1, $matches) && array_key_exists(self::$i, $matches[1])) {
-					$toret = $matches[1][self::$i];
-				}
-			}
-			if (!$toret || $toret == 'parent') {
-				$toret = false;
-				$num = 3;
-				while (!$toret && array_key_exists($num, $bt)) {
-					if (array_key_exists('function', $bt[$num])
-						&& in_array($bt[$num]['function'], array('call_user_func', 'call_user_func_array'))
-						&& is_array($bt[$num]['args'][0])
-						&& $bt[$num]['args'][0][0] != 'parent'
-					) {
-						$toret = $bt[$num]['args'][0][0];
-					} else {
-						$num++;
+/********************************
+ * Retro-support of get_called_class()
+ * Tested and works in PHP 5.2.4
+ * http://www.sol1.com.au/
+ ********************************/
+if (!function_exists('get_called_class')) {
+	function get_called_class($bt = false, $l = 1) {
+		if (!$bt) $bt = debug_backtrace();
+		if (!isset($bt[$l])) throw new Exception("Cannot find called class -> stack level too deep.");
+		if (!isset($bt[$l]['type'])) {
+			throw new Exception ('type not set');
+		} else {
+			switch ($bt[$l]['type']) {
+			case '::':
+				if (array_key_exists('file', $bt[$l])) {
+					$lines = file($bt[$l]['file']);
+					$i = 0;
+					$callerLine = '';
+					do {
+						$i++;
+						$callerLine = $lines[$bt[$l]['line'] - $i] . $callerLine;
+					} while (stripos($callerLine,$bt[$l]['function']) === false);
+					preg_match('/([a-zA-Z0-9\_]+)::'.$bt[$l]['function'].'/',
+						$callerLine,
+						$matches
+					);
+					if (!isset($matches[1])) {
+					// must be an edge case.
+						throw new Exception ("Could not find caller class: originating method call is obscured.");
 					}
+					switch ($matches[1]) {
+					case 'self':
+					case 'parent':
+						return get_called_class($bt, $l + 1);
+						break;
+					default:
+						return $matches[1];
+						break;
+					}
+				} else if (
+						array_key_exists('function', $bt[$l + 1])
+						&& in_array($bt[$l + 1]['function'], array('call_user_func', 'call_user_func_array'))
+						&& array_key_exists(0, $bt[$l + 1]['args'])
+						&& is_array($bt[$l + 1]['args'][0])
+					) {
+					return current($bt[$l + 1]['args'][0]);
 				}
+			// won't get here.
+			case '->':
+				switch ($bt[$l]['function']) {
+				case '__get':
+					// edge case -> get class of calling object
+					if (!is_object($bt[$l]['object'])) throw new Exception ("Edge case fail. __get called on non object.");
+					return get_class($bt[$l]['object']);
+					break;
+				default:
+					return $bt[$l]['class'];
+					break;
+				}
+			default:
+				throw new Exception ("Unknown backtrace method type");
+				break;
 			}
-			if (is_object($toret)) {
-				$toret = class_name($toret);
-			}
-			return $toret;
-        }
-    }
-
-    function get_called_class() {
-        return class_tools::get_called_class();
-    }
-}
+		}
+	}
+} 
