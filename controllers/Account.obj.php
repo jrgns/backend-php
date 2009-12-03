@@ -24,6 +24,13 @@ class Account extends TableCtl {
 				$username = $username ? $username : (array_key_exists('username', $_REQUEST) ? $_REQUEST['username'] : false);
 				$password = $password ? $password : (array_key_exists('password', $_REQUEST) ? $_REQUEST['password'] : false);
 				if ($username && $password && !empty($_SESSION['cookie_is_working'])) {
+					/*$query = new Query('select', new AccountObj());
+					$query->field('`users`.*');
+							->filter('`users`.`Username` = :username OR `users`.`Mobile` = :username OR `users`.`Email` = :username')
+							->filter('`users`.`password` = MD5(CONCAT(`users`.`salt`, :password, :salt))')
+							->filter('`users`.`active` = 1')
+							->filter('`users`.`confirmed` = 1');
+					die($query);*/
 					$sql = '
 						SELECT `users`.*, GROUP_CONCAT(DISTINCT `roles`.`name` ORDER BY `roles`.`name` SEPARATOR \',\') AS `roles` FROM `users` 
 						LEFT JOIN `assignments` ON `assignments`.`access_type` = \'users\' AND (`users`.`id` = `assignments`.`access_id` OR `assignments`.`access_id` = 0)
@@ -108,6 +115,18 @@ class Account extends TableCtl {
 		return $toret ? $User : false;
 	}
 	
+	public function html_display($object) {
+		Backend::add('Sub Title', 'My Account');
+		if (self::checkUser()) {
+			$grav_url = 'http://www.gravatar.com/avatar.php?gravatar_id=' . md5( strtolower($_SESSION['user']->email) ) . '&size=120&d=identicon';
+			Backend::add('gravatar', $grav_url);
+			Backend::add('TabLinks', $this->getTabLinks('display'));
+			Backend::add('obj', $_SESSION['user']);
+			Controller::addContent(Render::renderFile('account.display.tpl.php'));
+		}
+		Controller::addContent(Render::renderFile('loginout.tpl.php'));
+	}
+	
 	public function html_update($object) {
 		Backend::add('Sub Title', 'Manage my Account');
 		if (self::checkUser()) {
@@ -115,7 +134,7 @@ class Account extends TableCtl {
 			Backend::add('gravatar', $grav_url);
 			Backend::add('TabLinks', $this->getTabLinks('update'));
 			Backend::add('obj', $_SESSION['user']);
-			Controller::addContent(Render::renderFile('account_info.tpl.php'));
+			Controller::addContent(Render::renderFile('account.update.tpl.php'));
 		}
 		Controller::addContent(Render::renderFile('loginout.tpl.php'));
 	}
@@ -275,12 +294,14 @@ END;
 
 	public static function checkParameters($parameters) {
 		if (array_key_exists('user', $_SESSION) && $_SESSION['user']->id > 0) {
-			if (in_array(Controller::$action, array('update', 'display')) && !empty($parameters['0']) && $parameters[0] != $_SESSION['user']->id) {
+			if (Controller::$action == 'signup') {
+				Controller::setAction('display');
+			}
+			if (in_array(Controller::$action, array('update', 'display')) && (empty($parameters['0']) || $parameters[0] != $_SESSION['user']->id)) {
 				$parameters[0] = $_SESSION['user']->id;
 			}
-			return $parameters;
 		}
-		return array();
+		return $parameters;
 	}
 
 	public static function install(array $options = array()) {

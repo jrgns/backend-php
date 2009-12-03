@@ -27,8 +27,11 @@ class TableCtl extends AreaCtl {
 			if ($this->checkPermissions(array('action' => 'list'))) {
 				$links[] = array('link' => '?q=' . Controller::$area . '/list', 'text' => 'List');
 			}
-			if (Controller::$action == 'display' && $this->checkPermissions(array('action' => 'update'))) {
-				$links[] = array('link' => '?q=' . Controller::$area . '/update/' . $id, 'text' => 'Update');
+			if (Controller::$action == 'display' && $this->checkPermissions(array('action' => 'update')) && !empty(Controller::$parameters[0])) {
+				$links[] = array('link' => '?q=' . Controller::$area . '/update/' . Controller::$parameters[0], 'text' => 'Update');
+			}
+			if (Controller::$action == 'update' && $this->checkPermissions(array('action' => 'update')) && !empty(Controller::$parameters[0])) {
+				$links[] = array('link' => '?q=' . Controller::$area . '/display/' . Controller::$parameters[0], 'text' => 'Display');
 			}
 			if ($this->checkPermissions(array('action' => 'create'))) {
 				$links[] = array('link' => '?q=' . Controller::$area . '/create', 'text' => 'Create');
