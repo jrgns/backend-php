@@ -132,7 +132,7 @@ class Controller {
 			if (Controller::$debug) {
 				Controller::addError('Component is Inactive');
 			}
-			$control_name = 'TableCtl';
+			self::redirect('?q=' . Value::get('default_controller', 'home') . '/' . Value::get('default_action', 'index'));
 		}
 		if (Controller::$debug) {
 			var_dump('User Controller ' . $control_name);
