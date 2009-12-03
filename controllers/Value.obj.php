@@ -28,20 +28,22 @@ class Value extends TableCtl {
 	public static function set($name, $new_value) {
 		$new_value = base64_encode(serialize($new_value));
 
-		$old_val = Value::retrieve($name);
-		if (!is_null($old_val)) {
-			$value = new ValueObj($old_val['id']);
-			if ($value) {
-				$toret = $value->update(array('value' => $new_value));
-			}
-		} else {
-			$value = new ValueObj();
-			$data = array(
-				'name' => $name,
-				'value' => $new_value,
-			);
-			$toret = $value->create($data);
-		}
+		$value = new ValueObj();
+		$data = array(
+			'name' => $name,
+			'value' => $new_value,
+		);
+		$toret = $value->replace($data);
+		return $toret;
+	}
+
+	public static function pre_install() {
+		$toret = self::installModel(__CLASS__ . 'Obj');
+	}
+
+	public static function install(array $options = array()) {
+		$options['install_model'] = array_key_exists('install_model', $options) ? $options['install_model'] : false;
+		$toret = parent::install($options);
 		return $toret;
 	}
 }

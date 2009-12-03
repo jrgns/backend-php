@@ -26,15 +26,16 @@ class Admin extends AreaCtl {
 		$toret = false;
 		$installed = Value::get('admin_installed', false);
 		if (!$installed) {
+			Component::pre_install();
+			Hook::pre_install();
+			Value::pre_install();
+			
 			$original = Value::get('log_to_file', false);
 			//Value::set('log_to_file', 'install_log.txt');
 			Value::set('log_to_file', 'install_log_' . date('Ymd_His') . '.txt');
 
 			Controller::addNotice(PHP_EOL . PHP_EOL . 'Installation started at ' . date('Y-m-d H:i:s'));
 
-			Component::pre_install();
-			Hook::pre_install();
-			
 			$components = Component::getActive();
 			if ($components) {
 				$toret = true;
