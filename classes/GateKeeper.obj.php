@@ -22,13 +22,14 @@
  * @todo Figure out what barredRole should do
  */
 class GateKeeper {
-	public static function dropPermissions($action, $subject, $subject_id) { 
-		$params = array(':action' => $action, ':subject' => $subject, ':subject_id' => $subject_id);
-		$query = new CustomQuery('DELETE FROM `permissions` WHERE `action` = :action AND `subject` = :subject AND `subject_id` = :subject_id AND system = 0');
-		return $query->execute($params);
+	public static function check(array $user_roles, $action = '*', $subject = '*', $subject_id = 0) {
+		$roles = self::permittedRoles($action, $subject, $subject_id);
+		$intersect = array_intersect($user_roles, $roles);
+		$toret = count($intersect) ? true : false;
+		return $toret;
 	}
-  
-	public static function permit($role, $control, $action, $subject, $subject_id) {
+	
+	public static function permit($role, $action, $subject, $subject_id, $control) {
 		$toret = false;
 		$params = array(':role' => $role, ':control' => $control, ':action' => $action, ':subject' => $subject, ':subject_id' => $subject_id);
 		$query = new CustomQuery('SELECT `id` FROM `permissions` WHERE `role` = :role AND `control` = :control AND `action` = :action AND `subject` = :subject AND `subject_id` = :subject_id AND system = 0');
@@ -45,13 +46,32 @@ class GateKeeper {
 		return $toret;
 	}
 	
-	public static function check(array $user_roles, $action = '*', $subject = '*', $subject_id = 0) {
-		$roles = self::permittedRoles($action, $subject, $subject_id);
-		$intersect = array_intersect($user_roles, $roles);
-		$toret = count($intersect) ? true : false;
+	public static function assign($role_id, $access_type, $access_id) { 
+		$toret = false;
+		//if (!self::barredRole($role)) {
+			if (!is_numeric($role_id)) {
+				$role_id = Role::retrieve($role_id);
+				$role_id = $role_id['id'];
+			}
+			$params = array(':role_id' => $role_id, ':access_type' => $access_type, ':access_id' => $access_id);
+			$query = new CustomQuery('SELECT `id` FROM `assignments` WHERE `role_id`= :role_id AND `access_type` = :access_type AND `access_id` = :access_id');
+			$id = $query->fetchColumn($params);
+			if ($id) {
+				$toret = true;
+			} else {
+				$query = new CustomQuery('INSERT INTO `assignments` (`role_id`, `access_type`, `access_id`) VALUES (:role_id, :access_type, :access_id)'); 
+				$toret = $query->execute($params) ? true : false;
+			}
+		//}
 		return $toret;
 	}
-	
+
+	public static function dropPermissions($action, $subject, $subject_id) { 
+		$params = array(':action' => $action, ':subject' => $subject, ':subject_id' => $subject_id);
+		$query = new CustomQuery('DELETE FROM `permissions` WHERE `action` = :action AND `subject` = :subject AND `subject_id` = :subject_id AND system = 0');
+		return $query->execute($params);
+	}
+  
 	public static function permittedRoles($action = '*', $subject = '*', $subject_id = 0) {
 		if (Controller::$debug) {
 			Controller::addNotice('Checking action ' . $action . ' for ' . $subject . ' ' . $subject_id);
@@ -143,22 +163,6 @@ class GateKeeper {
 	
 	private static function barredRole($role) {
 		return in_array($role, array('anonymous', 'authorized', 'nobody'));
-	}
-
-	public static function assign($role, $access_type, $access_id) { 
-		$toret = false;
-		//if (!self::barredRole($role)) {
-			$params = array(':role' => $role, ':access_type' => $access_type, ':access_id' => $access_id);
-			$query = new CustomQuery('SELECT `id` FROM `assignments` WHERE `role`= :role AND `access_type` = :access_type AND `access_id` = :access_id');
-			$id = $query->fetchColumn($params);
-			if ($id) {
-				$toret = true;
-			} else {
-				$query = new CustomQuery('INSERT INTO `assignments` (`role`, `access_type`, `access_id`) VALUES (:role, :access_type, :access_id)'); 
-				$toret = $query->execute($params) ? true : false;
-			}
-		//}
-		return $toret;
 	}
 
 	public static function dropAccess($access_type, $access_id) { 

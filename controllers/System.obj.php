@@ -49,26 +49,4 @@ class System extends TableCtl {
 			}
 		}
 	}
-	
-	protected function getDefaultPermissions() {
-		$toret = array(
-			array('role' => 'anonymous', 'control' => '100', 'action' => 'display', 'subject' => 'content', 'subject_id' => '*'),
-			array('role' => 'superadmin', 'control' => '111', 'action' => '*', 'subject' => '*', 'subject_id' => '*'),
-		);
-		return $toret;
-	}
-	
-	protected function getDefaultRoles() {
-		$toret = array(
-			//All anonymous visitors to the site will be classified as visitors
-			array('role' => 'anonymous', 'access_type' => 'visitor', 'access_id' => '*'),
-			//All registered visitors to the site will be classified as users
-			array('role' => 'registered', 'access_type' => 'user', 'access_id' => '*'),
-			//No one will be registered as nobody
-			array('role' => 'nobody', 'access_type' => 'nobody', 'access_id' => '0'),
-			//The user with id 1 will be super admin
-			array('role' => 'superadmin', 'access_type' => 'user', 'access_id' => '1'),
-		);
-		return $toret;
-	}
 }

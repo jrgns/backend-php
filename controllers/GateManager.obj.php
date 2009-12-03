@@ -15,7 +15,6 @@ class GateManager extends AreaCtl {
 		return array(
 			array('text' => 'Roles', 'link' => '?q=gate_manager/roles'),
 			array('text' => 'Permissions', 'link' => '?q=gate_manager/permissions'),
-			array('text' => 'Assignments', 'link' => '?q=gate_manager/assignments'),
 		);
 	}
 	
@@ -33,7 +32,7 @@ class GateManager extends AreaCtl {
 	public function action_roles($id = false) {
 		$toret = new stdClass();
 		if ($id) {
-			$toret->role = Role::retrieve(array('id' => $id));
+			$toret->role = Role::retrieve($id, 'dbobject');
 			if ($toret->role) {
 				$query = new CustomQuery("SELECT * FROM `permissions` WHERE `role` = :role");
 				$toret->permissions = $query->fetchAll(array(':role' => $toret->role->array['name']));
@@ -71,125 +70,11 @@ class GateManager extends AreaCtl {
 		Controller::addContent(Render::renderFile('std_list.tpl.php'));
 	}
 	
-	public function html_assignments($object) {
-		Backend::add('Sub Title', 'GateKeeper Assignments');
-		Backend::add('TabLinks', $this->getTabLinks('assignments'));
-		$Assignments = new AssignmentObj();
-		$Assignments->load();
-		Backend::add('Object', $Assignments);
-		Controller::addContent(Render::renderFile('std_list.tpl.php'));
-	}
-	
-	public function action_check() {
-		$roles = GateKeeper::getRoles();
-		if (!$roles || !count($roles)) {
-			if (Controller::$debug) {
-				Controller::addNotice('No roles setup, addings some');
-			}
-			self::install();
-		} else {
-			if (Controller::$debug) {
-				var_dump($roles);
-			}
-		}
-	}
-	
-	public function action_install() {
-		self::install();
-	}
-	
-	public static function hook_post_display($data, $controller) {
-		$user = Account::checkUser();
-		if ($user && count(array_intersect(array('superadmin', 'admin'), $user->roles))) {
-			Links::add('Manage Roles', '?q=gate_manager/roles', 'secondary');
-			Links::add('Manage Permissions', '?q=gate_manager/permissions', 'secondary');
-			Links::add('Manage Assignments', '?q=gate_manager/assignments', 'secondary');
-		}
-		return $data;
-	}
-	
 	public static function admin_links() {
 		return array(
 			array('text' => 'Manage Roles'      , 'href' => '?q=gate_manager/roles'),
 			array('text' => 'Manage Permissions', 'href' => '?q=gate_manager/permissions'),
 			array('text' => 'Manage Assignments', 'href' => '?q=gate_manager/assignments'),
 		);
-	}
-
-	public static function install(array $options = array()) {
-		$toret = parent::install($options);
-		$toret = Hook::add('display', 'post', __CLASS__, array('global' => true, 'mode' => 'html')) && $toret;
-
-		$roles = self::getDefaultRoles();
-		if ($roles) {
-			$RoleObj = new RoleObj();
-			$RoleObj->truncate();
-
-			foreach($roles as $role) {
-				if ($RoleObj->create($role)) {
-					Controller::addSuccess('Added role ' . $role['name']);
-				} else {
-					$toret = false;
-				}
-			}
-		}
-		
-		$assigns = self::getDefaultAssignments();
-		if ($assigns) {
-			$AssignmentObj = new AssignmentObj();
-			$AssignmentObj->truncate();
-
-			foreach($assigns as $assignment) {
-				if ($AssignmentObj->create($assignment)) {
-					Controller::addSuccess('Added assignment ' . $assignment['access_type'] . ' to ' . $assignment['role_id']);
-				} else {
-					$toret = false;
-				}
-			}
-		}
-
-		$permits = self::getDefaultPermissions();
-		if ($permits) {
-			$PermissionObj = new PermissionObj();
-			$PermissionObj->truncate();
-
-			foreach($permits as $permit) {
-				$toret = Permission::add($permit['role'], $permit['action'], $permit['subject'], $permit['subject_id']) && $toret;
-			}
-		}
-		return $toret;
-	}
-	
-	protected static function getDefaultRoles() {
-		$toret = array(
-			array('id' => 1, 'name' => 'nobody', 'description' => 'No one. No, really, no one.', 'active' => 1),
-			array('id' => 2, 'name' => 'anonymous', 'description' => 'The standard, anonymous user with minimum rights', 'active' => 1),
-			array('id' => 3, 'name' => 'authenticated', 'description' => 'A registered user', 'active' => 1),
-			array('id' => 4, 'name' => 'superadmin', 'description' => 'The user with all the rights', 'active' => 1),
-			
-		);
-		return $toret;
-	}
-
-	protected static function getDefaultAssignments() {
-		$toret = array(
-			//No one will be registered as nobody
-			array('role_id' => 1, 'access_type' => 'nobody', 'access_id' => '0'),
-			//All anonymous visitors to the site will be classified as visitors
-			array('role_id' => 2, 'access_type' => 'visitor', 'access_id' => '*'),
-			//All registered visitors to the site will be classified as users
-			array('role_id' => 3, 'access_type' => 'users', 'access_id' => '*'),
-			//The user with id 1 will be super admin
-			array('role_id' => 4, 'access_type' => 'users', 'access_id' => '1'),
-		);
-		return $toret;
-	}
-	
-	protected static function getDefaultPermissions() {
-		$toret = array(
-			array('role' => 'anonymous', 'control' => '100', 'action' => 'display', 'subject' => 'content', 'subject_id' => '*'),
-			array('role' => 'superadmin', 'control' => '111', 'action' => '*', 'subject' => '*', 'subject_id' => '*'),
-		);
-		return $toret;
 	}
 }

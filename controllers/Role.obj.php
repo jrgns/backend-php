@@ -18,5 +18,48 @@
  * This is the controller for the table roles.
  */
 class Role extends TableCtl {
+	public static function add($name, $description, array $options = array()) {
+		$id     = array_key_exists('id', $options)     ? $options['id']     : null;
+		$active = array_key_exists('active', $options) ? $options['active'] : null;
+		
+		$data = array(
+			'name'        => $name,
+			'description' => $description,
+			'active'      => $active,
+		);
+		if (!is_null($active)) {
+			$data['id'] = $id;
+		}
+
+		$RoleObj = new RoleObj();
+		if ($RoleObj->replace($data)) {
+			Controller::addSuccess('Added role ' . $data['name']);
+			$toret = true;
+		} else {
+			Controller::addError('Could not add role ' . $data['name']);
+			$toret = false;
+		}
+		return $toret;
+	}
+	
+	public static function getDefaults() {
+		$toret = array(
+			array('id' => 1, 'name' => 'nobody', 'description' => 'No one. No, really, no one.', 'active' => 1),
+			array('id' => 2, 'name' => 'anonymous', 'description' => 'The standard, anonymous user with minimum rights', 'active' => 1),
+			array('id' => 3, 'name' => 'authenticated', 'description' => 'A registered user', 'active' => 1),
+			array('id' => 4, 'name' => 'superadmin', 'description' => 'The user with all the rights', 'active' => 1),
+			
+		);
+		return $toret;
+	}
+
+	public static function install(array $options = array()) {
+		$toret = parent::install($options);
+
+		foreach(self::getDefaults() as $role) {
+			$toret = self::add($role['name'], $role['description'], array('id' => $role['id'], 'active' => $role['active'])) && $toret;
+		}
+		return $toret;
+	}
 }
 

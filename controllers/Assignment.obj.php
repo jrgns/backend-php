@@ -28,4 +28,33 @@ class Assignment extends TableCtl {
 		Backend::add('Assignments', $Assignments);
 		Controller::addContent(Render::renderFile('assignment_list.tpl.php'));
 	}
+
+	public static function getDefaults() {
+		$toret = array(
+			//All anonymous visitors to the site will be classified as visitors
+			array('role' => 'anonymous', 'access_type' => 'visitor', 'access_id' => '*'),
+			//All registered visitors to the site will be classified as users
+			array('role' => 'authenticated', 'access_type' => 'users', 'access_id' => '*'),
+			//No one will be registered as nobody
+			array('role' => 'nobody', 'access_type' => 'nobody', 'access_id' => '0'),
+			//The user with id 1 will be super admin
+			array('role' => 'superadmin', 'access_type' => 'users', 'access_id' => '1'),
+		);
+		return $toret;
+	}
+
+	public static function install(array $options = array()) {
+		$toret = parent::install($options);
+
+		foreach(self::getDefaults() as $assignment) {
+			if (GateKeeper::assign($assignment['role'], $assignment['access_type'], $assignment['access_id'])) {
+				Controller::addSuccess('Added assignment to ' . $assignment['role']);
+				$toret = $toret && true;
+			} else {
+				Controller::addError('Could not add assignment to ' . $assignment['role']);
+				$toret = false;
+			}
+		}
+		return $toret;
+	}
 }

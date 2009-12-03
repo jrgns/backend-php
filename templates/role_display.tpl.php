@@ -5,6 +5,13 @@ if (!empty($Role)): ?>
 	<div>
 		<?php echo $Role->array['description']; ?>
 	</div>
+	<div class="notice">
+		<ul>
+			<li>Show All user in this role</li>
+			<li>Show All permissions for this role</li>
+		</ul>
+		<p class="bottom">And do the same for <a href="?q=gate_manager/permissions">permissions</a> (All roles with a permission)??</p>
+	</div>
 	<?php if (!empty($Permissions)): ?>
 		<table>
 			<thead>

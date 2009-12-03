@@ -43,5 +43,25 @@ class Permission extends TableCtl {
 		}
 		return $toret;
 	}
+
+	public static function getDefaults() {
+		$toret = array(
+			array('role' => 'anonymous', 'control' => '100', 'action' => 'display', 'subject' => 'content', 'subject_id' => '*'),
+			array('role' => 'superadmin', 'control' => '111', 'action' => '*', 'subject' => '*', 'subject_id' => '*'),
+		);
+		return $toret;
+	}
+	
+	public static function install(array $options = array()) {
+		$toret = parent::install($options);
+
+		foreach(self::getDefaults() as $permit) {
+			GateKeeper::permit($permit['role'], $permit['action'], $permit['subject'], $permit['subject_id'], $permit['control']);
+			if (Controller::$debug) {
+				Controller::addSuccess('Added permission to ' . $permit['action'] . ' to ' . $permit['role']);
+			}
+		}
+		return $toret;
+	}
 }
 
