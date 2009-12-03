@@ -22,7 +22,6 @@ class TableCtl extends AreaCtl {
 	 */
 	protected function getTabLinks($action) {
 		$links = array();
-		//TODO Check permissions!
 		if ($action != 'list') {
 			if ($this->checkPermissions(array('action' => 'list'))) {
 				$links[] = array('link' => '?q=' . Controller::$area . '/list', 'text' => 'List');
@@ -426,7 +425,7 @@ class TableCtl extends AreaCtl {
 			Controller::setAction('list');
 		}
 		if (Controller::$action == 'list' && empty(Controller::$parameters[0])) {
-			$parameters[0] = Value::get('list_length', 5);
+			$parameters[0] = !isset($parameters[0]) ? Value::get('list_length', 5) : $parameters[0];
 		}
 		return $parameters;
 	}

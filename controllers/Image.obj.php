@@ -28,7 +28,7 @@ class Image extends File {
 		Controller::addScript(SITE_LINK . 'scripts/jquery.js');
 		Controller::addScript(SITE_LINK . 'scripts/image_list.js');
 		Controller::addStyle(SITE_LINK . 'styles/image_list.css');
-		Controller::addContent(Render::renderFile('image_list.tpl.php'));
+		Controller::addContent(Render::renderFile('image.list.tpl.php'));
 	}
 	
 	function rss_list($result) {
@@ -83,6 +83,16 @@ class Image extends File {
 			Controller::whoops();
 		}
 		return $toret;
+	}
+
+	public static function checkParameters($parameters) {
+		if (Controller::$action == 'index') {
+			Controller::setAction('list');
+		}
+		if (Controller::$action == 'list' && empty(Controller::$parameters[0])) {
+			$parameters[0] = Value::get('list_length', 9);
+		}
+		return parent::checkParameters($parameters);
 	}
 
 	public static function install(array $options = array()) {
