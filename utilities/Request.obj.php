@@ -18,8 +18,10 @@ class Request {
 	private static function checkAliases($query) {
 		$aliases = @include(APP_FOLDER . '/configs/queries.php');
 		if (empty($aliases)) {
-			Controller::addError('Invalid query aliases');
-			return false;
+			if (Controller::$debug) {
+				Controller::addError('Invalid query aliases');
+			}
+			return $query;
 		}
 		if (array_key_exists($query, $aliases)) {
 			return $aliases[$query];
