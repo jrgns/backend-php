@@ -43,7 +43,11 @@ class Render {
 	public static function checkTemplateFile($filename) {
 		$toret = false;
 		$template_loc = Backend::getConfig('backend.templates.location', 'templates');
-		$theme = Theme::get();
+		if (Component::isActive('Theme')) {
+			$theme = Theme::get();
+		} else {
+			$theme = false;
+		}
 
 		//Check the theme first.
 		if ($theme && is_readable($theme['path'] . '/' . $filename)) {
@@ -321,7 +325,7 @@ class Render {
 		Value::set('clean_urls', false);
 		
 		$filter = new BEFilterObj();
-		$filter->truncate();
+		$filter->install();
 		$toret = $filter->create(array(
 				'name' => 'System Replace',
 				'description' => 'Replace system variables with their values',
