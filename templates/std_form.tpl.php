@@ -21,9 +21,13 @@
 			$input_name = 'obj[' . $name . ']';
 			switch (true) {
 				case $field == 'integer':
+				case $field == 'number':
 				case $field == 'string':
 				case $field == 'email':
 				case $field == 'telnumber':
+					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="text" class="text" value="' . $value . '">';
+					break;
+				case $field == 'date':
 					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="text" class="text" value="' . $value . '">';
 					break;
 				case $field == 'title':
