@@ -209,7 +209,7 @@ function class_for_url($string) {
 	if (is_object($string)) {
 		$string = get_class($string);
 	}
-	return strtolower(class_name($string));
+	return computerize(class_name($string));
 }
 /**
  * Return the string as a plain text string, no HTML allowed
