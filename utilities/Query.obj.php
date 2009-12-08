@@ -78,7 +78,11 @@ class Query {
 								$error[] = '(' . $error_info[1] . ')';
 							}
 							$error = implode(' ', $error);
-							echo 'Error executing query:<pre>' . PHP_EOL . $this->query . '</pre>';
+							echo 'Error Info:';
+							var_dump($stmt->errorInfo());
+							if (Controller::$debug >= 2) {
+								echo 'Query:<pre>' . PHP_EOL . $stmt->query . '</pre>';
+							}
 						} else {
 							$error = 'Error executing statement';
 						}

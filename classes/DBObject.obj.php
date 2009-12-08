@@ -33,19 +33,21 @@ class DBObject {
 				$meta = array();
 			}
 		}
+		$meta['id']       = array_key_exists('id', $meta)           ? $meta['id']       : false;
+		$meta['id_field'] = array_key_exists('id_field', $meta)     ? $meta['id_field'] : 'id';
+		$meta['table']    = array_key_exists('table', $meta)        ? $meta['table']    : table_name(get_class($this));
+		$meta['database'] = array_key_exists('database', $meta)     ? $meta['database'] : Backend::getConfig('backend.dbs.default.alias', 'default');
+		$meta['provider'] = array_key_exists('provider', $meta)     ? $meta['provider'] : Backend::getConfig('backend.provider', 'MySQL');
+		$meta['fields']   = array_key_exists('fields', $meta)       ? $meta['fields']   : array();
+		$meta['keys']     = array_key_exists('keys', $meta)         ? $meta['keys']     : array();
+		$meta['name']     = array_key_exists('name', $meta)         ? $meta['name']     : class_name(get_class($this));
+		$meta['objname']  = array_key_exists('objname', $meta)      ? $meta['objname']  : get_class($this);
+		$meta['parents']  = array_key_exists('parents', $meta)      ? $meta['parents']  : array();
+		$meta['children'] = array_key_exists('children', $meta)     ? $meta['children'] : array();
+		$this->meta = $meta;
+
 		$options = $options ? $options : array();
 		$load_type        = array_key_exists('load_mode', $options) ? $options['load_mode'] : $this->load_mode;
-		$meta['id']       = array_key_exists('id', $meta) ? $meta['id'] : false;
-		$meta['id_field'] = array_key_exists('id_field', $meta) ? $meta['id_field'] : 'id';
-		$meta['table']    = array_key_exists('table', $meta) ? $meta['table'] : table_name(get_class($this));
-		$meta['database'] = array_key_exists('database', $meta) ? $meta['database'] : Backend::getConfig('backend.dbs.default.alias', 'default');
-		$meta['provider'] = array_key_exists('provider', $meta) ? $meta['provider'] : Backend::getConfig('backend.provider', 'MySQL');
-		$meta['fields']   = array_key_exists('fields', $meta) ? $meta['fields'] : array();
-		$meta['name']     = array_key_exists('name', $meta) ? $meta['name'] : class_name(get_class($this));
-		$meta['objname']  = array_key_exists('objname', $meta) ? $meta['objname'] : get_class($this);
-		$meta['parents']  = array_key_exists('parents', $meta) ? $meta['parents'] : array();
-		$meta['children'] = array_key_exists('children', $meta) ? $meta['children'] : array();
-		$this->meta = $meta;
 		if ($this->checkConnection()) {
 			if ($meta['id']) {
 				$this->load(array('mode' => $load_type));
@@ -173,15 +175,15 @@ class DBObject {
 			} else {
 				list ($query, $params) = $this->getSelectSQL($options);
 			}
-			if (Controller::$debug) {
+			if (Controller::$debug >= 2) {
 				var_dump('Options:', $options);
 				echo 'Query:<br/><pre>';
 				echo $query . '</pre>';
 				var_dump('Params:', $params);
 			}
 			if (!empty($query)) {
-				$stmt = $this->db->prepare($query);
-				$result = $stmt->execute($params);
+				$query = new CustomQuery($query);
+				$result = $query->execute($params);
 				if ($result) {
 					switch ($options['mode']) {
 					case 'object':
@@ -202,12 +204,6 @@ class DBObject {
 					}
 					if ($this->array) {
 						$this->array = $this->process($this->array, 'out');
-					}
-				} else {
-					$this->last_error = $stmt->errorInfo();
-					if (Controller::$debug) {
-						echo 'Error Info:';
-						var_dump('Error Info:', $stmt->errorInfo());
 					}
 				}
 			} else {
