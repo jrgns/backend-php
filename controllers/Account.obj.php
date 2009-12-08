@@ -153,17 +153,8 @@ class Account extends TableCtl {
 				Controller::addSuccess('Signed up!');
 				$this->postSignup($object, $options);
 			} else {
-				$error = $object->getLastError();
-				if (!empty($error[1])) {
-					switch ($error[1]) {
-					/*case 1062: //Duplicate
-						Controller::addError('Some of the credentials you used is already in use by another user. Please try other information!');
-						break;*/
-					default:
-						Controller::addError('Could not sign you up. Please try again later!');
-						break;
-					}
-				}
+				Controller::addError('Could not sign you up. Please try again later!');
+				break;
 			}
 		} else if (!empty($_SESSION['just_installed'])) {
 			$data['username'] = 'admin';

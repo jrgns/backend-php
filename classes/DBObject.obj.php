@@ -17,7 +17,6 @@
 class DBObject {
 	private $db;
 	protected $meta;
-	protected $last_error;
 	protected $load_mode = 'array';
 	
 	public $list = null;
@@ -188,15 +187,15 @@ class DBObject {
 					switch ($options['mode']) {
 					case 'object':
 					case 'full_object':
-						$this->object = $stmt->fetch(PDO::FETCH_OBJ);
+						$this->object = $result->fetch(PDO::FETCH_OBJ);
 						$this->array = (array)$this->object;
 						$this->load_deep();
 						break;
 					case 'array':
-						$this->array = $stmt->fetch(PDO::FETCH_ASSOC);
+						$this->array = $result->fetch(PDO::FETCH_ASSOC);
 					case 'list':
 					default:
-						$this->list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+						$this->list = $result->fetchAll(PDO::FETCH_ASSOC);
 						break;
 					}
 					if ($this->object) {
@@ -246,8 +245,8 @@ class DBObject {
 			if ($data) {
 				$data = $this->process($data, 'in');
 				list ($query, $params) = $this->getCreateSQL($data, $options);
-				$stmt = $this->db->prepare($query);
-				$toret = $stmt->execute($params);
+				$query = new CustomQuery($query);
+				$toret = $query->execute($params);
 				if ($toret) {
 					//TODO This will potentially break if there are triggers in use
 					$this->inserted_id = $this->db->lastInsertId();
@@ -257,12 +256,6 @@ class DBObject {
 					$toret             = $this->inserted_id;
 					if (array_key_exists('load', $options) ? $options['load'] : true) {
 						$this->load();
-					}
-				} else {
-					$this->last_error = $stmt->errorInfo();
-					if (Controller::$debug) {
-						echo 'Error Info:';
-						var_dump($stmt->errorInfo());
 					}
 				}
 			}
@@ -280,8 +273,8 @@ class DBObject {
 				$data = $this->process($data, 'in');
 				list ($query, $params) = $this->getCreateSQL($data, $options);
 				$query = preg_replace('/^INSERT/', 'REPLACE', $query);
-				$stmt = $this->db->prepare($query);
-				$toret = $stmt->execute($params);
+				$query = new CustomQuery($query);
+				$toret = $query->execute($params);
 				if ($toret) {
 					//TODO This will potentially break if there are triggers in use
 					$this->inserted_id = $this->db->lastInsertId();
@@ -289,12 +282,6 @@ class DBObject {
 					$toret             = $this->inserted_id;
 					if (array_key_exists('load', $options) ? $options['load'] : true) {
 						$this->load();
-					}
-				} else {
-					$this->last_error = $stmt->errorInfo();
-					if (Controller::$debug) {
-						echo 'Error Info:';
-						var_dump($stmt->errorInfo());
 					}
 				}
 			}
@@ -358,17 +345,11 @@ class DBObject {
 			if ($data) {
 				$data = $this->process($data, 'in');
 				list ($query, $params) = $this->getUpdateSQL($data, $options);
-				$stmt = $this->db->prepare($query);
-				$toret = $stmt->execute($params);
+				$query = new CustomQuery($query);
+				$toret = $query->execute($params);
 				if ($toret) {
 					if (array_key_exists('load', $options) ? $options['load'] : true) {
 						$this->load();
-					}
-				} else {
-					$this->last_error = $stmt->errorInfo();
-					if (Controller::$debug) {
-						echo 'Error Info:';
-						var_dump($stmt->errorInfo());
 					}
 				}
 			}
@@ -561,10 +542,6 @@ class DBObject {
 			}
 		}
 		return $data;
-	}
-	
-	public function getLastError() {
-		return $this->last_error;
 	}
 	
 	public function getSource() {
@@ -798,7 +775,114 @@ class DBObject {
 	}
 	
 	public function getInstallSQL() {
-		$query = false;
+		extract($this->meta);
+		$query_fields = array();
+		$query_keys = array();
+		$keys = empty($keys) ? array() : $keys;
+		foreach($fields as $field => $options) {
+			$field_arr = array();
+			if (is_string($options)) {
+				$type = $options;
+			} else {
+				$type    = array_key_exists('type',    $options) ? $options['type']    : 'string';
+				$default = array_key_exists('default', $options) ? $options['default'] : null;
+				$null    = array_key_exists('null',    $options) ? $options['null']    : false;
+			}
+			$field_arr[] = '`' . $field . '`';
+			switch($type) {
+			case 'primarykey':
+				$keys[$field] = 'primary';
+				$field_arr[] = 'BIGINT(20) NOT NULL AUTO_INCREMENT';
+				break;
+			case 'title':
+				//No break;
+			case 'string':
+				$string_size = empty($string_size) ? 255 : $string_size;
+				$field_arr[] = 'VARCHAR(' . $string_size .')';
+				break;
+			case 'large_string':
+				$field_arr[] = 'VARCHAR(1024)';
+				break;
+			case 'small_string':
+				$field_arr[] = 'VARCHAR(30)';
+				break;
+			case 'character':
+				$field_arr[] = 'VARCHAR(1)';
+				break;
+			case 'text':
+				$field_arr[] = 'TEXT';
+				break;
+			case 'number':
+				//No break;
+			case 'integer':
+				$int_size = empty($int_size) ? 11 : $int_size;
+				$field_arr[] = 'INT(' . $int_size . ')';
+				break;
+			case 'currency':
+				//No break;
+			case 'float':
+				$field_arr[] = 'FLOAT';
+				break;
+			case 'active':
+				//No break;
+			case 'boolean':
+				$field_arr[] = 'TINYINT(1)';
+				break;
+			case 'lastmodified':
+				$null = false;
+				$default = 'CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP';
+				//No break;
+			case 'timestamp':
+				$field_arr[] = 'TIMESTAMP';
+				break;
+			case 'date':
+				$field_arr[] = 'DATE';
+				break;
+			case 'time':
+				$field_arr[] = 'TIME';
+				break;
+			case 'dateadded':
+				//No break;
+			case 'datetime':
+				$field_arr[] = 'DATETIME';
+				break;
+			default:
+				var_dump('CreateSQL Failure: ', $field, $options);
+				break;
+			}
+			if ($null) {
+				$field_arr[] = 'NULL';
+			} else {
+				$field_arr[] = 'NOT NULL';
+			}
+			if (!is_null($default)) {
+				$field_arr[] = 'DEFAULT ' . $default;
+			}
+			$query_fields[] = implode(' ', array_map('trim', $field_arr));
+		}
+		
+		foreach($keys as $field => $type) {
+			switch ($type) {
+			case 'primary':
+				$query_keys[] = 'PRIMARY KEY(`' . $field . '`)';
+				break;
+			}
+		}
+
+		//Add the keys and the fields together
+		if (count($query_keys)) {
+			$query_fields = array_merge($query_fields, $query_keys);
+		}
+
+		$query = 'CREATE TABLE IF NOT EXISTS `' . $database .'`.`' . $table . '` (';
+		$query .= "\n\t" . implode(",\n\t", $query_fields);
+		$query .= "\n\t)";
+		if (!empty($engine)) {
+			$query .= ' ENGINE=' . $engine;
+		}
+		if (!empty($charset)) {
+			$query .= ' DEFAULT CHARSET=' . $charset;
+		}
 		return $query;
 	}
 	
