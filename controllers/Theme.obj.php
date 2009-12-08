@@ -19,10 +19,13 @@
  */
 class Theme extends TableCtl {
 	public static function get($name = false) {
-		$name = $name ? $name : Value::get('default_theme', 'backend');
-		$theme = Theme::retrieve($name);
-		if ($theme) {
-			$theme['path'] = str_replace(array('#BACKEND_FOLDER#', '#APP_FOLDER#', '#SITE_FOLDER#'), array(BACKEND_FOLDER, APP_FOLDER, SITE_FOLDER), $theme['path']);
+		$theme = false;
+		if (Value::get('admin_installed', false)) {
+			$name = $name ? $name : Value::get('default_theme', 'backend');
+			$theme = Theme::retrieve($name);
+			if ($theme) {
+				$theme['path'] = str_replace(array('#BACKEND_FOLDER#', '#APP_FOLDER#', '#SITE_FOLDER#'), array(BACKEND_FOLDER, APP_FOLDER, SITE_FOLDER), $theme['path']);
+			}
 		}
 		return $theme;
 	}

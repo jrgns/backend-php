@@ -47,27 +47,30 @@ class Hook extends TableCtl {
 	}
 
 	public static function get($hook, $type = 'pre') {
-		$params = array(':type' => $type, ':hook' => $hook);
-		$query = '
-SELECT *
-FROM `hooks`
-LEFT JOIN `components` ON `hooks`.`class` = `components`.`name`
-WHERE
-	`hook` = :hook AND
-	`type` = :type AND
-	`hooks`.`active` = 1 AND
-	`components`.`active` = 1';
-		if (Controller::$area) {
-			$query .= ' AND (`global` = 1 OR `class` = :area)';
-			$params[':area'] = Controller::$area;
+		$toret = false;
+		if (Value::get('admin_installed', false)) {
+			$params = array(':type' => $type, ':hook' => $hook);
+			$query = '
+	SELECT *
+	FROM `hooks`
+	LEFT JOIN `components` ON `hooks`.`class` = `components`.`name`
+	WHERE
+		`hook` = :hook AND
+		`type` = :type AND
+		`hooks`.`active` = 1 AND
+		`components`.`active` = 1';
+			if (Controller::$area) {
+				$query .= ' AND (`global` = 1 OR `class` = :area)';
+				$params[':area'] = Controller::$area;
+			}
+			if (Controller::$view && Controller::$view->mode) {
+				$query .= ' AND `mode` IN (:mode, \'*\')';
+				$params[':mode'] = Controller::$view->mode;
+			}
+			$query .= ' ORDER BY `sequence`';
+			$query = new CustomQuery($query);
+			$toret = $query->fetchAll($params);
 		}
-		if (Controller::$view && Controller::$view->mode) {
-			$query .= ' AND `mode` IN (:mode, \'*\')';
-			$params[':mode'] = Controller::$view->mode;
-		}
-		$query .= ' ORDER BY `sequence`';
-		$query = new CustomQuery($query);
-		$toret = $query->fetchAll($params);
 		return $toret;
 	}
 	

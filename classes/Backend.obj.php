@@ -82,6 +82,8 @@ class Backend {
 		if ($dbs) {
 			self::initDBs($dbs);
 		}
+		
+		define('BACKEND_INSTALLED', Value::get('admin_installed', false));
 	}
 	
 	static private function initConfigs() {

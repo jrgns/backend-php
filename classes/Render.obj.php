@@ -195,13 +195,15 @@ class Render {
 	
 	public static function hook_output($content) {
 		$toret = $content;
-		$BEFilter = new BEFilterObj();
-		$BEFilter->load();
-		$filters = $BEFilter->list ? $BEFilter->list : array();
+		if (Value::get('admin_installed', false)) {
+			$BEFilter = new BEFilterObj();
+			$BEFilter->load();
+			$filters = $BEFilter->list ? $BEFilter->list : array();
 		
-		foreach($filters as $row) {
-			if (class_exists($row['class'], true) && method_exists($row['class'], $row['function'])) {
-				$toret = call_user_func(array($row['class'], $row['function']), $toret);
+			foreach($filters as $row) {
+				if (class_exists($row['class'], true) && method_exists($row['class'], $row['function'])) {
+					$toret = call_user_func(array($row['class'], $row['function']), $toret);
+				}
 			}
 		}
 		return $toret;

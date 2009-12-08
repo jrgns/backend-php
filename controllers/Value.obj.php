@@ -20,8 +20,11 @@ class Value extends TableCtl {
 	}
 	
 	public static function get($name, $default = null) {
-		$toret = Value::retrieve($name);
-		$toret = !empty($toret['value']) ? unserialize(base64_decode($toret['value'])) : $default;
+		$toret = $default;
+		if (defined('BACKEND_INSTALLED') && BACKEND_INSTALLED) {
+			$toret = Value::retrieve($name);
+			$toret = !empty($toret['value']) ? unserialize(base64_decode($toret['value'])) : $default;
+		}
 		return $toret;
 	}
 	
