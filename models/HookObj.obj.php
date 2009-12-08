@@ -44,27 +44,4 @@ class HookObj extends DBObject {
 		}
 		return $toret ? $data : false;
 	}
-	
-	public function getInstallSQL() {
-		$toret = <<< END_SQL
-CREATE TABLE `hooks` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `description` text NOT NULL,
-  `mode` varchar(255) NOT NULL,
-  `type` varchar(255) NOT NULL,
-  `hook` varchar(255) NOT NULL,
-  `class` varchar(255) NOT NULL,
-  `method` varchar(255) NOT NULL,
-  `global` tinyint(1) NOT NULL DEFAULT '0',
-  `sequence` int(11) NOT NULL,
-  `active` tinyint(1) NOT NULL,
-  `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `added` datetime NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `UniqueHooks` (`type`,`hook`,`class`)
-)
-END_SQL;
-		return $toret;
-	}
 }

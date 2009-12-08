@@ -38,24 +38,5 @@ class CommentObj extends DBObject {
 		$data = parent::validate($data, $action, $options);
 		return $toret ? $data : false;
 	}
-
-	public function getInstallSQL() {
-		$toret = <<< END_SQL
-CREATE TABLE `comments` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) NOT NULL,
-  `foreign_table` varchar(255) NOT NULL,
-  `foreign_id` bigint(20) NOT NULL,
-  `in_reply_to` bigint(20) NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `content` text NOT NULL,
-  `active` tinyint(1) NOT NULL DEFAULT '0',
-  `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `added` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-)
-END_SQL;
-		return $toret;
-	}
 }
 
