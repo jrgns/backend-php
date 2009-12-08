@@ -79,7 +79,7 @@ class Query {
 							}
 							$error = implode(' ', $error);
 							echo 'Error Info:';
-							var_dump($stmt->errorInfo());
+							var_dump($error_info);
 							if (Controller::$debug >= 2) {
 								echo 'Query:<pre>' . PHP_EOL . $stmt->query . '</pre>';
 							}
