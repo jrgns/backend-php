@@ -27,6 +27,7 @@ class Admin extends AreaCtl {
 		$installed = Value::get('admin_installed', false);
 		if (!$installed) {
 			Component::pre_install();
+			Permission::pre_install();
 			Hook::pre_install();
 			Value::pre_install();
 			

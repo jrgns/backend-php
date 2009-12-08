@@ -52,7 +52,13 @@ class Permission extends TableCtl {
 		return $toret;
 	}
 	
+	public static function pre_install() {
+		$toret = self::installModel(__CLASS__ . 'Obj');
+		return $toret;
+	}
+	
 	public static function install(array $options = array()) {
+		$options['install_model'] = array_key_exists('install_model', $options) ? $options['install_model'] : false;
 		$toret = parent::install($options);
 
 		foreach(self::getDefaults() as $permit) {
