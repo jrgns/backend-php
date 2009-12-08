@@ -150,13 +150,9 @@ class TableCtl extends AreaCtl {
 		return $toret;
 	}
 	
-	public function action_delete() {
+	public function action_delete($id) {
 		$toret = false;
 		if (is_post()) {
-			$id = $id;
-			if (empty($id) && !empty($_POST['delete_id'])) {
-				Controller::$parameters['id'] = $_POST['delete_id'];
-			}
 			$obj_name = (class_name(Controller::$area) . 'Obj');
 			$object = new $obj_name($id);
 			if ($object->array) {
@@ -426,6 +422,9 @@ class TableCtl extends AreaCtl {
 		}
 		if (Controller::$action == 'list' && empty(Controller::$parameters[0])) {
 			$parameters[0] = !isset($parameters[0]) ? Value::get('list_length', 5) : $parameters[0];
+		}
+		if (Controller::$action == 'delete' && empty($parameters[0]) && !empty($_POST['delete_id'])) {
+			$parameters[0] = $_POST['delete_id'];
 		}
 		return $parameters;
 	}
