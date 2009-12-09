@@ -71,6 +71,7 @@ class Component extends TableCtl {
 		$toret['HtmlView']    = '/views/HtmlView.obj.php';
 		$toret['ImageView']   = '/views/ImageView.obj.php';
 		$toret['JsonView']    = '/views/JsonView.obj.php';
+		$toret['CssView']     = '/views/CssView.obj.php';
 		$toret['SerializeView'] = '/views/SerializeView.obj.php';
 		$toret['PhpView']     = '/views/PhpView.obj.php';
 		$toret['AtomView']    = '/views/AtomView.obj.php';
