@@ -11,6 +11,7 @@
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
 class Value extends TableCtl {
+	private static $cache = array();
 	function action_test() {
 		self::set('test', 'on');
 		var_dump(self::get('test'));
@@ -22,9 +23,14 @@ class Value extends TableCtl {
 	public static function get($name, $default = null) {
 		$toret = $default;
 		if (!defined('BACKEND_INSTALLED') || BACKEND_INSTALLED) {
-			$toret = Value::retrieve($name);
-			$toret = !empty($toret['value']) ? unserialize(base64_decode($toret['value'])) : $default;
+			if (isset(self::$cache[$name])) {
+				$toret = self::$cache[$name];
+			} else {
+				$toret = Value::retrieve($name);
+				$toret = !empty($toret['value']) ? unserialize(base64_decode($toret['value'])) : $default;
+			}
 		}
+		self::$cache[$name] = $toret;
 		return $toret;
 	}
 	
@@ -37,6 +43,7 @@ class Value extends TableCtl {
 			'value' => $new_value,
 		);
 		$toret = $value->replace($data);
+		self::$cache[$name] = $new_value;
 		return $toret;
 	}
 
