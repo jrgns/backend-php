@@ -1,5 +1,4 @@
 <?php
-//die('Fix permissions for account login / logout, Account::action / Account::hook_action');
 /**
  * The file that defines the Controller class.
  *
@@ -40,15 +39,18 @@ class Controller {
 	protected static $started = false;
 	protected static $init = false;
 	
+	public static $firephp = false;
+	
 	public static function serve(array $info = array()) {
 		self::init();
-		$controller = self::start();
-		self::action($controller);
+		self::start();
+		self::action();
 		self::finish();
 	}
 
 	public static function init() {
 		if (!self::$init) {
+			session_set_cookie_params(0, SITE_SUB_FOLDER, null, null, true);
 			session_name('Controller');
 			session_start();
 
@@ -106,19 +108,8 @@ class Controller {
 		}
 		if (!self::$started) {
 			Hook::run('start', 'pre');
-
-			$toret = self::parseQuery();
-			
-			if ($toret) {
-				foreach ($toret as $name => $value) {
-					self::$parameters[$name] = $value;
-					if (property_exists('Controller', $name)) {
-						self::$$name = self::check_map($name, $value);
-					}
-					Backend::add($name, $value);
-				}
-			}
-
+			self::parseQuery();
+			$toret = true;
 		}
 		return $toret;
 	}
@@ -141,10 +132,14 @@ class Controller {
 		$controller = new $control_name();
 
 		if ($controller instanceof AreaCtl) {
-			Hook::run('action', 'pre');
-			$result = $controller->action();
-			if (Controller::$debug) {
-				Controller::addNotice('Code for this page is in the ' . get_class($controller) . ' Controller');
+			$run_action = Hook::run('action', 'pre', array(), array('toret' => true));
+			if ($run_action) {
+				$result = $controller->action();
+				if (Controller::$debug) {
+					Controller::addNotice('Code for this page is in the ' . get_class($controller) . ' Controller');
+				}
+			} else {
+				$result = null;
 			}
 			Hook::run('action', 'post');
 		} else {
@@ -177,7 +172,6 @@ class Controller {
 			$_SESSION['previous_url'] = array();
 		}
 		$_SESSION['previous_url'][self::$view->mode] = $_SERVER['REQUEST_URI'];
-		$_SESSION['cookie_is_working'] = true;
 
 		Hook::run('finish', 'post');
 	}
@@ -202,7 +196,7 @@ class Controller {
 			//Check for an extension
 			$extension = explode('.', str_replace(dirname($_SERVER['SCRIPT_NAME']), '', $_SERVER['REQUEST_URI']));
 			if (count($extension) > 1) {
-				$extension = end($extension);
+				$extension = current(explode('?', end($extension)));
 				switch (true) {
 				case $extension == 'css':
 					$view_name = 'CssView';
@@ -408,7 +402,7 @@ class Controller {
 				//Redirect
 				self::finish();
 				header('Location: ' . $location);
-				die('redirecting');
+				die('redirecting to <a href="' . $location . '">');
 			}
 		} catch (Exception $e) {
 			Controller::addError('Could not redirect');
