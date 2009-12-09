@@ -20,18 +20,5 @@ class TextView extends View {
 		$this->mode = 'text';
 		$this->mime_type = 'text/plain';
 	}
-	
-	public static function hook_output($to_print) {
-		if (!headers_sent()) {
-			header('Content-Type: text/plain');
-		}
-		return $to_print;
-	}
-
-	public static function install() {
-		$toret = true;
-		$toret = Hook::add('output', 'pre', __CLASS__, array('mode' => 'text', 'global' => 1)) && $toret;
-		return $toret;
-	}
 }
 

@@ -22,9 +22,6 @@ class RssView extends View {
 	}
 	
 	public static function hook_output($to_print) {
-		if (!headers_sent()) {
-			header('Content-Type: application/xml');
-		}
 		$to_print = Render::renderFile('rss2.tpl.php');
 		return $to_print;
 	}

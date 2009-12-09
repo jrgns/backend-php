@@ -20,11 +20,5 @@ class CssView extends TextView {
 		$this->mode = 'css';
 		$this->mime_type = 'text/css';
 	}
-	
-	public static function install() {
-		$toret = true;
-		$toret = Hook::add('output', 'pre', __CLASS__, array('mode' => 'css', 'global' => 1)) && $toret;
-		return $toret;
-	}
 }
 

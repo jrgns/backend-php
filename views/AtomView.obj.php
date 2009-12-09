@@ -22,9 +22,6 @@ class AtomView extends View {
 	}
 	
 	public static function hook_output($to_print) {
-		if (!headers_sent()) {
-			header('Content-Type: application/atom+xml');
-		}
 		$to_print = Render::renderFile('atom.tpl.php');
 		return $to_print;
 	}

@@ -23,9 +23,6 @@ class HtmlView extends View {
 	}
 	
 	public static function hook_output($to_print) {
-		if (!headers_sent()) {
-			header('Content-Type: text/html');
-		}
 		$to_print = Render::renderFile('index.tpl.php');
 		return $to_print;
 	}
