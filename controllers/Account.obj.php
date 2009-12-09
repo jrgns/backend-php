@@ -227,6 +227,10 @@ class Account extends TableCtl {
 		Backend::add('user', $user);
 	}
 	
+	public static function hook_post_finish() {
+		$_SESSION['cookie_is_working'] = true;
+	}
+	
 	public function postSignup($object, array $options = array()) {
 		if (Backend::getConfig('backend.application.user.confirm') && empty($options['confirmed'])) {
 			$this->confirmUser($object);
@@ -299,6 +303,7 @@ END;
 		$toret = parent::install($options);
 
 		$toret = Hook::add('start', 'pre', __CLASS__, array('global' => true)) && $toret;
+		$toret = Hook::add('finish', 'post', __CLASS__, array('global' => true)) && $toret;
 		
 		$toret = Permission::add('anonymous', 'signup', 'account') && $toret;
 		$toret = Permission::add('anonymous', 'confirm', 'account') && $toret;
