@@ -15,9 +15,10 @@
  * Default class to handle View specific functions
  */
 class View {
-	public $mode      = false;
-	public $mime_type = false;
-	public $charset   = false;
+	public $mode       = false;
+	public $mime_type  = false;
+	public $charset    = false;
+	public $actionable = true;
 	
 	function __construct() {
 		$this->mode = Backend::getConfig('application.default.type', 'view');
@@ -63,12 +64,12 @@ class View {
 	 */
 	function output($to_print = null) {
 		if (!headers_sent()) {
-			if ($content_type = $this->mime_type) {
-				if ($this->charset) {
-					$content_type .= '; charset=' . $this->charset;
-				}
-				header('Content-Type: ' . $content_type);
+			header('X-Backend-View: ' . get_class($this));
+			$content_type = $this->mime_type;
+			if ($this->charset) {
+				$content_type .= '; charset=' . $this->charset;
 			}
+			header('Content-Type: ' . $content_type);
 		}
 		$to_print = Hook::run('output', 'pre', array($to_print), array('toret' => $to_print));
 
