@@ -42,16 +42,28 @@ class Backend {
 		set_error_handler    (array('Backend', '__error_handler'));
 		set_exception_handler(array('Backend', '__exception_handler'));
 		
-		//Some constants
-		$url = parse_url(get_current_url());
-		$url = $url['host'] . dirname($url['path']);
-		if (substr($url, strlen($url) - 1) != '/') {
-			$url .= '/';
-		}
-
+		
 		//Configs
 		self::initConfigs();
 
+		//Some constants
+		$url = parse_url(get_current_url());
+		$folder = !empty($url['path']) ? dirname($url['path']) : '/';
+		if ($folder != '.') {
+			if (substr($folder, strlen($folder) - 1) != '/') {
+				$folder .= '/';
+			}
+			define('SITE_SUB_FOLDER', $folder);
+		} else {
+			define('SITE_SUB_FOLDER', '/');
+		}
+		Backend::add('SITE_SUB_FOLDER', SITE_SUB_FOLDER);
+		
+		$domain = !empty($url['host']) ? $url['host'] : 'localhost';
+		define('SITE_DOMAIN', $domain);
+		Backend::add('SITE_DOMAIN', SITE_DOMAIN);
+
+		$url = SITE_DOMAIN . SITE_SUB_FOLDER;
 		define('SITE_LINK', 'http://' . $url);
 		if (Backend::getConfig('backend.application.use_ssl', false)) {
 			define('S_SITE_LINK', 'https://' . $url);
