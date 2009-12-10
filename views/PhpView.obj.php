@@ -21,7 +21,6 @@ class PhpView extends TextView {
 	}
 		
 	public static function hook_output($to_print) {
-		$to_print = parent::hook_output($to_print);
 		switch (Controller::$action) {
 		case 'list':
 			$to_print = $to_print instanceof DBObject ? $to_print->list : $to_print;
@@ -39,7 +38,7 @@ class PhpView extends TextView {
 
 	public static function install() {
 		$toret = true;
-		$toret = Hook::add('output', 'pre', __CLASS__, array('mode' => 'pre', 'global' => 1)) && $toret;
+		$toret = Hook::add('output', 'pre', __CLASS__, array('mode' => 'php', 'global' => 1)) && $toret;
 		return $toret;
 	}
 }

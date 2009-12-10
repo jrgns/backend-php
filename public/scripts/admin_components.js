@@ -6,10 +6,10 @@ function toggleActive(evt) {
 	var id = $(this).attr('id').replace(/^component_/, '');
 	if (id) {
 		$.getJSON('?q=component/toggle/' + id + '/active&mode=json', function(json) {
-			if (json.array['active'] == 1) {
-				$('a#component_' + json.array['id']).html('Yes');
+			if (json['active'] == 1) {
+				$('a#component_' + json['id']).html('Yes');
 			} else {
-				$('a#component_' + json.array['id']).html('No');
+				$('a#component_' + json['id']).html('No');
 			}
 		});
 	}

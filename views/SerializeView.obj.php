@@ -21,7 +21,6 @@ class SerializeView extends TextView {
 	}
 	
 	public static function hook_output($to_print) {
-		$to_print = parent::hook_output($to_print);
 		switch (Controller::$action) {
 		case 'list':
 			$to_print = $to_print instanceof DBObject ? $to_print->list : $to_print;
