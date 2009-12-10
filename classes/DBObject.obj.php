@@ -782,18 +782,28 @@ class DBObject {
 		foreach($fields as $field => $options) {
 			$field_arr = array();
 			if (is_string($options)) {
-				$type = $options;
-			} else {
-				$type    = array_key_exists('type',    $options) ? $options['type']    : 'string';
-				$default = array_key_exists('default', $options) ? $options['default'] : null;
-				$null    = array_key_exists('null',    $options) ? $options['null']    : false;
+				$options = array('type' => $options);
 			}
+			$type    = array_key_exists('type',    $options) ? $options['type']    : 'string';
+			$default = array_key_exists('default', $options) ? $options['default'] : null;
+			$null    = array_key_exists('null',    $options) ? $options['null']    : false;
 			$field_arr[] = '`' . $field . '`';
 			switch($type) {
 			case 'primarykey':
 				$keys[$field] = 'primary';
 				$field_arr[] = 'BIGINT(20) NOT NULL AUTO_INCREMENT';
 				break;
+			case 'password':
+				$string_size = empty($string_size) ? 32 : $string_size;
+				$field_arr[] = 'VARCHAR(' . $string_size .')';
+				break;
+			case 'salt':
+				$field_arr[] = 'VARCHAR(32)';
+				break;
+			case 'email':
+				//No break;
+			case 'telnumber':
+				//No break;
 			case 'title':
 				//No break;
 			case 'string':
