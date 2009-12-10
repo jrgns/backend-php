@@ -386,13 +386,32 @@ class Controller {
 		if (Value::get('clean_urls', false) && substr($location, 0, 3) == '?q=') {
 			$location = SITE_LINK . substr($location, 3);
 		}
-		//There's some other variables that should also be transported, but I need this NOW
-		if (array_key_exists('debug', $_REQUEST)) {
-			if (strpos($location, '?') !== false) {
-				$location .= '&debug=' . $_REQUEST['debug'];
-			} else {
-				$location .= '?debug=' . $_REQUEST['debug'];
+		//Add some meta variables
+		if (!empty($_SERVER['QUERY_STRING'])) {
+			parse_str($_SERVER['QUERY_STRING'], $vars);
+			$new_vars = array();
+			if (array_key_exists('debug', $vars)) {
+				$new_vars['debug'] = $vars['debug'];
 			}
+			if (array_key_exists('nocache', $vars)) {
+				$new_vars['nocache'] = $vars['nocache'];
+			}
+			if (array_key_exists('recache', $vars)) {
+				$new_vars['recache'] = $vars['recache'];
+			}
+			if (array_key_exists('mode', $vars)) {
+				$new_vars['mode'] = $vars['mode'];
+			}
+
+			$url = parse_url($location);
+			parse_str($url['query'], $old_vars);
+			//Allow the redirect to overwrite these vars
+			$new_vars = array_merge($new_vars, $old_vars);
+
+			$old_url = parse_url(get_current_url());
+			$url['query'] = http_build_query($new_vars);
+			$url = array_merge($old_url, $url);
+			$location = build_url($url);
 		}
 			
 		try {
