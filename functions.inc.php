@@ -101,6 +101,22 @@ function get_current_url() {
 	return $toret;
 }
 
+function build_url(array $url) {
+	$toret = '';
+	if (array_key_exists('host', $url)) {
+		$protocol = array_key_exists('scheme', $url) ? $url['scheme'] : 'http';
+		$host     = array_key_exists('host', $url)   ? $url['host']   : $_SERVER['HTTP_HOST'];
+		$toret = $protocol . '://' . $host;
+		if (array_key_exists('port', $url)) {
+			$toret .= ':' . $url['port'];
+		}
+	}
+	$path  = array_key_exists('path', $url)  ? $url['path']  : '/';
+	$query = array_key_exists('query', $url) ? $url['query'] : '';
+	$toret  .= $path . (empty($query) ? '' : '?' . $query);
+	return $toret;
+}
+
 function get_random($options = array()) {
 	$toret = false;
 	if (is_string($options)) {
