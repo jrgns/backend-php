@@ -11,7 +11,7 @@
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
 class Assignment extends TableCtl {
-	function action_list($count) {
+	function action_list($start, $count) {
 		$Assignments = new AssignmentObj();
 		$conditions = array(
 			'`assignments`.`active` = 1',

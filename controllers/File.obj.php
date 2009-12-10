@@ -54,7 +54,7 @@ class File extends TableCtl {
 		Controller::addContent('<a href="?q=' . class_for_url(get_class($this)) . '/read/' . $file->array['id'] . '" title="' . $file->array['name'] . '">' . $file->array['name'] . '</a>');
 	}
 	
-	public function action_list($count) {
+	public function action_list($start, $count) {
 		$toret = false;
 		Backend::add('Sub Title', 'List');
 		$obj_name = (class_name(Controller::$area) . 'Obj');

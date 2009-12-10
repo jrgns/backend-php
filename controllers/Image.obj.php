@@ -71,13 +71,13 @@ class Image extends File {
 		return $result;
 	}
 
-	public function action_list($count) {
+	public function action_list($start, $count) {
 		$toret = false;
 		Backend::add('Sub Title', 'List');
 		$obj_name = (class_name(Controller::$area) . 'Obj');
 		if (class_exists($obj_name, true)) {
 			$object = new $obj_name();
-			$object->load(array('limit' => $count));
+			$object->load(array('limit' => "$start, $count"));
 			$toret = $object;
 		} else {
 			Controller::whoops();
@@ -89,8 +89,11 @@ class Image extends File {
 		if (Controller::$action == 'index') {
 			Controller::setAction('list');
 		}
-		if (Controller::$action == 'list' && empty(Controller::$parameters[0])) {
-			$parameters[0] = Value::get('list_length', 9);
+		if (Controller::$action == 'list' && !isset(Controller::$parameters[0])) {
+			$parameters[0] = 0;
+		}
+		if (Controller::$action == 'list' && !isset(Controller::$parameters[1])) {
+			$parameters[1] = Value::get('list_length', 9);
 		}
 		return parent::checkParameters($parameters);
 	}

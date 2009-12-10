@@ -47,9 +47,6 @@ class TableCtl extends AreaCtl {
 		$obj_name = (class_name(Controller::$area) . 'Obj');
 		if (class_exists($obj_name, true) && $id > 0) {
 			$toret = self::action_read($id);
-		} else {
-			Controller::$parameters['action'] = 'list';
-			$toret = $this->action_list();
 		}
 		return $toret;
 	}
@@ -57,12 +54,12 @@ class TableCtl extends AreaCtl {
 	/**
 	 * Action for listing an area's records
 	 */
-	public function action_list($count) {
+	public function action_list($start, $count) {
 		$toret = false;
 		$obj_name = (class_name(Controller::$area) . 'Obj');
 		if (class_exists($obj_name, true)) {
 			$object = new $obj_name();
-			$object->load(array('limit' => $count));
+			$object->load(array('limit' => "$start, $count"));
 			$toret = $object;
 		} else {
 			Controller::whoops();
@@ -422,8 +419,11 @@ class TableCtl extends AreaCtl {
 		if (Controller::$action == 'index') {
 			Controller::setAction('list');
 		}
-		if (Controller::$action == 'list' && empty(Controller::$parameters[0])) {
-			$parameters[0] = !isset($parameters[0]) ? Value::get('list_length', 5) : $parameters[0];
+		if (Controller::$action == 'list' && !isset(Controller::$parameters[0])) {
+			$parameters[0] = 0;
+		}
+		if (Controller::$action == 'list' && !isset(Controller::$parameters[1])) {
+			$parameters[1] = Value::get('list_length', 5);
 		}
 		if (Controller::$action == 'delete' && empty($parameters[0]) && !empty($_POST['delete_id'])) {
 			$parameters[0] = $_POST['delete_id'];
