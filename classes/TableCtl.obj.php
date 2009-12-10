@@ -176,7 +176,9 @@ class TableCtl extends AreaCtl {
 				$data = array(
 					$field => !$toret->array[$field],
 				);
-				if (!$toret->update($data)) {
+				if ($toret->update($data)) {
+					Controller::redirect('?q=' . Controller::$area . '/' . $id);
+				} else {
 					$toret = false;
 				}
 			} else {
