@@ -249,11 +249,14 @@ class Render {
 			$new_vars['debug'] = $vars['debug'];
 		}
 		if (array_key_exists('nocache', $vars)) {
-			$new_vars['nocache'] = '';
+			$new_vars['nocache'] = $vars['nocache'];
 		}
 		if (array_key_exists('recache', $vars)) {
-			$new_vars['recache'] = '';
+			$new_vars['recache'] = $vars['recache'];
 		}
+		/*if (array_key_exists('mode', $vars)) {
+			$new_vars['mode'] = $vars['mode'];
+		}*/
 		$toret = update_links($content, $new_vars);
 		//$toret = $content;
 		return $toret;
