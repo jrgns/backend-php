@@ -305,7 +305,8 @@ class Controller {
 		}
 
 		$terms = explode('/', $query);
-		$terms = array_filter($terms);
+		//We want to now what a parameter was, even if it's empty, so don't filter
+		//$terms = array_filter($terms);
 		
 		self::$area   = count($terms) ? array_shift($terms) : Value::get('default_controller', 'home');
 		self::$action = count($terms) ? array_shift($terms) : Value::get('default_action', 'index');

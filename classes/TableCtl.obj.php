@@ -59,7 +59,12 @@ class TableCtl extends AreaCtl {
 		$obj_name = (class_name(Controller::$area) . 'Obj');
 		if (class_exists($obj_name, true)) {
 			$object = new $obj_name();
-			$object->load(array('limit' => "$start, $count"));
+			if ($start || $count) {
+				$limit = "$start, $count";
+			} else {
+				$limit = false;
+			}
+			$object->load(array('limit' => $limit));
 			$toret = $object;
 		} else {
 			Controller::whoops();
