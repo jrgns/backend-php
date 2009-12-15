@@ -376,7 +376,7 @@ class TableCtl extends AreaCtl {
 			if ($parameter) {
 				$query = $toret->getRetrieveSQL();
 				if ($query) {
-					$toret->load(array('query' => $query, 'parameters' => array(':parameter' => $parameter), 'mode' => $return));
+					$toret->load(array('query' => $query, 'parameters' => array(':parameter' => $parameter), 'mode' => ($return == 'dbobject' ? 'object' : $return)));
 				} else {
 					$toret = null;
 				}
