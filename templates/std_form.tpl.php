@@ -8,7 +8,7 @@
 		$title_width = 2;
 		$input_width = $row_width - $title_width - 1;
 		foreach($fields as $name => $field):
-			if (in_array($field, array('primarykey', 'lastmodified', 'dateadded', 'hidden', 'serialized'))) {
+			if (in_array($field, array('primarykey', 'lastmodified', 'dateadded', 'hidden', 'serialized', 'current_user'))) {
 				continue;
 			}
 			$odd = $odd ? false : true;

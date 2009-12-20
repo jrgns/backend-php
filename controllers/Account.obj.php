@@ -271,7 +271,7 @@ END;
 		$_SESSION['user']->roles = array('anonymous');
 	}
 	
-	static function checkUser($user = false) {
+	public static function checkUser($user = false) {
 		$toret = false;
 		if (!empty($_SESSION) && array_key_exists('user', $_SESSION) && is_object($_SESSION['user']) && $_SESSION['user']->id > 0) {
 			$toret = $_SESSION['user'];

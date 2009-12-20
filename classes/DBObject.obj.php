@@ -480,6 +480,17 @@ class DBObject {
 						}
 					}
 					break;
+				case 'current_user':
+					if ($value !== null) {
+						$value = (int)$value;
+					} else {
+						$user = Account::checkUser();
+						if ($user) {
+							$value = $user->id;
+						} else {
+							$value = -1;
+						}
+					}
 				default:
 					if ($value !== null) {
 					}
