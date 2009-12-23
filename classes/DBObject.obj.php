@@ -23,6 +23,9 @@ class DBObject {
 	public $array = null;
 	public $object = null;
 	public $inserted_id;
+	
+	//If you set $last_error in a function, reset it in the beginning of the function as well.
+	public $last_error = false;
 
 	function __construct($meta = array(), array $options = null) {
 		if (!is_array($meta)) {
@@ -55,10 +58,12 @@ class DBObject {
 	}
 	
 	private function checkConnection() {
+		$this->last_error = false;
 		if (!$this->db instanceof PDO) {
 			$this->db = Backend::getDB($this->meta['database']);
 			if (!$this->db instanceof PDO) {
-				Controller::whoops(array('title' => 'No Database setup', 'message' => 'Please make sure that the application has been setup correctly'));
+				$this->last_error = 'No Database setup';
+				return false;
 			}
 		}
 		return ($this->db instanceof PDO);
@@ -159,6 +164,8 @@ class DBObject {
 	}
 	
 	public function load($options = array()) {
+		$result = false;
+		$this->last_error = false;
 		if ($this->checkConnection()) {
 			if (!array_key_exists('mode', $options)) {
 				if (empty($this->meta['id'])) {
@@ -206,11 +213,12 @@ class DBObject {
 					}
 				}
 			} else {
-				Controller::addError('No Query to load');
+				$this->last_error = 'No Query to load';
 			}
 		} else {
-			Controller::addError('DB Connection error');
+			$this->last_error = 'DB Connection error';
 		}
+		return $result;
 	}
 	
 	function process($data, $direction) {
@@ -240,6 +248,7 @@ class DBObject {
 	
 	public function create($data, $options = array()) {
 		$toret = false;
+		$this->last_error = false;
 		if ($this->checkConnection()) {
 			$data = $this->validate($data, 'create', $options);
 			if ($data) {
@@ -260,13 +269,14 @@ class DBObject {
 				}
 			}
 		} else {
-			Controller::addError('DB Connection error');
+			$this->last_error = 'DB Connection error';
 		}
 		return $toret;
 	}
 	
 	public function replace($data, $options = array()) {
 		$toret = false;
+		$this->last_error = false;
 		if ($this->checkConnection()) {
 			$data = $this->validate($data, 'create', $options);
 			if ($data) {
@@ -286,13 +296,14 @@ class DBObject {
 				}
 			}
 		} else {
-			Controller::addError('DB Connection error');
+			$this->last_error = 'DB Connection error';
 		}
 		return $toret;
 	}
 	
 	public function retrieve($parameter) {
 		$toret = null;
+		$this->last_error = false;
 		if ($this->checkConnection()) {
 			$query = $this->getRetrieveSQL();
 			if ($query) {
@@ -302,16 +313,17 @@ class DBObject {
 					$toret = $toret ? $toret : null;
 				}
 			} else {
-				Controller::addError('No retrieve SQL for ' . class_name($this));
+				$this->last_error = 'No retrieve SQL for ' . class_name($this);
 			}
 		} else {
-			Controller::addError('DB Connection error');
+			$this->last_error = 'DB Connection error';
 		}
 		return $toret;
 	}
 	
 	public function read($mode = false) {
 		$toret = null;
+		$this->last_error = false;
 		if ($this->checkConnection()) {
 			$id = $this->meta['id'];
 			$mode = $mode ? $mode : ($id ? $this->load_mode : 'list');
@@ -333,13 +345,14 @@ class DBObject {
 				break;
 			}
 		} else {
-			Controller::addError('DB Connection error');
+			$this->last_error = 'DB Connection error';
 		}
 		return $toret;
 	}
 
 	function update($data, $options = array()) {
 		$toret = false;
+		$this->last_error = false;
 		if ($this->checkConnection()) {
 			$data = $this->validate($data, 'update', $options);
 			if ($data) {
@@ -354,37 +367,40 @@ class DBObject {
 				}
 			}
 		} else {
-			Controller::addError('DB Connection error');
+			$this->last_error = 'DB Connection error';
 		}
 		return $toret;
 	}
 	
 	function delete() {
 		$toret = false;
+		$this->last_error = false;
 		if ($this->checkConnection()) {
 			extract($this->meta);
 			$query = new CustomQuery("DELETE FROM `$table` WHERE `$id_field` = :id LIMIT 1");
 			$toret = $query->execute(array(':id' => $this->meta['id']));
 		} else {
-			Controller::addError('DB Connection error');
+			$this->last_error = 'DB Connection error';
 		}
 		return $toret;
 	}
 	
 	function truncate() {
 		$toret = false;
+		$this->last_error = false;
 		if ($this->checkConnection()) {
 			extract($this->meta);
 			$query = new CustomQuery("TRUNCATE `$table`");
 			$toret = $query->execute();
 		} else {
-			Controller::addError('DB Connection error');
+			$this->last_error = 'DB Connection error';
 		}
 		return $toret;
 	}
 	
 	public function install(array $options = array()) {
 		$toret = false;
+		$this->last_error = false;
 		$drop_table = array_key_exists('drop_table', $options) ? $options['drop_table'] : true;
 		$query = $this->getInstallSQL();
 		if ($query) {
@@ -396,12 +412,13 @@ class DBObject {
 			$query = new CustomQuery($query);
 			$toret = $query->execute();
 		} else {
-			Controller::addError('No Install SQL for ' . class_name($this));
+			$this->last_error = 'No Install SQL for ' . class_name($this);
 		}
 		return $toret;
 	}
 	
 	function validate($data, $action, $options = array()) {
+		//TODO Try to use $this->last_error here
 		$ret_data = array();
 		$toret = true;
 		if (is_array($data)) {
@@ -838,6 +855,8 @@ class DBObject {
 			case 'character':
 				$field_arr[] = 'VARCHAR(1)';
 				break;
+			case 'serialized':
+				//No break;
 			case 'text':
 				$field_arr[] = 'TEXT';
 				break;
@@ -851,6 +870,18 @@ class DBObject {
 				//No break;
 			case 'float':
 				$field_arr[] = 'FLOAT';
+				break;
+			case 'long_blob':
+				$field_arr[] = 'LONGBLOB';
+				break;
+			case 'medium_blob':
+				$field_arr[] = 'MEDIUMBLOB';
+				break;
+			case 'blob':
+				$field_arr[] = 'BLOB';
+				break;
+			case 'tiny_blob':
+				$field_arr[] = 'TINYBLOB';
 				break;
 			case 'active':
 				//No break;
