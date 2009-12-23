@@ -22,6 +22,7 @@ class Value extends TableCtl {
 	
 	public static function get($name, $default = null) {
 		$toret = $default;
+		//The only call allowed without BACKEND_INSTALLED = true, is to get the value for BACKEND_INSTALLED
 		if (!defined('BACKEND_INSTALLED') || BACKEND_INSTALLED) {
 			if (isset(self::$cache[$name])) {
 				$toret = self::$cache[$name];

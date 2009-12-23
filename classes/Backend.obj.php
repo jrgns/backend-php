@@ -40,8 +40,7 @@ class Backend {
 		require(BACKEND_FOLDER . '/modifiers.inc.php');
 		spl_autoload_register(array('Backend', '__autoload'));
 		set_error_handler    (array('Backend', '__error_handler'));
-		set_exception_handler(array('Backend', '__exception_handler'));
-		
+		set_exception_handler(array('Backend', '__exception_handler'));		
 		
 		//Configs
 		self::initConfigs();
@@ -111,7 +110,7 @@ class Backend {
 		}
 	}
 	
-	static public function __error_handler($number, $string, $file = false, $line = false, $context = false) {
+	public static function __error_handler($number, $string, $file = false, $line = false, $context = false) {
 		switch ($number) {
 		case 2:
 			preg_match_all('/Missing argument ([0-9]+) for ([\S]+)::([^\(\)]+)\(\), called in ([\S]+) on line ([0-9]+)/', $string, $vars, PREG_SET_ORDER);
@@ -131,7 +130,7 @@ class Backend {
 		return false;
 	}
 	
-	private static function __exception_handler($exception) {
+	public static function __exception_handler($exception) {
 		echo "Uncaught exception: " , $exception->getMessage(), "\n";
 	}
 
@@ -257,9 +256,9 @@ class Backend {
 					$connection = new PDO($dsn, $username, $password);
 				} catch (Exception $e) {
 					if (Controller::$debug) {
-						Controller::addError($e->getMessage());
+						throw new ConnectToDBException($e->getMessage());
 					} else {
-						Controller::addError('Could not connect to Database ' . $name);
+						throw new ConnectToDBException('Could not connect to Database ' . $name);
 					}
 				}
 			}
@@ -273,7 +272,7 @@ class Backend {
 				}
 				$toret = true;
 			} else {
-				Controller::addError('Could not connect to Database ' . $alias);
+				throw new ConnectToDBException('Could not connect to Database ' . $alias);
 			}
 		}
 		return $toret;
