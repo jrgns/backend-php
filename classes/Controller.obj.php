@@ -304,7 +304,11 @@ class Controller {
 			$query = 'admin/pre_install';
 		}
 
-		$terms = explode('/', $query);
+		if (!empty($query)) {
+			$terms = explode('/', $query);
+		} else {
+			$terms = array();
+		}
 		//We want to now what a parameter was, even if it's empty, so don't filter
 		//$terms = array_filter($terms);
 		
