@@ -19,7 +19,7 @@
  */
 class Component extends TableCtl {
 
-	public function action_toggle($id, $field) {
+	public function action_toggle($id, $field, $should_redirect = true) {
 		$toret = parent::action_toggle($id, $field, false);
 		if ($toret) {
 			if ($toret->array['active']) {
