@@ -270,10 +270,14 @@ class TableCtl extends AreaCtl {
 				Backend::add('TabLinks', $this->getTabLinks('display'));
 				Backend::add('Sub Title', $object->getMeta('name'));
 				$template_file = $object->getArea() . '.display.tpl.php';
-				if (!Render::checkTemplateFile($template_file)) {
-					$template_file = 'std_display.tpl.php';
+				if (Render::checkTemplateFile($template_file)) {
+					Controller::addContent(Render::renderFile($template_file));
+				} else {
+					//TODO It's a bit of a hack to redirect just because we can't generate the template
+					Render::createTemplate($template_file, 'std_display.tpl.php');
+					Controller::addSuccess('Created template for ' . $object->getMeta('name') . ' display');
+					Controller::redirect();
 				}
-				Controller::addContent(Render::renderFile($template_file));
 			} else {
 				Controller::whoops(array('title' => 'Invalid Object returned'));
 			}
@@ -297,10 +301,14 @@ class TableCtl extends AreaCtl {
 				Controller::addScript(SITE_LINK . 'scripts/jquery.js');
 				Controller::addScript(SITE_LINK . 'scripts/table_list.js');
 				$template_file = $object->getArea() . '.list.tpl.php';
-				if (!Render::checkTemplateFile($template_file)) {
-					$template_file = 'std_list.tpl.php';
+				if (Render::checkTemplateFile($template_file)) {
+					Controller::addContent(Render::renderFile($template_file));
+				} else {
+					//TODO It's a bit of a hack to redirect just because we can't generate the template
+					Render::createTemplate($template_file, 'std_list.tpl.php');
+					Controller::addSuccess('Created template for ' . $object->getMeta('name') . ' list');
+					Controller::redirect();
 				}
-				Controller::addContent(Render::renderFile($template_file));
 			} else {
 				Controller::whoops(array('title' => 'Invalid Object returned'));
 			}
@@ -321,10 +329,14 @@ class TableCtl extends AreaCtl {
 				Backend::add('TabLinks', $this->getTabLinks('create'));
 				Backend::add('Sub Title', 'Add ' . $object->getMeta('name'));
 				$template_file = $object->getArea() . '.form.tpl.php';
-				if (!Render::checkTemplateFile($template_file)) {
-					$template_file = 'std_form.tpl.php';
+				if (Render::checkTemplateFile($template_file)) {
+					Controller::addContent(Render::renderFile($template_file));
+				} else {
+					//TODO It's a bit of a hack to redirect just because we can't generate the template
+					Render::createTemplate($template_file, 'std_form.tpl.php');
+					Controller::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
+					Controller::redirect();
 				}
-				Controller::addContent(Render::renderFile($template_file));
 			} else {
 				Controller::whoops(array('title' => 'Invalid Object returned'));
 			}
@@ -345,8 +357,13 @@ class TableCtl extends AreaCtl {
 				Backend::add('TabLinks', $this->getTabLinks('update'));
 				Backend::add('Sub Title', 'Update ' . $object->getMeta('name'));
 				$template_file = $object->getArea() . '.form.tpl.php';
-				if (!Render::checkTemplateFile($template_file)) {
-					$template_file = 'std_form.tpl.php';
+				if (Render::checkTemplateFile($template_file)) {
+					Controller::addContent(Render::renderFile($template_file));
+				} else {
+					//TODO It's a bit of a hack to redirect just because we can't generate the template
+					Render::createTemplate($template_file, 'std_form.tpl.php');
+					Controller::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
+					Controller::redirect();
 				}
 				Controller::addContent(Render::renderFile($template_file));
 			} else {

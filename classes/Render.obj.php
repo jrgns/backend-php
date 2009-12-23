@@ -19,6 +19,13 @@
 class Render {
 	public static $do_cache = true;
 
+	public static function createTemplate($destination, $origin) {
+		$template_file    = self::buildTemplate($origin);
+		$template_content = self::evalTemplate($template_file);
+		$template_loc     = Backend::getConfig('backend.templates.location', 'templates');
+		return file_put_contents(APP_FOLDER . '/' . $template_loc . '/' . $destination, $template_content);
+	}
+
 	public static function renderFile($filename) {
 		//Build the template
 		$cache_file = self::buildTemplate($filename);
