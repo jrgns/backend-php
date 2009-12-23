@@ -108,7 +108,7 @@ class Render {
 					if (Controller::$debug) {
 						var_dump($cache_filename);
 					}
-					die('Render::Cache folder unwritable');
+					die('Render::Cache folder unwritable (' . SITE_FOLDER . '/cache/' . ')');
 				}
 			}
 		}
