@@ -806,7 +806,11 @@ class DBObject {
 			switch($type) {
 			case 'primarykey':
 				$keys[$field] = 'primary';
-				$field_arr[] = 'BIGINT(20) NOT NULL AUTO_INCREMENT';
+				$field_arr[] = 'BIGINT(20) AUTO_INCREMENT';
+				break;
+			case 'current_user':
+			case 'foreignkey':
+				$field_arr[] = 'BIGINT(20)';
 				break;
 			case 'password':
 				$string_size = empty($options['string_size']) ? 32 : $options['string_size'];
@@ -822,7 +826,7 @@ class DBObject {
 			case 'title':
 				//No break;
 			case 'string':
-				$string_size = empty($options['string_size']) ? 32 : $options['string_size'];
+				$string_size = empty($options['string_size']) ? 255 : $options['string_size'];
 				$field_arr[] = 'VARCHAR(' . $string_size .')';
 				break;
 			case 'large_string':
