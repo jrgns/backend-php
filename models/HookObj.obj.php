@@ -33,6 +33,9 @@ class HookObj extends DBObject {
 			'modified'    => 'lastmodified',
 			'added'       => 'dateadded',
 		);
+		$meta['keys'] = array(
+			'type,hook,class' => 'unique',
+		);
 		return parent::__construct($meta);
 	}
 	

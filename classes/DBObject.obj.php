@@ -649,15 +649,19 @@ class DBObject {
 		$field_data = array();
 		$value_data = array();
 		$parameters = array();
-		foreach ($fields as $name => $field) {
+		foreach ($fields as $name => $options) {
+			if (!is_array($options)) {
+				$options = array('type' => $options);
+			}
 			if (array_key_exists($name, $data)) {
+				$type = array_key_exists('type', $options) ? $options['type'] : 'string';
 				$field_data[] = $name;
 
 				$do_add = true;
 				$just_add = false;
 				$value = null;
 				switch (true) {
-					case substr($field, 0, 8) == 'password':
+					case substr($type, 0, 8) == 'password':
 						if (strpos($field, ':') !== false) {
 							$temp = explode(':', $field);
 							if (count($temp) >= 2) {
@@ -672,10 +676,10 @@ class DBObject {
 							$value = $data[$name];
 						}
 						break;
-					case $field == 'lastmodified':
+					case $type == 'lastmodified':
 						$do_add = false;
 						break;
-					case $field == 'dateadded':
+					case $type == 'dateadded':
 						$do_add = false;
 						$just_add = true;
 						$value = 'NOW()';
@@ -805,7 +809,7 @@ class DBObject {
 				$field_arr[] = 'BIGINT(20) NOT NULL AUTO_INCREMENT';
 				break;
 			case 'password':
-				$string_size = empty($string_size) ? 32 : $string_size;
+				$string_size = empty($options['string_size']) ? 32 : $options['string_size'];
 				$field_arr[] = 'VARCHAR(' . $string_size .')';
 				break;
 			case 'salt':
@@ -818,7 +822,7 @@ class DBObject {
 			case 'title':
 				//No break;
 			case 'string':
-				$string_size = empty($string_size) ? 255 : $string_size;
+				$string_size = empty($options['string_size']) ? 32 : $options['string_size'];
 				$field_arr[] = 'VARCHAR(' . $string_size .')';
 				break;
 			case 'large_string':
@@ -836,7 +840,7 @@ class DBObject {
 			case 'number':
 				//No break;
 			case 'integer':
-				$int_size = empty($int_size) ? 11 : $int_size;
+				$int_size = empty($options['int_size']) ? 11 : $options['int_size'];
 				$field_arr[] = 'INT(' . $int_size . ')';
 				break;
 			case 'currency':
@@ -883,9 +887,18 @@ class DBObject {
 		}
 		
 		foreach($keys as $field => $type) {
+			$fields = array_map('trim', explode(',', $field));
+			$name = str_replace(' ', '', ucwords(implode(' ', $fields)));
+			$fields = '`' . implode('`, `', $fields) . '`';
 			switch ($type) {
 			case 'primary':
-				$query_keys[] = 'PRIMARY KEY(`' . $field . '`)';
+				$query_keys[] = 'PRIMARY KEY(' . $fields . ')';
+				break;
+			case 'unique':
+				$query_keys[] = 'UNIQUE KEY `Unique' . $name . '` (' . $fields . ')';
+				break;
+			case 'index':
+				$query_keys[] = 'KEY `Index' . $name . '` (' . $fields . ')';
 				break;
 			}
 		}
@@ -897,7 +910,7 @@ class DBObject {
 
 		$query = 'CREATE TABLE IF NOT EXISTS `' . $database .'`.`' . $table . '` (';
 		$query .= "\n\t" . implode(",\n\t", $query_fields);
-		$query .= "\n\t)";
+		$query .= "\n)";
 		if (!empty($engine)) {
 			$query .= ' ENGINE=' . $engine;
 		}

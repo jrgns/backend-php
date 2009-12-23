@@ -20,15 +20,19 @@ class PermissionObj extends DBObject {
 		$meta['name'] = 'Permission';
 		$meta['fields'] = array(
 			'id' => 'primarykey',
-			'role' => 'string',
+			'role' => array('type' => 'string', 'string_size' => 60),
 			'control' => 'integer',
-			'action' => 'string',
-			'subject' => 'string',
-			'subject_id' => 'string',
+			'action' => array('type' => 'string', 'string_size' => 60),
+			'subject' => array('type' => 'string', 'string_size' => 60),
+			'subject_id' => 'integer',
 			'system' => 'integer',
 			'active' => 'boolean',
 			'modified' => 'lastmodified',
 			'added' => 'dateadded',
+		);
+		$meta['keys'] = array(
+			'role,action,subject,subject_id' => 'index',
+			'subject,action,subject_id'      => 'index',
 		);
 		return parent::__construct($meta);
 	}
