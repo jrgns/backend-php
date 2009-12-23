@@ -168,7 +168,7 @@ class TableCtl extends AreaCtl {
 		}
 	}
 	
-	public function action_toggle($id, $field) {
+	public function action_toggle($id, $field, $should_redirect = true) {
 		$toret = null;
 		$obj_name = (class_name(Controller::$area) . 'Obj');
 		if (class_exists($obj_name, true)) {
@@ -179,7 +179,9 @@ class TableCtl extends AreaCtl {
 					$field => !$toret->array[$field],
 				);
 				if ($toret->update($data)) {
-					Controller::redirect('?q=' . Controller::$area . '/' . $id);
+					if ($should_redirect) {
+						Controller::redirect('?q=' . Controller::$area . '/' . $id);
+					}
 				} else {
 					$toret = false;
 				}

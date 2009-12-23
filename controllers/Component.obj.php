@@ -20,14 +20,16 @@
 class Component extends TableCtl {
 
 	public function action_toggle($id, $field) {
-		$toret = parent::action_toggle($id, $field);
+		$toret = parent::action_toggle($id, $field, false);
 		if ($toret) {
 			if ($toret->array['active']) {
-				if (!call_user_func(array($toret->array['name'], 'install'))) {
+				if (call_user_func(array($toret->array['name'], 'install'))) {
+				} else {
 					Controller::addError('Could not install component');
 				}
 			}
 		}
+		Controller::redirect('?q=' . Controller::$area . '/' . $id);
 		return $toret;
 	}
 	
@@ -145,7 +147,12 @@ class Component extends TableCtl {
 		return $toret;
 	}
 	
-	public static function check() {
+	public static function action_check() {
+		$files = self::fromFolder();
+		$table = Component::retrieve(false, 'list');
+		var_dump($files);
+		var_dump($table);
+		die;
 		$toret = false;
 	}
 }
