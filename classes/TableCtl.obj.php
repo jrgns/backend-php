@@ -391,30 +391,33 @@ class TableCtl extends AreaCtl {
 		//We've defined get_called_class in functions.inc.php for servers with PHP < 5.3.0
 		$obj_name = get_called_class() . 'Obj';
 		if ($obj_name && class_exists($obj_name, true)) {
-			$toret = new $obj_name();
+			$object = new $obj_name();
 			if ($parameter) {
-				$query = $toret->getRetrieveSQL();
+				$query = $object->getRetrieveSQL();
 				if ($query) {
-					$toret->load(array('query' => $query, 'parameters' => array(':parameter' => $parameter), 'mode' => ($return == 'dbobject' ? 'object' : $return)));
+					$object->load(array('query' => $query, 'parameters' => array(':parameter' => $parameter), 'mode' => ($return == 'dbobject' ? 'object' : $return)));
 				} else {
-					$toret = null;
+					$object = null;
 				}
 			} else {
-				$toret->load();
+				$object->load();
 			}
-			if ($toret) {
+			if (!empty($object->last_error)) {
+				Controller::addError($object->last_error);
+			} else if ($object) {
 				switch ($return) {
 				case 'list':
-					$toret = $toret->list;
+					$toret = $object->list;
 					break;
 				case 'array':
-					$toret = $toret->array;
+					$toret = $object->array;
 					break;
 				case 'object':
-					$toret = $toret->object;
+					$toret = $object->object;
 					break;
 				case 'dbobject':
 				default:
+					$toret = $object;
 					break;
 				}
 			}
