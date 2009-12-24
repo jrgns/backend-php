@@ -344,7 +344,7 @@ class Controller {
 	private static function addSomething($what, $string, $options = array()) {
 		$toret = false;
 		if (!is_null($string)) {
-			$log_to_file = Value::get('log_to_file', false);
+			$log_to_file = defined('BACKEND_INSTALLED') && BACKEND_INSTALLED ? Value::get('log_to_file', false) : false;
 			if ($log_to_file) {
 				@list($file, $log_what) = explode('|', $log_to_file);
 				$file     = empty($file)     ? 'logfile_' . date('Ymd') . 'txt' : $file;

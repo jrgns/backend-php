@@ -211,6 +211,8 @@ class DBObject {
 					if ($this->array) {
 						$this->array = $this->process($this->array, 'out');
 					}
+				} else if (!empty($query->last_error)) {
+					$this->last_error = $query->last_error;
 				}
 			} else {
 				$this->last_error = 'No Query to load';
@@ -266,6 +268,8 @@ class DBObject {
 					if (array_key_exists('load', $options) ? $options['load'] : true) {
 						$this->load();
 					}
+				} else if (!empty($query->last_error)) {
+					$this->last_error = $query->last_error;
 				}
 			}
 		} else {
@@ -293,6 +297,8 @@ class DBObject {
 					if (array_key_exists('load', $options) ? $options['load'] : true) {
 						$this->load();
 					}
+				} else if (!empty($query->last_error)) {
+					$this->last_error = $query->last_error;
 				}
 			}
 		} else {
@@ -364,6 +370,8 @@ class DBObject {
 					if (array_key_exists('load', $options) ? $options['load'] : true) {
 						$this->load();
 					}
+				} else if (!empty($query->last_error)) {
+					$this->last_error = $query->last_error;
 				}
 			}
 		} else {
@@ -379,6 +387,9 @@ class DBObject {
 			extract($this->meta);
 			$query = new CustomQuery("DELETE FROM `$table` WHERE `$id_field` = :id LIMIT 1");
 			$toret = $query->execute(array(':id' => $this->meta['id']));
+			if (!empty($query->last_error)) {
+				$this->last_error = $query->last_error;
+			}
 		} else {
 			$this->last_error = 'DB Connection error';
 		}
@@ -392,6 +403,9 @@ class DBObject {
 			extract($this->meta);
 			$query = new CustomQuery("TRUNCATE `$table`");
 			$toret = $query->execute();
+			if (!empty($query->last_error)) {
+				$this->last_error = $query->last_error;
+			}
 		} else {
 			$this->last_error = 'DB Connection error';
 		}
@@ -408,9 +422,15 @@ class DBObject {
 				$table = $this->meta['table'];
 				$drop_query = new CustomQuery('DROP TABLE IF EXISTS `' . $table . '`');
 				$drop_query->execute();
+				if (!empty($drop_query->last_error)) {
+					$this->last_error = $query->last_error;
+				}
 			}
 			$query = new CustomQuery($query);
 			$toret = $query->execute();
+			if (!empty($query->last_error)) {
+				$this->last_error = $query->last_error;
+			}
 		} else {
 			$this->last_error = 'No Install SQL for ' . class_name($this);
 		}

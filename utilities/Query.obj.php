@@ -29,6 +29,8 @@ class Query {
 	private $last_stmt   = false;
 	private $last_params = array();
 	
+	public $last_error = false;
+	
 	function __construct($action, $table, array $options = array()) {
 		$action = strtoupper($action);
 		if (!in_array($action, array('SELECT', 'INSERT', 'DELETE', 'UPDATE', 'SHOW'))) {
@@ -51,6 +53,7 @@ class Query {
 	
 	public function execute(array $parameters = array(), array $options = array()) {
 		$toret = false;
+		$this->last_error = false;
 		if ($this->checkConnection() && !empty($this->query)) {
 			$parameters = array_merge($this->parameters, $parameters);
 			//Check if we've already executed this query, and that the parameters are the same
@@ -86,14 +89,14 @@ class Query {
 						} else {
 							$error = 'Error executing statement';
 						}
-						Controller::addError($error);
+						$this->last_error = $error;
 					}
 				} else {
-					Controller::addError('Could not prepare statement');
+					$this->last_error = 'Could not prepare statement';
 				}
 			}
 		} else {
-			Controller::addError('Could not execute query');
+			$this->last_error = 'Could not execute query';
 		}
 		return $toret;
 	}
