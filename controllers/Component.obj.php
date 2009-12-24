@@ -120,17 +120,7 @@ class Component extends TableCtl {
 		$component = new ComponentObj();
 		$component->truncate();
 		foreach($components as $component_file) {
-			$name = preg_replace('/\.obj\.php$/', '', basename($component_file));
-			$active = in_array($name, array_keys(self::getBaseComponents())) ||
-					  $name == Backend::getConfig('backend.application.class');
-
-			$data = array(
-				'name'     => $name,
-				'filename' => $component_file,
-				'options'  => '',
-				'active'   => $active,
-			);
-			if ($component->create($data, array('load' => false))) {
+			if (self::add($component_file)) {
 				//TODO Move this to a install log file
 				//echo 'Installed ' . $name;
 			} else {
@@ -138,6 +128,21 @@ class Component extends TableCtl {
 			}
 		}
 		return $toret;
+	}
+	
+	private static function add($filename) {
+		$name = preg_replace('/\.obj\.php$/', '', basename($filename));
+		$active = in_array($name, array_keys(self::getBaseComponents())) ||
+				  $name == Backend::getConfig('backend.application.class');
+
+		$data = array(
+			'name'     => $name,
+			'filename' => $filename,
+			'options'  => '',
+			'active'   => $active,
+		);
+		$component = new ComponentObj();
+		return $component->create($data, array('load' => false));
 	}
 		
 	public static function install(array $options = array()) {
@@ -147,13 +152,24 @@ class Component extends TableCtl {
 		return $toret;
 	}
 	
-	public static function action_check() {
+	public function action_check() {
+		$toret = 0;
 		$files = self::fromFolder();
 		$table = Component::retrieve(false, 'list');
-		var_dump($files);
-		var_dump($table);
-		die;
-		$toret = false;
+		$table = array_flatten($table, null, 'filename');
+		foreach ($files as $component) {
+			if (!in_array($component, $table)) {
+				var_dump($component);
+				if (self::add($component)) {
+					$toret++;
+				}
+			}
+		}
+		return $toret;
+	}
+	
+	public function html_check() {
+		Controller::redirect('?q=admin/components');
 	}
 }
 
