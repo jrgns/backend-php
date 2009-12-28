@@ -66,11 +66,11 @@ class Account extends TableCtl {
 					Controller::addError('Please supply a username and password');
 				}
 			}
-		} else {
-			Controller::whoops();
 		}
 		if ($toret) {
 			Controller::redirect();
+		} else {
+			Controller::addContent(Render::renderFile('loginout.tpl.php'));
 		}
 		return $toret;
 	}
