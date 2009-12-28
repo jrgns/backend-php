@@ -63,6 +63,13 @@ class View {
 	 * Actually output the information
 	 */
 	function output($to_print = null) {
+		Backend::add('BackendErrors', array_unique(array_filter(Controller::getError())));
+		Backend::add('BackendSuccess', array_unique(array_filter(Controller::getSuccess())));
+		Backend::add('BackendNotices', array_unique(array_filter(Controller::getNotice())));
+		Controller::setError();
+		Controller::setSuccess();
+		Controller::setNotice();
+
 		if (!headers_sent()) {
 			header('X-Backend-View: ' . get_class($this));
 			$content_type = $this->mime_type;

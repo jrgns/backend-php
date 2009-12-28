@@ -17,13 +17,15 @@
 				<div id="topnav" class="span-24">
 					{tpl:topnav.tpl.php}
 				</div>
-				<div id="teaser" class="span-24">
-					{tpl:backend_errors.tpl.php}
-					{tpl:backend_success.tpl.php}
-					{tpl:backend_notices.tpl.php}
-					<?php if (!empty($Teaser)): ?><p class="bottom">#Teaser#</p><?php endif; ?>
-					<hr>
-				</div>
+				<?php if (!empty($BackendNotices) || !empty($BackendErrors) || !empty($BackendSuccess) || !empty($Teaser)): ?>
+					<div id="teaser" class="span-24">
+						{tpl:backend_errors.tpl.php}
+						{tpl:backend_success.tpl.php}
+						{tpl:backend_notices.tpl.php}
+						<?php if (!empty($Teaser)): ?><p class="bottom">#Teaser#</p><?php endif; ?>
+						<hr>
+					</div>
+				<?php endif; ?>
 
 				<div id="maincol" class="span-15 prepend-1 colborder">
 					{tpl:tab_links.tpl.php}

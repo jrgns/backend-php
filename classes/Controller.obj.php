@@ -145,12 +145,6 @@ class Controller {
 		} else {
 			Controller::whoops();
 		}
-		Backend::add('BackendErrors', array_unique(array_filter(self::$error)));
-		self::$error = array();
-		Backend::add('BackendSuccess', array_unique(array_filter(self::$success)));
-		self::$success = array();
-		Backend::add('BackendNotices', array_unique(array_filter(self::$notice)));
-		self::$notice = array();
 		
 		if (self::$view instanceof View) {
 			Hook::run('action_display', 'pre', array($result));
@@ -159,6 +153,7 @@ class Controller {
 		} else {
 			die('Unrecognized Request');
 		}
+
 		return $result;
 	}
 	
@@ -496,12 +491,20 @@ class Controller {
 		return self::$error;
 	}
 	
+	static public function setError(array $errors = array()) {
+		self::$error = $errors;
+	}
+	
 	static public function addNotice($content, $options = array()) {
 		return self::addSomething('notice', $content, $options);
 	}
 	
 	static public function getNotice() {
 		return self::$notice;
+	}
+
+	static public function setNotice(array $notices = array()) {
+		self::$notice = $notices;
 	}
 	
 	static public function addSuccess($content, $options = array()) {
@@ -510,5 +513,9 @@ class Controller {
 	
 	static public function getSuccess() {
 		return self::$success;
+	}
+
+	static public function setSuccess(array $successes = array()) {
+		self::$success = $successes;
 	}
 }
