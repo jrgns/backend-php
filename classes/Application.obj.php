@@ -15,7 +15,7 @@
  * The Application class
  */
 class Application {
-	public static function getLinks() {
+	public static function getLinks($type = 'primary') {
 	}
 	
 	/**
