@@ -307,9 +307,10 @@ class TableCtl extends AreaCtl {
 					Controller::addContent(Render::renderFile($template_file));
 				} else {
 					//TODO It's a bit of a hack to redirect just because we can't generate the template
-					Render::createTemplate($template_file, 'std_list.tpl.php');
-					Controller::addSuccess('Created template for ' . $object->getMeta('name') . ' list');
-					Controller::redirect();
+					//Render::createTemplate($template_file, 'std_list.tpl.php');
+					//Controller::addSuccess('Created template for ' . $object->getMeta('name') . ' list');
+					//Controller::redirect();
+					Controller::addContent(Render::renderFile('std_list.tpl.php'));
 				}
 			} else {
 				Controller::whoops(array('title' => 'Invalid Object returned'));
@@ -367,7 +368,6 @@ class TableCtl extends AreaCtl {
 					Controller::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
 					Controller::redirect();
 				}
-				Controller::addContent(Render::renderFile($template_file));
 			} else {
 				Controller::whoops(array('title' => 'Invalid Object returned'));
 			}

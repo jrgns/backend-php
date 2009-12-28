@@ -2,9 +2,6 @@
 	$fields = $Object->getMeta('fields');
 	$list = $Object->list;
 	$odd = false;
-	$row_width = 15;
-	$title_width = 2;
-	$input_width = $row_width - $title_width - 1;
 ?>
 	<table>
 		<thead>
