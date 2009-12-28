@@ -1,6 +1,6 @@
 <?php if (!empty($Object)): ?>
-	<form method="post" action="?q=<?php echo array_key_exists('q', $_REQUEST) ? $_REQUEST['q'] : '' ?>" enctype="multipart/form-data">
-	<?php 
+		<form method="post" action="?q=<?php echo array_key_exists('q', $_REQUEST) ? $_REQUEST['q'] : '' ?>" enctype="multipart/form-data">
+<?php 
 		Hook::run('form', 'pre', array($Object));
 		$fields = $Object->getMeta('fields');
 		$odd = false;
@@ -23,42 +23,48 @@
 				case $field == 'integer':
 				case $field == 'number':
 				case $field == 'string':
+				case $field == 'large_string':
+				case $field == 'small_string':
 				case $field == 'email':
 				case $field == 'telnumber':
-					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="text" class="text" value="' . $value . '">';
+					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="text" class="text" value="<?php echo plain($obj_values[\'' . $name . '\']) ?>">';
 					break;
 				case $field == 'date':
-					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="text" class="text" value="' . $value . '">';
+					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="text" class="text" value="<?php echo plain($obj_values[\'' . $name . '\']) ?>">';
 					break;
 				case $field == 'title':
-					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="text" class="text title" value="' . $value . '">';
+					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="text" class="text title" value="<?php echo plain($obj_values[\'' . $name . '\']) ?>">';
 					break;
 				case $field == 'text':
-					$field_str = '<textarea id="' . $input_id . '" name="' . $input_name . '" class="textarea">' . $value . '</textarea>';
+					$field_str = '<textarea id="' . $input_id . '" name="' . $input_name . '" class="textarea"><?php echo $obj_values[\'' . $name . '\'] ?></textarea>';
+					break;
+				case $field == 'long_blob':
+				case $field == 'medium_blob':
+				case $field == 'blob':
+				case $field == 'tiny_blob':
+					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="file" class="text" value="<?php echo plain($obj_values[\'' . $name . '\']) ?>">';
 					break;
 				case $field == 'boolean':
-					$field_str = '<select id="' . $input_id . '" name="' . $input_name . '" class="">';
-					$field_str .= '<option value="1">Yes</option>';
-					$field_str .= '<option value="0">No</option>';
-					$field_str .= '</select>';
-					break;
-				case $field == 'blob':
-					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="file" class="text" value="' . $value . '">';
+					$field_str = '<select id="' . $input_id . '" name="' . $input_name . '" class="">' . PHP_EOL;
+					$field_str .= "\t\t\t\t\t" . '<option value="1"<?php if ($obj_values[\'' . $name . '\']): ?> selected="selected"<?php endif; ?>>Yes</option>' . PHP_EOL;
+					$field_str .= "\t\t\t\t\t" . '<option value="0"<?php if (empty($obj_values[\'' . $name . '\'])): ?> selected="selected"<?php endif; ?>>No</option>' . PHP_EOL;
+					$field_str .= "\t\t\t\t" . '</select>';
 					break;
 				default:
 					$field_str = '';
 					break;
 			}
-			?>
+?>
 			<div id="<?php echo $input_id ?>_container">
 				<label id="<?php echo $input_id ?>_label" for="<?php echo $input_id ?>"><?php echo humanize($name) ?></label><br>
 				<?php echo $field_str ?>
+
 			</div>
-		<?php endforeach;
+<?php endforeach;
 		Hook::run('form', 'post', array($Object));
-	?>
-		<input type="submit" value="<?php echo ucwords(Controller::$action) ?> <?php echo $Object->getMeta('name') ?>" class=""/>
-	</form>
+?>
+			<input type="submit" value="<?php echo ucwords(Controller::$action) ?> <?php echo $Object->getMeta('name') ?>" class=""/>
+		</form>
 <?php else: ?>
 	No object
 <?php endif; ?>
