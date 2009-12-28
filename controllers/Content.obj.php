@@ -147,6 +147,14 @@ class Content extends TableCtl {
 		return $content;		
 	}
 	
+	public static function show($id) {
+		$content = Content::retrieve($id);
+		if ($content) {
+			$content = array_key_exists('markdown', $content) ? $content['markdown'] : $content['body'];
+			Controller::addContent($content);
+		}
+	}
+	
 	public static function install(array $options = array()) {
 		$toret = parent::install($options);
 
