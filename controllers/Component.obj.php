@@ -159,8 +159,8 @@ class Component extends TableCtl {
 		$table = array_flatten($table, null, 'filename');
 		foreach ($files as $component) {
 			if (!in_array($component, $table)) {
-				var_dump($component);
 				if (self::add($component)) {
+					Controller::addSuccess('Added ' . $component);
 					$toret++;
 				}
 			}

@@ -26,13 +26,13 @@ class Render {
 		return file_put_contents(APP_FOLDER . '/' . $template_loc . '/' . $destination, $template_content);
 	}
 
-	public static function renderFile($filename) {
+	public static function renderFile($filename, array $values = array()) {
 		//Build the template
 		$cache_file = self::buildTemplate($filename);
 		//Run the PHP in the template
-		$toret = self::evalTemplate($cache_file);
+		$toret = self::evalTemplate($cache_file, $values);
 		//Parse the #Variables# in the template
-		$toret = self::parseVariables($toret);
+		$toret = self::parseVariables($toret, $values);
 		return $toret;
 	}
 	
@@ -170,8 +170,8 @@ class Render {
 	/**
 	 * This function translates all #Variables# into their Backend values
 	 */
-	private static function parseVariables($content, $vars = false) {
-			$vars = $vars ? $vars : Backend::getAll();
+	private static function parseVariables($content, array $vars = array()) {
+		$vars = array_merge(Backend::getAll(), $vars);
 		foreach($vars as $name => $value) {
 			if (is_string($name) && is_string($value)) {
 				$search[] = self::getTemplateVarName($name);
@@ -185,10 +185,10 @@ class Render {
 	/**
 	 * This function runs a template, making all the Backend variables available as PHP vars
 	 */
-	private static function evalTemplate($template, $vars = false) {
+	private static function evalTemplate($template, array $vars = array()) {
 		$toret = false;
 		if (file_exists($template)) {
-			$vars = $vars ? $vars : Backend::getAll();
+			$vars = array_merge(Backend::getAll(), $vars);
 
 			$keys = array_keys($vars);
 			$keys = array_map(create_function('$elm', "return str_replace(' ', '_', \$elm);"), $keys);

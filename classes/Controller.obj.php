@@ -25,6 +25,7 @@ class Controller {
 
 	public static $parameters = array();
 	
+	//TODO move this to the config or Application class
 	public static $salt = 'Change this to something random!';
 	public static $view = false;
 		

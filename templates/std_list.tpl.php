@@ -14,7 +14,7 @@
 		</thead>
 		<tbody>
 		<?php foreach($list as $row):
-			$odd = $odd ? false : true;
+			$odd = !$odd;
 			?>
 			<tr class="<?php echo $odd ? '' : 'even' ?>">
 				<td><?php echo implode('</td><td>', $row) ?></td>
