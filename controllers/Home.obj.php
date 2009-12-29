@@ -10,5 +10,6 @@ class Home extends AreaCtl {
 		$toret = parent::install($options);
 		
 		$toret = Permission::add('anonymous', 'index', 'home') && $toret;
+		return $toret;
 	}
 }

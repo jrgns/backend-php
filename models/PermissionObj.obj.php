@@ -31,7 +31,7 @@ class PermissionObj extends DBObject {
 			'added' => 'dateadded',
 		);
 		$meta['keys'] = array(
-			'role,action,subject,subject_id' => 'index',
+			'role,action,subject,subject_id' => 'unique',
 			'subject,action,subject_id'      => 'index',
 		);
 		return parent::__construct($meta);

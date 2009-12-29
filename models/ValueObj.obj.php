@@ -30,6 +30,9 @@ class ValueObj extends DBObject {
 			'value' => 'text',
 			'modified' => 'lastmodified',
 		);
+		$meta['keys'] = array(
+			'name' => 'unique',
+		);
 		return parent::__construct($meta);
 	}
 

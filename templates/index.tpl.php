@@ -5,7 +5,7 @@
 		<title>#Title#<?php if (!empty($Sub_Title)): ?> - #Sub Title#<?php endif; ?></title>
 		{tpl:head.tpl.php}
 		{tpl:styles.tpl.php}
-		<link rel="shortcut icon" type="image/x-icon" href="<?php echo SITE_LINK ?>/favicon.ico">
+		<link rel="shortcut icon" type="image/x-icon" href="#SITE_LINK#favicon.ico">
 	</head>
 	<body>
 		<div id="middleback">
