@@ -41,6 +41,9 @@ class Query {
 		if ($table instanceof DBObject) {
 			$table = $table->getSource();
 		}
+		if (array_key_exists('fields', $options)) {
+			$this->fields = is_array($options['fields']) ? $options['fields'] : array($options['fields']);
+		}
 		$this->table = $table;
 	}
 
@@ -54,6 +57,9 @@ class Query {
 	public function execute(array $parameters = array(), array $options = array()) {
 		$toret = false;
 		$this->last_error = false;
+		if (empty($this->query)) {
+			$this->query = $this->buildQuery();
+		}
 		if ($this->checkConnection() && !empty($this->query)) {
 			$parameters = array_merge($this->parameters, $parameters);
 			//Check if we've already executed this query, and that the parameters are the same
@@ -146,7 +152,7 @@ class Query {
 		return $this;
 	}
 	
-	public function fetchAssoc(array $parameters = array()) {
+	public function fetchAssoc(array $parameters = array(), array $options = array()) {
 		$toret = $this->execute($parameters);
 		if ($toret) {
 			$toret = $toret->fetch(PDO::FETCH_ASSOC);
@@ -154,16 +160,19 @@ class Query {
 		return $toret;
 	}
 	
-	public function fetchAll(array $parameters = array()) {
+	public function fetchAll(array $parameters = array(), array $options = array()) {
 		$toret = $this->execute($parameters);
 		if ($toret) {
-			$toret = $toret->fetchAll(PDO::FETCH_ASSOC);
+			if (empty($options['with_key'])) {
+				$toret = $toret->fetchAll(PDO::FETCH_ASSOC);
+			} else {
+				$toret = $toret->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
+			}
 		}
 		return $toret;
 	}
 	
-	public function fetchColumn(array $parameters = null, int $column = null) {
-		$parameters = is_null($parameters) ? array() : $parameters;
+	public function fetchColumn(array $parameters = array(), int $column = null, array $options = array()) {
 		$column = is_null($column) ? 0 : $column;
 		$toret = $this->execute($parameters);
 		if ($toret) {
@@ -185,7 +194,7 @@ class Query {
 		case 'SELECT':
 			$query = $this->action;
 			if (empty($this->fields)) {
-				$query .= ' * ';
+				$query .= ' *';
 			} else {
 				$query .= ' ' . implode(', ', $this->fields);
 			}
