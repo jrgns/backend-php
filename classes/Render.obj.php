@@ -272,13 +272,16 @@ class Render {
 	protected static function rewriteLinks($content) {
 		$toret = $content;
 		if (Value::get('clean_urls', false)) {
-			preg_match_all('/(<a\s+.*?href=[\'\"]|<form\s+.*?action=[\'"]|<link\s+.*?href=[\'"])(.*?[\?&]q=.*?&?.*?)[\'"]/', $toret, $matches);
+			preg_match_all('/(<a\s+.*?href=[\'\"]|<form\s+.*?action=[\'"]|<link\s+.*?href=[\'"])(|.*?[\?&]q=.*?&?.*?)[\'"]/', $toret, $matches);
 			if (count($matches) == 3) {
 				$matched = $matches[0];
 				$links = $matches[1];
 				$urls = $matches[2];
 				$replacements = array();
 				foreach ($urls as $key => $url) {
+					if (empty($url)) {
+						$url = get_current_url();
+					}
 					//Build query array
 					//workaround for parse_url acting funky with a url = ?q=something/another/
 					if (substr($url, 0, 3) == '?q=') {
