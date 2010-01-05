@@ -160,7 +160,7 @@ class Component extends TableCtl {
 		foreach ($files as $component) {
 			if (!in_array($component, $table)) {
 				if (self::add($component)) {
-					Controller::addSuccess('Added ' . $component);
+					Controller::addSuccess('Added ' . basename($component));
 					$toret++;
 				}
 			}
@@ -170,6 +170,12 @@ class Component extends TableCtl {
 	
 	public function html_check() {
 		Controller::redirect('?q=admin/components');
+	}
+
+	public static function admin_links() {
+		return array(
+			array('text' => 'Check Components'  , 'href' => '?q=component/check'),
+		);
 	}
 }
 
