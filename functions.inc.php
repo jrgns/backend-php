@@ -96,7 +96,7 @@ function get_current_url() {
 	$host = $_SERVER['HTTP_HOST'];
 	$port = $_SERVER['SERVER_PORT'];
 	$request = $_SERVER['PHP_SELF'];
-	$query = !empty($_SERVER['argv'][0]) ? substr($_SERVER['argv'][0], strpos($_SERVER['argv'][0], ';') + 1) : '';
+	$query = !empty($_SERVER['argv'][0]) ? substr($_SERVER['argv'][0], strpos($_SERVER['argv'][0], ';')) : '';
 	$toret = $protocol . '://' . $host . ($port == $protocol_port ? '' : ':' . $port) . $request . (empty($query) ? '' : '?' . $query);
 	return $toret;
 }
