@@ -20,7 +20,7 @@ class CommentObj extends DBObject {
 		$meta['name'] = 'Comment';
 		$meta['fields'] = array(
 			'id' => 'primarykey',
-			'user_id' => 'foreignkey',
+			'user_id' => 'current_user',
 			'foreign_table' => 'string',
 			'foreign_id' => 'foreignkey',
 			'in_reply_to' => 'foreignkey',

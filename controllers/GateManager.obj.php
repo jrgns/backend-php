@@ -29,9 +29,8 @@ class GateManager extends AreaCtl {
 	public function html_index($object) {
 		Backend::add('Sub Title', 'Administer the GateKeeper');
 		Controller::addContent('<ul>');
-		Controller::addContent('<li><a href="">Roles</a></li>');
-		Controller::addContent('<li><a href="?q=permission">Permissions</a></li>');
-		Controller::addContent('<li><a href="?q=assignment">Assignments</a></li>');
+		Controller::addContent('<li><a href="?q=gate_manager/roles">Roles</a></li>');
+		Controller::addContent('<li><a href="?q=gate_manager/permissions">Permissions</a></li>');
 		Controller::addContent('</ul>');
 		return true;
 	}
@@ -68,40 +67,75 @@ class GateManager extends AreaCtl {
 		}
 	}
 	
-	public function action_permissions($id = false) {
-		$toret = new stdClass();
-		if ($id) {
-			$toret->permission = Permission::retrieve($id, 'dbobject');
-			if ($toret->permission) {
-				$query = new CustomQuery("SELECT * FROM `permissions` WHERE `role` = :role");
-				$toret->roles = $query->fetchAll(array(':role' => $toret->permission->array['name']));
+	public function action_update_permissions() {
+		$toret = true;
+		if (is_post()) {
+			$query = new DeleteQuery('permissions');
+			if ($query->filter("`role` != 'nobody'")->filter("`role` != 'superadmin'")->execute()) {
+				$permission = new PermissionObj();
+				foreach($_POST as $key => $roles) {
+					list($subject, $action) = explode('_', $key);
+					foreach($roles as $role => $value) {
+						$data = array(
+							'subject' => $subject,
+							'action'  => $action,
+							'role'    => $role,
+						);
+						$toret = $permission->replace($data) && $toret;
+					}
+				}
 			} else {
-				$toret->roles = null;
+				Controller::addError('Could not empty permissions table');
 			}
+		}
+		return $toret;
+	}
+	
+	public function html_update_permissions($result) {
+		if ($result) {
+			Controller::addSuccess('Permissions updated');
 		} else {
-			$toret->permissions = Role::retrieve();
+			Controller::addError('Could not update Permissions');
+		}
+		Controller::redirect('?q=gate_manager/permissions');
+	}
+	
+	public function action_permissions() {
+		$toret = new stdClass();
+		$query = new SelectQuery('permissions');
+		$query
+			->filter('`active` = 1')
+			->filter("`role` = 'nobody'")
+			->filter('`subject_id` = 0')
+			->group('`subject`, `action` WITH ROLLUP');
+		$toret->base_perms = $query->fetchAll();
+		
+		$query = new SelectQuery('roles');
+		$query->filter('`active` = 1');
+		$toret->roles = $query->fetchAll();
+
+		$query = new SelectQuery('permissions', array('fields' => "CONCAT(`subject`, '_', `action`), GROUP_CONCAT(DISTINCT `role` ORDER BY `role`) AS `roles`"));
+		$query
+			->filter('`active` = 1')
+			->filter('`subject_id` = 0')
+			->filter("`role` != 'nobody'")
+			->group('`subject`, `action`');
+		$permissions = $query->fetchAll(array(), array('with_key' => 1));
+		$toret->permissions = array();
+		foreach($permissions as $key => $value) {
+			$toret->permissions[$key] = explode(',', current(current($value)));
 		}
 		return $toret;
 	}
 	
 	public function html_permissions($result) {
-		Backend::add('TabLinks', $this->getTabLinks('permissions'));
-		if (!empty($result->permission)) {
-			Backend::add('Sub Title', 'GateKeeper Permissions');
-			Backend::add('Result', $result);
-			Controller::addContent(Render::renderFile('permission_display.tpl.php'));
-		} else {
-			Backend::add('Sub Title', 'GateKeeper Permissions');
-			Backend::add('Object', $result->permissions);
-			Controller::addContent(Render::renderFile('permission_list.tpl.php'));
-		}
+		Controller::addContent(Render::renderFile('permission_list.tpl.php', (array)$result));
 	}
 	
 	public static function admin_links() {
 		return array(
 			array('text' => 'Manage Roles'      , 'href' => '?q=gate_manager/roles'),
 			array('text' => 'Manage Permissions', 'href' => '?q=gate_manager/permissions'),
-			array('text' => 'Manage Assignments', 'href' => '?q=gate_manager/assignments'),
 		);
 	}
 }
