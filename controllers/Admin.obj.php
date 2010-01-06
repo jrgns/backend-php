@@ -53,13 +53,13 @@ class Admin extends AreaCtl {
 					}
 				}
 			}
+			Value::set('log_to_file', $original);
 			if ($toret) {
 				$_SESSION['just_installed'] = true;
 				Value::set('admin_installed', date('Y-m-d H:i:s'));
 				Controller::addSuccess('Backend Install Successful');
 				Controller::redirect('?q=account/signup');
 			}
-			Value::set('log_to_file', $original);
 		} else {
 			Controller::addError('Admin installation script already ran at ' . $installed);
 			Controller::redirect('?q=admin/post_install');

@@ -51,12 +51,24 @@ if (!empty($Role)): ?>
 			</table>
 		</dd>
 	<?php endif; ?>
+		<dt>Add a Permission for <em><?php echo $Role->array['name'] ?></em> users</dt>
+		<dd>
+			<form>
+				<div id="perm_action_container">
+					<label>Action</label><br>
+					<input type="text" name="perm_action" id="perm_action" class="text">
+				</div>
+				<div id="perm_subject_container">
+					<label>Subject</label><br>
+					<input type="text" name="perm_subject" id="perm_subject" class="text">
+				</div>
+				<div id="perm_subject_id_container">
+					<label>Subject ID</label><br>
+					<input type="text" name="perm_subject_id" id="perm_subject_id" class="text">
+				</div>
+			</form>
+		</dd>
 	</dl>
-	<hr>
-	<form>
-		<span class="large loud">Add a Permission for <?php echo $Role->array['name'] ?> users</span>
-	
-	</form>
 <?php else: ?>
 	No Role to display
 <?php endif; ?>

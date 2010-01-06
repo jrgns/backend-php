@@ -44,8 +44,8 @@ class TableCtl extends AreaCtl {
 	 */
 	public function action_display($id) {
 		$toret = false;
-		$obj_name = (class_name(Controller::$area) . 'Obj');
-		if (class_exists($obj_name, true) && $id > 0) {
+		$object = self::getObject();
+		if ($object && $id > 0) {
 			$toret = self::action_read($id);
 		}
 		return $toret;
@@ -56,9 +56,9 @@ class TableCtl extends AreaCtl {
 	 */
 	public function action_list($start, $count) {
 		$toret = false;
-		$obj_name = (class_name(Controller::$area) . 'Obj');
-		if (class_exists($obj_name, true)) {
-			$object = new $obj_name();
+		$object = self::getObject();
+		if ($object) {
+			$toret = true;
 			if ($start || $count) {
 				$limit = "$start, $count";
 			} else {
@@ -74,32 +74,35 @@ class TableCtl extends AreaCtl {
 	
 	/**
 	 * Action for creating a record in an area
+	 *
+	 * TODO: There's a duplication of code between rest_create and action_create... Any ideas on
+	 * how to work around this?
 	 */
 	public function action_create() {
 		$toret = false;
-		$obj_name = (class_name(Controller::$area) . 'Obj');
-		if (class_exists($obj_name, true)) {
-			$object = new $obj_name();
-			$data = $object->fromPost();
+		$object = self::getObject();
+		if ($object) {
+			$toret = true;
 			//We need to check if the post data is valid in some way?
+			$data = $object->fromPost();
 			if (is_post()) {
 				$data = Hook::run('create', 'pre', array($data, $object), array('toret' => $data));
 				if ($object->create($data)) {
+					Hook::run('create', 'post', array($data, $object));
 					Controller::addSuccess($object->getMeta('name') . ' Added');
-					if (Hook::run('create', 'post', array($data, $object), array('toret' => true))) {
-						Controller::redirect('?q=' . $object->getArea() . '/display/' . $object->getMeta('id'));
-					}
+					$toret = $object;
 				} else {
+					$toret = false;
 					Controller::addError('Could not add ' . $object->getMeta('name'));
 				}
 			}
 			Backend::add('obj_values', $data);
-			$toret = $object;
 		} else {
 			Controller::whoops();
 		}
 		return $toret;
 	}
+	
 	
 	/**
 	 * Action for reading a record in an area
@@ -122,29 +125,26 @@ class TableCtl extends AreaCtl {
 	 */
 	public function action_update($id) {
 		$toret = false;
-		$obj_name = (class_name(Controller::$area) . 'Obj');
-		if (class_exists($obj_name, true) && $id !== 'home' && $id > 0) {
-			$object = new $obj_name($id);
-			//We need to check if the post data is valid in some way?
-			if (is_post()) {
-				$data = $object->fromPost();
-				$data = Hook::run('update', 'pre', array($data, $object), array('toret' => $data));
-				if ($object->update($data)) {
-					Controller::addSuccess($object->getMeta('name') . ' Modified');
-					if (Hook::run('update', 'post', array($data, $object), array('toret' => true))) {
-						Controller::redirect('?q=' . $object->getArea() . '/display/' . $object->getMeta('id'));
+		$object = self::getObject($id);
+		if ($object) {
+			if ($object->array) {
+				$toret = true;
+				//We need to check if the post data is valid in some way?
+				if (is_post()) {
+					$data = $object->fromPost();
+					$data = Hook::run('update', 'pre', array($data, $object), array('toret' => $data));
+					if ($object->update($data)) {
+						$toret = $object;
+						Controller::addSuccess($object->getMeta('name') . ' Modified');
+					} else {
+						Controller::addError('Could not update ' . $object->getMeta('name'));
 					}
 				} else {
-					Controller::addError('Could not update ' . $object->getMeta('name'));
+					$data = $object->array;
 				}
+				Backend::add('obj_values', $data);
 			} else {
-				$data = $object->array;
-			}
-			Backend::add('obj_values', $data);
-			if ($data) {
-				$toret = $object;
-			} else {
-				Controller::whoops('No ' . $object->getMeta('name') . ' to update');
+				Controller::addError('The ' . $object->getMeta('name') . ' does not exist');
 			}
 		} else {
 			Controller::whoops();
@@ -154,18 +154,20 @@ class TableCtl extends AreaCtl {
 	
 	public function action_delete($id) {
 		$toret = false;
-		if (is_post()) {
-			$obj_name = (class_name(Controller::$area) . 'Obj');
-			$object = new $obj_name($id);
+		$object = self::getObject($id);
+		if ($object && is_post()) {
 			if ($object->array) {
 				if ($object->delete()) {
 					Controller::addSuccess('Record has been removed');
-					Controller::redirect();
+					$toret = true;
 				}
 			} else {
-				Controller::addError('The record does not exist');
+				Controller::addError('The ' . $object->getMeta('name') . ' does not exist');
 			}
+		} else {
+			Controller::whoops();
 		}
+		return $true;
 	}
 	
 	public function action_toggle($id, $field, $should_redirect = true) {
@@ -325,9 +327,14 @@ class TableCtl extends AreaCtl {
 	 * Override this function if you want to customize the way the creation of a record is displayed.
 	 * You can also just create a template named $areaname.form.tpl.php to customize the HTML.
 	 */
-	public function html_create($object) {
-		if ($object) {
-			if ($object instanceof DBObject) {
+	public function html_create($result) {
+		switch (true) {
+		case $result instanceof DBObject:
+			Controller::redirect('?q=' . $result->getArea() . '/display/' . $result->getMeta('id'));
+			break;
+		case $result:
+			$object = self::getObject();
+			if ($object) {
 				Backend::add('Object', $object);
 				Backend::add('TabLinks', $this->getTabLinks('create'));
 				Backend::add('Sub Title', 'Add ' . $object->getMeta('name'));
@@ -340,9 +347,10 @@ class TableCtl extends AreaCtl {
 					Controller::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
 					Controller::redirect();
 				}
-			} else {
-				Controller::whoops(array('title' => 'Invalid Object returned'));
 			}
+			break;
+		default:
+			break;
 		}
 		return true;
 	}
@@ -353,9 +361,14 @@ class TableCtl extends AreaCtl {
 	 * Override this function if you want to customize the way the creation of a record is displayed.
 	 * You can also just create a template named $areaname.form.tpl.php to customize the HTML.
 	 */
-	public function html_update($object) {
-		if ($object) {
-			if ($object instanceof DBObject) {
+	public function html_update($result) {
+		switch (true) {
+		case $result instanceof DBObject:
+			Controller::redirect('?q=' . $result->getArea() . '/display/' . $result->getMeta('id'));
+			break;
+		case $result:
+			$object = self::getObject();
+			if ($object) {
 				Backend::add('Object', $object);
 				Backend::add('TabLinks', $this->getTabLinks('update'));
 				Backend::add('Sub Title', 'Update ' . $object->getMeta('name'));
@@ -368,9 +381,10 @@ class TableCtl extends AreaCtl {
 					Controller::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
 					Controller::redirect();
 				}
-			} else {
-				Controller::whoops(array('title' => 'Invalid Object returned'));
 			}
+			break;
+		default:
+			break;
 		}
 		return true;
 	}
@@ -380,6 +394,32 @@ class TableCtl extends AreaCtl {
 		if ($result instanceof DBObject) {
 			Backend::add('Sub Title', 'Import ' . $object->getMeta('name'));
 		}
+	}
+	
+	/**
+	 * RESTful action for creating a record in an area
+	 *
+	 * This function should be called when the create action is called in a RESTful app.
+	 * TODO: There's a duplication of code between rest_create and action_create... Any ideas on
+	 * how to work around this?
+	 */
+	public function rest_create() {
+		$object = self::getObject();
+		if ($object) {
+			$toret = true;
+			//We need to check if the post data is valid in some way?
+			$data = $object->fromPost();
+			$data = Hook::run('create', 'pre', array($data, $object), array('toret' => $data));
+			if ($object->create($data)) {
+				Hook::run('create', 'post', array($data, $object));
+				Controller::addSuccess($object->getMeta('name') . ' Added');
+				$toret = $object;
+			} else {
+				$toret = false;
+				Controller::addError('Could not add ' . $object->getMeta('name'));
+			}
+		}
+		return $toret;
 	}
 	
 	public static function retrieve($parameter = false, $return = 'array') {
@@ -435,6 +475,9 @@ class TableCtl extends AreaCtl {
 				Controller::setAction('delete');
 				break;
 			case 'PUT':
+				Controller::setAction('create');
+				break;
+			case 'POST':
 				Controller::setAction('update');
 				break;
 			case 'GET':
@@ -456,6 +499,20 @@ class TableCtl extends AreaCtl {
 			$parameters[0] = $_POST['delete_id'];
 		}
 		return $parameters;
+	}
+	
+	public static function getObject($id = false) {
+		$toret = false;
+		$component = class_name(Controller::$area);
+		$obj_name  = class_name(Controller::$area) . 'Obj';
+		if (Component::isActive($obj_name) && class_exists($obj_name, true)) {
+			if ($id) {
+				$toret = new $obj_name($id);
+			} else {
+				$toret = new $obj_name();
+			}
+		}
+		return $toret;
 	}
 	
 	public function action_install() {
