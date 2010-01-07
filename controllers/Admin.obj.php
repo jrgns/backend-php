@@ -26,54 +26,38 @@ class Admin extends AreaCtl {
 		$toret = false;
 		$installed = Value::get('admin_installed', false);
 		if (!$installed) {
-			Component::pre_install();
-			Permission::pre_install();
-			Hook::pre_install();
-			Value::pre_install();
+			if (is_post()) {
+				Component::pre_install();
+				Permission::pre_install();
+				Hook::pre_install();
+				Value::pre_install();
 			
-			$original = Value::get('log_to_file', false);
-			//Value::set('log_to_file', 'install_log.txt');
-			Value::set('log_to_file', 'install_log_' . date('Ymd_His') . '.txt');
+				$original = Value::get('log_to_file', false);
+				//Value::set('log_to_file', 'install_log.txt');
+				Value::set('log_to_file', 'install_log_' . date('Ymd_His') . '.txt');
 
-			Controller::addNotice(PHP_EOL . PHP_EOL . 'Installation started at ' . date('Y-m-d H:i:s'));
+				Controller::addNotice(PHP_EOL . PHP_EOL . 'Installation started at ' . date('Y-m-d H:i:s'));
 
-			$components = Component::getActive();
-			if ($components) {
-				$toret = true;
+				$components = Component::getActive();
+				if ($components) {
+					$toret = true;
 
-				$components = array_flatten($components, null, 'name');
+					$components = array_flatten($components, null, 'name');
 
-				foreach($components as $component) {
-					Controller::addNotice('Installing ' . $component);
-					if (class_exists($component, true) && method_exists($component, 'install')) {
-						if (!call_user_func_array(array($component, 'install'), array())) {
-							Controller::addError('Error on installing ' . $component);
-							$toret = false;
+					foreach($components as $component) {
+						Controller::addNotice('Installing ' . $component);
+						if (class_exists($component, true) && method_exists($component, 'install')) {
+							if (!call_user_func_array(array($component, 'install'), array())) {
+								Controller::addError('Error on installing ' . $component);
+								$toret = false;
+							}
 						}
 					}
 				}
+				Value::set('log_to_file', $original);
 			}
-			Value::set('log_to_file', $original);
-			if ($toret) {
-				$_SESSION['just_installed'] = true;
-				Value::set('admin_installed', date('Y-m-d H:i:s'));
-				Controller::addSuccess('Backend Install Successful');
-				Controller::redirect('?q=account/signup');
-			}
-		} else {
-			Controller::addError('Admin installation script already ran at ' . $installed);
-			Controller::redirect('?q=admin/post_install');
 		}
 		return $toret;
-	}
-	
-	function action_post_install() {
-		if (Value::get('admin_installed', false)) {
-			Backend::add('Sub Title', 'Installation Successfull');
-		} else {
-			Backend::add('Sub Title', 'Installation Failed');
-		}
-		return true;
 	}
 	
 	function action_update() {
@@ -93,8 +77,27 @@ class Admin extends AreaCtl {
 	}
 	
 	function html_install($result) {
-		Backend::add('Sub Title', 'Install Backend Components');
-		Backend::add('result', $result);
+		$installed = Value::get('admin_installed', false);
+		if ($result) {
+			Controller::addSuccess('Backend Install Successful');
+			$_SESSION['just_installed'] = true;
+			Value::set('admin_installed', date('Y-m-d H:i:s'));
+			Controller::redirect('?q=account/signup');
+		} else if (!$installed) {
+			Backend::add('Sub Title', 'Install Backend Application');
+		} else {
+			Controller::addNotice('Installation script already ran at ' . $installed);
+			Controller::redirect('?q=admin');
+		}
+	}
+	
+	function html_post_install($result) {
+		if (Value::get('admin_installed', false)) {
+			Backend::add('Sub Title', 'Installation Successfull');
+		} else {
+			Backend::add('Sub Title', 'Installation Failed');
+		}
+		return true;
 	}
 	
 	function html_update($result) {
