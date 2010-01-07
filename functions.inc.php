@@ -172,6 +172,10 @@ function reseed() {
  * @todo Extend this to check the recipient formats, handle recipients as an array, etc.
  */
 function send_email($recipient, $subject, $message, array $headers = array()) {
+	$headers = array_change_key_case($headers);
+	if (!array_key_exists('from')) {
+		$headers['from'] = Value::get('site_email', 'info@' . SITE_DOMAIN);
+	}
 	return mail($recipient, $subject, $message, implode("\r\n", $headers));
 }
 
