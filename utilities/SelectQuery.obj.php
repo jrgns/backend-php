@@ -14,8 +14,45 @@
  * Base class to handle select queries
  */
 class SelectQuery extends Query {
+	protected $joins = array();
+
 	function __construct($table, array $options = array()) {
 		parent::__construct('SELECT', $table, $options);
+	}
+	
+	function leftJoin($table, $conditions) {
+		return $this->join('LEFT', $table, $conditions);
+	}
+	
+	function rightJoin($table, $conditions) {
+		return $this->join('RIGHT', $table, $conditions);
+	}
+
+	function innerJoin($table, $conditions) {
+		return $this->join('INNER', $table, $conditions);
+	}
+
+	function outerJoin($table, $conditions) {
+		return $this->join('OUTER', $table, $conditions);
+	}
+
+	function join($type, $table, $conditions) {
+		$type = strtoupper($type);
+		if (!in_array($type, array('RIGHT', 'LEFT', 'INNER', 'OUTER'))) {
+			throw new Exception('Unsupported Join Type');
+		}
+		if (!is_array($condition)) {
+			$conditions = array($conditions);
+		}
+		if (!array_key_exists($type, $this->joins)) {
+			$this->joins[$type] = array();
+		}
+		if (array_key_exists($table, $this->joins[$type])) {
+			$this->joins[$type][$table] = array_merge($this->joins[$type][$table], $conditions);
+		} else {
+			$this->joins[$type][$table] = $conditions;
+		}
+		return $this;
 	}
 }
 
