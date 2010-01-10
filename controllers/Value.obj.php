@@ -28,7 +28,12 @@ class Value extends TableCtl {
 				$toret = self::$cache[$name];
 			} else {
 				$toret = Value::retrieve($name);
-				$toret = !empty($toret['value']) ? unserialize(base64_decode($toret['value'])) : $default;
+				if ($toret) {
+					$toret = !empty($toret['value']) ? $toret['value'] : $default;
+				} else {
+					$toret = $default;
+					Value::set($name, $default);
+				}
 			}
 		}
 		self::$cache[$name] = $toret;
