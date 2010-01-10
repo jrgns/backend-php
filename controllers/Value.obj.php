@@ -30,7 +30,7 @@ class Value extends TableCtl {
 				$toret = Value::retrieve($name);
 				if ($toret) {
 					$toret = !empty($toret['value']) ? $toret['value'] : $default;
-				} else {
+				} else if (!is_null($default)) {
 					$toret = $default;
 					Value::set($name, $default);
 				}
