@@ -51,16 +51,15 @@ class Account extends TableCtl {
 						$toret = $User->object;
 						$_SESSION['user'] = $User->object;
 						Controller::addSuccess('Welcome to ' . Backend::getConfig('application.Title') . '!');
-						$location = empty($_SESSION['previous_url']) ? SITE_LINK : $_SESSION['previous_url'];
-						Controller::redirect($location);
+						Controller::redirect('previous');
 					} else {
 						Controller::addError(Account::getError(2));
-						Controller::redirect();
+						Controller::redirect('previous');
 						$toret = false;
 					}
 				} else if (empty($_SESSION['cookie_is_working'])) {
 					Controller::addError(Account::getError(1));
-					Controller::redirect();
+					Controller::redirect('previous');
 					$toret = false;
 				} else {
 					Controller::addError('Please supply a username and password');
@@ -68,7 +67,7 @@ class Account extends TableCtl {
 			}
 		}
 		if ($toret) {
-			Controller::redirect();
+			Controller::redirect('previous');
 		} else {
 			Controller::addContent(Render::renderFile('loginout.tpl.php'));
 		}
@@ -83,11 +82,10 @@ class Account extends TableCtl {
 					setcookie(session_name(), '', time() - 42000, '/');
 				}			
 				session_destroy();
-				$location = empty($_SESSION['previous_url']) ? SITE_LINK : $_SESSION['previous_url'];
-				Controller::redirect($location);
+				Controller::redirect('previous');
 			}
 		}
-		Controller::redirect();
+		Controller::redirect('previous');
 		return true;
 	}
 	

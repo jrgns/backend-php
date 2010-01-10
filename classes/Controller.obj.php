@@ -372,17 +372,26 @@ class Controller {
 	/**
 	 * Redirect to a specified location.
 	 *
-	 * If the location is omitted, go to the previous URL
+	 * If the location is omitted, go to the current URL. If $location == 'previous', go the previous URL for the current mode.
 	 */	
 	public static function redirect($location = false) {
-		$location = $location ? $location : (empty($_SESSION['previous_url']) ? false : $_SESSION['previous_url']);
-		if (is_array($location)) {
-			if (array_key_exists(self::$view->mode, $location)) {
-				$location = $location[self::$view->mode];
+		switch ($location) {
+		case false:
+			$location = get_current_url();
+			break;
+		case 'previous':
+			if (!empty($_SESSION['previous_url'])) {
+				if (is_array($_SESSION['previous_url'])) {
+					$location = !empty($_SESSION['previous_url'][self::$view->mode]) ? $_SESSION['previous_url'][self::$view->mode] : reset($_SESSION['previous_url']);
+				} else {
+					$location = $_SESSION['previous_url'];
+				}
 			} else {
-				$location = current($location);
+				$location = false;
 			}
+			break;
 		}
+
 		//This should fix most redirects, but it may happen that location == '?debug=true&q=something/or/another' or something similiar
 		if (Value::get('clean_urls', false) && substr($location, 0, 3) == '?q=') {
 			$location = SITE_LINK . substr($location, 3);
