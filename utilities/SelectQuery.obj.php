@@ -20,6 +20,23 @@ class SelectQuery extends Query {
 		parent::__construct('SELECT', $table, $options);
 	}
 	
+	protected function buildQuery() {
+		if (!empty($this->joins)) {
+			$tables = array();
+			foreach ($this->joins as $type => $join) {
+				foreach ($join as $table => $conditions) {
+					$one_table = $type . ' JOIN ' . $table;
+					if (!empty($conditions)) {
+						$one_table .= ' ON (' . implode(') AND (', $conditions) . ')';
+					}
+					$tables[] = $one_table;
+				}
+			}
+		}
+		$this->table .= ' ' . implode(PHP_EOL, $tables);
+		return parent::buildQuery();
+	}
+
 	function leftJoin($table, $conditions) {
 		return $this->join('LEFT', $table, $conditions);
 	}
@@ -41,7 +58,7 @@ class SelectQuery extends Query {
 		if (!in_array($type, array('RIGHT', 'LEFT', 'INNER', 'OUTER'))) {
 			throw new Exception('Unsupported Join Type');
 		}
-		if (!is_array($condition)) {
+		if (!is_array($conditions)) {
 			$conditions = array($conditions);
 		}
 		if (!array_key_exists($type, $this->joins)) {

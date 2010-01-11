@@ -14,20 +14,20 @@
  * Base class to handle queries
  */
 class Query {
-	private $connection;
+	protected $connection;
 
-	private $action     = false;
-	private $table      = false;
-	private $query      = false;
-	private $fields     = array();
-	private $conditions = array();
-	private $parameters = array();
-	private $group      = array();
-	private $order      = array();
-	private $limit      = array();
+	protected $action     = false;
+	protected $table      = false;
+	protected $query      = false;
+	protected $fields     = array();
+	protected $conditions = array();
+	protected $parameters = array();
+	protected $group      = array();
+	protected $order      = array();
+	protected $limit      = array();
 
-	private $last_stmt   = false;
-	private $last_params = array();
+	protected $last_stmt   = false;
+	protected $last_params = array();
 	
 	public $last_error = false;
 	
@@ -186,7 +186,7 @@ class Query {
 		$this->query     = $query;
 	}
 	
-	private function buildQuery() {
+	protected function buildQuery() {
 		switch ($this->action) {
 		case 'DELETE':
 			$query = $this->action . ' FROM ' . $this->table;
