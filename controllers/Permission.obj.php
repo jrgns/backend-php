@@ -43,6 +43,19 @@ class Permission extends TableCtl {
 		}
 		return $toret;
 	}
+	
+	public static function check($action = '*', $subject = '*', $subject_id = 0) {
+		$toret = false;
+		$user = Account::checkUser();
+		if (!empty($user->roles)) {
+			$user_roles = $user->roles;
+			$roles = GateKeeper::permittedRoles($action, $subject, $subject_id);
+			$intersect = array_intersect($user_roles, $roles);
+			$toret = count($intersect) ? true : false;
+		}
+		return $toret;
+		
+	}
 
 	public static function getDefaults() {
 		$toret = array(
