@@ -44,6 +44,7 @@ class Assignment extends TableCtl {
 	}
 
 	public static function install(array $options = array()) {
+		$options['drop_table'] = array_key_exists('drop_table', $options) ? $options['drop_table'] : true;
 		$toret = parent::install($options);
 
 		foreach(self::getDefaults() as $assignment) {

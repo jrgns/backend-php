@@ -415,7 +415,7 @@ class DBObject {
 	public function install(array $options = array()) {
 		$toret = false;
 		$this->last_error = false;
-		$drop_table = array_key_exists('drop_table', $options) ? $options['drop_table'] : true;
+		$drop_table = array_key_exists('drop_table', $options) ? $options['drop_table'] : false;
 		$query = $this->getInstallSQL();
 		if ($query) {
 			if ($drop_table) {

@@ -95,6 +95,7 @@ class Hook extends TableCtl {
 	}
 	
 	public static function install(array $options = array()) {
+		$options['drop_table'] = array_key_exists('drop_table', $options) ? $options['drop_table'] : true;
 		$options['install_model'] = array_key_exists('install_model', $options) ? $options['install_model'] : false;
 		$toret = parent::install($options);
 		return $toret;
