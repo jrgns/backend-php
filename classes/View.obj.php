@@ -80,14 +80,6 @@ class View {
 		}
 		$to_print = Hook::run('output', 'pre', array($to_print), array('toret' => $to_print));
 
-		//We're assuming that there's nothing to handle output, so output the default view
-		if ($to_print instanceof DBObject || !Value::get('admin_installed', false)) {
-			$default_view = Backend::getConfig('backend.default.view', 'HtmlView');
-			if ($default_view && class_exists($default_view, true) && method_exists($default_view, 'hook_output')) {
-				$to_print = call_user_func_array(array($default_view, 'hook_output'), array($to_print));
-				$to_print = Render::hook_output($to_print);
-			}
-		}
 		echo $to_print;
 		
 		$to_print = Hook::run('output', 'post', array($to_print), array('toret' => $to_print));

@@ -256,6 +256,9 @@ class Controller {
 		if (!Component::isActive($view_name)) {
 			$view_name = 'View';
 		}
+		if ($view_name == 'View') {
+			$view_name = Backend::getConfig('backend.default.view', 'HtmlView');
+		}
 		$view = new $view_name();
 
 		return $view;

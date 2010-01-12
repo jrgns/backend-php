@@ -26,7 +26,7 @@ class Admin extends AreaCtl {
 		$toret = false;
 		$installed = Value::get('admin_installed', false);
 		if (!$installed) {
-			if (is_post()) {
+			//if (is_post()) {
 				Component::pre_install();
 				Permission::pre_install();
 				Hook::pre_install();
@@ -55,7 +55,7 @@ class Admin extends AreaCtl {
 					}
 				}
 				Value::set('log_to_file', $original);
-			}
+			//}
 		}
 		return $toret;
 	}
@@ -76,7 +76,7 @@ class Admin extends AreaCtl {
 		return $toret;
 	}
 	
-	function html_install($result) {
+	public function html_install($result) {
 		$installed = Value::get('admin_installed', false);
 		if ($result) {
 			Controller::addSuccess('Backend Install Successful');

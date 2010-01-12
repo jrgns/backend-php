@@ -422,6 +422,7 @@ class DBObject {
 				$table = $this->meta['table'];
 				$drop_query = new CustomQuery('DROP TABLE IF EXISTS `' . $table . '`');
 				$drop_query->execute();
+				Controller::addNotice('Dropping table ' . $table);
 				if (!empty($drop_query->last_error)) {
 					$this->last_error = $query->last_error;
 				}

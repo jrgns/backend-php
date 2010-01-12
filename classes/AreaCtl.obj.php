@@ -31,6 +31,7 @@ class AreaCtl {
 		}
 		if (method_exists($this, $method)) {
 			if ($this->checkPermissions()) {
+				//Maybe move this to a hook...
 				if (Controller::$view->mode == 'html') {
 					$comp_script = '/scripts/' . Controller::$area . '.component.js';
 					$comp_style  = '/styles/' . Controller::$area . '.component.css';

@@ -527,17 +527,17 @@ class TableCtl extends AreaCtl {
 		$class = get_called_class();
 		if ($class && class_exists($class, true)) {
 			if ($install_model) {
-				$toret = self::installModel($class . 'Obj');
+				$toret = self::installModel($class . 'Obj', $options);
 			}
 		}
 		return $toret;
 	}
 
-	public static function installModel($model) {
+	public static function installModel($model, array $options = array()) {
 		$toret = false;
 		if (class_exists($model, true)) {
 			$model = new $model();
-			$toret = $model->install();
+			$toret = $model->install($options);
 		} else {
 			Controller::addError($model . ' does not exist');
 		}

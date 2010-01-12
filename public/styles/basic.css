@@ -110,3 +110,7 @@ pre, code, tt {
 	overflow: auto;
 }
 
+li.even {
+	background-color: #e5ecf9;
+}
+
