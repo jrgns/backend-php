@@ -1,13 +1,16 @@
 <?php if (!empty($Object)):
 	Hook::run('form', 'pre', array($Object));
-	$action = '?q=<?php echo Controller::$area . \'/\' . Controller::$action . (empty(Controller::$parameters[0]) ? \'\' : \'/\' . Controller::$parameters[0]) ?>';
 	$fields = $Object->getMeta('fields');
 	$odd = false;
 	$row_width = 15;
 	$title_width = 2;
 	$input_width = $row_width - $title_width - 1;
+echo '<?php
+$action_url = empty($action_url) ? Controller::$area . \'/\' . Controller::$action . (empty(Controller::$parameters[0]) ? \'\' : \'/\' . Controller::$parameters[0]) : $action_url;
 ?>
-		<form method="post" action="<?php echo $action ?>" enctype="multipart/form-data">
+';
+?>
+		<form method="post" action="<?php echo '<?php echo $action_url ?>' ?>" enctype="multipart/form-data">
 <?php 
 		foreach($fields as $name => $field):
 			if (in_array($field, array('primarykey', 'lastmodified', 'dateadded', 'hidden', 'serialized', 'current_user'))) {
