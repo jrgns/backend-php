@@ -103,6 +103,30 @@ class TableCtl extends AreaCtl {
 		return $toret;
 	}
 	
+	public function action_replace() {
+		$toret = false;
+		$object = self::getObject();
+		if ($object) {
+			$toret = true;
+			//We need to check if the post data is valid in some way?
+			$data = $object->fromPost();
+			if (is_post()) {
+				$data = Hook::run('replace', 'pre', array($data, $object), array('toret' => $data));
+				if ($object->replace($data)) {
+					Hook::run('replace', 'post', array($data, $object));
+					Controller::addSuccess($object->getMeta('name') . ' Added');
+					$toret = $object;
+				} else {
+					$toret = false;
+					Controller::addError('Could not replace ' . $object->getMeta('name'));
+				}
+			}
+			Backend::add('obj_values', $data);
+		} else {
+			Controller::whoops();
+		}
+	}
+	
 	
 	/**
 	 * Action for reading a record in an area
@@ -353,6 +377,10 @@ class TableCtl extends AreaCtl {
 			break;
 		}
 		return true;
+	}
+	
+	public function html_replace($result) {
+		return $this->html_create($result);
 	}
 	
 	/**
