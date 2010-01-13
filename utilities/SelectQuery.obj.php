@@ -25,15 +25,15 @@ class SelectQuery extends Query {
 			$tables = array();
 			foreach ($this->joins as $type => $join) {
 				foreach ($join as $table => $conditions) {
-					$one_table = $type . ' JOIN ' . $table;
+					$one_table = $type . ' JOIN ' . Query::enclose($table);
 					if (!empty($conditions)) {
 						$one_table .= ' ON (' . implode(') AND (', $conditions) . ')';
 					}
 					$tables[] = $one_table;
 				}
 			}
+			$this->table .= ' ' . implode(PHP_EOL, $tables);
 		}
-		$this->table .= ' ' . implode(PHP_EOL, $tables);
 		return parent::buildQuery();
 	}
 

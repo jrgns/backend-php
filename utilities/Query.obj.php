@@ -44,7 +44,7 @@ class Query {
 		if (array_key_exists('fields', $options)) {
 			$this->fields = is_array($options['fields']) ? $options['fields'] : array($options['fields']);
 		}
-		$this->table = $table;
+		$this->table = self::enclose($table);
 	}
 
 	private function checkConnection() {
@@ -214,6 +214,22 @@ class Query {
 			$query .= ' LIMIT ' . implode(', ', $this->limit);
 		}
 		return $query;
+	}
+	
+	public static function enclose($element) {
+		if (strpos($element, '.')) {
+			$toret = array();
+			foreach(explode('.', $element) as $elm) {
+				$toret[] = self::enclose($elm);
+			}
+			return implode('.', $toret);
+		} else if (
+			substr($element, 0, 1) != '`' && 
+			substr($element, 0, -1) != '`' &&
+			$element != '*'
+		) {
+			return '`' . $element . '`';
+		}
 	}
 	
 	public function __toString() {
