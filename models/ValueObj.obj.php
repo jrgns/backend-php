@@ -27,7 +27,7 @@ class ValueObj extends DBObject {
 		$meta['fields'] = array(
 			'id' => 'primarykey',
 			'name' => 'string',
-			'value' => 'text',
+			'value' => 'serialized',
 			'modified' => 'lastmodified',
 		);
 		$meta['keys'] = array(
