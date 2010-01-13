@@ -53,6 +53,22 @@ class Value extends TableCtl {
 		return $toret;
 	}
 	
+	public function action_admin() {
+		$query = new SelectQuery('values');
+		$result = new stdClass();
+		$result->values = $query->fetchAll();
+
+		$value = new ValueObj();
+		$result->obj_values = $value->fromPost();
+		return $result;
+	}
+	
+	public function html_admin($result) {
+		$values = (array)$result;
+		$values['action_url'] = 'value/replace';
+		Controller::addContent(Render::renderFile('values.tpl.php', $values));
+	}
+	
 	public static function admin_links() {
 		return array(
 			array('href' => '?q=value/admin', 'text' => 'Values')
