@@ -23,7 +23,14 @@ class Render {
 		$template_file    = self::buildTemplate($origin);
 		$template_content = self::evalTemplate($template_file);
 		$template_loc     = Backend::getConfig('backend.templates.location', 'templates');
-		return file_put_contents(APP_FOLDER . '/' . $template_loc . '/' . $destination, $template_content);
+		$dest_file        = APP_FOLDER . '/' . $template_loc . '/' . $destination;
+		if (file_put_contents($dest_file, $template_content)) {
+			if (SITE_STATE != 'production') {
+				chmod($dest_file, 0664);
+			}
+			return true;
+		}
+		return false;
 	}
 
 	public static function renderFile($filename, array $values = array()) {
