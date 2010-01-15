@@ -114,3 +114,8 @@ li.even {
 	background-color: #e5ecf9;
 }
 
+tr.odd, li.odd {
+	background-color: white;
+}
+
+
