@@ -38,7 +38,11 @@
 					<div class="box loud" id="helpbox">
 						#HelpBoxContent#
 					</div>
-					{tpl:secondary_links.tpl.php}
+					<?php if(empty($secondary_links)): ?>
+						<hr>
+					<?php else: ?>
+						{tpl:secondary_links.tpl.php}
+					<?php endif; ?>
 					{tpl:loginout.tpl.php}
 				</div>
 				<?php if ($debug): ?>

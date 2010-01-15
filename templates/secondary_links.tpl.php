@@ -5,6 +5,4 @@
 		<li><a href="<?php echo $link['href'] ?>"><?php echo $link['text'] ?></a></li>
 	<?php endforeach; ?>
 </ul>
-<?php else: ?>
-<hr>
 <?php endif; ?>
