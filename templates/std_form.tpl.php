@@ -13,6 +13,9 @@ $action_url = empty($action_url) ? Controller::$area . \'/\' . Controller::$acti
 		<form method="post" action="<?php echo '<?php echo $action_url ?>' ?>" enctype="multipart/form-data">
 <?php 
 		foreach($fields as $name => $field):
+			if (is_array($field)) {
+				$field = array_key_exists('type', $field) ? $field['type'] : 'string';
+			}
 			if (in_array($field, array('primarykey', 'lastmodified', 'dateadded', 'hidden', 'serialized', 'current_user'))) {
 				continue;
 			}
