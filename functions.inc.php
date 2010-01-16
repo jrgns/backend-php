@@ -176,6 +176,9 @@ function send_email($recipient, $subject, $message, array $headers = array()) {
 	if (!array_key_exists('from')) {
 		$headers['from'] = Value::get('site_email', 'info@' . SITE_DOMAIN);
 	}
+	foreach($headers as $name => $value) {
+		$headers[$name] = ucwords($name) . ': ' . $value;
+	}
 	return mail($recipient, $subject, $message, implode("\r\n", $headers));
 }
 
