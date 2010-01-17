@@ -231,3 +231,40 @@ function simple($string) {
 	return $string;
 }
 
+function time_elapsed($time) {
+	$toret = $time;
+	$time = strtotime($time);
+	$now  = time();
+	$diff = $now - $time;
+	switch (true) {
+	case $diff < 0:
+		$toret = 'some time in the future';
+		break;
+	case $diff < 15:
+		$toret = 'a few seconds ago';
+		break;
+	case $diff < 60:
+		$break = $diff . ' seconds ago';
+		break;
+	case $diff < 60 * 2:
+		$toret = 'a few minutes ago';
+		break;
+	case $diff < 60 * 60:
+		$toret = round($diff / 60) . ' minutes ago';
+		break;
+	case $diff < 60 * 60 * 6:
+		$toret = round($diff / 60 / 60) . ' hours ago';
+		break;
+	case date('Ymd', $time) == date('Ymd', $now):
+		$toret = 'today at ' . date('H:i', $time);
+		break;
+	case date('Ymd', $time) == date('Ymd', strtotime('yesterday')):
+		$toret = 'yesterday at ' . date('H:i', $time);
+		break;
+	default:
+		$toret = 'at ' . date('H:i, Y-m-d', $time);
+		break;
+	}
+	return $toret;
+}
+
