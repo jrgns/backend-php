@@ -9,7 +9,9 @@
 	<table>
 		<tbody>
 			<tr class="<?php echo $odd ? '' : 'even' ?>">
-			<?php foreach($list as $image):
+			<?php foreach($list as $image): 
+				$extension = explode('/', $image['mime_type']);
+				$extension = end($extension);
 				if (!($count % $row_width)): ?>
 			</tr>
 			<tr class="<?php 
@@ -26,7 +28,7 @@
 							<a href="#" class="delete_link" id="delete_<?php echo $image['id'] ?>"><img src="#SITE_LINK#images/icons/cross.png"></a>
 						</div>
 						<a class="image_link" href="?q=image/display/<?php echo $image['id'] ?>">
-							<img width="<?php echo $image_width ?>" src="?q=image/read/<?php echo $image['id'] ?>" 
+							<img width="<?php echo $image_width ?>" src="?q=image/read/<?php echo $image['id'] ?>.<?php echo $extension ?>" 
 								title="<?php echo $image['title'] ?>" alt="<?php echo $image['title'] ?>" />
 						</a>
 					</td>

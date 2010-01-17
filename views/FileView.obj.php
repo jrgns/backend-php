@@ -35,10 +35,13 @@ class FileView extends View {
 				var_dump($mime_type);
 				var_dump($content); die(get_called_class() . '::hook_output');
 			} else {
+				$headers = apache_request_headers();
 				header('Content-Type: ' . $mime_type);
 				//header('Content-disposition: attachment; filename=' . $file->array['name']);
-				header('Last-Modified: ' . $to_print->array['modified']);
+				header('Last-Modified: ' . gmdate('D, d M Y H:i:s', strtotime($to_print->array['modified'])));
 				header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 60 * 60 * 24 * 7).'GMT');
+				header('Cache-Control: max-age: ' . 60 * 60 * 24 * 7);
+				header('Pragma: cache');
 				die($content);
 			}
 		}

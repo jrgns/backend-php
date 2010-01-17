@@ -262,7 +262,7 @@ function time_elapsed($time) {
 		$toret = 'yesterday at ' . date('H:i', $time);
 		break;
 	default:
-		$toret = 'at ' . date('H:i, Y-m-d', $time);
+		$toret = 'at ' . date('H:i, j F Y', $time);
 		break;
 	}
 	return $toret;

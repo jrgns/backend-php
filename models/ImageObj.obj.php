@@ -24,8 +24,12 @@ class ImageObj extends FileObject {
 	public $default_type = 'image/jpeg';
 
 	function __construct($meta = array()) {
-		if (!is_array($meta) && is_numeric($meta)) {
-			$meta = array('id' => $meta);
+		if (!is_array($meta)) {
+			if (is_numeric($meta)) {
+				$meta = array('id' => $meta);
+			} else {
+				$meta = array();
+			}
 		}
 		$meta['table'] = 'images';
 		$meta['name'] = 'Image';

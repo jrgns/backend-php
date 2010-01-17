@@ -16,9 +16,11 @@ class Image extends File {
 	}
 	
 	function html_display($image) {
+		$extension = explode('/', $image->array['mime_type']);
+		$extension = end($extension);
 		Backend::add('TabLinks', $this->getTabLinks(Controller::$action));
 		Backend::add('Sub Title', $image->array['name']);
-		Controller::addContent('<div class="image_container"><img src="?q=image/read/' . $image->array['id'] . '" title="' . $image->array['title'] . '" alt="' . $image->array['title'] . '" /></div>');
+		Controller::addContent('<div class="image_container"><img src="?q=image/read/' . $image->array['id'] . '.' . $extension . '" title="' . $image->array['title'] . '" alt="' . $image->array['title'] . '" /></div>');
 	}
 	
 	public function html_list($content) {
