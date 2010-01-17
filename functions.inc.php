@@ -85,6 +85,33 @@ function redirect($where_to = false, $dont_die = false) {
 	}
 }
 
+function get_previous_($what, $mode = 'html') {
+	if (!empty($_SESSION) && array_key_exists('previous_' . $what, $_SESSION) && array_key_exists($mode, $_SESSION['previous_' . $what])) {
+		return $_SESSION['previous_' . $what][$mode];
+	}
+	return null;
+}
+
+function get_previous_area($mode = 'html') {
+	return get_previous_('area', $mode);
+}
+
+function get_previous_action($mode = 'html') {
+	return get_previous_('action', $mode);
+}
+
+function get_previous_parameters($mode = 'html') {
+	return get_previous_('parameters', $mode);
+}
+
+function get_previous_url($mode = 'html') {
+	$toret = get_previous_('url', $mode);
+	if (empty($toret) && !empty($_SERVER['HTTP_REFERER'])) {
+		return $_SERVER['HTTP_REFERER'];
+	}
+	return $toret;
+}
+
 function get_current_url() {
 	$protocol = 'http';
 	if ($_SERVER['SERVER_PORT'] == 443 || (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on')) {

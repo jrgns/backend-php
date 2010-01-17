@@ -91,6 +91,9 @@ class Controller {
 			
 			//View
 			self::$view = self::getView();
+			if (!self::$view instanceof View) {
+				die('Unrecognized Request');
+			}
 			
 			Hook::run('init', 'post');
 			self::$init = true;
@@ -151,8 +154,6 @@ class Controller {
 			Hook::run('action_display', 'pre', array($result));
 			self::$view->display($result, $controller);
 			Hook::run('action_display', 'post', array($result));
-		} else {
-			die('Unrecognized Request');
 		}
 
 		return $result;
@@ -169,6 +170,21 @@ class Controller {
 		}
 		$_SESSION['previous_url'][self::$view->mode] = $_SERVER['REQUEST_URI'];
 
+		if (empty($_SESSION['previous_area']) || !is_array($_SESSION['previous_area'])) {
+			$_SESSION['previous_area'] = array();
+		}
+		$_SESSION['previous_area'][self::$view->mode] = self::$area;
+
+		if (empty($_SESSION['previous_action']) || !is_array($_SESSION['previous_action'])) {
+			$_SESSION['previous_action'] = array();
+		}
+		$_SESSION['previous_action'][self::$view->mode] = self::$action;
+		
+		if (empty($_SESSION['previous_parameters']) || !is_array($_SESSION['previous_parameters'])) {
+			$_SESSION['previous_parameters'] = array();
+		}
+		$_SESSION['previous_parameters'][self::$view->mode] = self::$parameters;
+		
 		Hook::run('finish', 'post');
 	}
 	
@@ -210,9 +226,14 @@ class Controller {
 				case in_array($extension, array('html', 'htm')):
 					$view_name = 'HtmlView';
 					break;
+				case in_array($extension, 'js'):
+				default:
+					$view_name = 'SomeOtherView';
+					break;
 				}
 			}
 		}
+		
 
 		if (!$view_name) {
 			$mime_ranges = Parser::accept_header();
@@ -253,15 +274,17 @@ class Controller {
 				$view_name = Backend::getConfig('backend.default.view', 'HtmlView');
 			}
 		}
-		if (!Component::isActive($view_name)) {
-			$view_name = 'View';
+		if (Component::isActive($view_name)) {
+			//TODO Perhaps we should abort the requests if we don't know how to handle it? This generates duplicate requests
+			//BUT we'll need something for the initial installation.
+			if ($view_name == 'View') {
+				$view_name = Backend::getConfig('backend.default.view', 'HtmlView');
+			}
+			$view = new $view_name();
+			return $view;
+		} else {
 		}
-		if ($view_name == 'View') {
-			$view_name = Backend::getConfig('backend.default.view', 'HtmlView');
-		}
-		$view = new $view_name();
-
-		return $view;
+		return false;
 	}
 
 	private static function check_quotes() {
