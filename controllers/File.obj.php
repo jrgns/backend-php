@@ -32,10 +32,9 @@ class File extends TableCtl {
 			if ($toret->array) {
 				$mime_type = array_key_exists('mime_type', $toret->array) ? $toret->array['mime_type'] : false;
 				if (!empty($mime_type)) {
-					//Controller::$mime_type is deprecated. Find a way to set it in the view
-					//Controller::$mime_type = $mime_type;
+					Controller::$view->mime_type = $mime_type;
 				} else {
-					//Controller::$mime_type = self::$default_type;
+					Controller::$view->mime_type = self::$default_type;
 				}
 			}
 		} else {
