@@ -41,7 +41,7 @@ class Value extends TableCtl {
 	}
 	
 	public static function set($name, $new_value) {
-		$new_value = base64_encode(serialize($new_value));
+		//$new_value = base64_encode(serialize($new_value));
 
 		$value = new ValueObj();
 		$data = array(
