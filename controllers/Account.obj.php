@@ -183,6 +183,11 @@ class Account extends TableCtl {
 			if ($stmt && $stmt->execute(array(':salt' => $salt))) {
 				$user = $stmt->fetch(PDO::FETCH_ASSOC);
 				if ($user) {
+					send_email(
+						Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)),
+						'New User: ' . $user['username'],
+						var_export($user, true)
+					);
 					$data = array(
 						'confirmed' => true,
 					);
