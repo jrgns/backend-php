@@ -230,6 +230,7 @@ class Query {
 		) {
 			return '`' . $element . '`';
 		}
+		return $element;
 	}
 	
 	public function __toString() {
