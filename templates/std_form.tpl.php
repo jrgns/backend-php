@@ -7,6 +7,7 @@
 	$input_width = $row_width - $title_width - 1;
 echo '<?php
 $action_url = empty($action_url) ? Controller::$area . \'/\' . Controller::$action . (empty(Controller::$parameters[0]) ? \'\' : \'/\' . Controller::$parameters[0]) : $action_url;
+$action_name = empty($action_name) ? ucwords(Controller::$action) : $action_name;
 ?>
 ';
 ?>
@@ -71,7 +72,7 @@ $action_url = empty($action_url) ? Controller::$area . \'/\' . Controller::$acti
 <?php endforeach;
 		Hook::run('form', 'post', array($Object));
 ?>
-			<input type="submit" value="<?php echo '<?php echo ucwords(Controller::$action) ?>' ?> <?php echo $Object->getMeta('name') ?>" class=""/>
+			<input type="submit" value="<?php echo '<?php echo $action_name ?>' ?> <?php echo $Object->getMeta('name') ?>" class=""/>
 		</form>
 <?php else: ?>
 	No object
