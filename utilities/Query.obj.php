@@ -87,6 +87,7 @@ class Query {
 								$error[] = '(' . $error_info[1] . ')';
 							}
 							$error = implode(' ', $error);
+							print_stacktrace();
 							echo 'Error Info:';
 							var_dump($error_info);
 							if (Controller::$debug >= 2) {
