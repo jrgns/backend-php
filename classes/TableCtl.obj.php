@@ -310,7 +310,7 @@ class TableCtl extends AreaCtl {
 				Controller::whoops(array('title' => 'Invalid Object returned'));
 			}
 		}
-		return true;
+		return $object;
 	}
 	
 	/**
@@ -342,7 +342,7 @@ class TableCtl extends AreaCtl {
 				Controller::whoops(array('title' => 'Invalid Object returned'));
 			}
 		}
-		return true;
+		return $object;
 	}
 	
 	/**
@@ -376,7 +376,7 @@ class TableCtl extends AreaCtl {
 		default:
 			break;
 		}
-		return true;
+		return $result;
 	}
 	
 	public function html_replace($result) {
@@ -414,7 +414,11 @@ class TableCtl extends AreaCtl {
 		default:
 			break;
 		}
-		return true;
+		return $result;
+	}
+	
+	public function html_delete($result) {
+		Controller::redirect('previous');
 	}
 
 	public function html_import($result) {
