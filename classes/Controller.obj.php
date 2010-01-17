@@ -89,6 +89,8 @@ class Controller {
 				self::$success = $_SESSION['success'];
 			}
 			
+			self::parseQuery();
+
 			//View
 			self::$view = self::getView();
 			if (!self::$view instanceof View) {
@@ -112,7 +114,6 @@ class Controller {
 		}
 		if (!self::$started) {
 			Hook::run('start', 'pre');
-			self::parseQuery();
 			$toret = true;
 		}
 		return $toret;
@@ -206,9 +207,20 @@ class Controller {
 			$view_name = ucwords($_REQUEST['mode']) . 'View';
 		} else {
 			//Check for an extension
-			$extension = explode('.', str_replace(dirname($_SERVER['SCRIPT_NAME']), '', $_SERVER['REQUEST_URI']));
-			if (count($extension) > 1) {
-				$extension = current(explode('?', end($extension)));
+			$id = reset(self::$parameters);
+			if (strpos($id, '.') !== false) {
+				$extension = explode('.', $id);
+				list ($id, $extension) = array(reset($extension), end($extension));
+				self::$parameters[0] = $id;
+			} else {
+				$extension = explode('.', str_replace(dirname($_SERVER['SCRIPT_NAME']), '', $_SERVER['REQUEST_URI']));
+				if (count($extension) > 1) {
+					$extension = current(explode('?', end($extension)));
+				} else {
+					$extension = false;
+				}
+			}
+			if ($extension) {
 				switch (true) {
 				case $extension == 'css':
 					$view_name = 'CssView';
@@ -223,17 +235,16 @@ class Controller {
 				case in_array($extension, array('png', 'jpg', 'jpeg', 'gif', 'bmp')):
 					$view_name = 'ImageView';
 					break;
-				case in_array($extension, array('html', 'htm')):
+				case in_array($extension, array('html', 'htm', 'php')):
 					$view_name = 'HtmlView';
 					break;
-				case in_array($extension, 'js'):
+				case in_array($extension, array('js')):
 				default:
 					$view_name = 'SomeOtherView';
 					break;
 				}
 			}
 		}
-		
 
 		if (!$view_name) {
 			$mime_ranges = Parser::accept_header();
