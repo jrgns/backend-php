@@ -11,34 +11,63 @@
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
 class Comment extends TableCtl {
-	public static function addComments($content_id, array $comments) {
+	public static function addComments($table, $table_id, array $comments) {
+		$toret = true;
 		$Comment = new CommentObj();
 		foreach($comments as $comment) {
 			$data = array(
-				'title'   => $comment['title'],
-				'content' => $comment['content'],
-				'active' => 1,
-				'weight' => 0,
+				'active'    => 1,
+				'title'      => $comment['title'],
+				'content'     => $comment['content'],
+				'foreign_id'   => $table_id,
+				'foreign_table' => table_name($table),
 			);
-			$Tag->create($data, array('ignore' => true));
-			//If you want to keep track of the last time a tag was added to content, do this
-			//$Tag->create($data, array('on_duplicate' => '`modified` = NOW()'));
+			$toret = $Comment->create($data, array('ignore' => true)) && $toret;
 		}
-		$query = new CustomQuery('UPDATE `contents` SET `contents`.`tags` = (SELECT GROUP_CONCAT(DISTINCT `tags`.`id` ORDER BY `tags`.`id` SEPARATOR \',\') FROM `tags` WHERE `tags`.`name` IN (' . implode(', ', array_fill(0, count($tags), '?')) . ')) WHERE `contents`.`id` = ?');
-		$tags[] = $content_id;
-		return $query->execute($tags);
+		return $toret;
 	}
 	
-	public static function getComments($content_id) {
-		$query = new CustomQuery('SELECT `comments`.* FROM `comments` LEFT JOIN `contents` ON FIND_IN_SET(`comments`.`id`, `contents`.`comments`) WHERE `contents`.`id` = :id');
-		return $query->fetchAll(array(':id' => $content_id));
+	public static function getComments($table, $table_id) {
+		$query = new SelectQuery('`comments`');
+		$query
+			->field(array('`comments`.*, `users`.`username`, `users`.`email`'))
+			->leftJoin('`users`', '`comments`.`user_id` = `users`.`id`')
+			->filter('`comments`.`foreign_id` = :id')
+			->filter('`comments`.`foreign_table` = :table')
+			->order('IF(`comments`.`in_reply_to` = 0, `comments`.`id`, `comments`.`in_reply_to`) DESC');
+		return $query->fetchAll(array(':table' => $table, ':id' => $table_id));
 	}
 	
+	public function action_create() {
+		if (is_post() && !empty($_POST['obj'])) {
+			$parameters = get_previous_parameters();
+			$_POST['obj']['foreign_id']    = empty($_POST['obj']['foreign_id'])    ? reset($parameters)              : $_POST['obj']['foreign_id'];
+			$_POST['obj']['foreign_table'] = empty($_POST['obj']['foreign_table']) ? table_name(get_previous_area()) : $_POST['obj']['foreign_table'];
+		}
+		return parent::action_create();
+	}
+	
+	public function html_create($result) {
+		if ($result instanceof DBObject) {
+			Controller::redirect('?q=' . class_for_url($result->array['foreign_table']) . '/' . $result->array['foreign_id']);
+		}
+		return $result;
+	}
+	
+	public static function hook_form($result) {
+		if (in_array(Controller::$action, array('create', 'update'))) {
+			$comments = self::getComments($result, Controller::$parameters[0]);
+			//Don't add Content, only render it.
+			Backend::add('obj_comments', $comments);
+			echo Render::renderFile('comment_form.tpl.php');
+		}
+		return $object;
+	}
+
 	public static function hook_post_display($object) {
-		if ($object instanceof DBObject && Controller::$area == 'content' && in_array(Controller::$action, array('display'))) {
-			$comments = self::getComments($object->array['id']);
-			Backend::add('comment_list', $comments);
-			Controller::addContent(Render::renderFile('comments.tpl.php'));
+		if ($object instanceof DBObject && in_array(Controller::$action, array('display'))) {
+			$comments = self::getComments(table_name($object), $object->array['id']);
+			Controller::addContent(Render::renderFile('comments.tpl.php', array('comment_list' => $comments)));
 		}
 		return $object;
 	}
