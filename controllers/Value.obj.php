@@ -66,6 +66,7 @@ class Value extends TableCtl {
 	public function html_admin($result) {
 		$values = (array)$result;
 		$values['action_url'] = 'value/replace';
+		$values['action_name'] = 'Update';
 		Controller::addContent(Render::renderFile('values.tpl.php', $values));
 	}
 	

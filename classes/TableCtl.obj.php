@@ -369,7 +369,7 @@ class TableCtl extends AreaCtl {
 					//TODO It's a bit of a hack to redirect just because we can't generate the template
 					Render::createTemplate($template_file, 'std_form.tpl.php');
 					Controller::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
-					Controller::redirect();
+					Controller::redirect('previous');
 				}
 			}
 			break;
