@@ -198,6 +198,9 @@ function class_name($string) {
 
 function table_name($string) {
 	if (is_object($string)) {
+		if ($string instanceof DBObject) {
+			return $string->getMeta('table');
+		}
 		$string = get_class($string);
 	}
 	$string = preg_replace('/Obj$/', '', $string);
