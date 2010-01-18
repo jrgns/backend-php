@@ -22,6 +22,16 @@ class HtmlView extends View {
 		$this->charset   = 'utf-8';
 	}
 	
+	public static function hook_display($results, $controller) {
+		if (Permission::check(Controller::$action, Controller::$area)) {
+			$template_file = Controller::$area . '.' . Controller::$action . '.tpl.php';
+			if (Render::checkTemplateFile($template_file)) {
+				Controller::addContent(Render::renderFile($template_file, $results));
+			}
+		}
+		return $results;
+	}
+	
 	public static function hook_output($to_print) {
 		$to_print = Render::renderFile('index.tpl.php');
 		return $to_print;
@@ -52,7 +62,8 @@ class HtmlView extends View {
 	public static function install() {
 		$toret = true;
 		$hook = new HookObj();
-		Hook::add('output', 'pre', __CLASS__, array('mode' => 'html', 'global' => 1)) && $toret;
+		Hook::add('output',  'pre',  __CLASS__, array('mode' => 'html', 'global' => 1)) && $toret;
+		Hook::add('display', 'pre',  __CLASS__, array('mode' => 'html', 'global' => 1)) && $toret;
 		Hook::add('display', 'post', __CLASS__, array('mode' => 'html', 'global' => 1, 'sequence' => 100)) && $toret;
 		return $toret;
 	}
