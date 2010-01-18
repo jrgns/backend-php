@@ -326,3 +326,43 @@ if (!function_exists('get_called_class')) {
 		}
 	}
 } 
+
+function curl_request($url, array $parameters = array(), array $options = array()) {
+	$ch = curl_init($url);
+	
+	curl_setopt($ch, CURLOPT_USERAGENT, 'Backend / PHP');
+	
+	if (array_key_exists('output', $options) && $options['output']) {
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+	} else {
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	}
+	if (!empty($options['username']) && !empty($options['password'])) {
+		curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+		curl_setopt($ch, CURLOPT_USERPWD, $options['username'] . ':' . $options['password']);
+	}
+
+	$method = array_key_exists('method', $options) && in_array(strtolower($options['method']), array('get', 'post', 'pust')) ? strtolower($options['method']) : 'get';
+	switch ($method) {
+	case 'put':
+		curl_setopt($ch, CURLOPT_PUT, true);
+		break;
+	case 'post':
+		curl_setopt($ch, CURLOPT_POST, true);
+		if (count($parameters)) {
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $parameters);
+		}
+		break;
+	case 'get':
+	default:
+		curl_setopt($ch, CURLOPT_HTTPGET, true);
+		if (count($parameters)) {
+			curl_setopt($ch, CURLOPT_URL, $url . '?' . http_build_query($parameters));
+		}
+		break;
+	}
+	$toret = curl_exec($ch);
+	curl_close($ch);
+	return $toret;
+}
+
