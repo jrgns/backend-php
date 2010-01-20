@@ -155,7 +155,6 @@ function get_random($options = array()) {
 	$uppercase = array_key_exists('uppercase', $options);
 	switch (strtolower($type)) {
 	case 'number':
-		break;
 	case 'numeric':
 		$characters = '0123456789';
 		break;
