@@ -71,5 +71,18 @@ class SelectQuery extends Query {
 		}
 		return $this;
 	}
+	
+	function joinArray(array $array) {
+		if (count($array) == 3) {
+			if (array_key_exists('type', $array) && array_key_exists('table', $array) && array_key_exists('conditions', $array)) {
+				return $this->join($array['type'], $array['table'], $array['conditions']);
+			} else {
+				list($type, $table, $conditions) = $array;
+				return $this->join($type, $table, $conditions);
+			}
+		}
+		//Maybe add a warning or exception?
+		return $this;
+	}
 }
 
