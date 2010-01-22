@@ -188,7 +188,9 @@ class DBObject {
 				var_dump('Params:', $params);
 			}
 			if (!empty($query)) {
-				$query = new CustomQuery($query);
+				if (!($query instanceof Query)) {
+					$query = new CustomQuery($query);
+				}
 				$result = $query->execute($params);
 				if ($result) {
 					switch ($options['mode']) {
@@ -599,70 +601,58 @@ class DBObject {
 	
 	public function getSelectSQL($options = array()) {
 		extract($this->meta);
-		$database = Backend::get('DB_' . $database, $database);
+
 		$mode = array_key_exists('mode', $options) ? $options['mode'] : 'list';
-		$joins = array_key_exists('joins', $options) ? $options['joins'] : array();
-		if (is_string($joins)) {
-			$joins = array($joins);
-		}
+
+		$database = Backend::get('DB_' . $database, $database);
+		$query = new SelectQuery("`$database`.`$table`");
+		//Fields
 		$fields = array_key_exists('fields', $options) ? $options['fields'] : array();
-		if (is_string($fields)) {
-			$fields = array($fields);
+		if (empty($fields)) {
+			$query->field("`$table`.*");
+		} else {
+			$query->field($fields);
 		}
-		$conditions = array();
+		//Joins
+		$joins = array_key_exists('joins', $options) ? $options['joins'] : array();
+		if (count($joins)) {
+			foreach($joins as $join) {
+				if (is_array($join)) {
+					$query->joinArray($join);
+				}
+			}
+		}
+
 		$parameters = array();
+
+		$query->filter($options['conditions']);
+
 		$limit = false;
 		switch ($mode) {
 			case 'object':
 			case 'array':
 			case 'full_object':
 				if ($id) {
-					$conditions[] = "`$table`.`$id_field` = :{$table}_id";
+					$query->filter("`$table`.`$id_field` = :{$table}_id");
 					$parameters[":{$table}_id"] = $id;
 				} else {
-					$limit = empty($limit) ? 1 : $limit;
+					$query->limit(empty($limit) ? 1 : $limit);
 				}
 				break;
 			case 'list':
-				$limit = array_key_exists('limit', $options) ? $options['limit'] : false;
+				if (array_key_exists('limit', $options)) {
+					$query->limit($options['limit']);
+				}
 				break;
 		}
-		if (array_key_exists('conditions', $options)) {
-			if (is_array($options['conditions'])) {
-				$conditions = array_merge($conditions, $options['conditions']);
-			} else if (is_string($options['conditions'])) {
-				$conditions[] = $options['conditions'];
-			}
-		}
+
 		if (array_key_exists('parameters', $options)) {
 			if (is_array($options['parameters'])) {
 				$parameters = array_merge($parameters, $options['parameters']);
 			}
 		}
-		if (Controller::$debug >= 2) {
-			var_dump('Conditions:', $conditions);
-		}
-		$query = 'SELECT';
-		if (count($fields)) {
-			$query .= implode(', ', $fields);
-		} else {
-			$query .= " `$table`.* ";
-		}
-		
-		$query .= " FROM `$database`.`$table`";
-		if (count($joins)) {
-			foreach($joins as $join) {
-				$query .= ' ' . $join;
-			}
-		}
-		if (count($conditions)) {
-			$query .= ' WHERE (' . implode(') AND (', $conditions) . ')';
-		}
-		if ($limit) {
-			$query .= ' LIMIT ' . $limit;
-		}
 		if (array_key_exists('order', $options)) {
-			$query .= ' ORDER BY ' . $options['order'];
+			$query->order($options['order']);
 		}
 		return array($query, $parameters);
 	}

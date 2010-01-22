@@ -17,7 +17,7 @@ class Assignment extends TableCtl {
 			'`assignments`.`active` = 1',
 		);
 		$joins = array(
-			'LEFT JOIN `roles` ON `roles`.`id` = `assignments`.`role_id` AND `roles`.`active` = 1',
+			array('type' => 'LEFT', 'table' => '`roles`', 'conditions' => array('`roles`.`id` = `assignments`.`role_id`', '`roles`.`active` = 1')),
 		);
 		$fields = array(
 			'`assignments`.*',
