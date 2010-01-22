@@ -23,7 +23,8 @@ class HtmlView extends View {
 	}
 	
 	public static function hook_display($results, $controller) {
-		if (Permission::check(Controller::$action, Controller::$area)) {
+		$display_method = Controller::$view->mode . '_' . Controller::$action;
+		if (Permission::check(Controller::$action, Controller::$area) && !method_exists($controller, $display_method)) {
 			$template_file = Controller::$area . '.' . Controller::$action . '.tpl.php';
 			if (Render::checkTemplateFile($template_file)) {
 				Controller::addContent(Render::renderFile($template_file, $results));
