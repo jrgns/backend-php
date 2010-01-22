@@ -184,7 +184,11 @@ class Query {
 
 	public function setQuery($query) {
 		$this->last_stmt = false;
-		$this->query     = $query;
+		if ($query instanceof Query) {
+			$this->query = $query->__toString();
+		} else {
+			$this->query = $query;
+		}
 	}
 	
 	protected function buildQuery() {
