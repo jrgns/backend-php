@@ -354,6 +354,13 @@ class Controller {
 		}
 		return self::$parameters;
 	}
+	
+	/**
+	 * Dont know if this will be usefull, might just use get_current_url()
+	 */
+	public static function getQuery() {
+		return implode('/', array_filter(array_merge(array(self::$area, self::$action), self::$parameters)));
+	}
 
 	public static function check_map($what, $value) {
 		$map = Backend::get($what . '_maps');

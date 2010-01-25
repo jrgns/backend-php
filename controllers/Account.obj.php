@@ -15,6 +15,8 @@ class Account extends TableCtl {
 		1 => 'Please enable cookies. This site can\'t function properly without them',
 		2 => 'Username and password does not match',
 	);
+	
+	public static $current_user = false;
 
 	function action_login($username = false, $password = false) {
 		$toret = false;
@@ -51,7 +53,13 @@ class Account extends TableCtl {
 						$toret = $User->object;
 						$_SESSION['user'] = $User->object;
 						Controller::addSuccess('Welcome to ' . Backend::getConfig('application.Title') . '!');
-						Controller::redirect('previous');
+						if (!empty($_SESSION['bookmark'])) {
+							$bookmark = $_SESSION['bookmark'];
+							unset($_SESSION['bookmark']);
+						} else {
+							$bookmark = 'previous';
+						}
+						Controller::redirect($bookmark);
 					} else {
 						Controller::addError(Account::getError(2));
 						Controller::redirect('previous');
@@ -214,7 +222,7 @@ class Account extends TableCtl {
 	
 	public function html_confirm($object) {
 		Backend::add('Sub Title', 'Confirm Account');
-		Controller::addContent(Render::renderFile('loginout.tpl.php'));
+		Controller::redirect('q=account/display');
 	}
 	
 	public static function hook_start() {
@@ -226,8 +234,7 @@ class Account extends TableCtl {
 				Controller::addNotice('You are the super user. Be carefull, careless clicking costs lives...');
 			}
 		}
-		//@todo Maybe give this another name? user is too generic
-		Backend::add('user', $user);
+		self::$current_user = $user;
 	}
 	
 	public static function hook_post_finish() {
