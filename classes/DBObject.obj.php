@@ -625,7 +625,9 @@ class DBObject {
 
 		$parameters = array();
 
-		$query->filter($options['conditions']);
+		if (!empty($options['conditions'])) {
+			$query->filter($options['conditions']);
+		}
 
 		$limit = false;
 		switch ($mode) {
