@@ -100,6 +100,15 @@ class Content extends TableCtl {
 		return $result;
 	}
 
+	function action_create($id = false) {
+		if (!empty($id)) {
+			$_POST['obj']['name'] = $id;
+			$_POST['obj']['title'] = humanize($id);
+		}
+		$toret = parent::action_create();
+		return $toret;
+	}
+
 	function action_display($id) {
 		$toret = false;
 		if (is_numeric($id)) {
@@ -118,6 +127,10 @@ class Content extends TableCtl {
 				Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to display ' . $toret->object->title));
 				$toret = false;
 			}
+		} else if (Permission::check('create', 'content')) {
+			Controller::addNotice('The content does not exist, but you can create it now');
+			Controller::redirect('?q=content/create/' . $id);
+			$toret = false;
 		} else {
 			Controller::whoops(array('title' => 'Unknown Content', 'message' => 'The page you requested could not be found.'));
 			$toret = false;
