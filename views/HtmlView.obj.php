@@ -30,10 +30,25 @@ class HtmlView extends View {
 				Controller::addContent(Render::renderFile($template_file, $results));
 			}
 		}
+		$comp_script = '/scripts/' . Controller::$area . '.component.js';
+		$comp_style  = '/styles/' . Controller::$area . '.component.css';
+		if (file_exists(SITE_FOLDER . $comp_script)) {
+			Controller::addScript(SITE_LINK . $comp_script);
+		}
+		if (file_exists(SITE_FOLDER . $comp_style)) {
+			Controller::addStyle(SITE_LINK . $comp_style);
+		}
 		return $results;
 	}
 	
 	public static function hook_output($to_print) {
+		Backend::add('BackendErrors', array_unique(array_filter(Controller::getError())));
+		Backend::add('BackendSuccess', array_unique(array_filter(Controller::getSuccess())));
+		Backend::add('BackendNotices', array_unique(array_filter(Controller::getNotice())));
+		Controller::setError();
+		Controller::setSuccess();
+		Controller::setNotice();
+
 		$to_print = Render::renderFile('index.tpl.php');
 		return $to_print;
 	}

@@ -45,7 +45,8 @@ class Controller {
 	public static function serve(array $info = array()) {
 		self::init();
 		self::start();
-		self::action();
+		list ($controller, $result) = self::action();
+		self::display($controller, $result);
 		self::finish();
 	}
 
@@ -120,44 +121,42 @@ class Controller {
 	}
 	
 	public static function action() {
-		$data = null;
-		
-		//Control
 		$control_name = class_name(self::$area);
-		if (!Component::isActive($control_name, true)) {
-			if (Controller::$debug) {
-				Controller::addError('Component is Inactive');
-			}
-			self::redirect('?q=' . Value::get('default_controller', 'home') . '/' . Value::get('default_action', 'index'));
-		}
 		if (Controller::$debug) {
-			var_dump('User Controller ' . $control_name);
+			var_dump('Trying Controller ' . $control_name);
+		}
+		if (!Component::isActive($control_name, true)) {
+			Controller::whoops('Component is Inactive');
+			return null;
 		}
 
 		$controller = new $control_name();
+		if (!($controller instanceof AreaCtl)) {
+			Controller::whoops('Invalid Area Controller');
+			return null;
+		}
 
-		if ($controller instanceof AreaCtl) {
-			$run_action = Hook::run('action', 'pre', array(), array('toret' => true));
-			if ($run_action) {
-				$result = $controller->action();
-				if (Controller::$debug) {
-					Controller::addNotice('Code for this page is in the ' . get_class($controller) . ' Controller');
-				}
-			} else {
-				$result = null;
+		if (!(self::$view instanceof View)) {
+			Controller::whoops('Invalid View');
+			return null;
+		}
+
+		$result = null;
+		$run_action = Hook::run('action', 'pre', array(), array('toret' => true));
+		if ($run_action) {
+			$result = $controller->action();
+			if (Controller::$debug) {
+				Controller::addNotice('Code for this page is in the ' . get_class($controller) . ' Controller');
 			}
-			Hook::run('action', 'post');
-		} else {
-			Controller::whoops();
 		}
-		
-		if (self::$view instanceof View) {
-			Hook::run('action_display', 'pre', array($result));
-			self::$view->display($result, $controller);
-			Hook::run('action_display', 'post', array($result));
-		}
-
-		return $result;
+		Hook::run('action', 'post');
+		return array($controller, $result);
+	}
+	
+	public static function display($controller, $result) {
+		Hook::run('action_display', 'pre', array($result));
+		self::$view->display($result, $controller);
+		Hook::run('action_display', 'post', array($result));
 	}
 	
 	public static function finish() {

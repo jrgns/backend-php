@@ -18,10 +18,12 @@ class View {
 	public $mode       = false;
 	public $mime_type  = false;
 	public $charset    = false;
-	public $actionable = true;
 	
 	function __construct() {
 		$this->mode = Backend::getConfig('application.default.type', 'view');
+		if (!headers_sent()) {
+			header('X-Backend-View: ' . get_class($this));
+		}
 	}
 
 	public static function hook_init() {
@@ -50,8 +52,6 @@ class View {
 			if ($controller->checkPermissions()) {
 				$data = $controller->$display_method($data);
 			}
-		} else if (is_null($data)) {
-			Controller::whoops(array('title' => 'Unknown Request'));
 		}
 		
 		$data = Hook::run('display', 'post', array($data, $controller), array('toret' => $data));
@@ -63,15 +63,7 @@ class View {
 	 * Actually output the information
 	 */
 	function output($to_print = null) {
-		Backend::add('BackendErrors', array_unique(array_filter(Controller::getError())));
-		Backend::add('BackendSuccess', array_unique(array_filter(Controller::getSuccess())));
-		Backend::add('BackendNotices', array_unique(array_filter(Controller::getNotice())));
-		Controller::setError();
-		Controller::setSuccess();
-		Controller::setNotice();
-
 		if (!headers_sent()) {
-			header('X-Backend-View: ' . get_class($this));
 			$content_type = $this->mime_type;
 			if ($this->charset) {
 				$content_type .= '; charset=' . $this->charset;

@@ -29,8 +29,9 @@ class CssView extends TextView {
 	}
 
 	public static function hook_output($to_print) {
-		$to_print = '';
-		return false;
+		$content = Controller::getContent();
+		$to_print .= PHP_EOL . implode(PHP_EOL, $content);
+		return $to_print;
 	}
 
 	public static function install() {

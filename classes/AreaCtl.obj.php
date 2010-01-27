@@ -31,17 +31,6 @@ class AreaCtl {
 		}
 		if (method_exists($this, $method)) {
 			if ($this->checkPermissions()) {
-				//Maybe move this to a hook...
-				if (Controller::$view->mode == 'html') {
-					$comp_script = '/scripts/' . Controller::$area . '.component.js';
-					$comp_style  = '/styles/' . Controller::$area . '.component.css';
-					if (file_exists(SITE_FOLDER . $comp_script)) {
-						Controller::addScript(SITE_LINK . $comp_script);
-					}
-					if (file_exists(SITE_FOLDER . $comp_style)) {
-						Controller::addStyle(SITE_LINK . $comp_style);
-					}
-				}
 				$toret = call_user_func_array(array($this, $method), Controller::$parameters);
 			} else {
 				Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to ' . Controller::$action . ' ' . get_class($this)));
