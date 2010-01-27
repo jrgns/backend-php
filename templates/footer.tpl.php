@@ -4,7 +4,7 @@
 		The backend for your website - info at backend-php.net
 	</p>
 	<p>
-		&copy; <a href="http://www.jadeit.co.za">JadeIT</a> 2009
+		&copy; <a href="http://www.jadeit.co.za">JadeIT</a> <?php echo date('Y') ?>
 	</p>
 </div>
 
