@@ -160,7 +160,6 @@ class Account extends TableCtl {
 				$this->postSignup($object, $options);
 			} else {
 				Controller::addError('Could not sign you up. Please try again later!');
-				break;
 			}
 		} else if (!empty($_SESSION['just_installed'])) {
 			$data['username'] = 'admin';
