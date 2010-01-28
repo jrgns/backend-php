@@ -148,7 +148,16 @@ class Query {
 		if ($two !== false) {
 			$this->limit = array($one, $two);
 		} else {
-			$this->limit = array(0, $one);
+			if (is_string($one)) {
+				$tmp = split('[,]\s*', $one);
+			} else if (is_array($one)) {
+				$tmp = $one;
+			}
+			if (count($tmp) == 2) {
+				$this->limit = $tmp;
+			} else {
+				$this->limit = array(0, $one);
+			}
 		}
 		return $this;
 	}
