@@ -244,7 +244,6 @@ class Controller {
 				}
 			}
 		}
-
 		if (!$view_name) {
 			$mime_ranges = Parser::accept_header();
 			if ($mime_ranges) {
@@ -284,7 +283,7 @@ class Controller {
 				$view_name = Backend::getConfig('backend.default.view', 'HtmlView');
 			}
 		}
-		if (Component::isActive($view_name)) {
+		if (Component::isActive($view_name) || (!BACKEND_INSTALLED && $view_name == 'HtmlView')) {
 			//TODO Perhaps we should abort the requests if we don't know how to handle it? This generates duplicate requests
 			//BUT we'll need something for the initial installation.
 			if ($view_name == 'View') {
@@ -292,7 +291,6 @@ class Controller {
 			}
 			$view = new $view_name();
 			return $view;
-		} else {
 		}
 		return false;
 	}
