@@ -25,11 +25,5 @@ class AtomView extends View {
 		$to_print = Render::renderFile('atom.tpl.php');
 		return $to_print;
 	}
-
-	public static function install() {
-		$toret = true;
-		$toret = Hook::add('output', 'pre', __CLASS__, array('mode' => 'atom', 'global' => 1)) && $toret;
-		return $toret;
-	}
 }
 

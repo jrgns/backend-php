@@ -25,11 +25,5 @@ class RssView extends View {
 		$to_print = Render::renderFile('rss2.tpl.php');
 		return $to_print;
 	}
-
-	public static function install() {
-		$toret = true;
-		$toret = Hook::add('output', 'pre', __CLASS__, array('mode' => 'rss', 'global' => 1)) && $toret;
-		return $toret;
-	}
 }
 

@@ -67,21 +67,15 @@ class HtmlView extends View {
 		if (class_exists($app_class, true) && method_exists($app_class, 'getLinks')) {
 			$app_pri = call_user_func(array($app_class, 'getLinks'), 'primary');
 			$app_sec = call_user_func(array($app_class, 'getLinks'), 'secondary');
+		} else {
+			$app_pri = false;
+			$app_sec = false;
 		}
 		$primary   += is_array($app_pri) ? $app_pri : array();
 		$secondary += is_array($app_sec) ? $app_sec : array();
 		Backend::add('primary_links', $primary);
 		Backend::add('secondary_links', $secondary);
 		return $data;
-	}
-	
-	public static function install() {
-		$toret = true;
-		$hook = new HookObj();
-		Hook::add('output',  'pre',  __CLASS__, array('mode' => 'html', 'global' => 1)) && $toret;
-		Hook::add('display', 'pre',  __CLASS__, array('mode' => 'html', 'global' => 1)) && $toret;
-		Hook::add('display', 'post', __CLASS__, array('mode' => 'html', 'global' => 1, 'sequence' => 100)) && $toret;
-		return $toret;
 	}
 }
 

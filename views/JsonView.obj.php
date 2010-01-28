@@ -35,11 +35,5 @@ class JsonView extends TextView {
 		}
 		return json_encode($to_print);
 	}
-
-	public static function install() {
-		$toret = true;
-		$toret = Hook::add('output', 'pre', __CLASS__, array('mode' => 'json', 'global' => 1)) && $toret;
-		return $toret;
-	}
 }
 

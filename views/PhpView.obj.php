@@ -35,11 +35,5 @@ class PhpView extends TextView {
 		}
 		return var_export($to_print, true);
 	}
-
-	public static function install() {
-		$toret = true;
-		$toret = Hook::add('output', 'pre', __CLASS__, array('mode' => 'php', 'global' => 1)) && $toret;
-		return $toret;
-	}
 }
 

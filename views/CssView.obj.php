@@ -37,7 +37,6 @@ class CssView extends TextView {
 	public static function install() {
 		$toret = true;
 		$toret = Hook::add('action', 'pre', __CLASS__, array('mode' => 'css', 'global' => 1)) && $toret;
-		$toret = Hook::add('output', 'pre', __CLASS__, array('mode' => 'css', 'global' => 1)) && $toret;
 		return $toret;
 	}
 }

@@ -36,11 +36,5 @@ class SerializeView extends TextView {
 		//TODO check options to see if it should be encoded as well
 		return serialize($to_print);
 	}
-
-	public static function install() {
-		$toret = true;
-		$toret = Hook::add('output', 'pre', __CLASS__, array('mode' => 'serialize', 'global' => 1)) && $toret;
-		return $toret;
-	}
 }
 

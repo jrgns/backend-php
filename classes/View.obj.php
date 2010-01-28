@@ -45,6 +45,9 @@ class View {
 	 * This function takes data, and translates it into information.
 	 */
 	function display($data, $controller) {
+		if (method_exists($this, 'hook_display')) {
+			$data = $this->hook_display($data, $controller);
+		}
 		$data = Hook::run('display', 'pre', array($data, $controller), array('toret' => $data));
 		
 		$display_method = $this->mode . '_' . Controller::$action;
@@ -55,6 +58,9 @@ class View {
 		}
 		
 		$data = Hook::run('display', 'post', array($data, $controller), array('toret' => $data));
+		if (method_exists($this, 'hook_post_display')) {
+			$data = $this->hook_post_display($data, $controller);
+		}
 
 		$this->output($data);
 	}
@@ -70,11 +76,17 @@ class View {
 			}
 			header('Content-Type: ' . $content_type);
 		}
+		if (method_exists($this, 'hook_output')) {
+			$to_print = $this->hook_output($to_print);
+		}
 		$to_print = Hook::run('output', 'pre', array($to_print), array('toret' => $to_print));
 
 		echo $to_print;
 		
 		$to_print = Hook::run('output', 'post', array($to_print), array('toret' => $to_print));
+		if (method_exists($this, 'hook_post_output')) {
+			$to_print = $this->hook_post_output($to_print);
+		}
 	}	
 
 	public static function install() {
