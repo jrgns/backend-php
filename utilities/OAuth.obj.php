@@ -35,7 +35,7 @@ class OAuth {
 		uksort($parameters, 'strnatcmp');
 		$query = array();
 		foreach($parameters as $name => $value) {
-			$query[] = $name . '=' . $value;
+			$query[] = self::encode($name) . '=' . self::encode($value);
 		}
 
 		$string = $parts['scheme'] . '://' . $username . $parts['host'] . $port . $parts['path'];
@@ -50,6 +50,46 @@ class OAuth {
 		return base64_encode(hash_hmac('sha1', $base, $key, true));
 	}
 	
+	public static function request($url, array $parameters = array(), $method = 'GET') {
+		$request = self::get_request($url, $parameters, $method);
+		$returned = curl_request($request, array(), array('method' => $method));
+		if (Controller::$debug >= 2) {
+			var_dump('Returned', $returned);
+		}
+		return $returned;
+	}
+	
+	protected static function get_request($url, array $parameters = array(), $method = 'GET') {
+		$parameters['oauth_version']          = empty($parameters['oauth_version'])      ? '1.0'                      : $parameters['oauth_version'];
+		$parameters['oauth_nonce']            = empty($parameters['oauth_nonce'])        ? md5(microtime().mt_rand()) : $parameters['oauth_nonce'];
+		$parameters['oauth_timestamp']        = empty($parameters['oauth_timestamp'])    ? time()                     : $parameters['oauth_timestamp'];
+		$parameters['oauth_consumer_key']     = empty($parameters['oauth_consumer_key']) ? Backend::getConfig('oauth.consumer.key') : $parameters['oauth_consumer_key'];
+		$parameters['oauth_signature_method'] = 'HMAC-SHA1';
+
+		//Don't pass the secret as a parameter, just use it
+		if (!empty($parameters['oauth_token_secret'])) {
+			$token_secret = $parameters['oauth_token_secret'];
+			unset($parameters['oauth_token_secret']);
+		} else {
+			$token_secret = '';
+		}
+
+		$base =  self::base_string($url, $parameters, $method);
+		if (Controller::$debug >= 2) {
+			var_dump('Base', $base);
+		}
+
+		$parameters['oauth_signature'] = self::sign_request($base, $token_secret);
+
+		ksort($parameters);
+
+		$request = $url . '?' . http_build_query($parameters);
+		if (Controller::$debug >= 2) {
+			var_dump('Request', $request);
+		}
+		return $request;
+	}
+
 	public static function getAuthToken(array $parameters = array()) {
 		$returned = self::request(Backend::getConfig('oauth.request.url'), $parameters);
 		parse_str($returned, $vars);
@@ -68,45 +108,6 @@ class OAuth {
 		} else {
 			return false;
 		}
-	}
-
-	public static function request($url, array $parameters = array(), $method = 'GET') {
-		$request = self::get_request($url, $parameters, $method);
-		$returned = curl_request($request, array(), array('method' => $method));
-		if (Controller::$debug >= 2) {
-			var_dump('Returned', $returned);
-		}
-		return $returned;
-	}
-	
-	protected static function get_request($url, array $parameters = array(), $method = 'GET') {
-		$parameters['oauth_version']          = empty($parameters['oauth_version'])      ? '1.0'                : $parameters['oauth_version'];
-		$parameters['oauth_nonce']            = empty($parameters['oauth_nonce'])        ? md5(microtime().mt_rand()) : $parameters['oauth_nonce'];
-		$parameters['oauth_timestamp']        = empty($parameters['oauth_timestamp'])    ? time()               : $parameters['oauth_timestamp'];
-		$parameters['oauth_consumer_key']     = empty($parameters['oauth_consumer_key']) ? Backend::getConfig('oauth.consumer.key') : $parameters['oauth_consumer_key'];
-		$parameters['oauth_signature_method'] = 'HMAC-SHA1';
-
-		//Don't pass the secret as a parameter, just use it
-		if (!empty($parameters['oauth_token_secret'])) {
-			$oauth_secret = $parameters['oauth_token_secret'];
-			unset($parameters['oauth_token_secret']);
-		} else {
-			$oauth_secret = '';
-		}
-
-		$base =  self::base_string($url, $parameters, $method);
-		if (Controller::$debug >= 2) {
-			var_dump('Base', $base);
-		}
-
-		$parameters['oauth_signature'] = self::sign_request($base, $oauth_secret);
-
-		ksort($parameters);
-		$request = $url . '?' . http_build_query($parameters);
-		if (Controller::$debug >= 2) {
-			var_dump('Request', $request);
-		}
-		return $request;
 	}
 }
 
