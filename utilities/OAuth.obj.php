@@ -1,6 +1,6 @@
 <?php
 class OAuth {
-	private static function encode($input) {
+	public static function encode($input) {
 		if (is_array($input)) {
 			return array_map(array('OAuth', 'encode'), $input);
 		} else if (is_scalar($input)) {
@@ -39,20 +39,19 @@ class OAuth {
 		}
 
 		$string = $parts['scheme'] . '://' . $username . $parts['host'] . $port . $parts['path'];
-		return 'GET&' . self::encode($string) . '&' . self::encode(implode('&', $query));
+		return strtoupper($method) . '&' . self::encode($string) . '&' . self::encode(implode('&', $query));
 	}
 
 	public static function sign_request($base, $token_secret = '') {
-		//$parts = self::urlencode_rfc3986(array(Backend::getConfig('
-		//$signature = 
 		$key = self::encode(Backend::getConfig('oauth.consumer.secret')) . '&' . self::encode($token_secret);
-		var_dump('Key', $key);
+		if (Controller::$debug >= 2) {
+			var_dump('Key', $key);
+		}
 		return base64_encode(hash_hmac('sha1', $base, $key, true));
 	}
 	
-	public static function getAuthToken() {
-		$request = self::request(Backend::getConfig('oauth.request.url'));
-		$returned = curl_request($request);
+	public static function getAuthToken(array $parameters = array()) {
+		$returned = self::request(Backend::getConfig('oauth.request.url'), $parameters);
 		parse_str($returned, $vars);
 		if (count($vars) == 2) {
 			return $vars;
@@ -61,31 +60,52 @@ class OAuth {
 		}
 	}
 
-	public static function getAccessToken() {
-		$request = self::request(Backend::getConfig('oauth.access.url'));
-		$returned = curl_request($request);
+	public static function getAccessToken(array $parameters = array()) {
+		$returned = self::request(Backend::getConfig('oauth.access.url'), $parameters);
 		parse_str($returned, $vars);
-		if (count($vars) == 2) {
+		if (count($vars) == 4) {
 			return $vars;
 		} else {
 			return false;
 		}
 	}
+
+	public static function request($url, array $parameters = array(), $method = 'GET') {
+		$request = self::get_request($url, $parameters, $method);
+		$returned = curl_request($request, array(), array('method' => $method));
+		if (Controller::$debug >= 2) {
+			var_dump('Returned', $returned);
+		}
+		return $returned;
+	}
 	
-	protected static function request($url, array $parameters = array()) {
+	protected static function get_request($url, array $parameters = array(), $method = 'GET') {
 		$parameters['oauth_version']          = empty($parameters['oauth_version'])      ? '1.0'                : $parameters['oauth_version'];
-		$parameters['oauth_nonce']            = empty($parameters['oauth_nonce'])        ? get_random(array('length' => 32)) : $parameters['oauth_nonce'];
+		$parameters['oauth_nonce']            = empty($parameters['oauth_nonce'])        ? md5(microtime().mt_rand()) : $parameters['oauth_nonce'];
 		$parameters['oauth_timestamp']        = empty($parameters['oauth_timestamp'])    ? time()               : $parameters['oauth_timestamp'];
 		$parameters['oauth_consumer_key']     = empty($parameters['oauth_consumer_key']) ? Backend::getConfig('oauth.consumer.key') : $parameters['oauth_consumer_key'];
 		$parameters['oauth_signature_method'] = 'HMAC-SHA1';
 
-		$base =  self::base_string($url, $parameters);
-		var_dump('Base', $base);
+		//Don't pass the secret as a parameter, just use it
+		if (!empty($parameters['oauth_token_secret'])) {
+			$oauth_secret = $parameters['oauth_token_secret'];
+			unset($parameters['oauth_token_secret']);
+		} else {
+			$oauth_secret = '';
+		}
 
-		$parameters['oauth_signature'] = self::sign_request($base);
+		$base =  self::base_string($url, $parameters, $method);
+		if (Controller::$debug >= 2) {
+			var_dump('Base', $base);
+		}
 
+		$parameters['oauth_signature'] = self::sign_request($base, $oauth_secret);
+
+		ksort($parameters);
 		$request = $url . '?' . http_build_query($parameters);
-		var_dump('Request', $request);
+		if (Controller::$debug >= 2) {
+			var_dump('Request', $request);
+		}
 		return $request;
 	}
 }
