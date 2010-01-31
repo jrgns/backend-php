@@ -3,3 +3,5 @@ License.text
 wmd-1.0.1
 class_gen.php
 index.php
+utilities/OAuth.php
+curl_log.txt

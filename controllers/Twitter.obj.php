@@ -41,7 +41,6 @@ class Twitter extends AreaCtl {
 	}
 
 	public function html_tweet($result) {
-		var_dump($result); die;
 		if ($result) {
 			Controller::addSuccess('Tweeted!');
 			Controller::addContent(var_export($result, true));

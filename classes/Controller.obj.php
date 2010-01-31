@@ -141,6 +141,8 @@ class Controller {
 			return null;
 		}
 
+		Backend::add('Area', self::$area);
+		Backend::add('Action', self::$action);
 		$result = null;
 		$run_action = Hook::run('action', 'pre', array(), array('toret' => true));
 		if ($run_action) {

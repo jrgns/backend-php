@@ -153,7 +153,7 @@ class Query {
 			} else if (is_array($one)) {
 				$tmp = $one;
 			}
-			if (count($tmp) == 2) {
+			if (isset($tmp) && count($tmp) == 2) {
 				$this->limit = $tmp;
 			} else {
 				$this->limit = array(0, $one);
