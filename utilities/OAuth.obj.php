@@ -52,7 +52,7 @@ class OAuth {
 	
 	public static function request($url, array $parameters = array(), $method = 'GET') {
 		$request = self::get_request($url, $parameters, $method);
-		$returned = curl_request($request, array(), array('method' => $method));
+		$returned = curl_request($request, array(), array('method' => $method, 'headers' => array('Expect:')));
 		if (Controller::$debug >= 2) {
 			var_dump('Returned', $returned);
 		}
