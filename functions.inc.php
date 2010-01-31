@@ -330,12 +330,27 @@ function curl_request($url, array $parameters = array(), array $options = array(
 	$ch = curl_init($url);
 	
 	curl_setopt($ch, CURLOPT_USERAGENT, 'Backend / PHP');
-	
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
 	if (array_key_exists('output', $options) && $options['output']) {
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
 	} else {
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	}
+	if (array_key_exists('header_function', $options) && is_callable($options['header_function'])) {
+		//curl_setopt($ci, CURLOPT_HEADERFUNCTION, array($this, 'getHeader'));
+		curl_setopt($ch, CURLOPT_HEADER, false);
+	} else if (!empty($options['return_header'])) {
+		curl_setopt($ch, CURLOPT_HEADER, true);
+	} else {
+		curl_setopt($ch, CURLOPT_HEADER, false);
+	}
+	if (!empty($options['headers']) && is_array($options['headers'])) {
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $options['headers']);
+	}
+	
 	if (!empty($options['username']) && !empty($options['password'])) {
 		curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
 		curl_setopt($ch, CURLOPT_USERPWD, $options['username'] . ':' . $options['password']);
@@ -359,6 +374,12 @@ function curl_request($url, array $parameters = array(), array $options = array(
 			curl_setopt($ch, CURLOPT_URL, $url . '?' . http_build_query($parameters));
 		}
 		break;
+	}
+	if ($filename = Value::get('log_curl_requests', false)) {
+		//$fp = fopen('/var/www/Jrgn5/backend/curl_log.txt', 'a');
+		$fp = fopen($filename, 'a');
+		fwrite($fp, date('Y-m-d H:i:s') . "\t" . $method . "\t" . $url . PHP_EOL);
+		fclose($fp);
 	}
 	$toret = curl_exec($ch);
 	curl_close($ch);
