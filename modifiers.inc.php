@@ -190,7 +190,7 @@ function class_name($string) {
 	if (is_object($string)) {
 		$string = get_class($string);
 	}
-	$string = singularize(humanize($string));
+	$string = humanize(singularize($string));
 	$string = str_replace(' ', '', $string);
 	$string = preg_replace('/Obj$/', '', $string);
 	return $string;
