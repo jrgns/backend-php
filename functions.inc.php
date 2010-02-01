@@ -112,6 +112,10 @@ function get_previous_url($mode = 'html') {
 	return $toret;
 }
 
+function get_previous_query($mode = 'html') {
+	return get_previous_area($mode) . '/' . get_previous_action($mode) . '/' . implode('/', get_previous_parameters($mode));
+}
+
 function get_current_url() {
 	$protocol = 'http';
 	if ($_SERVER['SERVER_PORT'] == 443 || (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on')) {
