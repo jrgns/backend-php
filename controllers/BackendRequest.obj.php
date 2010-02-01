@@ -21,8 +21,6 @@ class BackendRequest extends TableCtl {
 	public static function hook_post_init() {
 		$data = array(
 			'mode' => Controller::$view->mode,
-			'request' => Controller::$area . '/' . Controller::$action . '/' . implode('/', Controller::$parameters),
-			'query'   => $_SERVER['REQUEST_URI'],
 		);
 		$BR = new BackendRequestObj();
 		return $BR->create($data);

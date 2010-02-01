@@ -518,6 +518,8 @@ class DBObject {
 							Controller::addError('Please supply a valid URL with a scheme');
 							$value = null;
 						}
+					} else if (!empty($_SERVER['REMOTE_ADDR'])) {
+						$value = $_SERVER['REMOTE_ADDR'];
 					}
 					break;
 				case 'current_user':
@@ -531,6 +533,27 @@ class DBObject {
 							$value = -1;
 						}
 					}
+					break;
+				case 'current_query':
+					$value = Controller::$area . '/' . Controller::$action . '/' . implode('/', Controller::$parameters);
+					break;
+				case 'current_request':
+					if (!empty($_SERVER['REQUEST_URI'])) {
+						$value = $_SERVER['REQUEST_URI'];
+					} else {
+						$value = get_current_url();
+					}
+					break;
+				case 'previous_query':
+					$value = get_previous_query();
+					break;
+				case 'previous_request':
+					if (!empty($_SERVER['HTTP_REFERER'])) {
+						$value = $_SERVER['HTTP_REFERER'];
+					} else {
+						$value = get_previous_url();
+					}
+					break;
 				default:
 					if ($value !== null) {
 					}
@@ -842,12 +865,22 @@ class DBObject {
 			case 'foreignkey':
 				$field_arr[] = 'BIGINT(20)';
 				break;
+			case 'current_query':
+			case 'current_request':
+			case 'previous_query':
+			case 'previous_request':
+				$field_arr[] = 'VARCHAR(1024)';
+				break;
 			case 'password':
 				$string_size = empty($options['string_size']) ? 32 : $options['string_size'];
 				$field_arr[] = 'VARCHAR(' . $string_size .')';
 				break;
 			case 'salt':
 				$field_arr[] = 'VARCHAR(32)';
+				break;
+			case 'ip_address':
+				//TODO think about storing this as a number
+				$field_arr[] = 'VARCHAR(15)';
 				break;
 			case 'email':
 				//No break;

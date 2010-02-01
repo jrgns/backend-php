@@ -27,8 +27,8 @@ class BackendRequestObj extends DBObject {
 		$meta['fields'] = array(
 			'id' => 'primarykey',
 			'mode' => array('type' => 'string', 'string_size' => 255),
-			'request' => array('type' => 'string', 'string_size' => 1024),
-			'query' => array('type' => 'string', 'string_size' => 1024),
+			'request' => 'current_request',
+			'query' => 'current_query',
 			'added' => 'lastmodified',
 		);
 		return parent::__construct($meta);
