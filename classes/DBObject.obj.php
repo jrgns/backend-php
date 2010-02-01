@@ -554,6 +554,9 @@ class DBObject {
 						$value = get_previous_url();
 					}
 					break;
+				case 'user_agent':
+					$value = $_SERVER['HTTP_USER_AGENT'];
+					break;
 				default:
 					if ($value !== null) {
 					}
@@ -869,6 +872,7 @@ class DBObject {
 			case 'current_request':
 			case 'previous_query':
 			case 'previous_request':
+			case 'user_agent':
 				$field_arr[] = 'VARCHAR(1024)';
 				break;
 			case 'password':

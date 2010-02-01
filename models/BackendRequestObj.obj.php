@@ -26,6 +26,9 @@ class BackendRequestObj extends DBObject {
 		$meta['name'] = 'BackendRequest';
 		$meta['fields'] = array(
 			'id' => 'primarykey',
+			'user_id' => 'current_user',
+			'ip'     => 'ip_address',
+			'user_agent' => 'user_agent',
 			'mode' => array('type' => 'string', 'string_size' => 255),
 			'request' => 'current_request',
 			'query' => 'current_query',
