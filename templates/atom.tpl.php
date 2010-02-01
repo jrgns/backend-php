@@ -9,7 +9,7 @@
 		<entry>
 			<title><?php echo $item['title'] ?></title>
 			<link><?php echo $item['link'] ?></link>
-			<summary type="html"><?php echo $item['body'] ?></summary>
+			<summary type="html"><![CDATA[<?php echo $item['body'] ?>]]></summary>
 			<updated><?php echo date('r', strtotime($item['added'])) ?></updated>
 			<id><?php echo $item['link'] ?></id>
 		</entry>

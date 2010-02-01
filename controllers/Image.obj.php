@@ -33,7 +33,7 @@ class Image extends File {
 		Controller::addContent(Render::renderFile('image.list.tpl.php'));
 	}
 	
-	function rss_list($result) {
+	private function feed_list($result, $mode) {
 		if ($result instanceof DBObject) {
 			Backend::add('title', Backend::getConfig('application.Title'));
 			Backend::add('link', SITE_LINK . '?q=content');
@@ -42,7 +42,7 @@ class Image extends File {
 				$list = array();
 				foreach($result->list as $item) {
 					$item['link'] = SITE_LINK . '?q=image/' . $item['id'];
-					$item['body'] = $item['name'] . ': <![CDATA[<img src="' . SITE_LINK . '?q=image/' . $item['id'] . '"> ]]>';
+					$item['body'] = '<img src="' . SITE_LINK . '?q=image/' . $item['id'] . '">';
 					$list[] = $item;
 				}
 			} else {
@@ -52,25 +52,13 @@ class Image extends File {
 		}
 		return $result;
 	}
+	
+	function rss_list($result) {
+		return $this->feed_list($result, 'rss');
+	}
 
 	function atom_list($result) {
-		if ($result instanceof DBObject) {
-			Backend::add('title', Backend::getConfig('application.Title'));
-			Backend::add('link', SITE_LINK . '?q=content');
-			Backend::add('description', Backend::getConfig('application.description'));
-			if (!empty($result->list) && is_array($result->list)) {
-				$list = array();
-				foreach($result->list as $item) {
-					$item['link'] = SITE_LINK . '?q=image/' . $item['id'];
-					$item['body'] = htmlentities('<img src="' . SITE_LINK . '?q=image/' . $item['id'] . '" />');
-					$list[] = $item;
-				}
-			} else {
-				$list = false;
-			}
-			Backend::add('list', $list);
-		}
-		return $result;
+		return $this->feed_list($result, 'atom');
 	}
 
 	public function action_list($start, $count) {

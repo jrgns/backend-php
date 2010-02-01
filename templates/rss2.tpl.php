@@ -10,14 +10,14 @@
 		<lastBuildDate><?php echo date('r') ?></lastBuildDate>
 		<docs>http://blogs.law.harvard.edu/tech/rss</docs>
 		<generator>Backend-PHP</generator>
-		<managingEditor>editor@example.com</managingEditor>
-		<webMaster>webmaster@example.com</webMaster>
+		<managingEditor><?php echo Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)) ?></managingEditor>
+		<webMaster><?php echo Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)) ?></webMaster>
 		
 		<?php foreach($list as $item): ?>
 			<item>
 				<title><?php echo $item['title'] ?></title>
 				<link><?php echo $item['link'] ?></link>
-				<description><?php echo $item['body'] ?></description>
+				<description><?php echo htmlentities($item['body']) ?></description>
 				<pubDate><?php echo date('r', strtotime($item['added'])) ?></pubDate>
 				<guid><?php echo $item['link'] ?></guid>
 			</item>
