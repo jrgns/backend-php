@@ -530,7 +530,7 @@ class DBObject {
 						if ($user) {
 							$value = $user->id;
 						} else {
-							$value = -1;
+							$value = session_id();
 						}
 					}
 					break;
@@ -865,6 +865,8 @@ class DBObject {
 				$field_arr[] = 'BIGINT(20) AUTO_INCREMENT';
 				break;
 			case 'current_user':
+				$field_arr[] = 'VARCHAR(255)';
+				break;
 			case 'foreignkey':
 				$field_arr[] = 'BIGINT(20)';
 				break;

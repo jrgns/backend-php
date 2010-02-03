@@ -457,7 +457,11 @@ class Controller {
 			}
 
 			$url = parse_url($location);
-			parse_str($url['query'], $old_vars);
+			if (!empty($url['query'])) {
+				parse_str($url['query'], $old_vars);
+			} else {
+				$old_vars = array();
+			}
 			//Allow the redirect to overwrite these vars
 			$new_vars = array_merge($new_vars, $old_vars);
 

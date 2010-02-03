@@ -37,7 +37,7 @@ class AreaCtl {
 				$toret = false;
 			}
 		} else if (Controller::$debug) {
-			Controller::addError('Method ' . get_class($this) . '::' . $method . ' does not exist');
+			Controller::whoops(array('title' => 'Unknown Method', 'message' => 'Method ' . get_class($this) . '::' . $method . ' does not exist'));
 		}
 		return $toret;
 	}
