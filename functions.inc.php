@@ -113,7 +113,12 @@ function get_previous_url($mode = 'html') {
 }
 
 function get_previous_query($mode = 'html') {
-	return get_previous_area($mode) . '/' . get_previous_action($mode) . '/' . implode('/', get_previous_parameters($mode));
+	$arr = array(
+		get_previous_area($mode),
+		get_previous_action($mode),
+		implode('/', get_previous_parameters($mode)),
+	);
+	return implode('/', $arr);
 }
 
 function get_current_url() {
