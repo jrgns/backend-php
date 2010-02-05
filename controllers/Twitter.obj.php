@@ -1,5 +1,5 @@
 <?php
-class Twitter extends AreaCtl {
+class Twitter extends TableCtl {
 	public function action_request_auth() {
 		$token = OAuth::getAuthToken();
 		if ($token) {
@@ -18,16 +18,25 @@ class Twitter extends AreaCtl {
 		if ($auth_t) {
 			$access_t = OAuth::getAccessToken($auth_t);
 			if ($access_t) {
-				$_SESSION['TwitterInfo'] = array('user_id' => $access_t['user_id'], 'screen_name' => $access_t['screen_name']);
-				$_SESSION['OAuthAccessToken'] = array('oauth_token' => $access_t['oauth_token'], 'oauth_token_secret' => $access_t['oauth_token_secret']);
-				Controller::addSuccess('Twitter Username is ' . $access_t['screen_name']);
+				Controller::addSuccess('Sucessfully logged into Twitter');
+				$data = array(
+					'screen_name'  => $access_t['screen_name'],
+					'twitter_id'   => $access_t['user_id'],
+					'oauth_token'  => $access_t['oauth_token'],
+					'oauth_secret' => $access_t['oauth_token_secret'],
+					'active'       => 1,
+				);
+				$twit = new TwitterObj();
+				if ($twit->replace($data)) {
+				} else {
+					Controller::addError('Could not record Twitter Auth information');
+				}
 				if (!empty($_SESSION['TwitterRedirect'])) {
 					$url = $_SESSION['TwitterRedirect'];
 					unset($_SESSION['TwitterRedirect']);
 					Controller::redirect($url);
 				}
 			} else {
-				die('Could not get access token');
 				Controller::addError('Could not get Access Token');
 			}
 		} else {

@@ -912,11 +912,23 @@ class DBObject {
 			case 'text':
 				$field_arr[] = 'TEXT';
 				break;
+			case 'tiny_integer':
+				$field_arr[] = 'TINYINT(4)';
+				break;
+			case 'small_integer':
+				$field_arr[] = 'SMALLINT(6)';
+				break;
+			case 'medium_integer':
+				$field_arr[] = 'MEDIUMINT(9)';
+				break;
 			case 'number':
 				//No break;
 			case 'integer':
 				$int_size = empty($options['int_size']) ? 11 : $options['int_size'];
 				$field_arr[] = 'INT(' . $int_size . ')';
+				break;
+			case 'large_integer':
+				$field_arr[] = 'BIGINT(20)';
 				break;
 			case 'currency':
 				//No break;
