@@ -45,10 +45,10 @@ class View {
 	 * This function takes data, and translates it into information.
 	 */
 	function display($data, $controller) {
+		$data = Hook::run('display', 'pre', array($data, $controller), array('toret' => $data));
 		if (method_exists($this, 'hook_display')) {
 			$data = $this->hook_display($data, $controller);
 		}
-		$data = Hook::run('display', 'pre', array($data, $controller), array('toret' => $data));
 		
 		$display_method = $this->mode . '_' . Controller::$action;
 		if (method_exists($controller, $display_method)) {
@@ -76,10 +76,10 @@ class View {
 			}
 			header('Content-Type: ' . $content_type);
 		}
+		$to_print = Hook::run('output', 'pre', array($to_print), array('toret' => $to_print));
 		if (method_exists($this, 'hook_output')) {
 			$to_print = $this->hook_output($to_print);
 		}
-		$to_print = Hook::run('output', 'pre', array($to_print), array('toret' => $to_print));
 
 		echo $to_print;
 		
@@ -92,7 +92,6 @@ class View {
 	public static function install() {
 		$toret = true;
 		Hook::add('init', 'pre', __CLASS__, array('global' => 1)) && $toret;
-		Hook::add('output', 'pre', __CLASS__, array('global' => 1, 'sequence' => 1000)) && $toret;
 		return $toret;
 	}
 }
