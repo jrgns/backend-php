@@ -55,17 +55,23 @@ class HtmlView extends View {
 
 		$to_print = Render::renderFile('index.tpl.php');
 
-		//Checking for ob_level > 1, as we're using ob_gzhandler
-		if (ob_get_level() > 1) {
-			//Ending the ob_start from HtmlView::hook_init
-			$last = ob_get_clean();
-		} else {
-			$last = '';
+		$to_print = self::addLastContent($to_print);
+		$to_print = self::replace($to_print);
+		$to_print = self::rewriteLinks($to_print);
+		$to_print = self::addLinks($to_print);
+
+		if (Value::get('admin_installed', false)) {
+			$BEFilter = new BEFilterObj();
+			$BEFilter->load();
+			$filters = $BEFilter->list ? $BEFilter->list : array();
+		
+			foreach($filters as $row) {
+				if (class_exists($row['class'], true) && is_callable(array($row['class'], $row['function']))) {
+					$to_print = call_user_func(array($row['class'], $row['function']), $to_print);
+				}
+			}
 		}
-		$start = Backend::get('start');
-		$time = microtime(true) - $start;
-		$last = 'Generated on ' . date('Y-m-d H:i:s') . ' in ' . number_format($time, 4) . ' seconds' . $last;
-		$to_print = str_replace('#Last Content#', $last, $to_print);
+
 		return $to_print;
 	}
 	
@@ -92,6 +98,129 @@ class HtmlView extends View {
 		Backend::add('primary_links', $primary);
 		Backend::add('secondary_links', $secondary);
 		return $data;
+	}
+
+	public static function replace($content) {
+		$toret = $content;
+	
+		$vars = Backend::getAll();
+		$search = array();
+		$replace = array();
+		
+		if ($vars) {
+			foreach($vars as $name => $value) {
+				if (!(is_object($name) || is_array($name) || is_null($name)) && !(is_object($value)  || is_array($value))) {
+					$var_name = Render::getTemplateVarName($name);
+					$search[] = $var_name;
+					if (Controller::$debug && !in_array($var_name, array('#SITE_LINK#')) && !empty($_REQUEST['debug']) && $_REQUEST['debug'] == 'var_names') {
+						$replace[] = '<code class="var_name">{' . $var_name . '}</code>' . $value;
+					} else {
+						$replace[] = $value;
+					}
+				}
+			}
+
+			if (empty($vars['Sub Title'])) {
+				array_unshift($search, ' - ' . self::getTemplateVarName('Sub Title'));
+				array_unshift($replace, '');
+			}
+			$toret = str_replace($search, $replace, $content);
+		}
+		return $toret;
+	}
+	
+	private static function addLastContent($to_print) {
+		//Checking for ob_level > 1, as we're using ob_gzhandler
+		if (ob_get_level() > 1) {
+			//Ending the ob_start from HtmlView::hook_init
+			$last = ob_get_clean();
+		} else {
+			$last = '';
+		}
+		$start = Backend::get('start');
+		$time = microtime(true) - $start;
+		$last = 'Generated on ' . date('Y-m-d H:i:s') . ' in ' . number_format($time, 4) . ' seconds' . $last;
+		$to_print = str_replace('#Last Content#', $last, $to_print);
+		return $to_print;
+	}
+	
+	public static function addLinks($to_print) {
+		parse_str($_SERVER['QUERY_STRING'], $vars);
+		$new_vars = array();
+		if (array_key_exists('debug', $vars)) {
+			$new_vars['debug'] = $vars['debug'];
+		}
+		if (array_key_exists('nocache', $vars)) {
+			$new_vars['nocache'] = $vars['nocache'];
+		}
+		if (array_key_exists('recache', $vars)) {
+			$new_vars['recache'] = $vars['recache'];
+		}
+		/*if (array_key_exists('mode', $vars)) {
+			$new_vars['mode'] = $vars['mode'];
+		}*/
+		$to_print = update_links($to_print, $new_vars);
+		return $to_print;
+	}
+	
+	public static function rewriteLinks($to_print) {
+		if (Value::get('clean_urls', false)) {
+			preg_match_all('/(<a\s+.*?href=[\'\"]|<form\s+.*?action=[\'"]|<link\s+.*?href=[\'"])(|.*?[\?&]q=.*?&?.*?)[\'"]/', $to_print, $matches);
+			if (count($matches) == 3) {
+				$matched = $matches[0];
+				$links = $matches[1];
+				$urls = $matches[2];
+				$replacements = array();
+				foreach ($urls as $key => $url) {
+					if (empty($url)) {
+						$url = get_current_url();
+					}
+					//Build query array
+					//workaround for parse_url acting funky with a url = ?q=something/another/
+					if (substr($url, 0, 3) == '?q=') {
+						$query = array('query' => substr($url, 1));
+					} else {
+						$query = parse_url($url);
+					}
+					if (!array_key_exists('path', $query)) {
+						$query['path'] = dirname($_SERVER['SCRIPT_NAME']);
+					}
+					if (substr($query['path'], -1) != '/') {
+						$query['path'] .= '/';
+					}
+					if (array_key_exists('scheme', $query)) {
+						$query['scheme'] = $query['scheme'] . '://';
+					}
+					
+					//Get the old vars
+					if (array_key_exists('query', $query)) {
+						parse_str($query['query'], $vars);
+					} else {
+						$vars = array();
+					}
+					
+					//append q to the URL
+					if (array_key_exists('q', $vars)) {
+						$query['path'] .= $vars['q'];
+						unset($vars['q']);
+						if (substr($query['path'], -1) != '/') {
+							$query['path'] .= '/';
+						}
+					}
+					
+					//Create query string
+					if (count($vars)) {
+						$query['query'] = '?' . http_build_query($vars);
+					} else {
+						$query['query'] = '';
+					}
+					$to_rep = $links[$key] . $query['path'] . $query['query'] . '"';
+					$replacements[] = $to_rep;
+				}
+				$to_print = str_replace($matched, $replacements, $to_print);
+			}
+		}
+		return $to_print;
 	}
 
 	public static function install() {

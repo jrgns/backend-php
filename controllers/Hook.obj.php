@@ -82,7 +82,7 @@ class Hook extends TableCtl {
 		}
 		if ($hooks = self::get($hook_name, $type)) {
 			foreach($hooks as $hook) {
-				if (Component::isActive($hook['class']) && method_exists($hook['class'], $hook['method'])) {
+				if (Component::isActive($hook['class']) && is_callable(array($hook['class'], $hook['method']))) {
 					//var_dump('Running ' . $hook['class'] . '::' . $hook['method'] . ' for hook ' . $hook_name . '-' . $type);
 					$toret = call_user_func_array(array($hook['class'], $hook['method']), $parameters);
 					if (count($parameters) && !is_null($return_index)) {
