@@ -26,19 +26,6 @@ class View {
 		}
 	}
 
-	public static function hook_init() {
-		ob_start();
-	}
-	
-	public static function hook_output($output) {
-		$last = ob_get_clean();
-		$start = Backend::get('start');
-		$time = microtime(true) - $start;
-		$last = 'Generated on ' . date('Y-m-d H:i:s') . ' in ' . number_format($time, 4) . ' seconds' . $last;
-		$output = str_replace('#Last Content#', $last, $output);
-		return $output;
-	}
-
 	/**
 	 * Render the data into the correct format / as information
 	 *
@@ -88,10 +75,4 @@ class View {
 			$to_print = $this->hook_post_output($to_print);
 		}
 	}	
-
-	public static function install() {
-		$toret = true;
-		Hook::add('init', 'pre', __CLASS__, array('global' => 1)) && $toret;
-		return $toret;
-	}
 }

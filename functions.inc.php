@@ -20,7 +20,7 @@ function print_stacktrace() {
 		if (isset($item['line'])) $to_print .= '('.$item['line'].') called ';
 		if (isset($item['class'])) $to_print .= '<strong>'.$item['class'].'</strong>->';
 		if (isset($item['function'])) $to_print .= '<i>'.$item['function'].'</i>';
-		print('<li>'.$to_print.'</li>');
+		print('<li>'.$to_print.'</li>' . PHP_EOL);
 	}
 	print('</ol>');
 }

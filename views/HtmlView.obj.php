@@ -22,6 +22,10 @@ class HtmlView extends View {
 		$this->charset   = 'utf-8';
 	}
 	
+	public static function hook_init() {
+		ob_start();
+	}
+	
 	public static function hook_display($results, $controller) {
 		$display_method = Controller::$view->mode . '_' . Controller::$action;
 		if (Permission::check(Controller::$action, Controller::$area) && !method_exists($controller, $display_method)) {
@@ -50,6 +54,18 @@ class HtmlView extends View {
 		Controller::setNotice();
 
 		$to_print = Render::renderFile('index.tpl.php');
+
+		//Checking for ob_level > 1, as we're using ob_gzhandler
+		if (ob_get_level() > 1) {
+			//Ending the ob_start from HtmlView::hook_init
+			$last = ob_get_clean();
+		} else {
+			$last = '';
+		}
+		$start = Backend::get('start');
+		$time = microtime(true) - $start;
+		$last = 'Generated on ' . date('Y-m-d H:i:s') . ' in ' . number_format($time, 4) . ' seconds' . $last;
+		$to_print = str_replace('#Last Content#', $last, $to_print);
 		return $to_print;
 	}
 	
@@ -76,6 +92,12 @@ class HtmlView extends View {
 		Backend::add('primary_links', $primary);
 		Backend::add('secondary_links', $secondary);
 		return $data;
+	}
+
+	public static function install() {
+		$toret = true;
+		Hook::add('init', 'pre', __CLASS__, array('global' => 1, 'mode' => 'html')) && $toret;
+		return $toret;
 	}
 }
 
