@@ -24,11 +24,16 @@ class Render {
 		$template_content = self::evalTemplate($template_file);
 		$template_loc     = Backend::getConfig('backend.templates.location', 'templates');
 		$dest_file        = APP_FOLDER . '/' . $template_loc . '/' . $destination;
-		if (file_put_contents($dest_file, $template_content)) {
+		if (@file_put_contents($dest_file, $template_content)) {
 			if (SITE_STATE != 'production') {
 				chmod($dest_file, 0664);
 			}
 			return true;
+		} else {
+			$error = error_get_last();
+			if (strpos($error['message'], 'Permission denied') !== false) {
+				Controller::addError('Permission denied. Check writeability of templates folder.');
+			}
 		}
 		return false;
 	}

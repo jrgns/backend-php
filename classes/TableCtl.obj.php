@@ -302,9 +302,12 @@ class TableCtl extends AreaCtl {
 					Controller::addContent(Render::renderFile($template_file));
 				} else {
 					//TODO It's a bit of a hack to redirect just because we can't generate the template
-					Render::createTemplate($template_file, 'std_display.tpl.php');
-					Controller::addSuccess('Created template for ' . $object->getMeta('name') . ' display');
-					Controller::redirect();
+					if (Render::createTemplate($template_file, 'std_display.tpl.php')) {
+						Controller::addSuccess('Created template for ' . $object->getMeta('name') . ' display');
+						Controller::redirect();
+					} else {
+						Controller::whoops(array('message' => 'Could not create template file for ' . $object->getMeta('name') . '::display'));
+					}
 				}
 			} else {
 				Controller::whoops(array('title' => 'Invalid Object returned'));
@@ -333,9 +336,12 @@ class TableCtl extends AreaCtl {
 					Controller::addContent(Render::renderFile($template_file));
 				} else {
 					//TODO It's a bit of a hack to redirect just because we can't generate the template
-					//Render::createTemplate($template_file, 'std_list.tpl.php');
-					//Controller::addSuccess('Created template for ' . $object->getMeta('name') . ' list');
-					//Controller::redirect();
+					//if (Render::createTemplate($template_file, 'std_list.tpl.php')) {
+						//Controller::addSuccess('Created template for ' . $object->getMeta('name') . ' list');
+						//Controller::redirect();
+					//} else {
+						//Controller::whoops(array('message' => 'Could not create template file for ' . $object->getMeta('name') . '::list'));
+					//}
 					Controller::addContent(Render::renderFile('std_list.tpl.php'));
 				}
 			} else {
@@ -367,9 +373,12 @@ class TableCtl extends AreaCtl {
 					Controller::addContent(Render::renderFile($template_file));
 				} else {
 					//TODO It's a bit of a hack to redirect just because we can't generate the template
-					Render::createTemplate($template_file, 'std_form.tpl.php');
-					Controller::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
-					Controller::redirect('previous');
+					if (Render::createTemplate($template_file, 'std_form.tpl.php')) {
+						Controller::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
+						Controller::redirect();
+					} else {
+						Controller::whoops(array('message' => 'Could not create template file for ' . $object->getMeta('name') . '::create'));
+					}
 				}
 			}
 			break;
