@@ -121,7 +121,7 @@ class HtmlView extends View {
 			}
 
 			if (empty($vars['Sub Title'])) {
-				array_unshift($search, ' - ' . self::getTemplateVarName('Sub Title'));
+				array_unshift($search, ' - ' . Render::getTemplateVarName('Sub Title'));
 				array_unshift($replace, '');
 			}
 			$toret = str_replace($search, $replace, $content);
