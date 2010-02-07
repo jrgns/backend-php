@@ -527,7 +527,7 @@ class DBObject {
 						$value = (int)$value;
 					} else {
 						$user = Account::checkUser();
-						if ($user) {
+						if ($user && $user->id > 0) {
 							$value = $user->id;
 						} else {
 							$value = session_id();
