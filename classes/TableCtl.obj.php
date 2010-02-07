@@ -427,7 +427,7 @@ class TableCtl extends AreaCtl {
 	}
 	
 	public function html_delete($result) {
-		Controller::redirect('previous');
+		Controller::redirect('?q=' . Controller::$area . '/list');
 	}
 
 	public function html_import($result) {
