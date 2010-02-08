@@ -508,6 +508,7 @@ class Controller {
 		Backend::add('Sub Title', $title);
 		self::addContent($msg);
 		if (array_key_exists('debug', $_REQUEST)) {
+			var_dump($title, $msg);
 			print_stacktrace();
 		}
 	}
