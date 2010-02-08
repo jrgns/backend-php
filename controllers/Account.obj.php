@@ -221,7 +221,7 @@ class Account extends TableCtl {
 	
 	public function html_confirm($object) {
 		Backend::add('Sub Title', 'Confirm Account');
-		Controller::redirect('q=account/display');
+		Controller::redirect('?q=account/display');
 	}
 	
 	public static function hook_start() {
