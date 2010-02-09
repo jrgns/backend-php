@@ -23,7 +23,7 @@ class AtomView extends View {
 	
 	public static function hook_output($to_print) {
 		$to_print = Render::renderFile('atom.tpl.php');
-		return $to_print;
+		return trim($to_print);
 	}
 }
 
