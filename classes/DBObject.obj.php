@@ -235,7 +235,7 @@ class DBObject {
 						$data[$name] = base64_encode(serialize($value));
 						break;
 					case 'out':
-						$data[$name] = unserialize(base64_decode($value));
+						$data[$name] = @unserialize(base64_decode($value));
 						break;
 					}
 					break;

@@ -6,10 +6,18 @@
 	<table>
 		<thead>
 			<tr>
-			<?php foreach($fields as $name => $field): ?>
-				<th><?php echo humanize($name) ?></th>
-			<?php endforeach; ?>
-			<td></td><td></td><td></td>
+				<?php foreach($fields as $name => $field): ?>
+					<th><?php echo humanize($name) ?></th>
+				<?php endforeach; ?>
+				<?php if (Permission::check('display', class_for_url($Object))): ?>
+					<th></th>
+				<?php endif; ?>
+				<?php if (Permission::check('update', class_for_url($Object))): ?>
+					<th></th>
+				<?php endif; ?>
+				<?php if (Permission::check('delete', class_for_url($Object))): ?>
+					<th></th>
+				<?php endif; ?>
 			</tr>
 		</thead>
 		<tbody>
@@ -18,9 +26,15 @@
 			?>
 			<tr class="<?php echo $odd ? '' : 'even' ?>">
 				<td><?php echo implode('</td><td>', $row) ?></td>
-				<td><a href="?q=<?php echo class_for_url($Object) ?>/display/<?php echo $row['id'] ?>"><img src="#SITE_LINK#images/icons/magnifier.png"></a></td>
-				<td><a href="?q=<?php echo class_for_url($Object) ?>/update/<?php echo $row['id'] ?>"><img src="#SITE_LINK#images/icons/pencil.png"></a></td>
-				<td><a href="#" class="delete_link" id="delete_<?php echo $row['id'] ?>"><img src="#SITE_LINK#images/icons/cross.png"></a></td>
+				<?php if (Permission::check('display', class_for_url($Object))): ?>
+					<td><a href="?q=<?php echo class_for_url($Object) ?>/display/<?php echo $row['id'] ?>"><img src="#SITE_LINK#images/icons/magnifier.png"></a></td>
+				<?php endif; ?>
+				<?php if (Permission::check('update', class_for_url($Object))): ?>
+					<td><a href="?q=<?php echo class_for_url($Object) ?>/update/<?php echo $row['id'] ?>"><img src="#SITE_LINK#images/icons/pencil.png"></a></td>
+				<?php endif; ?>
+				<?php if (Permission::check('delete', class_for_url($Object))): ?>
+					<td><a href="#" class="delete_link" id="delete_<?php echo $row['id'] ?>"><img src="#SITE_LINK#images/icons/cross.png"></a></td>
+				<?php endif; ?>
 			</tr>
 		<?php endforeach; ?>
 		</tbody>
