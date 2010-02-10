@@ -91,7 +91,7 @@ class Query {
 							echo 'Error Info:';
 							var_dump($error_info);
 							if (Controller::$debug >= 2) {
-								echo 'Query:<pre>' . PHP_EOL . $stmt->query . '</pre>';
+								echo 'Query:<pre>' . PHP_EOL . $stmt->queryString . '</pre>';
 							}
 						} else {
 							$error = 'Error executing statement';
