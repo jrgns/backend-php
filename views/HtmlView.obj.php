@@ -59,6 +59,7 @@ class HtmlView extends View {
 		$to_print = self::replace($to_print);
 		$to_print = self::rewriteLinks($to_print);
 		$to_print = self::addLinks($to_print);
+		$to_print = self::formsAcceptCharset($to_print);
 
 		if (Value::get('admin_installed', false)) {
 			$BEFilter = new BEFilterObj();
@@ -120,6 +121,7 @@ class HtmlView extends View {
 				}
 			}
 
+			//Allways have a Sub Title?
 			if (empty($vars['Sub Title'])) {
 				array_unshift($search, ' - ' . Render::getTemplateVarName('Sub Title'));
 				array_unshift($replace, '');
@@ -221,6 +223,10 @@ class HtmlView extends View {
 			}
 		}
 		return $to_print;
+	}
+	
+	public static function formsAcceptCharset($content, $charset = 'utf-8') {
+		return str_replace('<form ', '<form accept-charset="' . $charset . '" ', $content);
 	}
 
 	public static function install() {
