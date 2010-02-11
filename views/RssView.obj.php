@@ -19,6 +19,7 @@ class RssView extends View {
 		parent::__construct();
 		$this->mode = 'rss';
 		$this->mime_type = 'application/xml';
+		$this->charset = 'utf-8';
 	}
 	
 	public static function hook_output($to_print) {
