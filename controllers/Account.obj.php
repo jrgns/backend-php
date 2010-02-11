@@ -307,6 +307,36 @@ END;
 		}
 		return $parameters;
 	}
+	
+	public static function daily(array $options = array()) {
+		self::purgeUnconfirmed();
+		self::userStats();
+	}
+	
+	public static function purgeUnconfirmed() {
+		$query = new DeleteQuery('users');
+		$query
+			->filter('`confirmed` = 0')
+			->filter('`added` < DATE_SUB(DATE(NOW()), INTERVAL 1 WEEK)');
+		$deleted = $query->execute();
+		Controller::addSuccess($deleted . ' unconfirmed users deleted');
+		send_email(
+			Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)),
+			'Unconfirmed Users purged: ' . $deleted,
+			$deleted . ' users were deleted from the database.
+They were unconfirmed, and more than a week old
+
+Site Admin
+'
+		);
+	}
+	
+	public static function userStats() {
+		$query = new SelectQuery('users');
+		$query
+			->filter('`active` = 1')
+			->filter('`confirmed` = 1');
+	}
 
 	public static function install(array $options = array()) {
 		$toret = parent::install($options);
