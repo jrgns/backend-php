@@ -1,4 +1,4 @@
-<?php echo '<?xml version="1.0"?>' . PHP_EOL; ?>
+<?php echo '<?xml version="1.0" encoding="utf-8"?>' . PHP_EOL; ?>
 <rss version="2.0">
 	<channel>
 		<title><?php echo $title ?></title>
@@ -17,7 +17,7 @@
 			<item>
 				<title><?php echo $item['title'] ?></title>
 				<link><?php echo $item['link'] ?></link>
-				<description><?php echo htmlentities($item['body']) ?></description>
+				<description><![CDATA[ <?php echo $item['body'] ?> ]]></description>
 				<pubDate><?php echo date('r', strtotime($item['added'])) ?></pubDate>
 				<guid><?php echo $item['link'] ?></guid>
 			</item>
