@@ -76,6 +76,16 @@ class Admin extends AreaCtl {
 		return $toret;
 	}
 	
+	function action_daily(array $options = array()) {
+		$components = Component::getActive();
+		foreach($components as $component) {
+			if (is_callable(array($component['class'], 'daily'))) {
+				call_user_func_array(array($component['class'], 'daily'), $options);
+			}
+		}
+		return true;
+	}
+
 	public function html_install($result) {
 		$installed = Value::get('admin_installed', false);
 		if ($result) {
@@ -140,7 +150,7 @@ class Admin extends AreaCtl {
 		
 		return $data;
 	}
-
+	
 	public static function install(array $options = array()) {
 		$toret = parent::install($options);
 
@@ -148,6 +158,7 @@ class Admin extends AreaCtl {
 
 		$toret = Permission::add('anonymous', 'post_install', 'admin') && $toret;
 		$toret = Permission::add('anonymous', 'pre_install', 'admin') && $toret;
+		$toret = Permission::add('anonymous', 'daily', 'admin') && $toret;
 
 		return $toret;
 	}
