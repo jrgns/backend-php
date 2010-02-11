@@ -1,4 +1,4 @@
-<?php echo '<?xml version="1.0" encoding="utf-8"?>' . PHP_EOL ?>
+<?php echo '<?xml version="1.0" encoding="utf-8"?>' . PHP_EOL; ?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 	<title><?php echo $title ?></title>
 	<?php if (!empty($subtitle)): ?><subtitle><?php echo $sub_title ?></subtitle><?php endif; ?>

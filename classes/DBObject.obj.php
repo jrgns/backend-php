@@ -27,6 +27,13 @@ class DBObject {
 	//If you set $last_error in a function, reset it in the beginning of the function as well.
 	public $last_error = false;
 
+	/**
+	 * Construct a DB Object
+	 *
+	 * children have the following options:
+	 * - conditions = array(ClassName => array(field_in_child => value | field_in_this_model))
+	 * - relation = single | multiple, defaults to single
+	 */
 	function __construct($meta = array(), array $options = null) {
 		if (!is_array($meta)) {
 			if (is_numeric($meta)) {
@@ -35,17 +42,16 @@ class DBObject {
 				$meta = array();
 			}
 		}
-		$meta['id']       = array_key_exists('id', $meta)           ? $meta['id']       : false;
-		$meta['id_field'] = array_key_exists('id_field', $meta)     ? $meta['id_field'] : 'id';
-		$meta['table']    = array_key_exists('table', $meta)        ? $meta['table']    : table_name(get_class($this));
-		$meta['database'] = array_key_exists('database', $meta)     ? $meta['database'] : Backend::getConfig('backend.dbs.default.alias', 'default');
-		$meta['provider'] = array_key_exists('provider', $meta)     ? $meta['provider'] : Backend::getConfig('backend.provider', 'MySQL');
-		$meta['fields']   = array_key_exists('fields', $meta)       ? $meta['fields']   : array();
-		$meta['keys']     = array_key_exists('keys', $meta)         ? $meta['keys']     : array();
-		$meta['name']     = array_key_exists('name', $meta)         ? $meta['name']     : class_name(get_class($this));
-		$meta['objname']  = array_key_exists('objname', $meta)      ? $meta['objname']  : get_class($this);
-		$meta['parents']  = array_key_exists('parents', $meta)      ? $meta['parents']  : array();
-		$meta['children'] = array_key_exists('children', $meta)     ? $meta['children'] : array();
+		$meta['id']        = array_key_exists('id', $meta)        ? $meta['id']        : false;
+		$meta['id_field']  = array_key_exists('id_field', $meta)  ? $meta['id_field']  : 'id';
+		$meta['table']     = array_key_exists('table', $meta)     ? $meta['table']     : table_name(get_class($this));
+		$meta['database']  = array_key_exists('database', $meta)  ? $meta['database']  : Backend::getConfig('backend.dbs.default.alias', 'default');
+		$meta['provider']  = array_key_exists('provider', $meta)  ? $meta['provider']  : Backend::getConfig('backend.provider', 'MySQL');
+		$meta['fields']    = array_key_exists('fields', $meta)    ? $meta['fields']    : array();
+		$meta['keys']      = array_key_exists('keys', $meta)      ? $meta['keys']      : array();
+		$meta['name']      = array_key_exists('name', $meta)      ? $meta['name']      : class_name(get_class($this));
+		$meta['objname']   = array_key_exists('objname', $meta)   ? $meta['objname']   : get_class($this);
+		$meta['relations'] = array_key_exists('relations', $meta) ? $meta['relations'] : array();
 		$this->meta = $meta;
 
 		$options = $options ? $options : array();
@@ -69,83 +75,76 @@ class DBObject {
 		return ($this->db instanceof PDO);
 	}
 	
-	private function load_deep() {
-		if ($this->object) {
-			foreach ($this->meta['parents'] as $class => $options) {
-				$class_name = array_key_exists('model', $options) ? $options['model'] . 'Obj' : $class . 'Obj';
-				if (Component::isActive($class_name)) {
-					$conds = array();
-					$params = array();
-					$parent = new $class_name();
-					$conditions = array_key_exists('conditions', $options) ? $options['conditions'] : false;
-					if ($conditions) {
-						foreach($conditions as $field => $name) {
-							if (is_array($name)) {
-								$operator = key($name);
-								$name     = current($name);
-							} else {
-								$operator = '=';
-							}
-							
-							$value = array_key_exists($name, $this->object) ? $this->object->$name : $name;
-							switch ($operator) {
-							case '=':
-								$conds[] = '`' . $field . '` = :' . $name;
-								break;
-							case 'FIND_IN_SET':
-							case 'in_set':
-								$conds[] = 'FIND_IN_SET(:' . $name . ', `' . $field . '`)';
-								break;
-							case 'IN':
-								$conds[] = '`' . $field . '` IN (' . $value . ')';
-								break;
-							}
-							$params[':' . $name] = $value;
-						}
+	private function loadRelation($class, $options, $load_mode) {
+		$class_name = array_key_exists('model', $options) ? $options['model'] . 'Obj' : $class . 'Obj';
+		if (Component::isActive($class_name)) {
+			$conds = array();
+			$params = array();
+			$parent = new $class_name();
+			$conditions = array_key_exists('conditions', $options) ? $options['conditions'] : false;
+			$type       = array_key_exists('type', $options)       ? $options['type']       : 'single';
+			if ($conditions) {
+				foreach($conditions as $field => $name) {
+					if (is_array($name)) {
+						$operator = key($name);
+						$name     = current($name);
+					} else {
+						$operator = '=';
 					}
-					$parent->load(array('conditions' => $conds, 'parameters' => $params, 'mode' => 'list'));
-					if ($parent->list) {
-						$this->object->$class = $parent->list;
+					
+					if ($load_mode == 'array') {
+						$value = array_key_exists($name, $this->array) ? $this->array[$name] : $name;
+					} else if ($type == 'object') {
+						$value = array_key_exists($name, $this->object) ? $this->object->$name : $name;
 					}
+					switch ($operator) {
+					case '=':
+						$conds[] = '`' . $field . '` = :' . $name;
+						break;
+					case 'FIND_IN_SET':
+					case 'in_set':
+						$conds[] = 'FIND_IN_SET(:' . $name . ', `' . $field . '`)';
+						break;
+					case 'IN':
+						$conds[] = '`' . $field . '` IN (' . $value . ')';
+						break;
+					}
+					$params[':' . $name] = $value;
 				}
 			}
-			
-			foreach ($this->meta['children'] as $class => $options) {
-				$class_name = array_key_exists('model', $options) ? $options['model'] . 'Obj' : $class . 'Obj';
-				if (Component::isActive($class_name)) {
-					$conds = array();
-					$params = array();
-					$child = new $class_name();
-					$conditions = array_key_exists('conditions', $options) ? $options['conditions'] : false;
-					if ($conditions) {
-						foreach($conditions as $field => $name) {
-							if (is_array($name)) {
-								$operator = key($name);
-								$name     = current($name);
-							} else {
-								$operator = '=';
-							}
-							
-							$value = array_key_exists($name, $this->object) ? $this->object->$name : $name;
-							switch ($operator) {
-							case '=':
-								$conds[] = '`' . $field . '` = :' . $name;
-								break;
-							case 'FIND_IN_SET':
-							case 'in_set':
-								$conds[] = 'FIND_IN_SET(:' . $name . ', `' . $field . '`)';
-								break;
-							case 'IN':
-								$conds[] = '`' . $field . '` IN (' . $value . ')';
-								break;
-							}
-							$params[':' . $name] = $value;
-						}
+			if ($type == 'multiple') {
+				$mode = 'list';
+			} else {
+				$mode = $load_mode;
+			}
+			$parent->load(array('conditions' => $conds, 'parameters' => $params, 'mode' => $mode));
+			$parent->loadDeep($mode);
+			return $parent;
+		}
+		return null;
+	}
+	
+	private function loadDeep($mode = 'array') {
+		if (in_array($mode, array('array', 'object')) && $this->$mode) {
+			foreach ($this->meta['relations'] as $class => $options) {
+				$type     = array_key_exists('type', $options) ? $options['type'] : 'single';
+				$relation = $this->loadRelation($class, $options, 'array');
+				switch ($type) {
+				case 'multiple':
+					if ($mode == 'array') {
+						$this->array[$class]  = $relation->list ? $relation->list : array();
+					} else if (!$mode == 'object') {
+						$this->object->$class = $relation->list ? $relation->list : array();
 					}
-					$child->load(array('conditions' => $conds, 'parameters' => $params, 'mode' => 'list'));
-					if ($child->list) {
-						$this->object->$class = $child->list;
+					break;
+				default:
+				case 'single':
+					if ($mode == 'array') {
+						$this->array[$class]  = $relation->array  ? $relation->array  : false;
+					} else if (!$mode == 'object') {
+						$this->object->$class = $relation->object ? $relation->object : false;
 					}
+					break;
 				}
 			}
 		}
@@ -198,10 +197,12 @@ class DBObject {
 					case 'full_object':
 						$this->object = $result->fetch(PDO::FETCH_OBJ);
 						$this->array = (array)$this->object;
-						$this->load_deep();
+						$this->loadDeep('object');
 						break;
 					case 'array':
 						$this->array = $result->fetch(PDO::FETCH_ASSOC);
+						$this->loadDeep('array');
+						break;
 					case 'list':
 					default:
 						$this->list = $result->fetchAll(PDO::FETCH_ASSOC);
@@ -492,6 +493,8 @@ class DBObject {
 						}
 					}
 					break;
+				case 'website':
+					//No break;
 				case 'url':
 					if ($value !== null) {
 						if (filter_var($value, FILTER_VALIDATE_URL)) {
@@ -717,9 +720,19 @@ class DBObject {
 				$just_add = false;
 				$value = null;
 				switch (true) {
+					case $type == 'lastmodified':
+						$do_add = false;
+						break;
+					case $type == 'dateadded':
+						$do_add = false;
+						$just_add = true;
+						$value = 'NOW()';
+						break;
 					case substr($type, 0, 8) == 'password':
-						if (strpos($field, ':') !== false) {
-							$temp = explode(':', $field);
+						/*
+						Use the default for now. method etc should be defined in the options array
+						if (strpos($options, ':') !== false) {
+							$temp = explode(':', $options);
 							if (count($temp) >= 2) {
 								$do_add = false;
 								$just_add = true;
@@ -732,14 +745,7 @@ class DBObject {
 							$value = $data[$name];
 						}
 						break;
-					case $type == 'lastmodified':
-						$do_add = false;
-						break;
-					case $type == 'dateadded':
-						$do_add = false;
-						$just_add = true;
-						$value = 'NOW()';
-						break;
+						*/
 					default:
 						$value = $data[$name];
 						break;
@@ -888,6 +894,8 @@ class DBObject {
 				//TODO think about storing this as a number
 				$field_arr[] = 'VARCHAR(15)';
 				break;
+			case 'website':
+				//No break;
 			case 'email':
 				//No break;
 			case 'telnumber':

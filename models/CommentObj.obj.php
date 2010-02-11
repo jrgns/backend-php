@@ -30,6 +30,11 @@ class CommentObj extends DBObject {
 			'modified' => 'lastmodified',
 			'added' => 'dateadded',
 		);
+		$meta['relations'] = array(
+			'Account' => array('conditions' => array('user_id' => 'id')),
+		);
+
+		$meta['parents'] = array();
 		return parent::__construct($meta);
 	}
 	

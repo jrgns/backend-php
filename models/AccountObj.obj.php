@@ -23,6 +23,7 @@ class AccountObj extends DBObject {
 			'name' => 'string',
 			'surname' => 'string',
 			'email' => 'email',
+			'website' => 'website',
 			'mobile' => 'telnumber',
 			'username' => 'string',
 			'password' => 'password',
@@ -32,9 +33,13 @@ class AccountObj extends DBObject {
 			'modified' => 'lastmodified',
 			'added' => 'dateadded',
 		);
-		/*$meta['children'] = array(
+		/*$meta['relations'] = array(
 			'roles' => array('model' => 'UserRole', 'conditions' => array('user_id' => 'id')),
 		);*/
+		$meta['keys'] = array(
+			'username' => 'unique',
+			'email'    => 'unique',
+		);		
 		return parent::__construct($meta);
 	}
 	
@@ -68,7 +73,7 @@ class AccountObj extends DBObject {
 			if (Backend::getConfig('backend.application.user.confirm')) {
 				$data['confirmed'] = false;
 			} else {
-				$data['confirmed'] = true;
+				$data['confirmed'] = array_key_exists('confirmed', $data) ? $data['confirmed'] : true;
 			}
 		}
 		return $toret ? $data : false;
