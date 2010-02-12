@@ -633,8 +633,7 @@ class DBObject {
 
 		$mode = array_key_exists('mode', $options) ? $options['mode'] : 'list';
 
-		$database = Backend::get('DB_' . $database, $database);
-		$query = new SelectQuery("`$database`.`$table`");
+		$query = new SelectQuery($this);
 		//Fields
 		$fields = array_key_exists('fields', $options) ? $options['fields'] : array();
 		if (empty($fields)) {

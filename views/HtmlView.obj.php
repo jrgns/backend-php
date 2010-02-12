@@ -34,6 +34,8 @@ class HtmlView extends View {
 				Controller::addContent(Render::renderFile($template_file, $results));
 			}
 		}
+		//TODO Add site_link, and other vars, as JS vars
+		//TODO if someone can land a script file in the correct place, he can insert JS at will...
 		$comp_script = '/scripts/' . Controller::$area . '.component.js';
 		$comp_style  = '/styles/' . Controller::$area . '.component.css';
 		if (file_exists(SITE_FOLDER . $comp_script)) {
