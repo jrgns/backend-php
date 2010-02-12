@@ -111,6 +111,9 @@ class Backend {
 	}
 	
 	public static function __error_handler($number, $string, $file = false, $line = false, $context = false) {
+		if (Component::isActive('BackendError')) {
+			BackendError::add($number, $string, $file, $line, $context);
+		}
 		switch ($number) {
 		case 2:
 			preg_match_all('/Missing argument ([0-9]+) for ([\S]+)::([^\(\)]+)\(\), called in ([\S]+) on line ([0-9]+)/', $string, $vars, PREG_SET_ORDER);
