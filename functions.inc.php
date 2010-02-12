@@ -9,20 +9,29 @@
  * Contributors:
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
-function print_stacktrace() {
+function print_stacktrace($return = false) {
 	$bt = array_reverse(debug_backtrace());
 	//Remove the call to print_backtrace :)
 	array_pop($bt);
-	print('<ol>');
-	foreach($bt as $item) {
-		$to_print = '';
-		if (isset($item['file'])) $to_print .= $item['file'];
-		if (isset($item['line'])) $to_print .= '('.$item['line'].') called ';
-		if (isset($item['class'])) $to_print .= '<strong>'.$item['class'].'</strong>->';
-		if (isset($item['function'])) $to_print .= '<i>'.$item['function'].'</i>';
-		print('<li>'.$to_print.'</li>' . PHP_EOL);
+	if ($return) {
+		return $bt;
+	} else {
+		$to_print = '<ol>';
+		foreach($bt as $item) {
+			if ($return) {
+			
+			} else {
+				$to_print .= '<li>';
+				if (isset($item['file'])) $to_print .= $item['file'];
+				if (isset($item['line'])) $to_print .= '('.$item['line'].') called ';
+				if (isset($item['class'])) $to_print .= '<strong>'.$item['class'].'</strong>->';
+				if (isset($item['function'])) $to_print .= '<i>'.$item['function'].'</i>';
+				$to_print .= '</li>';
+			}
+		}
+		$to_print .= '</ol>';
+		echo $to_print;
 	}
-	print('</ol>');
 }
 
 function is_post() {
