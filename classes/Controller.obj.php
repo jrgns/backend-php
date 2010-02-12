@@ -384,7 +384,7 @@ class Controller {
 		$toret = false;
 		if (!is_null($string)) {
 			$log_to_file = defined('BACKEND_INSTALLED') && BACKEND_INSTALLED ? Value::get('log_to_file', false) : false;
-			if ($log_to_file) {
+			if ($log_to_file && in_array($what, array('success', 'notice', 'error'))) {
 				@list($file, $log_what) = explode('|', $log_to_file);
 				$file     = empty($file)     ? 'logfile_' . date('Ymd') . 'txt' : $file;
 				$log_what = empty($log_what) ? '*' : explode(',', $log_what);
