@@ -40,6 +40,13 @@ class Query {
 		$this->action = $action;
 		if ($table instanceof DBObject) {
 			$table = $table->getSource();
+		} else if ($components = Component::getActive()) {
+			$components = array_flatten($components, null, 'name');
+			if (in_array($table, $components) && class_exists($table . 'Obj', true)) {
+				$name = $table . 'Obj';
+				$table = new $name();
+				$table = $table->getSource();
+			}
 		}
 		if (array_key_exists('fields', $options)) {
 			$this->fields = is_array($options['fields']) ? $options['fields'] : array($options['fields']);
