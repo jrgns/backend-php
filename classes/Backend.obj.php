@@ -38,6 +38,7 @@ class Backend {
 		}
 		require(BACKEND_FOLDER . '/functions.inc.php');
 		require(BACKEND_FOLDER . '/modifiers.inc.php');
+		include(BACKEND_FOLDER . '/libraries/Markdown/markdown.php');
 		spl_autoload_register(array('Backend', '__autoload'));
 		set_error_handler    (array('Backend', '__error_handler'));
 		set_exception_handler(array('Backend', '__exception_handler'));		
