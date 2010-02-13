@@ -90,14 +90,14 @@ class Account extends TableCtl {
 					setcookie(session_name(), '', time() - 42000, '/');
 				}			
 				session_destroy();
-				Controller::redirect('previous');
+				Controller::redirect(SITE_LINK);
 			}
 		}
-		Controller::redirect('previous');
+		Controller::redirect();
 		return true;
 	}
 	
-	public function action_update($id) {
+	public function action_update_old($id) {
 		$toret = false;
 		if (self::checkUser()) {
 			$User = new AccountObj($_SESSION['user']->id);
@@ -121,30 +121,29 @@ class Account extends TableCtl {
 		return $toret ? $User : false;
 	}
 	
-	public function html_display($object) {
-		Backend::add('Sub Title', 'My Account');
-		if (self::checkUser()) {
-			$grav_url = 'http://www.gravatar.com/avatar.php?gravatar_id=' . md5( strtolower($_SESSION['user']->email) ) . '&size=120&d=identicon';
-			Backend::add('gravatar', $grav_url);
-			Backend::add('TabLinks', $this->getTabLinks('display'));
-			Backend::add('obj', $_SESSION['user']);
-			Controller::addContent(Render::renderFile('account.display.tpl.php'));
+	public function html_display($result) {
+		parent::html_display($result);
+		if ($result instanceof DBObject) {
+			if ($_SESSION['user']->id == $result->array['id']) {
+				Backend::add('Sub Title', 'My Account');
+				Controller::addContent(Render::renderFile('loginout.tpl.php'));
+			} else {
+				Backend::add('Sub Title', 'User: ' . $result->array['username']);
+			}
 		}
-		Controller::addContent(Render::renderFile('loginout.tpl.php'));
 	}
 	
-	public function html_update($object) {
-		Backend::add('Sub Title', 'Manage my Account');
-		if (self::checkUser()) {
-			$grav_url = 'http://www.gravatar.com/avatar.php?gravatar_id=' . md5( strtolower($_SESSION['user']->email) ) . '&size=120&d=identicon';
-			Backend::add('gravatar', $grav_url);
-			Backend::add('TabLinks', $this->getTabLinks('update'));
-			Backend::add('obj', $_SESSION['user']);
-			Controller::addContent(Render::renderFile('account.update.tpl.php'));
+	public function html_update($result) {
+		parent::html_update($result);
+		if ($result instanceof DBObject) {
+			if ($_SESSION['user']->id == $result->array['id']) {
+				Backend::add('Sub Title', 'Manage my Account');
+			} else {
+				Backend::add('Sub Title', 'Update User ' . $result->array['username']);
+			}
 		}
-		Controller::addContent(Render::renderFile('loginout.tpl.php'));
 	}
-	
+
 	public function action_signup() {
 		$toret = false;
 		$object = new AccountObj();
@@ -288,6 +287,10 @@ END;
 		return $toret;
 	}
 	
+	public static function getGravatar($email, $size = 120) {
+		return 'http://www.gravatar.com/avatar.php?gravatar_id=' . md5(strtolower($email)) . '&size=' . $size . '&d=identicon';
+	}
+	
 	public function checkPermissions(array $options = array()) {
 		$toret = parent::checkPermissions();
 		if (!$toret && in_array(Controller::$action, array('update', 'display'))) {
@@ -297,12 +300,15 @@ END;
 	}
 
 	public static function checkParameters($parameters) {
-		if (array_key_exists('user', $_SESSION) && $_SESSION['user']->id > 0) {
-			if (Controller::$action == 'signup') {
-				Controller::setAction('display');
-			}
-			if (in_array(Controller::$action, array('update', 'display')) && (empty($parameters['0']) || $parameters[0] != $_SESSION['user']->id)) {
-				$parameters[0] = $_SESSION['user']->id;
+		$parameters = parent::checkParameters($parameters);
+		if (!Permission::check('manage', 'account')) {
+			if (array_key_exists('user', $_SESSION) && $_SESSION['user']->id > 0) {
+				if (Controller::$action == 'signup') {
+					Controller::setAction('display');
+				}
+				if (in_array(Controller::$action, array('update', 'display')) && (empty($parameters['0']) || $parameters[0] != $_SESSION['user']->id)) {
+					$parameters[0] = $_SESSION['user']->id;
+				}
 			}
 		}
 		return $parameters;
