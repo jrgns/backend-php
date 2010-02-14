@@ -43,6 +43,40 @@ class Comment extends TableCtl {
 			$parameters = get_previous_parameters();
 			$_POST['obj']['foreign_id']    = empty($_POST['obj']['foreign_id'])    ? reset($parameters)              : $_POST['obj']['foreign_id'];
 			$_POST['obj']['foreign_table'] = empty($_POST['obj']['foreign_table']) ? table_name(get_previous_area()) : $_POST['obj']['foreign_table'];
+			//If we don't have a logged in user, create a dummy account
+			if (!Account::checkUser()) {
+				$query = new SelectQuery('users');
+				$query->filter('`email` = :email');
+				$old_user = $query->fetchAssoc(array(':email' => $_POST['user']['email']));
+				switch (true) {
+				case $old_user && $old_user['confirmed'] && $old_user['active']:
+					//Attribute quote to user? Seems risque, actually, if I know a user's email address, I can just attribute to him. Auth first
+					break;
+				case $old_user && !$old_user['confirmed'] && $old_user['active']:
+					//Unregistered user commented before
+					$_POST['obj']['user_id'] = $old_user['id'];
+					var_dump($_POST); die;
+					break;
+				default:
+				case !$old_user:
+					$user_data = array(
+						'name'      => $_POST['user']['name'],
+						'surname'   => '',
+						'email'     => $_POST['user']['email'],
+						'website'   => $_POST['user']['website'],
+						//TODO username will be email address for a beginning, user can then change it. ONLY if username == email address
+						'username'  => $_POST['user']['email'],
+						'password'  => get_random(),
+						'confirmed' => 0,
+						'active'    => 1,
+					);
+					$user = new AccountObj();
+					if ($user->create($user_data)) {
+						$_POST['obj']['user_id'] = $user->array['id'];
+					}
+					break;
+				}
+			}
 		}
 		return parent::action_create();
 	}

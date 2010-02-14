@@ -31,7 +31,7 @@ class CommentObj extends DBObject {
 			'added' => 'dateadded',
 		);
 		$meta['relations'] = array(
-			'Account' => array('conditions' => array('user_id' => 'id')),
+			'Account' => array('conditions' => array('id' => 'user_id')),
 		);
 
 		$meta['parents'] = array();
