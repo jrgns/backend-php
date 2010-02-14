@@ -217,7 +217,7 @@ function reseed() {
  */
 function send_email($recipient, $subject, $message, array $headers = array()) {
 	$headers = array_change_key_case($headers);
-	if (!array_key_exists('from')) {
+	if (!array_key_exists('from', $headers)) {
 		$headers['from'] = Value::get('site_email', 'info@' . SITE_DOMAIN);
 	}
 	foreach($headers as $name => $value) {

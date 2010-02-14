@@ -354,6 +354,7 @@ Site Admin
 		$toret = Permission::add('anonymous', 'confirm', 'account') && $toret;
 		$toret = Permission::add('anonymous', 'login', 'account') && $toret;
 		$toret = Permission::add('authenticated', 'logout', 'account') && $toret;
+		$toret = Permission::add('authenticated', 'display', 'account') && $toret;
 		return $toret;
 	}
 }

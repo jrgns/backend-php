@@ -128,7 +128,7 @@ class DBObject {
 		if (in_array($mode, array('array', 'object')) && $this->$mode) {
 			foreach ($this->meta['relations'] as $class => $options) {
 				$type     = array_key_exists('type', $options) ? $options['type'] : 'single';
-				$relation = $this->loadRelation($class, $options, 'array');
+				$relation = $this->loadRelation($class, $options, $mode);
 				switch ($type) {
 				case 'multiple':
 					if ($mode == 'array') {
@@ -558,7 +558,11 @@ class DBObject {
 					}
 					break;
 				case 'user_agent':
-					$value = $_SERVER['HTTP_USER_AGENT'];
+					if (!empty($_SERVER['HTTP_USER_AGENT'])) {
+						$value = $_SERVER['HTTP_USER_AGENT'];
+					} else {
+						$value = 'Unknown';
+					}
 					break;
 				default:
 					if ($value !== null) {

@@ -35,6 +35,7 @@ $action_name = empty($action_name) ? ucwords(Controller::$action) : $action_name
 				case $field == 'large_string':
 				case $field == 'small_string':
 				case $field == 'email':
+				case $field == 'website':
 				case $field == 'telnumber':
 					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="text" class="text" value="<?php echo plain($obj_values[\'' . $name . '\']) ?>">';
 					break;
