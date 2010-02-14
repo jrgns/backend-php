@@ -154,24 +154,34 @@ class Account extends TableCtl {
 				if (!empty($_SESSION['just_installed'])) {
 					unset($_SESSION['just_installed']);
 				}
-				$toret = true;
 				Controller::addSuccess('Signed up!');
 				$this->postSignup($object, $options);
+				$toret = $object;
 			} else {
 				Controller::addError('Could not sign you up. Please try again later!');
 			}
 		} else if (!empty($_SESSION['just_installed'])) {
+			$toret = true;
 			$data['username'] = 'admin';
 		}
 		
 		Backend::add('obj_values', $data);
-		return $toret ? $object : false;
+		return $toret;
 	}
 	
-	public function html_signup($object) {
+	public function html_signup($result) {
 		Backend::add('Sub Title', 'Signup to ' . Backend::getConfig('application.Title'));
-		Backend::add('Object', $object);
-		Controller::addContent(Render::renderFile('signup.tpl.php'));
+		switch (true) {
+		case ($result instanceof DBObject):
+			//Successful signup, redirect
+			Controller::redirect(SITE_LINK);
+			break;
+		case ($result):
+		default:
+			Backend::add('Object', $result);
+			Controller::addContent(Render::renderFile('signup.tpl.php'));
+			break;
+		}
 	}
 
 	/**
