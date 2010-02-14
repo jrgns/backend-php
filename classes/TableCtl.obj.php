@@ -579,6 +579,9 @@ class TableCtl extends AreaCtl {
 		if (class_exists($model, true)) {
 			$model = new $model();
 			$toret = $model->install($options);
+			if (!$toret) {
+				Controller::addError('Could not install ' . get_class($model) . ' Model: ' . $model->last_error);
+			}
 		} else {
 			Controller::addError($model . ' does not exist');
 		}

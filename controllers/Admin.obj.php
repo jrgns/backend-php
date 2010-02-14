@@ -27,10 +27,22 @@ class Admin extends AreaCtl {
 		$installed = Value::get('admin_installed', false);
 		if (!$installed) {
 			//if (is_post()) {
-				Component::pre_install();
-				Permission::pre_install();
-				Hook::pre_install();
-				Value::pre_install();
+				if (!Component::pre_install()) {
+					Controller::addError('Could not pre install Component');
+					return false; 
+				}
+				if (!Permission::pre_install()) {
+					Controller::addError('Could not pre install Permission');
+					return false;
+				}
+				if (!Hook::pre_install()) {
+					Controller::addError('Could not pre install Hook');
+					return false;
+				}
+				if (!Value::pre_install()) {
+					Controller::addError('Could not pre install Value');
+					return false;
+				}
 			
 				$original = Value::get('log_to_file', false);
 				//Value::set('log_to_file', 'install_log.txt');

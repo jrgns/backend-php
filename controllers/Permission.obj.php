@@ -51,7 +51,7 @@ class Permission extends TableCtl {
 		if (!empty($user->roles)) {
 			$user_roles = $user->roles;
 			$roles = GateKeeper::permittedRoles($action, $subject, $subject_id);
-			$intersect = array_intersect($user_roles, $roles);
+			$intersect = is_array($roles) ? array_intersect($user_roles, $roles) : $user_roles;
 			$toret = count($intersect) ? true : false;
 		}
 		return $toret;

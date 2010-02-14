@@ -78,6 +78,7 @@ class Value extends TableCtl {
 
 	public static function pre_install() {
 		$toret = self::installModel(__CLASS__ . 'Obj', array('drop_table' => true));
+		return $toret;
 	}
 
 	public static function install(array $options = array()) {

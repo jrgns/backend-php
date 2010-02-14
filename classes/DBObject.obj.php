@@ -912,6 +912,9 @@ class DBObject {
 			case 'large_string':
 				$field_arr[] = 'VARCHAR(1024)';
 				break;
+			case 'medium_string':
+				$field_arr[] = 'VARCHAR(100)';
+				break;
 			case 'small_string':
 				$field_arr[] = 'VARCHAR(30)';
 				break;
