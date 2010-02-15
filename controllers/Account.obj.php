@@ -149,9 +149,10 @@ class Account extends TableCtl {
 		$object = new AccountObj();
 		$data = $object->fromPost();
 		if (is_post()) {
-			$options = array('confirmed' => !empty($_SESSION['just_installed']));
 			if ($object->create($data, $options)) {
-				if (!empty($_SESSION['just_installed'])) {
+				if (!empty($_SESSION['just_installed']) && Backend::getConfig('backend.application.user.confirm')) {
+					$data = array('confirmed' => 1);
+					$object->update($data);
 					unset($_SESSION['just_installed']);
 				}
 				Controller::addSuccess('Signed up!');
@@ -250,7 +251,7 @@ class Account extends TableCtl {
 	}
 	
 	public function postSignup($object, array $options = array()) {
-		if (Backend::getConfig('backend.application.user.confirm') && empty($options['confirmed'])) {
+		if (Backend::getConfig('backend.application.user.confirm') && empty($object->array['confirmed'])) {
 			$this->confirmUser($object);
 		}
 	}
