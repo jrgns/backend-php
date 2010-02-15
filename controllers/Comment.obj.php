@@ -34,6 +34,7 @@ class Comment extends TableCtl {
 			->leftJoin('`users`', '`comments`.`user_id` = `users`.`id`')
 			->filter('`comments`.`foreign_id` = :id')
 			->filter('`comments`.`foreign_table` = :table')
+			->filter('`comments`.`active` = 1')
 			->order('IF(`comments`.`in_reply_to` = 0, `comments`.`id`, `comments`.`in_reply_to`) DESC');
 		return $query->fetchAll(array(':table' => $table, ':id' => $table_id));
 	}
@@ -55,7 +56,6 @@ class Comment extends TableCtl {
 				case $old_user && !$old_user['confirmed'] && $old_user['active']:
 					//Unregistered user commented before
 					$_POST['obj']['user_id'] = $old_user['id'];
-					var_dump($_POST); die;
 					break;
 				default:
 				case !$old_user:
