@@ -19,19 +19,19 @@ class AccountObj extends DBObject {
 		$meta['table'] = 'users';
 		$meta['name'] = 'User';
 		$meta['fields'] = array(
-			'id' => 'primarykey',
-			'name' => 'string',
-			'surname' => 'string',
-			'email' => 'email',
-			'website' => 'website',
-			'mobile' => 'telnumber',
-			'username' => 'string',
-			'password' => 'password',
-			'salt' => 'salt',
+			'id'        => 'primarykey',
+			'name'      => 'string',
+			'surname'   => 'string',
+			'email'     => 'email',
+			'website'   => 'website',
+			'mobile'    => 'telnumber',
+			'username'  => 'string',
+			'password'  => 'password',
+			'salt'      => 'salt',
 			'confirmed' => 'boolean',
-			'active' => 'boolean',
-			'modified' => 'lastmodified',
-			'added' => 'dateadded',
+			'active'    => 'boolean',
+			'modified'  => 'lastmodified',
+			'added'     => 'dateadded',
 		);
 		/*$meta['relations'] = array(
 			'roles' => array('model' => 'UserRole', 'conditions' => array('user_id' => 'id')),

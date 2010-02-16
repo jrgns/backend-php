@@ -785,41 +785,48 @@ class DBObject {
 		$field_data = array();
 		$value_data = array();
 		$parameters = array();
-		foreach ($fields as $name => $field) {
+		foreach ($fields as $name => $options) {
+			$options = is_array($options) ? $options : array('type' => $options);
+			$type = array_key_exists('type', $options) ? $options['type'] : 'string';
 			if (array_key_exists($name, $data)) {
 				$do_add = true;
 				$just_add = false;
 				$value = null;
 				switch (true) {
-					case substr($field, 0, 8) == 'password':
-						if (!is_null($data[$name])) {
-							if (strpos($field, ':') !== false) {
-								$temp = explode(':', $field);
-								if (count($temp) >= 2) {
-									$do_add = false;
-									$just_add = true;
-									$method = $temp[1];
-									$value = $method . '(:' . $name . ')';
-									$parameters[':' . $name] = $data[$name];
-								}
+				case preg_match(REGEX_SQL_FUNCTION, strtoupper($data[$name])):
+					$do_add   = false;
+					$just_add = true;
+					$value = $data[$name];
+					break;
+				case substr($type, 0, 8) == 'password':
+					if (!is_null($data[$name])) {
+						/*if (strpos($type, ':') !== false) {
+							$temp = explode(':', $type);
+							if (count($temp) >= 2) {
+								$do_add = false;
+								$just_add = true;
+								$method = $temp[1];
+								$value = $method . '(:' . $name . ')';
+								$parameters[':' . $name] = $data[$name];
 							}
-							if (is_null($value)) {
-								$value = $data[$name];
-							}
-						} else {
-							unset($data['password']);
-							$do_add = false;
+						}*/
+						if (is_null($value)) {
+							$value = $data[$name];
 						}
-						break;
-					case $field == 'lastmodified':
+					} else {
+						unset($data['password']);
 						$do_add = false;
-						break;
-					case $field == 'dateadded':
-						$do_add = false;
-						break;
-					default:
-						$value = $data[$name];
-						break;
+					}
+					break;
+				case $type == 'lastmodified':
+					$do_add = false;
+					break;
+				case $type == 'dateadded':
+					$do_add = false;
+					break;
+				default:
+					$value = $data[$name];
+					break;
 				}
 				if ($do_add) {
 					$field_data[] = $name;
