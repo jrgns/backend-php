@@ -25,7 +25,12 @@ class Parser {
 				$type = array_shift($one_type);
 				if ($type) {
 					list($precedence, $tokens) = self::accept_header_options($one_type);
-					list($main_type, $sub_type) = array_map('trim', explode('/', $type));
+					if (strpos($type, '/') !== false) {
+						list($main_type, $sub_type) = array_map('trim', explode('/', $type));
+					} else {
+						$main_type = $type;
+						$sub_type  = '*';
+					}
 					$toret[] = array('main_type' => $main_type, 'sub_type' => $sub_type, 'precedence' => $precedence, 'tokens' => $tokens);
 				}
 			}
