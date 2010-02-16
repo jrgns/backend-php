@@ -56,8 +56,8 @@ $action_name = empty($action_name) ? ucwords(Controller::$action) : $action_name
 					break;
 				case $field == 'boolean':
 					$field_str = '<select id="' . $input_id . '" name="' . $input_name . '" class="">' . PHP_EOL;
-					$field_str .= "\t\t\t\t\t" . '<option value="1"<?php if ($obj_values[\'' . $name . '\']): ?> selected="selected"<?php endif; ?>>Yes</option>' . PHP_EOL;
 					$field_str .= "\t\t\t\t\t" . '<option value="0"<?php if (empty($obj_values[\'' . $name . '\'])): ?> selected="selected"<?php endif; ?>>No</option>' . PHP_EOL;
+					$field_str .= "\t\t\t\t\t" . '<option value="1"<?php if ($obj_values[\'' . $name . '\']): ?> selected="selected"<?php endif; ?>>Yes</option>' . PHP_EOL;
 					$field_str .= "\t\t\t\t" . '</select>';
 					break;
 				default:

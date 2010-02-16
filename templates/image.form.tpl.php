@@ -18,10 +18,6 @@ $action_name = empty($action_name) ? ucwords(Controller::$action) : $action_name
 					<option value="0"<?php if (empty($obj_values['active'])): ?> selected="selected"<?php endif; ?>>No</option>
 				</select>
 			</div>
-			<div id="obj_mime_type_container">
-				<label id="obj_mime_type_label" for="obj_mime_type">Mime Type</label><br>
-				<input id="obj_mime_type" name="obj[mime_type]" type="text" class="text" value="<?php echo plain($obj_values['mime_type']) ?>">
-			</div>
 			<div id="obj_from_db_container">
 				<label id="obj_from_db_label" for="obj_from_db">From Db</label><br>
 				<select id="obj_from_db" name="obj[from_db]" class="">
@@ -31,7 +27,7 @@ $action_name = empty($action_name) ? ucwords(Controller::$action) : $action_name
 			</div>
 			<div id="obj_content_container">
 				<label id="obj_content_label" for="obj_content">Content</label><br>
-				<input id="obj_content" name="obj[content]" type="file" class="text" value="<?php echo plain($obj_values['content']) ?>">
+				<input id="obj_content" name="obj[content]" type="file" class="text">
 			</div>
 			<input type="submit" value="<?php echo $action_name ?> Image" class=""/>
 		</form>
