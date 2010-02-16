@@ -582,8 +582,10 @@ class DBObject {
 		if (array_key_exists('obj', $data)) {
 			$data = $data['obj'];
 		}
-		foreach($this->meta['fields'] as $name => $field) {
-			if (in_array($field, array('blob'))) {
+		foreach($this->meta['fields'] as $name => $options) {
+			$options = is_array($options) ? $options : array('type' => $options);
+			$type = array_key_exists('type', $options) ? $options['type'] : 'string';
+			if (in_array($type, array('tiny_blob', 'blob', 'medium_blob', 'long_blob'))) {
 				if (!empty($_FILES['obj'])) {
 					if ($_FILES['obj']['error'][$name]) {
 						switch ($_FILES['obj']['error'][$name]) {
@@ -620,6 +622,8 @@ class DBObject {
 						$file['size']     = $_FILES['obj']['size'][$name];
 						$data[$name] = $file;
 					}
+				} else {
+					$data[$name] = null;
 				}
 			} else {
 				$data[$name] = array_key_exists($name, $data) ? $data[$name] : null;
