@@ -227,7 +227,7 @@ function plain($string) {
  */
 function simple($string) {
 	$string = preg_replace(
-		'/\b(?:(?:(https?|ftp|file):\/\/)|(www\.|ftp\.))([-A-Za-z0-9+&@#\/%=~_|$?!:,.]*[A-Za-z0-9+&@#\/%=~_|$])/',
+		REGEX_LINKS,
 		'<a href="http://$2$3">$2$3</a>',
 		$string
 	);

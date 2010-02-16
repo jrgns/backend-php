@@ -43,7 +43,7 @@ class CommentObj extends DBObject {
 		$data = parent::validate($data, $action, $options);
 		if ($data) {
 			if (preg_match(
-				'/\b(?:(?:(https?|ftp|file):\/\/)|(www\.|ftp\.))([-A-Za-z0-9+&@#\/%=~_|$?!:,.]*[A-Za-z0-9+&@#\/%=~_|$])/',
+				REGEX_LINKS,
 				$data['content']
 			)) {
 				$data['active'] = empty($data['active']) ? 0 : $data['active'];
