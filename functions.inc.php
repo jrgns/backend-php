@@ -122,12 +122,14 @@ function get_previous_url($mode = 'html') {
 }
 
 function get_previous_query($mode = 'html') {
+	$parameters = get_previous_parameters($mode);
+	$parameters = array_filter(is_array($parameters) ? $parameters : array());
 	$arr = array(
 		get_previous_area($mode),
 		get_previous_action($mode),
-		implode('/', get_previous_parameters($mode)),
+		implode('/', $parameters),
 	);
-	return implode('/', $arr);
+	return implode('/', array_filter($arr));
 }
 
 function get_current_url() {
