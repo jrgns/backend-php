@@ -149,14 +149,14 @@ class Account extends TableCtl {
 		$object = new AccountObj();
 		$data = $object->fromPost();
 		if (is_post()) {
-			if ($object->create($data, $options)) {
+			if ($object->create($data)) {
 				if (!empty($_SESSION['just_installed']) && Backend::getConfig('backend.application.user.confirm')) {
 					$data = array('confirmed' => 1);
 					$object->update($data);
 					unset($_SESSION['just_installed']);
 				}
 				Controller::addSuccess('Signed up!');
-				$this->postSignup($object, $options);
+				$this->postSignup($object);
 				$toret = $object;
 			} else {
 				Controller::addError('Could not sign you up. Please try again later!');

@@ -251,7 +251,7 @@ class DBObject {
 		return $data;
 	}
 	
-	public function create($data, $options = array()) {
+	public function create($data, array $options = array()) {
 		$toret = false;
 		$this->last_error = false;
 		if ($this->checkConnection()) {
