@@ -36,6 +36,7 @@ class Backend {
 		if (!defined('SITE_STATE')) {
 			define('SITE_STATE', 'production');
 		}
+		require(BACKEND_FOLDER . '/constants.inc.php');
 		require(BACKEND_FOLDER . '/functions.inc.php');
 		require(BACKEND_FOLDER . '/modifiers.inc.php');
 		include(BACKEND_FOLDER . '/libraries/Markdown/markdown.php');
