@@ -32,7 +32,7 @@ class Render {
 		} else {
 			$error = error_get_last();
 			if (strpos($error['message'], 'Permission denied') !== false) {
-				Controller::addError('Permission denied. Check writeability of templates folder.');
+				Backend::addError('Permission denied. Check writeability of templates folder.');
 			}
 		}
 		return false;
@@ -98,7 +98,7 @@ class Render {
 							$inner_content = file_get_contents($inner_filename);
 						} else {
 							$inner_content = '<!--Missing Template-->';
-							//Controller::addError('Unknown Inner Template: ' . $temp_file);
+							//Backend::addError('Unknown Inner Template: ' . $temp_file);
 						}
 						if (Controller::$debug) {
 							 if (!empty($_REQUEST['debug']) && $_REQUEST['debug'] == 'templates') {

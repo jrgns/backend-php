@@ -19,7 +19,7 @@ class Request {
 		$aliases = @include(APP_FOLDER . '/configs/queries.php');
 		if (empty($aliases)) {
 			if (Controller::$debug) {
-				Controller::addError('Invalid query aliases');
+				Backend::addError('Invalid query aliases');
 			}
 			return $query;
 		}

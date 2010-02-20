@@ -52,7 +52,7 @@ class Account extends TableCtl {
 						$User->object->roles = empty($User->object->roles) ? array() : explode(',', $User->object->roles);
 						$toret = $User->object;
 						$_SESSION['user'] = $User->object;
-						Controller::addSuccess('Welcome to ' . Backend::getConfig('application.Title') . '!');
+						Backend::addSuccess('Welcome to ' . Backend::getConfig('application.Title') . '!');
 						if (!empty($_SESSION['bookmark'])) {
 							$bookmark = $_SESSION['bookmark'];
 							unset($_SESSION['bookmark']);
@@ -61,23 +61,23 @@ class Account extends TableCtl {
 						}
 						Controller::redirect($bookmark);
 					} else {
-						Controller::addError(Account::getError(2));
+						Backend::addError(Account::getError(2));
 						Controller::redirect('previous');
 						$toret = false;
 					}
 				} else if (empty($_SESSION['cookie_is_working'])) {
-					Controller::addError(Account::getError(1));
+					Backend::addError(Account::getError(1));
 					Controller::redirect('previous');
 					$toret = false;
 				} else {
-					Controller::addError('Please supply a username and password');
+					Backend::addError('Please supply a username and password');
 				}
 			}
 		}
 		if ($toret) {
 			Controller::redirect('previous');
 		} else {
-			Controller::addContent(Render::renderFile('loginout.tpl.php'));
+			Backend::addContent(Render::renderFile('loginout.tpl.php'));
 		}
 		return $toret;
 	}
@@ -104,11 +104,11 @@ class Account extends TableCtl {
 			$data = $User->fromPost();
 			if (is_post()) {
 				if ($User->update($data)) {
-					Controller::addSuccess('Your account details have been updated');
+					Backend::addSuccess('Your account details have been updated');
 					$User->load(array('mode' => 'full_object'));
 					$_SESSION['user'] = $User->object;
 				} else {
-					Controller::addError('We could not update your account details');
+					Backend::addError('We could not update your account details');
 				}
 			}
 			$toret = true;
@@ -126,7 +126,7 @@ class Account extends TableCtl {
 		if ($result instanceof DBObject) {
 			if ($_SESSION['user']->id == $result->array['id']) {
 				Backend::add('Sub Title', 'My Account');
-				Controller::addContent(Render::renderFile('loginout.tpl.php'));
+				Backend::addContent(Render::renderFile('loginout.tpl.php'));
 			} else {
 				Backend::add('Sub Title', 'User: ' . $result->array['username']);
 			}
@@ -155,11 +155,11 @@ class Account extends TableCtl {
 					$object->update($data);
 					unset($_SESSION['just_installed']);
 				}
-				Controller::addSuccess('Signed up!');
+				Backend::addSuccess('Signed up!');
 				$this->postSignup($object);
 				$toret = $object;
 			} else {
-				Controller::addError('Could not sign you up. Please try again later!');
+				Backend::addError('Could not sign you up. Please try again later!');
 			}
 		} else if (!empty($_SESSION['just_installed'])) {
 			$toret = true;
@@ -180,7 +180,7 @@ class Account extends TableCtl {
 		case ($result):
 		default:
 			Backend::add('Object', $result);
-			Controller::addContent(Render::renderFile('signup.tpl.php'));
+			Backend::addContent(Render::renderFile('signup.tpl.php'));
 			break;
 		}
 	}
@@ -210,21 +210,21 @@ class Account extends TableCtl {
 					);
 					$user = new AccountObj($user['id']);
 					if ($user->update($data)) {
-						Controller::addSuccess('Your user account has been confirmed. You can proceed to the login.');
+						Backend::addSuccess('Your user account has been confirmed. You can proceed to the login.');
 					} else {
-						Controller::addError('Could not confirm your account at the moment. Please try again later');
+						Backend::addError('Could not confirm your account at the moment. Please try again later');
 					}
 				} else {
-					Controller::addError('Could not confirm your account at the moment. Please try again later');
+					Backend::addError('Could not confirm your account at the moment. Please try again later');
 				}
 			} else {
-				Controller::addError('Could not confirm your account at the moment. Please try again later');
+				Backend::addError('Could not confirm your account at the moment. Please try again later');
 				if (Controller::$debug) {
 					var_dump($stmt->errorInfo());
 				}
 			}
 		} else {
-			Controller::addError('Could not confirm your account at the moment. Please try again later');
+			Backend::addError('Could not confirm your account at the moment. Please try again later');
 		}
 		return $toret;
 	}
@@ -240,7 +240,7 @@ class Account extends TableCtl {
 			self::setupAnonymous();
 		} else {
 			if ($user && in_array('superadmin', $user->roles)) {
-				Controller::addNotice('You are the super user. Be carefull, careless clicking costs lives...');
+				Backend::addNotice('You are the super user. Be carefull, careless clicking costs lives...');
 			}
 		}
 		self::$current_user = $user;
@@ -271,7 +271,7 @@ $url
 
 Regards
 END;
-		Controller::addSuccess('A confirmation email as been sent to your email address. Please click on the link in the email to confirm your account');
+		Backend::addSuccess('A confirmation email as been sent to your email address. Please click on the link in the email to confirm your account');
 		send_email($object->array['email'], 'Confirmation Email', $message);
 	}
 
@@ -336,7 +336,7 @@ END;
 			->filter('`confirmed` = 0')
 			->filter('`added` < DATE_SUB(DATE(NOW()), INTERVAL 1 WEEK)');
 		$deleted = $query->execute();
-		Controller::addSuccess($deleted . ' unconfirmed users deleted');
+		Backend::addSuccess($deleted . ' unconfirmed users deleted');
 		send_email(
 			Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)),
 			'Unconfirmed Users purged: ' . $deleted,

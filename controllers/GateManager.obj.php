@@ -28,10 +28,10 @@ class GateManager extends AreaCtl {
 	
 	public function html_index($object) {
 		Backend::add('Sub Title', 'Administer the GateKeeper');
-		Controller::addContent('<ul>');
-		Controller::addContent('<li><a href="?q=gate_manager/roles">Roles</a></li>');
-		Controller::addContent('<li><a href="?q=gate_manager/permissions">Permissions</a></li>');
-		Controller::addContent('</ul>');
+		Backend::addContent('<ul>');
+		Backend::addContent('<li><a href="?q=gate_manager/roles">Roles</a></li>');
+		Backend::addContent('<li><a href="?q=gate_manager/permissions">Permissions</a></li>');
+		Backend::addContent('</ul>');
 		return true;
 	}
 	
@@ -59,11 +59,11 @@ class GateManager extends AreaCtl {
 		if (!empty($result->role)) {
 			Backend::add('Sub Title', 'Role: ' . $result->role->array['name']);
 			Backend::add('Result', $result);
-			Controller::addContent(Render::renderFile('role_display.tpl.php'));
+			Backend::addContent(Render::renderFile('role_display.tpl.php'));
 		} else {
 			Backend::add('Sub Title', 'GateKeeper Roles');
 			Backend::add('Object', $result->roles);
-			Controller::addContent(Render::renderFile('role_list.tpl.php'));
+			Backend::addContent(Render::renderFile('role_list.tpl.php'));
 		}
 	}
 	
@@ -85,7 +85,7 @@ class GateManager extends AreaCtl {
 					}
 				}
 			} else {
-				Controller::addError('Could not empty permissions table');
+				Backend::addError('Could not empty permissions table');
 			}
 		}
 		return $toret;
@@ -93,9 +93,9 @@ class GateManager extends AreaCtl {
 	
 	public function html_update_permissions($result) {
 		if ($result) {
-			Controller::addSuccess('Permissions updated');
+			Backend::addSuccess('Permissions updated');
 		} else {
-			Controller::addError('Could not update Permissions');
+			Backend::addError('Could not update Permissions');
 		}
 		Controller::redirect('?q=gate_manager/permissions');
 	}
@@ -129,7 +129,7 @@ class GateManager extends AreaCtl {
 	}
 	
 	public function html_permissions($result) {
-		Controller::addContent(Render::renderFile('permission_list.tpl.php', (array)$result));
+		Backend::addContent(Render::renderFile('permission_list.tpl.php', (array)$result));
 	}
 	
 	public static function admin_links() {

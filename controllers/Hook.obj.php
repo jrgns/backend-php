@@ -37,10 +37,10 @@ class Hook extends TableCtl {
 		);
 		$hook = new HookObj();
 		if ($hook->replace($data)) {
-			Controller::addSuccess('Added hook ' . $name . '(' . $class . '::' . $method . ')');
+			Backend::addSuccess('Added hook ' . $name . '(' . $class . '::' . $method . ')');
 			$toret = true;
 		} else {
-			Controller::addError('Could not add hook ' . $name . '(' . $class . '::' . $method . ')');
+			Backend::addError('Could not add hook ' . $name . '(' . $class . '::' . $method . ')');
 			$toret = false;
 		}
 		return $toret;

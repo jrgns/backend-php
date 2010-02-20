@@ -27,7 +27,7 @@ class ContentRevision extends TableCtl {
 		Backend::add('Sub Title', 'Revisions for ' . $content->array['name']);
 		Backend::add('content', $content);
 		Backend::add('revisions', $content->object->revisions);
-		Controller::addContent(Render::renderFile('content_revision.display.tpl.php'));
+		Backend::addContent(Render::renderFile('content_revision.display.tpl.php'));
 		return true;
 	}
 
@@ -38,7 +38,7 @@ class ContentRevision extends TableCtl {
 					$object->array['markdown'], 
 					array_key_exists('revision_summary', $data) ? $data['revision_summary'] : false)
 			) {
-				Controller::addError('Could not add Content Revision');
+				Backend::addError('Could not add Content Revision');
 				
 			}
 		}
@@ -52,7 +52,7 @@ class ContentRevision extends TableCtl {
 					$object->array['markdown'], 
 					array_key_exists('revision_summary', $data) ? $data['revision_summary'] : false)
 			) {
-				Controller::addError('Could not add Content Revision');
+				Backend::addError('Could not add Content Revision');
 				
 			}
 		}

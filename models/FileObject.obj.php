@@ -65,7 +65,7 @@ class FileObject extends DBObject {
 						if (move_uploaded_file($data['content']['tmp_name'], $destination)) {
 							$data['content'] = $destination;
 						} else {
-							Controller::addError('Could not upload file');
+							Backend::addError('Could not upload file');
 							$data = false;
 						}
 					} else {
@@ -91,7 +91,7 @@ class FileObject extends DBObject {
 
 		if (!file_exists($folder)) {
 			if (!@mkdir($folder, 0775)) {
-				Controller::addError('Cannot create File Store');
+				Backend::addError('Cannot create File Store');
 				$folder = false;
 			}
 		} else if (!is_writeable($folder)) {

@@ -56,14 +56,14 @@ class AccountObj extends DBObject {
 			if (empty($data['username'])) {
 				if ($action == 'create') {
 					$toret = false;
-					Controller::addError('Please choose a username');
+					Backend::addError('Please choose a username');
 				}
 			} else {
 				//Lower ASCII only
 				$data['username'] = filter_var(trim($data['username']), FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH);
 				if (in_array($data['username'], $banned_usernames)) {
 					$toret = false;
-					Controller::addError('Please choose a valid username');
+					Backend::addError('Please choose a valid username');
 				}
 			}
 		}

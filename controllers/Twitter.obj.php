@@ -18,7 +18,7 @@ class Twitter extends TableCtl {
 		if ($auth_t) {
 			$access_t = OAuth::getAccessToken($auth_t);
 			if ($access_t) {
-				Controller::addSuccess('Sucessfully logged into Twitter');
+				Backend::addSuccess('Sucessfully logged into Twitter');
 				$data = array(
 					'screen_name'  => $access_t['screen_name'],
 					'twitter_id'   => $access_t['user_id'],
@@ -29,7 +29,7 @@ class Twitter extends TableCtl {
 				$twit = new TwitterObj();
 				if ($twit->replace($data)) {
 				} else {
-					Controller::addError('Could not record Twitter Auth information');
+					Backend::addError('Could not record Twitter Auth information');
 				}
 				if (!empty($_SESSION['TwitterRedirect'])) {
 					$url = $_SESSION['TwitterRedirect'];
@@ -37,10 +37,10 @@ class Twitter extends TableCtl {
 					Controller::redirect($url);
 				}
 			} else {
-				Controller::addError('Could not get Access Token');
+				Backend::addError('Could not get Access Token');
 			}
 		} else {
-			Controller::addError('No Authentication Token');
+			Backend::addError('No Authentication Token');
 		}
 		return true;
 	}
@@ -51,8 +51,8 @@ class Twitter extends TableCtl {
 
 	public function html_tweet($result) {
 		if ($result) {
-			Controller::addSuccess('Tweeted!');
-			Controller::addContent(var_export($result, true));
+			Backend::addSuccess('Tweeted!');
+			Backend::addContent(var_export($result, true));
 		}
 	}
 }

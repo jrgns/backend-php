@@ -6,6 +6,6 @@
 		<input type="file" name="import_file" class="text" />
 		<input type="submit" value="Import <?php echo get_class($Object->getMeta('name')) ?>" class=""/>
 	</form>
-<?php else: Controller::addNotice('No Object to Import'); ?>
+<?php else: Backend::addNotice('No Object to Import'); ?>
 	No object
 <?php endif; ?>

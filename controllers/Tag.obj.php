@@ -89,7 +89,7 @@ class Tag extends TableCtl {
 			$tags = self::getTags($object->array['id']);
 			//Don't add Content, only render it.
 			Backend::add('obj_tags', $tags);
-			Controller::addContent(Render::renderFile('tags.tpl.php'));
+			Backend::addContent(Render::renderFile('tags.tpl.php'));
 		}
 		return $object;
 	}

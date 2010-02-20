@@ -22,14 +22,14 @@ class System extends TableCtl {
 		$roles = GateKeeper::getRoles();
 		if (!$roles || !count($roles)) {
 			if (Controller::$debug) {
-				Controller::addNotice('No roles setup, addings some');
+				Backend::addNotice('No roles setup, addings some');
 			}
 			$roles = $this->getDefaultRoles();
 			if ($roles) {
 				foreach($roles as $role) {
 					GateKeeper::assign($role['role'], $role['access_type'], $role['access_id']);
 					if (Controller::$debug) {
-						Controller::addSuccess('Added role ' . $role['role']);
+						Backend::addSuccess('Added role ' . $role['role']);
 					}
 				}
 			}
@@ -39,7 +39,7 @@ class System extends TableCtl {
 				foreach($permits as $permit) {
 					GateKeeper::permit($permit['role'], $permit['control'], $permit['action'], $permit['subject'], $permit['subject_id']);
 					if (Controller::$debug) {
-						Controller::addSuccess('Added permission to ' . $role['action'] . ' to ' . $permit['role']);
+						Backend::addSuccess('Added permission to ' . $role['action'] . ' to ' . $permit['role']);
 					}
 				}
 			}

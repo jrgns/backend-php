@@ -50,7 +50,7 @@ class File extends TableCtl {
 	function html_display($file) {
 		Backend::add('TabLinks', $this->getTabLinks(Controller::$action));
 		Backend::add('Sub Title', $file->array['name']);
-		Controller::addContent('<a href="?q=' . class_for_url(get_class($this)) . '/read/' . $file->array['id'] . '" title="' . $file->array['name'] . '">' . $file->array['name'] . '</a>');
+		Backend::addContent('<a href="?q=' . class_for_url(get_class($this)) . '/read/' . $file->array['id'] . '" title="' . $file->array['name'] . '">' . $file->array['name'] . '</a>');
 	}
 	
 	public function action_list($start, $count) {

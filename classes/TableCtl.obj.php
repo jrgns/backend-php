@@ -89,11 +89,11 @@ class TableCtl extends AreaCtl {
 				$data = Hook::run('create', 'pre', array($data, $object), array('toret' => $data));
 				if ($object->create($data)) {
 					Hook::run('create', 'post', array($data, $object));
-					Controller::addSuccess($object->getMeta('name') . ' Added');
+					Backend::addSuccess($object->getMeta('name') . ' Added');
 					$toret = $object;
 				} else {
 					$toret = false;
-					Controller::addError('Could not add ' . $object->getMeta('name'));
+					Backend::addError('Could not add ' . $object->getMeta('name'));
 				}
 			}
 			Backend::add('obj_values', $data);
@@ -114,11 +114,11 @@ class TableCtl extends AreaCtl {
 				$data = Hook::run('replace', 'pre', array($data, $object), array('toret' => $data));
 				if ($object->replace($data)) {
 					Hook::run('replace', 'post', array($data, $object));
-					Controller::addSuccess($object->getMeta('name') . ' Added');
+					Backend::addSuccess($object->getMeta('name') . ' Added');
 					$toret = $object;
 				} else {
 					$toret = false;
-					Controller::addError('Could not replace ' . $object->getMeta('name'));
+					Backend::addError('Could not replace ' . $object->getMeta('name'));
 				}
 			}
 			Backend::add('obj_values', $data);
@@ -159,16 +159,16 @@ class TableCtl extends AreaCtl {
 					$data = Hook::run('update', 'pre', array($data, $object), array('toret' => $data));
 					if ($object->update($data)) {
 						$toret = $object;
-						Controller::addSuccess($object->getMeta('name') . ' Modified');
+						Backend::addSuccess($object->getMeta('name') . ' Modified');
 					} else {
-						Controller::addError('Could not update ' . $object->getMeta('name'));
+						Backend::addError('Could not update ' . $object->getMeta('name'));
 					}
 				} else {
 					$data = $object->array;
 				}
 				Backend::add('obj_values', $data);
 			} else {
-				Controller::addError('The ' . $object->getMeta('name') . ' does not exist');
+				Backend::addError('The ' . $object->getMeta('name') . ' does not exist');
 			}
 		} else {
 			Controller::whoops();
@@ -182,11 +182,11 @@ class TableCtl extends AreaCtl {
 		if ($object && is_post()) {
 			if ($object->array) {
 				if ($object->delete()) {
-					Controller::addSuccess('Record has been removed');
+					Backend::addSuccess('Record has been removed');
 					$toret = true;
 				}
 			} else {
-				Controller::addError('The ' . $object->getMeta('name') . ' does not exist');
+				Backend::addError('The ' . $object->getMeta('name') . ' does not exist');
 			}
 		} else {
 			Controller::whoops();
@@ -254,31 +254,31 @@ class TableCtl extends AreaCtl {
 										}
 										$count++;
 									} else {
-										Controller::addError('Number of imported fields does not match defined fields');
+										Backend::addError('Number of imported fields does not match defined fields');
 									}
 								}
 								if ($count) {
-									Controller::addSuccess($count . ' records Imported');
+									Backend::addSuccess($count . ' records Imported');
 								}
 							} else {
-								Controller::addNotice('The Object definition is missing');
+								Backend::addNotice('The Object definition is missing');
 							}
 						} else {
-							Controller::addError('Could not read uploaded file');
+							Backend::addError('Could not read uploaded file');
 						}
 					}
 				} else {
-					Controller::addError('This import can only handle CSV files. The uploaded file is ' . $file['type']);
+					Backend::addError('This import can only handle CSV files. The uploaded file is ' . $file['type']);
 				}
 			} else if (is_post() && empty($_FILES)) {
-				Controller::addError('There is a problem with the HTML Form');
+				Backend::addError('There is a problem with the HTML Form');
 			}
 			Backend::add('Object', $object);
 			$template_file = singularize(computerize(class_name(Controller::$area))) . '.import.tpl.php';
 			if (!Render::checkTemplateFile($template_file)) {
 				$template_file = 'std_import.tpl.php';
 			}
-			Controller::addContent(Render::renderFile($template_file));
+			Backend::addContent(Render::renderFile($template_file));
 		} else {
 			Controller::whoops();
 		}
@@ -299,11 +299,11 @@ class TableCtl extends AreaCtl {
 				Backend::add('Sub Title', $object->getMeta('name'));
 				$template_file = $object->getArea() . '.display.tpl.php';
 				if (Render::checkTemplateFile($template_file)) {
-					Controller::addContent(Render::renderFile($template_file));
+					Backend::addContent(Render::renderFile($template_file));
 				} else {
 					//TODO It's a bit of a hack to redirect just because we can't generate the template
 					if (Render::createTemplate($template_file, 'std_display.tpl.php')) {
-						Controller::addSuccess('Created template for ' . $object->getMeta('name') . ' display');
+						Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' display');
 						Controller::redirect();
 					} else {
 						Controller::whoops(array('message' => 'Could not create template file for ' . $object->getMeta('name') . '::display'));
@@ -329,20 +329,20 @@ class TableCtl extends AreaCtl {
 				Backend::add('TabLinks', $this->getTabLinks('list'));
 				Backend::add('Sub Title', $object->getMeta('name'));
 
-				Controller::addScript(SITE_LINK . 'scripts/jquery.js');
-				Controller::addScript(SITE_LINK . 'scripts/table_list.js');
+				Backend::addScript(SITE_LINK . 'scripts/jquery.js');
+				Backend::addScript(SITE_LINK . 'scripts/table_list.js');
 				$template_file = $object->getArea() . '.list.tpl.php';
 				if (Render::checkTemplateFile($template_file)) {
-					Controller::addContent(Render::renderFile($template_file));
+					Backend::addContent(Render::renderFile($template_file));
 				} else {
 					//TODO It's a bit of a hack to redirect just because we can't generate the template
 					//if (Render::createTemplate($template_file, 'std_list.tpl.php')) {
-						//Controller::addSuccess('Created template for ' . $object->getMeta('name') . ' list');
+						//Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' list');
 						//Controller::redirect();
 					//} else {
 						//Controller::whoops(array('message' => 'Could not create template file for ' . $object->getMeta('name') . '::list'));
 					//}
-					Controller::addContent(Render::renderFile('std_list.tpl.php'));
+					Backend::addContent(Render::renderFile('std_list.tpl.php'));
 				}
 			} else {
 				Controller::whoops(array('title' => 'Invalid Object returned'));
@@ -370,11 +370,11 @@ class TableCtl extends AreaCtl {
 				Backend::add('Sub Title', 'Add ' . $object->getMeta('name'));
 				$template_file = $object->getArea() . '.form.tpl.php';
 				if (Render::checkTemplateFile($template_file)) {
-					Controller::addContent(Render::renderFile($template_file));
+					Backend::addContent(Render::renderFile($template_file));
 				} else {
 					//TODO It's a bit of a hack to redirect just because we can't generate the template
 					if (Render::createTemplate($template_file, 'std_form.tpl.php')) {
-						Controller::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
+						Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
 						Controller::redirect();
 					} else {
 						Controller::whoops(array('message' => 'Could not create template file for ' . $object->getMeta('name') . '::create'));
@@ -411,11 +411,11 @@ class TableCtl extends AreaCtl {
 				Backend::add('Sub Title', 'Update ' . $object->getMeta('name'));
 				$template_file = $object->getArea() . '.form.tpl.php';
 				if (Render::checkTemplateFile($template_file)) {
-					Controller::addContent(Render::renderFile($template_file));
+					Backend::addContent(Render::renderFile($template_file));
 				} else {
 					//TODO It's a bit of a hack to redirect just because we can't generate the template
 					Render::createTemplate($template_file, 'std_form.tpl.php');
-					Controller::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
+					Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
 					Controller::redirect();
 				}
 			}
@@ -453,11 +453,11 @@ class TableCtl extends AreaCtl {
 			$data = Hook::run('create', 'pre', array($data, $object), array('toret' => $data));
 			if ($object->create($data)) {
 				Hook::run('create', 'post', array($data, $object));
-				Controller::addSuccess($object->getMeta('name') . ' Added');
+				Backend::addSuccess($object->getMeta('name') . ' Added');
 				$toret = $object;
 			} else {
 				$toret = false;
-				Controller::addError('Could not add ' . $object->getMeta('name'));
+				Backend::addError('Could not add ' . $object->getMeta('name'));
 			}
 		}
 		return $toret;
@@ -484,7 +484,7 @@ class TableCtl extends AreaCtl {
 				$object->load();
 			}
 			if (!empty($object->last_error)) {
-				Controller::addError($object->last_error);
+				Backend::addError($object->last_error);
 			} else if ($object) {
 				switch ($return) {
 				case 'list':
@@ -580,10 +580,10 @@ class TableCtl extends AreaCtl {
 			$model = new $model();
 			$toret = $model->install($options);
 			if (!$toret) {
-				Controller::addError('Could not install ' . get_class($model) . ' Model: ' . $model->last_error);
+				Backend::addError('Could not install ' . get_class($model) . ' Model: ' . $model->last_error);
 			}
 		} else {
-			Controller::addError($model . ' does not exist');
+			Backend::addError($model . ' does not exist');
 		}
 		return $toret;
 	}

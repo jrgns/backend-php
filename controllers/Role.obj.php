@@ -33,10 +33,10 @@ class Role extends TableCtl {
 
 		$RoleObj = new RoleObj();
 		if ($RoleObj->replace($data)) {
-			Controller::addSuccess('Added role ' . $data['name']);
+			Backend::addSuccess('Added role ' . $data['name']);
 			$toret = true;
 		} else {
-			Controller::addError('Could not add role ' . $data['name']);
+			Backend::addError('Could not add role ' . $data['name']);
 			$toret = false;
 		}
 		return $toret;

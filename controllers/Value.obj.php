@@ -67,7 +67,7 @@ class Value extends TableCtl {
 		$values = (array)$result;
 		$values['action_url'] = 'value/replace';
 		$values['action_name'] = 'Update';
-		Controller::addContent(Render::renderFile('values.tpl.php', $values));
+		Backend::addContent(Render::renderFile('values.tpl.php', $values));
 	}
 	
 	public static function admin_links() {

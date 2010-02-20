@@ -12,8 +12,8 @@
  */
 class Admin extends AreaCtl {
 	public function action_pre_install() {
-		Controller::addNotice('This application has not been installed yet');
-		Controller::addContent(Render::renderFile('uninstalled_msg.tpl.php'));
+		Backend::addNotice('This application has not been installed yet');
+		Backend::addContent(Render::renderFile('uninstalled_msg.tpl.php'));
 		return true;
 	}
 	
@@ -28,19 +28,19 @@ class Admin extends AreaCtl {
 		if (!$installed) {
 			//if (is_post()) {
 				if (!Component::pre_install()) {
-					Controller::addError('Could not pre install Component');
+					Backend::addError('Could not pre install Component');
 					return false; 
 				}
 				if (!Permission::pre_install()) {
-					Controller::addError('Could not pre install Permission');
+					Backend::addError('Could not pre install Permission');
 					return false;
 				}
 				if (!Hook::pre_install()) {
-					Controller::addError('Could not pre install Hook');
+					Backend::addError('Could not pre install Hook');
 					return false;
 				}
 				if (!Value::pre_install()) {
-					Controller::addError('Could not pre install Value');
+					Backend::addError('Could not pre install Value');
 					return false;
 				}
 			
@@ -48,7 +48,7 @@ class Admin extends AreaCtl {
 				//Value::set('log_to_file', 'install_log.txt');
 				Value::set('log_to_file', 'install_log_' . date('Ymd_His') . '.txt');
 
-				Controller::addNotice(PHP_EOL . PHP_EOL . 'Installation started at ' . date('Y-m-d H:i:s'));
+				Backend::addNotice(PHP_EOL . PHP_EOL . 'Installation started at ' . date('Y-m-d H:i:s'));
 
 				$components = Component::getActive();
 				if ($components) {
@@ -57,10 +57,10 @@ class Admin extends AreaCtl {
 					$components = array_flatten($components, null, 'name');
 
 					foreach($components as $component) {
-						Controller::addNotice('Installing ' . $component);
+						Backend::addNotice('Installing ' . $component);
 						if (class_exists($component, true) && method_exists($component, 'install')) {
 							if (!call_user_func_array(array($component, 'install'), array())) {
-								Controller::addError('Error on installing ' . $component);
+								Backend::addError('Error on installing ' . $component);
 								$toret = false;
 							}
 						}
@@ -101,14 +101,14 @@ class Admin extends AreaCtl {
 	public function html_install($result) {
 		$installed = Value::get('admin_installed', false);
 		if ($result) {
-			Controller::addSuccess('Backend Install Successful');
+			Backend::addSuccess('Backend Install Successful');
 			$_SESSION['just_installed'] = true;
 			Value::set('admin_installed', date('Y-m-d H:i:s'));
 			Controller::redirect('?q=account/signup');
 		} else if (!$installed) {
 			Backend::add('Sub Title', 'Install Backend Application');
 		} else {
-			Controller::addNotice('Installation script already ran at ' . $installed);
+			Backend::addNotice('Installation script already ran at ' . $installed);
 			Controller::redirect('?q=admin');
 		}
 	}
@@ -139,15 +139,15 @@ class Admin extends AreaCtl {
 			}
 		}
 		Backend::add('admin_links', $admin_links);
-		Controller::addContent(Render::renderFile('admin_interface.tpl.php'));
+		Backend::addContent(Render::renderFile('admin_interface.tpl.php'));
 	}
 	
 	function html_components($result) {
 		Backend::add('Sub Title', 'Manage Components');
 		Backend::add('result', $result);
-		Controller::addScript(SITE_LINK . 'scripts/jquery.js');
-		Controller::addScript(SITE_LINK . 'scripts/admin_components.js');
-		Controller::addContent(Render::renderFile('admin_components.tpl.php'));
+		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
+		Backend::addScript(SITE_LINK . 'scripts/admin_components.js');
+		Backend::addContent(Render::renderFile('admin_components.tpl.php'));
 	}
 	
 	public static function hook_post_display($data, $controller) {

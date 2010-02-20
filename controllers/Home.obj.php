@@ -2,7 +2,7 @@
 class Home extends AreaCtl {
 	function html_index() {
 		Backend::add('Sub Title', 'Welcome');
-		Controller::addContent('Welcome to #Title#');
+		Backend::addContent('Welcome to #Title#');
 		return true;
 	}
 	

@@ -24,19 +24,19 @@ class Content extends TableCtl {
 				$filename = 'content/static/' . $content->array['name'] . '.html';
 				$template = 'content/' . $content->array['name'] . '.tpl.php';
 				if (Render::checkTemplateFile($template)) {
-					Controller::addContent(Render::renderFile($template));
+					Backend::addContent(Render::renderFile($template));
 					$toret = $content;
 				} else if (file_exists(APP_FOLDER . '/' . $filename)) {
-					Controller::addContent(file_get_contents(APP_FOLDER . '/' . $filename));
+					Backend::addContent(file_get_contents(APP_FOLDER . '/' . $filename));
 					$toret = $content;
 				} else if (file_exists(BACKEND_FOLDER . '/' . $filename)) {
-					Controller::addContent(file_get_contents(BACKEND_FOLDER . '/' . $filename));
+					Backend::addContent(file_get_contents(BACKEND_FOLDER . '/' . $filename));
 					$toret = $content;
 				//SITE FOLDER too?
 				}
 			} else {
 				Backend::add('Content', $content);
-				Controller::addContent(Render::renderFile('content.display.tpl.php'));
+				Backend::addContent(Render::renderFile('content.display.tpl.php'));
 				$toret = $content;
 			}
 		}
@@ -46,7 +46,7 @@ class Content extends TableCtl {
 			if (Controller::$debug) {
 				$filename = 'content/' . Controller::$id . '.tpl.php';
 				if (Render::checkTemplateFile($filename)) {
-					Controller::addNotice('File available for content');
+					Backend::addNotice('File available for content');
 				}
 			}
 		}
@@ -117,7 +117,7 @@ class Content extends TableCtl {
 				$toret = false;
 			}
 		} else if (Permission::check('create', 'content')) {
-			Controller::addNotice('The content does not exist, but you can create it now');
+			Backend::addNotice('The content does not exist, but you can create it now');
 			Controller::redirect('?q=content/create/' . $id);
 			$toret = false;
 		} else {
@@ -153,7 +153,7 @@ class Content extends TableCtl {
 		$content = Content::retrieve($id);
 		if ($content) {
 			$content = array_key_exists('markdown', $content) ? $content['markdown'] : $content['body'];
-			Controller::addContent($content);
+			Backend::addContent($content);
 		}
 	}
 	

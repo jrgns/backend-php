@@ -28,7 +28,7 @@ class TwitterAPI {
 		$result = curl_request('http://search.twitter.com/search.json?q=' . $parameter);
 		if ($result = json_decode($result)) {
 			if (array_key_exists('error', $result)) {
-				Controller::addError($result->error);
+				Backend::addError($result->error);
 			} else {
 				return is_object($result) && isset($result->results) ? $result->results : false;
 			}
@@ -42,7 +42,7 @@ class TwitterAPI {
 			$result = OAuth::request('http://twitter.com/statuses/mentions.json', $parameters);
 			if ($result = json_decode($result)) {
 				if (array_key_exists('error', $result)) {
-					Controller::addError($result->error);
+					Backend::addError($result->error);
 				} else {
 					return is_array($result) ? $result : false;
 				}
@@ -58,7 +58,7 @@ class TwitterAPI {
 			$result = OAuth::request('http://twitter.com/statuses/update.json', $parameters, 'POST');
 			if ($result = json_decode($result)) {
 				if (array_key_exists('error', $result)) {
-					Controller::addError($result->error);
+					Backend::addError($result->error);
 				} else {
 					return $result;
 				}

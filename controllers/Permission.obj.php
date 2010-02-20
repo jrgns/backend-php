@@ -35,10 +35,10 @@ class Permission extends TableCtl {
 
 		$permission = new PermissionObj();
 		if ($permission->replace($data)) {
-			Controller::addSuccess('Added permission to ' . $action . ' for ' . $role);
+			Backend::addSuccess('Added permission to ' . $action . ' for ' . $role);
 			$toret = true;
 		} else {
-			Controller::addError('Could not add permission to ' . $action . ' for ' . $role);
+			Backend::addError('Could not add permission to ' . $action . ' for ' . $role);
 			$toret = false;
 		}
 		return $toret;
@@ -78,7 +78,7 @@ class Permission extends TableCtl {
 		foreach(self::getDefaults() as $permit) {
 			GateKeeper::permit($permit['role'], $permit['action'], $permit['subject'], $permit['subject_id'], $permit['control']);
 			if (Controller::$debug) {
-				Controller::addSuccess('Added permission to ' . $permit['action'] . ' to ' . $permit['role']);
+				Backend::addSuccess('Added permission to ' . $permit['action'] . ' to ' . $permit['role']);
 			}
 		}
 		return $toret;

@@ -101,7 +101,7 @@ class Comment extends TableCtl {
 	public static function hook_post_display($object) {
 		if ($object instanceof DBObject && in_array(Controller::$action, array('display'))) {
 			$comments = self::getComments(table_name($object), $object->array['id']);
-			Controller::addContent(Render::renderFile('comments.tpl.php', array('comment_list' => $comments)));
+			Backend::addContent(Render::renderFile('comments.tpl.php', array('comment_list' => $comments)));
 		}
 		return $object;
 	}

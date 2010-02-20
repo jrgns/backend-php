@@ -74,7 +74,7 @@ class GateKeeper {
   
 	public static function permittedRoles($action = '*', $subject = '*', $subject_id = 0) {
 		if (Controller::$debug) {
-			Controller::addNotice('Checking action ' . $action . ' for ' . $subject . ' ' . $subject_id);
+			Backend::addNotice('Checking action ' . $action . ' for ' . $subject . ' ' . $subject_id);
 		}
 
 		$roles = self::permissionHolders($action, $subject, $subject_id);
@@ -110,7 +110,7 @@ class GateKeeper {
 		}
 		$toret = $specific ? end($most_spec) : $toret;
 		if (Controller::$debug) {
-			Controller::addNotice('Roles found: ' . serialize($toret));
+			Backend::addNotice('Roles found: ' . serialize($toret));
 		}
 		return $toret;
 	}

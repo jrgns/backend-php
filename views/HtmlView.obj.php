@@ -31,7 +31,7 @@ class HtmlView extends View {
 		if (Permission::check(Controller::$action, Controller::$area) && !method_exists($controller, $display_method)) {
 			$template_file = Controller::$area . '.' . Controller::$action . '.tpl.php';
 			if (Render::checkTemplateFile($template_file)) {
-				Controller::addContent(Render::renderFile($template_file, $results));
+				Backend::addContent(Render::renderFile($template_file, $results));
 			}
 		}
 		//TODO Add site_link, and other vars, as JS vars
@@ -39,21 +39,21 @@ class HtmlView extends View {
 		$comp_script = '/scripts/' . Controller::$area . '.component.js';
 		$comp_style  = '/styles/' . Controller::$area . '.component.css';
 		if (file_exists(SITE_FOLDER . $comp_script)) {
-			Controller::addScript(SITE_LINK . $comp_script);
+			Backend::addScript(SITE_LINK . $comp_script);
 		}
 		if (file_exists(SITE_FOLDER . $comp_style)) {
-			Controller::addStyle(SITE_LINK . $comp_style);
+			Backend::addStyle(SITE_LINK . $comp_style);
 		}
 		return $results;
 	}
 	
 	public static function hook_output($to_print) {
-		Backend::add('BackendErrors', array_unique(array_filter(Controller::getError())));
-		Backend::add('BackendSuccess', array_unique(array_filter(Controller::getSuccess())));
-		Backend::add('BackendNotices', array_unique(array_filter(Controller::getNotice())));
-		Controller::setError();
-		Controller::setSuccess();
-		Controller::setNotice();
+		Backend::add('BackendErrors', array_unique(array_filter(Backend::getError())));
+		Backend::add('BackendSuccess', array_unique(array_filter(Backend::getSuccess())));
+		Backend::add('BackendNotices', array_unique(array_filter(Backend::getNotice())));
+		Backend::setError();
+		Backend::setSuccess();
+		Backend::setNotice();
 
 		$to_print = Render::renderFile('index.tpl.php');
 
@@ -83,9 +83,9 @@ class HtmlView extends View {
 	 *
 	 */
 	public static function hook_post_display($data, $controller) {
-		Controller::addScript(SITE_LINK . 'scripts/backend.js');
-		Backend::add('Styles', array_unique(array_filter(Controller::getStyles())));
-		Backend::add('Scripts', array_unique(array_filter(Controller::getScripts())));
+		Backend::addScript(SITE_LINK . 'scripts/backend.js');
+		Backend::add('Styles', array_unique(array_filter(Backend::getStyles())));
+		Backend::add('Scripts', array_unique(array_filter(Backend::getScripts())));
 		$app_class = Backend::getConfig('backend.application.class', 'Application');
 		$primary = Links::get('primary');
 		$secondary = Links::get('secondary');

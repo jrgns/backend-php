@@ -25,7 +25,7 @@ class Component extends TableCtl {
 			if ($toret->array['active']) {
 				if (call_user_func(array($toret->array['name'], 'install'))) {
 				} else {
-					Controller::addError('Could not install component');
+					Backend::addError('Could not install component');
 				}
 			}
 		}
@@ -160,7 +160,7 @@ class Component extends TableCtl {
 		foreach ($files as $component) {
 			if (!in_array($component, $table)) {
 				if (self::add($component)) {
-					Controller::addSuccess('Added ' . basename($component));
+					Backend::addSuccess('Added ' . basename($component));
 					$toret++;
 				}
 			}

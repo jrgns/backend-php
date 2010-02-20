@@ -29,14 +29,6 @@ class Controller {
 	public static $salt = 'Change this to something random!';
 	public static $view = false;
 		
-	protected static $error = array();
-	protected static $notice = array();
-	protected static $success = array();
-
-	protected static $content = array();
-	protected static $scripts = array();
-	protected static $styles = array();	
-
 	protected static $started = false;
 	protected static $init = false;
 	
@@ -81,13 +73,13 @@ class Controller {
 
 			//Sessions
 			if (array_key_exists('error', $_SESSION)) {
-				self::$error = $_SESSION['error'];
+				Backend::setError($_SESSION['error']);
 			}
 			if (array_key_exists('notice', $_SESSION)) {
-				self::$notice = $_SESSION['notice'];
+				Backend::setNotice($_SESSION['notice']);
 			}
 			if (array_key_exists('success', $_SESSION)) {
-				self::$success = $_SESSION['success'];
+				Backend::setSuccess($_SESSION['success']);
 			}
 			
 			self::parseQuery();
@@ -148,7 +140,7 @@ class Controller {
 		if ($run_action) {
 			$result = $controller->action();
 			if (Controller::$debug) {
-				Controller::addNotice('Code for this page is in the ' . get_class($controller) . ' Controller');
+				Backend::addNotice('Code for this page is in the ' . get_class($controller) . ' Controller');
 			}
 		}
 		Hook::run('action', 'post');
@@ -164,9 +156,9 @@ class Controller {
 	public static function finish() {
 		Hook::run('finish', 'pre');
 
-		$_SESSION['error'] = self::getError();
-		$_SESSION['notice'] = self::getNotice();
-		$_SESSION['success'] = self::getSuccess();
+		$_SESSION['error'] = Backend::getError();
+		$_SESSION['notice'] = Backend::getNotice();
+		$_SESSION['success'] = Backend::getSuccess();
 		if (empty($_SESSION['previous_url']) || !is_array($_SESSION['previous_url'])) {
 			$_SESSION['previous_url'] = array();
 		}
@@ -380,39 +372,6 @@ class Controller {
 		return $value;
 	}
 	
-	private static function addSomething($what, $string, $options = array()) {
-		$toret = false;
-		if (!is_null($string)) {
-			if (is_array($string)) {
-				$toret = true;
-				foreach($string as $one_string) {
-					$toret = self::addSomething($what, $one_string, $options) && $toret;
-				}
-			} else {
-				$toret = true;
-				array_push(self::$$what, $string);
-				//Log to file if necessary
-				$log_to_file = defined('BACKEND_INSTALLED') && BACKEND_INSTALLED ? Value::get('log_to_file', false) : false;
-				if ($log_to_file && in_array($what, array('success', 'notice', 'error'))) {
-					@list($file, $log_what) = explode('|', $log_to_file);
-					$file     = empty($file)     ? 'logfile_' . date('Ymd') . 'txt' : $file;
-					$log_what = empty($log_what) ? '*' : explode(',', $log_what);
-					if ((is_array($log_what) && in_array($what, $log_what)) || $log_what == '*') {
-						if (!file_exists(APP_FOLDER . '/logs/')) {
-							mkdir(APP_FOLDER . '/logs/', 0755);
-						}
-						$fp = fopen(APP_FOLDER . '/logs/' . $file, 'a');
-						if ($fp) {
-							$query = Controller::$area . '/' . Controller::$action . '/' . implode('/', Controller::$parameters);
-							fwrite($fp, time() . "\t" . $query . "\t" . $what . "\t" . $string . PHP_EOL);
-						}
-					}
-				}
-			}
-		}
-		return $toret;
-	}
-
 	/**
 	 * Redirect to a specified location.
 	 *
@@ -474,7 +433,7 @@ class Controller {
 			
 		try {
 			if (self::$debug) {
-				self::addSuccess('The script should now redirect to <a href="' . $location . '">here</a>');
+				Backend::addSuccess('The script should now redirect to <a href="' . $location . '">here</a>');
 			} else {
 				//Redirect
 				self::finish();
@@ -482,7 +441,7 @@ class Controller {
 				die('redirecting to <a href="' . $location . '">');
 			}
 		} catch (Exception $e) {
-			Controller::addError('Could not redirect');
+			Backend::addError('Could not redirect');
 		}
 		return true;
 	}
@@ -507,7 +466,7 @@ class Controller {
 		$title = array_key_exists('title', $options) ? $options['title'] : 'Whoops!';
 		$msg = array_key_exists('message', $options) ? $options['message'] : 'Looks like something went wrong...';
 		Backend::add('Sub Title', $title);
-		self::addContent($msg);
+		Backend::addContent($msg);
 		if (array_key_exists('debug', $_REQUEST)) {
 			var_dump($title, $msg);
 			print_stacktrace();
@@ -516,65 +475,5 @@ class Controller {
 	
 	function __destruct() {
 		self::finish();
-	}
-	
-	static public function addContent($content, $options = array()) {
-		return self::addSomething('content', $content, $options);
-	}
-	
-	static public function getContent() {
-		return self::$content;
-	}
-	
-	static public function addScript($script, $options = array()) {
-		return self::addSomething('scripts', $script, $options);
-	}
-	
-	static public function getScripts() {
-		return self::$scripts;
-	}
-	
-	static public function addStyle($style, $options = array()) {
-		return self::addSomething('styles', $style, $options);
-	}
-	
-	static public function getStyles() {
-		return self::$styles;
-	}
-	
-	static public function addError($content, $options = array()) {
-		return self::addSomething('error', $content, $options);
-	}
-	
-	static public function getError() {
-		return self::$error;
-	}
-	
-	static public function setError(array $errors = array()) {
-		self::$error = $errors;
-	}
-	
-	static public function addNotice($content, $options = array()) {
-		return self::addSomething('notice', $content, $options);
-	}
-	
-	static public function getNotice() {
-		return self::$notice;
-	}
-
-	static public function setNotice(array $notices = array()) {
-		self::$notice = $notices;
-	}
-	
-	static public function addSuccess($content, $options = array()) {
-		return self::addSomething('success', $content, $options);
-	}
-	
-	static public function getSuccess() {
-		return self::$success;
-	}
-
-	static public function setSuccess(array $successes = array()) {
-		self::$success = $successes;
 	}
 }

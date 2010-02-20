@@ -23,7 +23,7 @@ class AreaCtl {
 	public final function action() {
 		$toret = null;
 		if (array_key_exists('msg', $_REQUEST)) {
-			Controller::addError(self::getError($_REQUEST['msg']));
+			Backend::addError(self::getError($_REQUEST['msg']));
 		}
 		$method = 'action_' . Controller::$action;
 		if (Controller::$debug) {
@@ -89,9 +89,9 @@ class AreaCtl {
 			if (!empty($_SESSION['user'])) {
 				if (Controller::$debug) {
 					if (is_object($_SESSION['user']) && property_exists($_SESSION['user'], 'roles')) {
-						Controller::addNotice('Current user roles: ' . serialize($_SESSION['user']->roles));
+						Backend::addNotice('Current user roles: ' . serialize($_SESSION['user']->roles));
 					} else {
-						Controller::addError('No user roles');
+						Backend::addError('No user roles');
 						$_SESSION['user']->roles = array();
 					}
 				}

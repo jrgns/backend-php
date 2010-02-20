@@ -26,7 +26,7 @@ class Assignment extends TableCtl {
 		list ($query, $params) = $Assignments->getSelectSQL(array('conditions' => $conditions, 'joins' => $joins, 'fields' => $fields));
 		$Assignments->load(array('query' => $query, 'parameters' => $params));
 		Backend::add('Assignments', $Assignments);
-		Controller::addContent(Render::renderFile('assignment_list.tpl.php'));
+		Backend::addContent(Render::renderFile('assignment_list.tpl.php'));
 	}
 
 	public static function getDefaults() {
@@ -49,10 +49,10 @@ class Assignment extends TableCtl {
 
 		foreach(self::getDefaults() as $assignment) {
 			if (GateKeeper::assign($assignment['role'], $assignment['access_type'], $assignment['access_id'])) {
-				Controller::addSuccess('Added assignment to ' . $assignment['role']);
+				Backend::addSuccess('Added assignment to ' . $assignment['role']);
 				$toret = $toret && true;
 			} else {
-				Controller::addError('Could not add assignment to ' . $assignment['role']);
+				Backend::addError('Could not add assignment to ' . $assignment['role']);
 				$toret = false;
 			}
 		}

@@ -425,7 +425,7 @@ class DBObject {
 				$table = $this->meta['table'];
 				$drop_query = new CustomQuery('DROP TABLE IF EXISTS `' . $table . '`');
 				$drop_query->execute();
-				Controller::addNotice('Dropping table ' . $table);
+				Backend::addNotice('Dropping table ' . $table);
 				if (!empty($drop_query->last_error)) {
 					$this->last_error = $query->last_error;
 				}
@@ -461,7 +461,7 @@ class DBObject {
 				case 'alphanumeric':
 					if ($value !== null) {
 						if (!ctype_alnum(preg_replace('/[[:space:]]/', '', $value))) {
-							Controller::addError('Please supply a valid string for ' . humanize($name));
+							Backend::addError('Please supply a valid string for ' . humanize($name));
 							$toret = false;
 						}
 					}
@@ -488,7 +488,7 @@ class DBObject {
 						if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
 							$value = filter_var($value, FILTER_VALIDATE_EMAIL);
 						} else {
-							Controller::addError('Please supply a valid email address');
+							Backend::addError('Please supply a valid email address');
 							$toret = false;
 						}
 					}
@@ -500,7 +500,7 @@ class DBObject {
 						if (filter_var($value, FILTER_VALIDATE_URL)) {
 							$value = filter_var($value, FILTER_VALIDATE_URL);
 						} else {
-							Controller::addError('Please supply a valid URL');
+							Backend::addError('Please supply a valid URL');
 							$value = null;
 						}
 					}
@@ -510,7 +510,7 @@ class DBObject {
 						if (filter_var($value, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED)) {
 							$value = filter_var($value, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED);
 						} else {
-							Controller::addError('Please supply a valid URL with a scheme');
+							Backend::addError('Please supply a valid URL with a scheme');
 							$value = null;
 						}
 					}
@@ -518,7 +518,7 @@ class DBObject {
 				case 'ip_address':
 					if ($value !== null) {
 						if (!filter_var($value, FILTER_VALIDATE_IP)) {
-							Controller::addError('Please supply a valid URL with a scheme');
+							Backend::addError('Please supply a valid URL with a scheme');
 							$value = null;
 						}
 					} else if (!empty($_SERVER['REMOTE_ADDR'])) {
@@ -612,7 +612,7 @@ class DBObject {
 							$message = 'Unknown file upload error (' . $_FILES['obj']['error'][$name] . ')';
 							break;
 						}
-						Controller::addError($message);
+						Backend::addError($message);
 					} else {
 						$file = array();
 						$file['name']     = $_FILES['obj']['name'][$name];
