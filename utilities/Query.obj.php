@@ -41,6 +41,9 @@ class Query {
 			trigger_error('Unknown Query Action', E_USER_ERROR);
 			return false;
 		}
+		if (array_key_exists('connection', $options) && $options['connection'] instanceof PDO) {
+			$this->connection = $options['connection'];
+		}
 		$this->action = $action;
 		if ($table instanceof DBObject) {
 			$table = $table->getSource();
@@ -202,7 +205,10 @@ class Query {
 		return $toret;
 	}
 
-	public function setQuery($query) {
+	public function setQuery($query, array $options = array()) {
+		if (array_key_exists('connection', $options) && $options['connection'] instanceof PDO) {
+			$this->connection = $options['connection'];
+		}
 		$this->last_stmt = false;
 		if ($query instanceof Query) {
 			$this->query = $query->__toString();
