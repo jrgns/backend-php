@@ -204,7 +204,7 @@ class Backend {
 			}
 			if (!empty($connection) && $connection instanceof PDO) {
 				if (array_key_exists($alias, self::$DB)) {
-					Backend::addWarning('Overwriting existing DB definition: ' . $alias);
+					Backend::addNotice('Overwriting existing DB definition: ' . $alias);
 				}
 				self::$DB[$name] = array('dsn' => $dsn, 'username' => $username, 'password' => $password, 'connection' => $connection);
 				if ($alias != $name) {
