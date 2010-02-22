@@ -362,6 +362,7 @@ class TableCtl extends AreaCtl {
 		case $result instanceof DBObject:
 			Controller::redirect('?q=' . $result->getArea() . '/display/' . $result->getMeta('id'));
 			break;
+		default:
 		case $result:
 			$object = self::getObject();
 			if ($object) {
@@ -381,8 +382,6 @@ class TableCtl extends AreaCtl {
 					}
 				}
 			}
-			break;
-		default:
 			break;
 		}
 		return $result;

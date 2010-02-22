@@ -188,7 +188,7 @@ class DBObject {
 			}
 			if (!empty($query)) {
 				if (!($query instanceof Query)) {
-					$query = new CustomQuery($query);
+					$query = new CustomQuery($query, array('connection' => $this->db));
 				}
 				$result = $query->execute($params);
 				if ($result) {
@@ -259,7 +259,7 @@ class DBObject {
 			if ($data) {
 				$data = $this->process($data, 'in');
 				list ($query, $params) = $this->getCreateSQL($data, $options);
-				$query = new CustomQuery($query);
+				$query = new CustomQuery($query, array('connection' => $this->db));
 				$toret = $query->execute($params);
 				if ($toret) {
 					//TODO This will potentially break if there are triggers in use
@@ -290,7 +290,7 @@ class DBObject {
 				$data = $this->process($data, 'in');
 				list ($query, $params) = $this->getCreateSQL($data, $options);
 				$query = preg_replace('/^INSERT/', 'REPLACE', $query);
-				$query = new CustomQuery($query);
+				$query = new CustomQuery($query, array('connection' => $this->db));
 				$toret = $query->execute($params);
 				if ($toret) {
 					//TODO This will potentially break if there are triggers in use
@@ -367,7 +367,7 @@ class DBObject {
 			if ($data) {
 				$data = $this->process($data, 'in');
 				list ($query, $params) = $this->getUpdateSQL($data, $options);
-				$query = new CustomQuery($query);
+				$query = new CustomQuery($query, array('connection' => $this->db));
 				$toret = $query->execute($params);
 				if ($toret) {
 					if (array_key_exists('load', $options) ? $options['load'] : true) {
@@ -388,7 +388,7 @@ class DBObject {
 		$this->last_error = false;
 		if ($this->checkConnection()) {
 			extract($this->meta);
-			$query = new CustomQuery("DELETE FROM `$table` WHERE `$id_field` = :id LIMIT 1");
+			$query = new CustomQuery("DELETE FROM `$table` WHERE `$id_field` = :id LIMIT 1", array('connection' => $this->db));
 			$toret = $query->execute(array(':id' => $this->meta['id']));
 			if (!empty($query->last_error)) {
 				$this->last_error = $query->last_error;
@@ -404,7 +404,7 @@ class DBObject {
 		$this->last_error = false;
 		if ($this->checkConnection()) {
 			extract($this->meta);
-			$query = new CustomQuery("TRUNCATE `$table`");
+			$query = new CustomQuery("TRUNCATE `$table`", array('connection' => $this->db));
 			$toret = $query->execute();
 			if (!empty($query->last_error)) {
 				$this->last_error = $query->last_error;
@@ -418,25 +418,29 @@ class DBObject {
 	public function install(array $options = array()) {
 		$toret = false;
 		$this->last_error = false;
-		$drop_table = array_key_exists('drop_table', $options) ? $options['drop_table'] : false;
-		$query = $this->getInstallSQL();
-		if ($query) {
-			if ($drop_table) {
-				$table = $this->meta['table'];
-				$drop_query = new CustomQuery('DROP TABLE IF EXISTS `' . $table . '`');
-				$drop_query->execute();
-				Backend::addNotice('Dropping table ' . $table);
-				if (!empty($drop_query->last_error)) {
+		if ($this->checkConnection()) {
+			$drop_table = array_key_exists('drop_table', $options) ? $options['drop_table'] : false;
+			$query = $this->getInstallSQL();
+			if ($query) {
+				if ($drop_table) {
+					$table = $this->meta['table'];
+					$drop_query = new CustomQuery('DROP TABLE IF EXISTS `' . $table . '`', array('connection' => $this->db));
+					$drop_query->execute();
+					Backend::addNotice('Dropping table ' . $table);
+					if (!empty($drop_query->last_error)) {
+						$this->last_error = $query->last_error;
+					}
+				}
+				$query = new CustomQuery($query, array('connection' => $this->db));
+				$toret = $query->execute();
+				if (!empty($query->last_error)) {
 					$this->last_error = $query->last_error;
 				}
-			}
-			$query = new CustomQuery($query);
-			$toret = $query->execute();
-			if (!empty($query->last_error)) {
-				$this->last_error = $query->last_error;
+			} else {
+				$this->last_error = 'No Install SQL for ' . class_name($this);
 			}
 		} else {
-			$this->last_error = 'No Install SQL for ' . class_name($this);
+			$this->last_error = 'DB Connection error';
 		}
 		return $toret;
 	}
@@ -641,7 +645,7 @@ class DBObject {
 
 		$mode = array_key_exists('mode', $options) ? $options['mode'] : 'list';
 
-		$query = new SelectQuery($this);
+		$query = new SelectQuery($this, array('connection' => $this->db));
 		//Fields
 		$fields = array_key_exists('fields', $options) ? $options['fields'] : array();
 		if (empty($fields)) {
@@ -698,7 +702,7 @@ class DBObject {
 	public function getRetrieveSQL() {
 		extract($this->meta);
 		$database = Backend::get('DB_' . $database, $database);
-		$query = 'SELECT * FROM `' . $database . '`.`' . $table . '` WHERE `id` = :parameter';
+		$query = 'SELECT * FROM `' . $database . '`.`' . $table . '` WHERE `' . $id_field . '` = :parameter';
 		if (array_key_exists('name', $fields)) {
 			$query .= ' OR `name` = :parameter';
 		}
