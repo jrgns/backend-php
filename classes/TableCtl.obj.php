@@ -223,66 +223,39 @@ class TableCtl extends AreaCtl {
 	/**
 	 * Action for importing records in an area
 	 */
-	public function action_import() {
-		$toret = false;
+	public function action_import($data = false) {
 		$obj_name = (class_name(Controller::$area) . 'Obj');
 		if (class_exists($obj_name, true)) {
 			$object = new $obj_name();
 			$object->load();
-			if (is_post() && !empty($_FILES) && array_key_exists('import_file', $_FILES)) {
-				$file = $_FILES['import_file'];
-				if ($file['type'] == 'text/csv') {
-					$importer_name = get_class($this) . 'Importer';
-					if (class_exists($importer_name, true)) {
-						$Importer = new $importer_name();
-						$toret = $Importer->import($file['tmp_name']);
-					} else {
-						$fp = fopen($file['tmp_name'], 'r');
-						if ($fp)  {
-							$obj_name = get_class($this) . 'Obj';
-							if (class_exists($obj_name, true)) {
-								$Object = new $obj_name();
-								$names = array_keys($Object->getMeta('fields'));
-								$name_count = count($names);
-								$count = 0;
-								while(($line = fgetcsv($fp)) !== false) {
-									if ($name_count == count($line)) {
-										$line = array_combine($names, $line);
-										$toret = $Object->create($line);
-										if (!$toret) {
-											break;
-										}
-										$count++;
-									} else {
-										Backend::addError('Number of imported fields does not match defined fields');
-									}
-								}
-								if ($count) {
-									Backend::addSuccess($count . ' records Imported');
-								}
-							} else {
-								Backend::addNotice('The Object definition is missing');
-							}
-						} else {
-							Backend::addError('Could not read uploaded file');
-						}
-					}
-				} else {
-					Backend::addError('This import can only handle CSV files. The uploaded file is ' . $file['type']);
+			if (is_post()) {
+				if (empty($_FILES) || !array_key_exists('import_file', $_FILES)) {
+					Backend::addError('There is a problem with the HTML Form');
+					return false;
 				}
-			} else if (is_post() && empty($_FILES)) {
-				Backend::addError('There is a problem with the HTML Form');
+				$file = $_FILES['import_file'];
+				if (!in_array($file['type'], array('text/csv', 'application/octet-stream'))) {
+					Backend::addError('This import can only handle CSV files. The uploaded file is ' . $file['type']);
+					return false;
+				}
+				$importer_name = get_class($this) . 'Importer';
+				if (class_exists($importer_name, true)) {
+					$count = call_user_func_array(array($importer_name, 'import'), array($file['tmp_name'], $data));
+				} else {
+					$importer_name = 'GenericImporter';
+					$count = call_user_func_array(array($importer_name, 'import'), array($this, $file['tmp_name'], $data));
+				}
+				$error = call_user_func(array($importer_name, 'getLastError'));
+				if (!$count && !empty($error)) {
+					Backend::addError($error);
+				}
+				return $count;
 			}
-			Backend::add('Object', $object);
-			$template_file = singularize(computerize(class_name(Controller::$area))) . '.import.tpl.php';
-			if (!Render::checkTemplateFile($template_file)) {
-				$template_file = 'std_import.tpl.php';
-			}
-			Backend::addContent(Render::renderFile($template_file));
+			return $object;
 		} else {
 			Controller::whoops();
 		}
-		return $toret;
+		return false;
 	}
 	
 	/**
@@ -431,8 +404,23 @@ class TableCtl extends AreaCtl {
 
 	public function html_import($result) {
 		Backend::add('Sub Title', 'Import');
-		if ($result instanceof DBObject) {
-			Backend::add('Sub Title', 'Import ' . $object->getMeta('name'));
+		switch (true) {
+		case $result instanceof DBObject:
+			Backend::add('Object', $result);
+			Backend::add('Sub Title', 'Import ' . $result->getMeta('name'));
+			$template_file = singularize(computerize(class_name(Controller::$area))) . '.import.tpl.php';
+			if (!Render::checkTemplateFile($template_file)) {
+				$template_file = 'std_import.tpl.php';
+			}
+			Backend::addContent(Render::renderFile($template_file));
+			break;
+		case is_numeric($result) && $result >= 0:
+			Backend::addSuccess($result . ' records imported');
+			Controller::redirect('?q=' . Controller::$area . '/list');
+			break;
+		default:
+			Controller::redirect();
+			break;
 		}
 	}
 	
