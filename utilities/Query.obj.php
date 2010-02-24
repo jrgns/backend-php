@@ -45,20 +45,10 @@ class Query {
 			$this->connection = $options['connection'];
 		}
 		$this->action = $action;
-		if ($table instanceof DBObject) {
-			$table = $table->getSource();
-		} else if ($components = Component::getActive()) {
-			$components = array_flatten($components, null, 'name');
-			if (in_array($table, $components) && class_exists($table . 'Obj', true)) {
-				$name = $table . 'Obj';
-				$table = new $name();
-				$table = $table->getSource();
-			}
-		}
+		$this->table = self::getTable($table);
 		if (array_key_exists('fields', $options)) {
 			$this->fields = is_array($options['fields']) ? $options['fields'] : array($options['fields']);
 		}
-		$this->table = self::enclose($table);
 	}
 
 	private function checkConnection() {
@@ -262,6 +252,20 @@ class Query {
 			return '`' . $element . '`';
 		}
 		return $element;
+	}
+	
+	public static function getTable($table) {
+		if ($table instanceof DBObject) {
+			$table = $table->getSource();
+		} else if ($components = Component::getActive()) {
+			$components = array_flatten($components, null, 'name');
+			if (in_array($table, $components) && class_exists($table . 'Obj', true)) {
+				$name = $table . 'Obj';
+				$table = new $name();
+				$table = $table->getSource();
+			}
+		}
+		return self::enclose($table);
 	}
 	
 	public function __toString() {
