@@ -16,7 +16,9 @@ class Request {
 	}
 	
 	private static function checkAliases($query) {
-		$aliases = @include(APP_FOLDER . '/configs/queries.php');
+		if (file_exists(APP_FOLDER . '/configs/queries.php')) {
+			$aliases = include(APP_FOLDER . '/configs/queries.php');
+		}
 		if (empty($aliases)) {
 			if (Controller::$debug) {
 				Backend::addError('Invalid query aliases');
