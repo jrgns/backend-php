@@ -133,7 +133,7 @@ class HtmlView extends View {
 		return $toret;
 	}
 	
-	private static function addLastContent($to_print) {
+	public static function addLastContent($to_print) {
 		//Checking for ob_level > 1, as we're using ob_gzhandler
 		if (ob_get_level() > 1) {
 			//Ending the ob_start from HtmlView::hook_init

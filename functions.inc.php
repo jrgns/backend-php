@@ -267,7 +267,7 @@ function files_from_folder($folder, array $options = array()) {
 	if (is_dir($folder)) {
 		$dh = opendir($folder);
 		while (($file = readdir($dh)) !== false) {
-			if (filetype($folder . $file) == 'file' && substr($file, 0, -1) != '~') {
+			if (filetype($folder . $file) == 'file' && substr($file, -1, 1) != '~') {
 				if ($prepend_folder) {
 					$toret[] = $folder . $file;
 				} else {
