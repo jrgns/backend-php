@@ -6,7 +6,7 @@ class BackendSitemap extends AreaCtl {
 		$sitemaps = array();
 		foreach($this->areas as $area => $options) {
 			if ($filename = $this->generateSitemap($area, $options)) {
-				$sitemaps[] = array('location' => $filename);
+				$sitemaps[] = array('location' => SITE_LINK . basename($filename));
 			}
 		}
 		if (count($sitemaps)) {
