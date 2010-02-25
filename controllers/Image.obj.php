@@ -67,7 +67,11 @@ class Image extends File {
 		$obj_name = (class_name(Controller::$area) . 'Obj');
 		if (class_exists($obj_name, true)) {
 			$object = new $obj_name();
-			$object->load(array('limit' => "$start, $count"));
+			if ($start == 'all') {
+				$object->load(array());
+			} else {
+				$object->load(array('limit' => "$start, $count"));
+			}
 			$toret = $object;
 		} else {
 			Controller::whoops();

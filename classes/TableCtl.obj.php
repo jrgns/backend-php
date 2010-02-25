@@ -59,7 +59,9 @@ class TableCtl extends AreaCtl {
 		$object = self::getObject();
 		if ($object) {
 			$toret = true;
-			if ($start || $count) {
+			if ($start == 'all') {
+				$limit = 'all';
+			} else if ($start || $count) {
 				$limit = "$start, $count";
 			} else {
 				$limit = false;

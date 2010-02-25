@@ -64,7 +64,7 @@ class SelectQuery extends Query {
 		if (!array_key_exists($type, $this->joins)) {
 			$this->joins[$type] = array();
 		}
-		$table = Query::getTable($query);
+		$table = Query::getTable($table);
 		if (array_key_exists($table, $this->joins[$type])) {
 			$this->joins[$type][$table] = array_merge($this->joins[$type][$table], $conditions);
 		} else {

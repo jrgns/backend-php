@@ -682,7 +682,7 @@ class DBObject {
 				}
 				break;
 			case 'list':
-				if (array_key_exists('limit', $options)) {
+				if (array_key_exists('limit', $options) && !$options['limit'] != 'all') {
 					$query->limit($options['limit']);
 				}
 				break;
