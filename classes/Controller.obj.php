@@ -233,7 +233,7 @@ class Controller {
 					break;
 				case in_array($extension, array('js')):
 				default:
-					$view_name = 'SomeOtherView';
+					$view_name = false;
 					break;
 				}
 			}
