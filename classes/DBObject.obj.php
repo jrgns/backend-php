@@ -450,9 +450,12 @@ class DBObject {
 		$ret_data = array();
 		$toret = true;
 		if (is_array($data)) {
-			foreach($this->meta['fields'] as $name => $field) {
+			foreach($this->meta['fields'] as $name => $options) {
+				$options = is_array($options) ? $options : array('type' => $options);
+				$type  = array_key_exists('type', $options) ? $options['type'] : 'string';
+				
 				$value = array_key_exists($name, $data) ? $data[$name] : null;
-				switch($field) {
+				switch($type) {
 				case 'primarykey':
 				case 'lastmodified':
 					$value = null;
@@ -575,6 +578,9 @@ class DBObject {
 				}
 				if (!is_null($value)) {
 					$ret_data[$name] = $value;
+				} else if (!empty($options['required'])) {
+					$toret = false;
+					break;
 				}
 			}
 		}
@@ -586,8 +592,10 @@ class DBObject {
 		if (array_key_exists('obj', $data)) {
 			$data = $data['obj'];
 		}
+		$toret = array();
 		foreach($this->meta['fields'] as $name => $options) {
 			$options = is_array($options) ? $options : array('type' => $options);
+
 			$type = array_key_exists('type', $options) ? $options['type'] : 'string';
 			if (in_array($type, array('tiny_blob', 'blob', 'medium_blob', 'long_blob'))) {
 				if (!empty($_FILES['obj'])) {
@@ -624,16 +632,16 @@ class DBObject {
 						$file['tmp_name'] = $_FILES['obj']['tmp_name'][$name];
 						$file['error']    = $_FILES['obj']['error'][$name];
 						$file['size']     = $_FILES['obj']['size'][$name];
-						$data[$name] = $file;
+						$toret[$name] = $file;
 					}
 				} else {
-					$data[$name] = null;
+					$toret[$name] = null;
 				}
 			} else {
-				$data[$name] = array_key_exists($name, $data) ? $data[$name] : null;
+				$toret[$name] = array_key_exists($name, $data) ? $data[$name] : null;
 			}
 		}
-		return $data;
+		return $toret;
 	}
 	
 	public function getSource() {
