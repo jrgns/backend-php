@@ -26,7 +26,9 @@ class ChunkView extends HtmlView {
 		Backend::setSuccess();
 		Backend::setNotice();
 
-		$to_print = Render::renderFile('maincontent.tpl.php');
+		$to_print = Render::renderFile('styles.area.tpl.php');
+		$to_print .= Render::renderFile('maincontent.tpl.php');
+		$to_print .= Render::renderFile('scripts.tpl.php');
 
 		$to_print = HtmlView::addLastContent($to_print);
 		$to_print = HtmlView::replace($to_print);
@@ -58,6 +60,8 @@ class ChunkView extends HtmlView {
 	 *
 	 */
 	public static function hook_post_display($data, $controller) {
+		Backend::add('Styles', array_unique(array_filter(Backend::getStyles())));
+		Backend::add('Scripts', array_unique(array_filter(Backend::getScripts())));
 		return $data;
 	}
 }
