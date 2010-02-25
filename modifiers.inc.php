@@ -92,24 +92,24 @@ function pluralize($string) {
 */
 function singularize($string) {
 	$singular = array(
-					array( '/(quiz)zes$/i'             , "$1" ),
+					array( '/(quiz)(zes)?$/i'          , "$1" ),
 					array( '/(matr)ices$/i'            , "$1ix" ),
 					array( '/(vert|ind)ices$/i'        , "$1ex" ),
-					array( '/^(ox)en$/i'               , "$1" ),
-					array( '/(alias)es$/i'             , "$1" ),
+					array( '/^(ox)(en)?$/i'            , "$1" ),
+					array( '/(alias)(es)?$/i'          , "$1" ),
 					array( '/(octop|vir)i$/i'          , "$1us" ),
 					array( '/(cris|ax|test)es$/i'      , "$1is" ),
-					array( '/(shoe)s$/i'               , "$1" ),
-					array( '/(o)es$/i'                 , "$1" ),
-					array( '/(bus)es$/i'               , "$1" ),
+					array( '/(shoe)(s)?$/i'            , "$1" ),
+					array( '/(o)(es)?$/i'              , "$1" ),
+					array( '/(bus)(es)?$/i'            , "$1" ),
 					array( '/([m|l])ice$/i'            , "$1ouse" ),
-					array( '/(x|ch|ss|sh)es$/i'        , "$1" ),
-					array( '/(m)ovies$/i'              , "$1ovie" ),
+					array( '/(x|ch|ss|sh)(es)?$/i'     , "$1" ),
+					array( '/(m)(ovies)?$/i'           , "$1ovie" ),
 					array( '/(s)eries$/i'              , "$1eries" ),
 					array( '/([^aeiouy]|qu)ies$/i'     , "$1y" ),
 					array( '/([lr])ves$/i'             , "$1f" ),
-					array( '/(tive)s$/i'               , "$1" ),
-					array( '/(hive)s$/i'               , "$1" ),
+					array( '/(tive)(s)?$/i'            , "$1" ),
+					array( '/(hive)(s)?$/i'            , "$1" ),
 					array( '/(li|wi|kni)ves$/i'        , "$1fe" ),
 					array( '/(shea|loa|lea|thie)ves$/i', "$1f" ),
 					array( '/(^analy)ses$/i'           , "$1sis" ),
@@ -117,8 +117,8 @@ function singularize($string) {
 					array( '/([ti])a$/i'               , "$1um" ),
 					array( '/(n)ews$/i'                , "$1ews" ),
 					array( '/(h|bl)ouses$/i'           , "$1ouse" ),
-					array( '/(corpse)s$/i'             , "$1" ),
-					array( '/(us)es$/i'                , "$1" ),
+					array( '/(corpse)(s)?$/i'             , "$1" ),
+					array( '/(us)(es)?$/i'                , "$1" ),
 					array( '/s$/i'                     , "" )
 				);
 
@@ -154,9 +154,10 @@ function singularize($string) {
 	}
 
 	// check for matches using regular expressions
-	foreach ( $singular as $pattern ) {
-		if ( preg_match( $pattern[0], $string ) )
+	foreach ( $singular as $key => $pattern ) {
+		if ( preg_match( $pattern[0], $string ) ) {
 			return preg_replace( $pattern[0], $pattern[1], $string );
+		}
 	}
 	
 	return $string;
