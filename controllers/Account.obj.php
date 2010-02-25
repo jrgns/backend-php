@@ -121,6 +121,10 @@ class Account extends TableCtl {
 		return $toret ? $User : false;
 	}
 	
+	public function action_list($start, $count, array $options = array()) {
+		return parent::action_list($start, $count, $options);
+	}
+	
 	public function html_display($result) {
 		parent::html_display($result);
 		if ($result instanceof DBObject) {

@@ -61,13 +61,13 @@ class Image extends File {
 		return $this->feed_list($result, 'atom');
 	}
 
-	public function action_list($start, $count) {
+	public function action_list($start, $count, array $options = array()) {
 		$toret = false;
 		Backend::add('Sub Title', 'List');
 		$obj_name = (class_name(Controller::$area) . 'Obj');
 		if (class_exists($obj_name, true)) {
 			$object = new $obj_name();
-			if ($start == 'all') {
+			if ($start === 'all') {
 				$object->load(array());
 			} else {
 				$object->load(array('limit' => "$start, $count"));

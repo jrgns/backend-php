@@ -44,7 +44,7 @@ class TableCtl extends AreaCtl {
 	 */
 	public function action_display($id) {
 		$toret = false;
-		$object = self::getObject();
+		$object = self::getObject(get_class($this));
 		if ($object && $id > 0) {
 			$toret = self::action_read($id);
 		}
@@ -54,19 +54,19 @@ class TableCtl extends AreaCtl {
 	/**
 	 * Action for listing an area's records
 	 */
-	public function action_list($start, $count) {
+	public function action_list($start, $count, array $options = array()) {
 		$toret = false;
-		$object = self::getObject();
+		$object = self::getObject(get_class($this));
 		if ($object) {
 			$toret = true;
-			if ($start == 'all') {
+			if ($start === 'all') {
 				$limit = 'all';
 			} else if ($start || $count) {
 				$limit = "$start, $count";
 			} else {
 				$limit = false;
 			}
-			$object->load(array('limit' => $limit));
+			$object->load(array_merge(array('limit' => $limit), $options));
 			$toret = $object;
 		} else {
 			Controller::whoops();
@@ -82,7 +82,7 @@ class TableCtl extends AreaCtl {
 	 */
 	public function action_create() {
 		$toret = false;
-		$object = self::getObject();
+		$object = self::getObject(get_class($this));
 		if ($object) {
 			$toret = true;
 			//We need to check if the post data is valid in some way?
@@ -107,7 +107,7 @@ class TableCtl extends AreaCtl {
 	
 	public function action_replace() {
 		$toret = false;
-		$object = self::getObject();
+		$object = self::getObject(get_class($this));
 		if ($object) {
 			$toret = true;
 			//We need to check if the post data is valid in some way?
@@ -151,7 +151,7 @@ class TableCtl extends AreaCtl {
 	 */
 	public function action_update($id) {
 		$toret = false;
-		$object = self::getObject($id);
+		$object = self::getObject(get_class($this), $id);
 		if ($object) {
 			if ($object->array) {
 				$toret = true;
@@ -180,7 +180,7 @@ class TableCtl extends AreaCtl {
 	
 	public function action_delete($id) {
 		$toret = false;
-		$object = self::getObject($id);
+		$object = self::getObject(get_class($this), $id);
 		if ($object && is_post()) {
 			if ($object->array) {
 				if ($object->delete()) {
@@ -339,7 +339,7 @@ class TableCtl extends AreaCtl {
 			break;
 		default:
 		case $result:
-			$object = self::getObject();
+			$object = self::getObject(get_class($this));
 			if ($object) {
 				Backend::add('Object', $object);
 				Backend::add('TabLinks', $this->getTabLinks('create'));
@@ -378,7 +378,7 @@ class TableCtl extends AreaCtl {
 			Controller::redirect('?q=' . $result->getArea() . '/display/' . $result->getMeta('id'));
 			break;
 		case $result:
-			$object = self::getObject();
+			$object = self::getObject(get_class($this));
 			if ($object) {
 				Backend::add('Object', $object);
 				Backend::add('TabLinks', $this->getTabLinks('update'));
@@ -434,7 +434,7 @@ class TableCtl extends AreaCtl {
 	 * how to work around this?
 	 */
 	public function rest_create() {
-		$object = self::getObject();
+		$object = self::getObject(get_class($this));
 		if ($object) {
 			$toret = true;
 			//We need to check if the post data is valid in some way?
@@ -531,11 +531,11 @@ class TableCtl extends AreaCtl {
 		return $parameters;
 	}
 	
-	public static function getObject($id = false) {
+	public static function getObject($obj_name = false, $id = false) {
 		$toret = false;
-		$component = class_name(Controller::$area);
-		$obj_name  = class_name(Controller::$area) . 'Obj';
-		if (Component::isActive($obj_name) && class_exists($obj_name, true)) {
+		$obj_name = $obj_name ? class_name($obj_name) : class_name(Controller::$area);
+		$obj_name .= 'Obj';
+		if (Component::isActive($obj_name)) {
 			if ($id) {
 				$toret = new $obj_name($id);
 			} else {

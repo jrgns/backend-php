@@ -11,8 +11,13 @@
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
 class Assignment extends TableCtl {
-	function action_list($start, $count) {
+	function action_list($start, $count, array $options = array()) {
 		$Assignments = new AssignmentObj();
+		if ($start === 'all') {
+			$limit = 'all';
+		} else {
+			$limit = "$start, $count";
+		}
 		$conditions = array(
 			'`assignments`.`active` = 1',
 		);
@@ -23,7 +28,7 @@ class Assignment extends TableCtl {
 			'`assignments`.*',
 			'`roles`.`name` AS `role`',
 		);
-		list ($query, $params) = $Assignments->getSelectSQL(array('conditions' => $conditions, 'joins' => $joins, 'fields' => $fields));
+		list ($query, $params) = $Assignments->getSelectSQL(array('conditions' => $conditions, 'joins' => $joins, 'fields' => $fields, 'limit' => $limit));
 		$Assignments->load(array('query' => $query, 'parameters' => $params));
 		Backend::add('Assignments', $Assignments);
 		Backend::addContent(Render::renderFile('assignment_list.tpl.php'));

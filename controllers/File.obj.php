@@ -53,13 +53,17 @@ class File extends TableCtl {
 		Backend::addContent('<a href="?q=' . class_for_url(get_class($this)) . '/read/' . $file->array['id'] . '" title="' . $file->array['name'] . '">' . $file->array['name'] . '</a>');
 	}
 	
-	public function action_list($start, $count) {
+	public function action_list($start, $count, array $options = array()) {
 		$toret = false;
 		Backend::add('Sub Title', 'List');
 		$obj_name = (class_name(Controller::$area) . 'Obj');
 		if (class_exists($obj_name, true)) {
 			$object = new $obj_name();
-			$object->load(array('limit' => $count));
+			if ($start === 'all') {
+				$object->load(array());
+			} else {
+				$object->load(array('limit' => "$start, $count"));
+			}
 			$toret = $object;
 		} else {
 			Controller::whoops();

@@ -21,17 +21,17 @@ class BackendSitemap extends AreaCtl {
 	}
 	
 	private function generateSitemap($area, $options) {
-		$class = class_name($area) . 'Obj';
-		if (!(class_exists($class, true) && Component::isActive(class_name($area)))) {
-			Backend::addError('Could not generate sitemap: Component missing or inactive. (' . $area . ')');
+		$class = class_name($area);
+		if (!Component::isActive(class_name($area))) {
+			Backend::addError('Could not generate sitemap: Component inactive. (' . $area . ')');
 			return false;
 		}
-		$object = new $class();
-		if (!($object instanceof DBObject)) {
+		$controller = new $class();
+		if (!($controller instanceof TableCtl)) {
 			Backend::addError('Could not generate sitemap: Invalid Area. (' . $area . ')');
 			return false;
 		}
-		$object->loadList();
+		$object = $controller->action_list('all', false);
 		if (!$object->list) {
 			Backend::addError('Could not generate sitemap: Could not generate list. (' . $area . ')');
 			return false;
@@ -42,18 +42,26 @@ class BackendSitemap extends AreaCtl {
 			Backend::addError('Could not generate sitemap: Could not open sitemap file. (' . $area . ')');
 			return false;
 		}
+		$last_date = 0;
 		ob_start();
 		fwrite($fp, '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . PHP_EOL);
 		foreach($object->list as $row) {
-			$url = SITE_LINK;
+			$last_date = strtotime($row['modified']) > $last_date ? strtotime($row['modified']) : $last_date;
 			if (Value::get('clean_urls', false)) {
-				$url .= '' . class_for_url($object) . '/' . $row['id'];
+				$url = SITE_LINK . class_for_url($object) . '/' . $row['id'];
 			} else {
-				$url .= '?q=' . class_for_url($object) . '/' . $row['id'];
+				$url = SITE_LINK . '?q=' . class_for_url($object) . '/' . $row['id'];
 			}
 			$row['url'] = $url;
 			fwrite($fp, Render::renderFile('sitemap_link.tpl.php', array('link' => $row)));
 		}
+		if (Value::get('clean_urls', false)) {
+			$url = SITE_LINK . class_for_url($object) . '/';
+		} else {
+			$url = SITE_LINK . '?q=' . class_for_url($object) . '/';
+		}
+		$link = array('url' => $url, 'modified' => date('Y-m-d H:i:s', $last_date), 'priority' => 0.8, 'frequency' => 'daily');
+		fwrite($fp, Render::renderFile('sitemap_link.tpl.php', array('link' => $link)));
 		fwrite($fp, '</urlset>' . PHP_EOL);
 		return $filename;
 	}
