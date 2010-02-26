@@ -33,7 +33,10 @@ class Component extends TableCtl {
 	}
 	
 	public function json_toggle($result) {
-		Controller::redirect('?q=' . Controller::$area . '/' . $id);
+		if ($result instanceof ComponentObj) {
+			Controller::redirect('?q=' . Controller::$area . '/' . $result->array['id']);
+		}
+		return $result;
 	}
 	
 	public static function fromFolder() {
