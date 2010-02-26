@@ -29,8 +29,11 @@ class Component extends TableCtl {
 				}
 			}
 		}
-		Controller::redirect('?q=' . Controller::$area . '/' . $id);
 		return $toret;
+	}
+	
+	public function json_toggle($result) {
+		Controller::redirect('?q=' . Controller::$area . '/' . $id);
 	}
 	
 	public static function fromFolder() {

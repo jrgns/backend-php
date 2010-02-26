@@ -33,7 +33,15 @@ class JsonView extends TextView {
 		default:
 			break;
 		}
-		return json_encode($to_print);
+		$object = new stdClass();
+		$object->result = $to_print;
+		$object->error = Backend::getError();
+		$object->notice = Backend::getNotice();
+		$object->success = Backend::getSuccess();
+		Backend::setError();
+		Backend::setNotice();
+		Backend::setSuccess();
+		return json_encode($object);
 	}
 }
 
