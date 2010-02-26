@@ -360,7 +360,7 @@ function curl_request($url, array $parameters = array(), array $options = array(
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	}
 	if (array_key_exists('header_function', $options) && is_callable($options['header_function'])) {
-		//curl_setopt($ci, CURLOPT_HEADERFUNCTION, array($this, 'getHeader'));
+		curl_setopt($ci, CURLOPT_HEADERFUNCTION, $options['header_function']);
 		curl_setopt($ch, CURLOPT_HEADER, false);
 	} else if (!empty($options['return_header'])) {
 		curl_setopt($ch, CURLOPT_HEADER, true);
@@ -384,7 +384,7 @@ function curl_request($url, array $parameters = array(), array $options = array(
 	case 'post':
 		curl_setopt($ch, CURLOPT_POST, true);
 		if (count($parameters)) {
-			curl_setopt($ch, CURLOPT_POSTFIELDS, $parameters);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($parameters));
 		}
 		break;
 	case 'get':
