@@ -151,7 +151,7 @@ class Admin extends AreaCtl {
 	}
 	
 	public static function hook_post_display($data, $controller) {
-		$user = Account::checkUser();
+		$user = BackendAccount::checkUser();
 		$installed = Value::get('admin_installed', false);
 		if (!$installed) {
 			Links::add('Install Application', '?q=admin/install', 'secondary');

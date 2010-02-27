@@ -536,7 +536,7 @@ class DBObject {
 					if ($value !== null) {
 						$value = (int)$value;
 					} else {
-						$user = Account::checkUser();
+						$user = BackendAccount::checkUser();
 						if ($user && $user->id > 0) {
 							$value = $user->id;
 						} else {

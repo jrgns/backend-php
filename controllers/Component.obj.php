@@ -73,7 +73,7 @@ class Component extends TableCtl {
 		$toret['Admin']       = '/controllers/Admin.obj.php';
 		$toret['Content']     = '/controllers/Content.obj.php';
 		$toret['Value']       = '/controllers/Value.obj.php';
-		$toret['Account']     = '/controllers/Account.obj.php';
+		$toret['BackendAccount'] = '/controllers/BackendAccount.obj.php';
 		$toret['Home']        = '/controllers/Home.obj.php';
 		//Views
 		$toret['HtmlView']    = '/views/HtmlView.obj.php';
@@ -84,6 +84,7 @@ class Component extends TableCtl {
 		$toret['PhpView']     = '/views/PhpView.obj.php';
 		$toret['AtomView']    = '/views/AtomView.obj.php';
 		$toret['RssView']     = '/views/RssView.obj.php';
+		$toret['ChunkView']   = '/views/ChunkView.obj.php';
 		return $toret;
 	}
 	

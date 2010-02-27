@@ -33,7 +33,7 @@
 		</div>
 		<div id="gravatar_div" class="span-4 last">
 			<a href="http://en.gravatar.com/site/check/<?php echo $Object->array['email'] ?>" target="_blank">
-				<img src="<?php echo Account::getGravatar($Object->array['email']) ?>" alt="Gravatar" />
+				<img src="<?php echo BackendAccount::getGravatar($Object->array['email']) ?>" alt="Gravatar" />
 			</a>
 		</div>
 		<div class="clear">&nbsp;</div>

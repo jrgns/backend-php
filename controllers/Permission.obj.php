@@ -46,7 +46,7 @@ class Permission extends TableCtl {
 	
 	public static function check($action = '*', $subject = '*', $subject_id = 0) {
 		$toret = false;
-		$user = Account::checkUser();
+		$user = BackendAccount::checkUser();
 		$user = (!$user && !empty($_SESSION['user'])) ? $_SESSION['user'] : $user;
 		if (!empty($user->roles)) {
 			$user_roles = $user->roles;

@@ -45,7 +45,7 @@ class Comment extends TableCtl {
 			$_POST['obj']['foreign_id']    = empty($_POST['obj']['foreign_id'])    ? reset($parameters)              : $_POST['obj']['foreign_id'];
 			$_POST['obj']['foreign_table'] = empty($_POST['obj']['foreign_table']) ? table_name(get_previous_area()) : $_POST['obj']['foreign_table'];
 			//If we don't have a logged in user, create a dummy account
-			if (!Account::checkUser()) {
+			if (!BackendAccount::checkUser()) {
 				$query = new SelectQuery('users');
 				$query->filter('`email` = :email');
 				$old_user = $query->fetchAssoc(array(':email' => $_POST['user']['email']));
@@ -70,7 +70,7 @@ class Comment extends TableCtl {
 						'confirmed' => 0,
 						'active'    => 1,
 					);
-					$user = new AccountObj();
+					$user = new BackendAccountObj();
 					if ($user->create($user_data)) {
 						$_POST['obj']['user_id'] = $user->array['id'];
 					}

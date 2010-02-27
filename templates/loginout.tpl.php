@@ -1,5 +1,5 @@
 <div id="loginout" class="box span-5">
-<?php if (!Account::checkUser()): ?>
+<?php if (!BackendAccount::checkUser()): ?>
 	<form method="post" action="#S_SITE_LINK#?q=account/login">
 		<div>
 			<label>Username:</label> <input class="text" type="text" name="username"><br>
