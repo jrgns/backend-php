@@ -67,12 +67,12 @@ class Tag extends TableCtl {
 	
 	public function action_display($id) {
 		$result = parent::action_display($id);
-		if ($toret instanceof DBObject) {
+		if ($result instanceof DBObject) {
 			$query = new SelectQuery('TagLink');
 			$query
-				->leftJoin($table, '`tag_links`.`foreign_id` = `' . $result->array['foreign_table'] . '`.`id`')
+				->leftJoin($result->array['foreign_table'], '`tag_links`.`foreign_id` = `' . $result->array['foreign_table'] . '`.`id`')
 				->filter('`tag_id` = :tag_id');
-			$result->array['list'] = $query->fetchAll(array(':tag_id' => $result->array['id'], ':table' => $result->array['foreign_table']));
+			$result->array['list'] = $query->fetchAll(array(':tag_id' => $result->array['id']));
 		}
 		return $result;
 	}
@@ -81,6 +81,11 @@ class Tag extends TableCtl {
 		$toret = parent::html_display($result);
 		if ($result instanceof DBObject) {
 			Backend::add('Sub Title', $result->array['name']);
+			if (Render::checkTemplateFile('tag.' . $result->array['foreign_table'] . '.list.tpl.php')) {
+				Backend::addContent(Render::renderFile('tag.' . $result->array['foreign_table'] . '.list.tpl.php'));
+			} else {
+				Backend::addContent(Render::renderFile('tag.display.list.tpl.php'));
+			}
 		}
 		return $toret;
 	}
