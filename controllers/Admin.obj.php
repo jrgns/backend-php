@@ -97,6 +97,16 @@ class Admin extends AreaCtl {
 		}
 		return true;
 	}
+	
+	function action_weekly(array $options = array()) {
+		$components = Component::getActive();
+		foreach($components as $component) {
+			if (is_callable(array($component['name'], 'weekly'))) {
+				call_user_func_array(array($component['name'], 'daily'), $options);
+			}
+		}
+		return true;
+	}
 
 	public function html_install($result) {
 		$installed = Value::get('admin_installed', false);
