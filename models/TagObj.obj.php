@@ -29,7 +29,7 @@ class TagObj extends DBObject {
 		$meta['name'] = 'Tag';
 		$meta['fields'] = array(
 			'id' => 'primarykey',
-			'parent_id' => 'foreignkey',
+			'parent_id' => array('type' => 'foreignkey', 'default' => 0),
 			'foreign_table' => 'string',
 			'name' => 'title',
 			'description' => 'text',
@@ -42,6 +42,18 @@ class TagObj extends DBObject {
 			'foreign_table,name' => 'unique',
 		);
 		return parent::__construct($meta);
+	}
+
+	public function getSelectSQL($options = array()) {
+		if (!array_key_exists('conditions', $options)) {
+			if (!Permission::check('manage', 'tag')) {
+				$options['conditions'] = array('`active` = 1');
+			}
+		}
+		if (!array_key_exists('order', $options)) {
+			$options['order'] = '`weight`';
+		}
+		return parent::getSelectSQL($options);
 	}
 
 	function validate($data, $action, $options = array()) {
