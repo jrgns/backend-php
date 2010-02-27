@@ -16,8 +16,14 @@ class BackendSitemap extends AreaCtl {
 				return false;
 			}
 			fwrite($fp, Render::renderFile('sitemap_index.tpl.php', array('sitemaps' => $sitemaps)));
+			return SITE_FOLDER . '/sitemap_index.xml';
 		}
-		return true;
+		return false;
+	}
+	
+	public function notifyGoogle($url) {
+		$data = array('sitemap' => $url);
+		return curl_request('www.google.com/webmasters/tools/ping', $data);
 	}
 	
 	private function generateSitemap($area, $options) {
@@ -64,5 +70,13 @@ class BackendSitemap extends AreaCtl {
 		fwrite($fp, Render::renderFile('sitemap_link.tpl.php', array('link' => $link)));
 		fwrite($fp, '</urlset>' . PHP_EOL);
 		return $filename;
+	}
+	
+	public function weekley(array $options = array()) {
+		$url = self::action_generate();
+		if ($url) {
+			self::notifyGoogle($url);
+		}
+		return true;
 	}
 }
