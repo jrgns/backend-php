@@ -1,6 +1,6 @@
 <?php
 /**
- * Class file for TagObj
+ * Class file for TagLinkObj
  *
  * @author J Jurgens du Toit (JadeIT cc) <jurgens.dutoit@gmail.com> - initial API and implementation
  * @copyright Copyright (c) 2009 JadeIT cc.
@@ -13,33 +13,27 @@
  * Contributors:
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  *
- * Generated with class_gen on 2009-05-10 20:59:26 
  */
 
 /**
- * DBObject wrapper for the `tags` table
+ * DBObject wrapper for the `tag_links` table
  * @package Models
  */
-class TagObj extends DBObject {
+class TagLinkObj extends DBObject {
 	function __construct($meta = array()) {
 		if (!is_array($meta) && (is_numeric($meta) || is_string($meta))) {
 			$meta = array('id' => $meta);
 		}
-		$meta['table'] = 'tags';
-		$meta['name'] = 'Tag';
+		$meta['table'] = 'tag_links';
+		$meta['name'] = 'TagLink';
 		$meta['fields'] = array(
 			'id' => 'primarykey',
-			'parent_id' => 'foreignkey',
-			'foreign_table' => 'string',
-			'name' => 'title',
-			'description' => 'text',
-			'active' => 'boolean',
-			'weight' => 'integer',
-			'modified' => 'lastmodified',
-			'added' => 'dateadded',
+			'tag_id' => 'foreignkey',
+			'foreign_id' => 'foreignkey',
+			'added' => 'lastmodified',
 		);
 		$meta['keys'] = array(
-			'foreign_table,name' => 'unique',
+			'tag_id,foreign_id' => 'unique',
 		);
 		return parent::__construct($meta);
 	}

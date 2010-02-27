@@ -16,13 +16,65 @@ class Tag extends TableCtl {
 		return $links;
 	}
 	
-	public function action_display($id) {
-		$toret = parent::action_display($id);
-		if ($toret instanceof DBObject) {
-			$query = new CustomQuery('SELECT * FROM `contents` WHERE FIND_IN_SET(:tag_id, `tags`)');
-			$toret->array['content_list'] = $query->fetchAll(array(':tag_id' => $toret->array['id']));
+	public static function getTags($content_id) {
+		$query = new CustomQuery('SELECT `tags`.* FROM `tags` LEFT JOIN `contents` ON FIND_IN_SET(`tags`.`id`, `contents`.`tags`) WHERE `contents`.`id` = :id');
+		return $query->fetchAll(array(':id' => $content_id));
+	}
+	
+	public static function addTags($tags, $foreign_table, $foreign_id) {
+		$tags = array_map('plain', array_map('trim', explode(',', $tags)));
+		$toret = true;
+		foreach($tags as $tag) {
+			$toret = Tag::add($tag, $foreign_table, $foreign_id) && $toret;
 		}
 		return $toret;
+	}
+	
+	public static function add($tag, $foreign_table, $foreign_id) {
+		$tag_info = Tag::check($tag, $foreign_table);
+		if ($tag_info) {
+			return TagLink::add($tag_info['id'], $foreign_id);
+		}
+		return false;
+	}
+	
+	public static function check($name, $area) {
+		if (is_object($area)) {
+			$area = table_name($area);
+		}
+		
+		//Check if tag exists
+		$query = new SelectQuery('Tag');
+		$query
+			->filter('`foreign_table` = :table')
+			->filter('`name` = :tag');
+		if ($row = $query->fetchAssoc(array(':tag' => $name, ':table' => $area))) {
+			return $row;
+		}
+		
+		//Tag doesn't already exist
+		$data = array(
+			'name'          => $name,
+			'foreign_table' => $area,
+			'active'        => 1,
+		);
+		$tag = new TagObj();
+		if ($tag->create($data)) {
+			return $tag->array;
+		}
+		return false;
+	}
+	
+	public function action_display($id) {
+		$result = parent::action_display($id);
+		if ($toret instanceof DBObject) {
+			$query = new SelectQuery('TagLink');
+			$query
+				->leftJoin($table, '`tag_links`.`foreign_id` = `' . $result->array['foreign_table'] . '`.`id`')
+				->filter('`tag_id` = :tag_id');
+			$result->array['list'] = $query->fetchAll(array(':tag_id' => $result->array['id'], ':table' => $result->array['foreign_table']));
+		}
+		return $result;
 	}
 	
 	public function html_display($result) {
@@ -52,28 +104,7 @@ class Tag extends TableCtl {
 		return $result;
 	}
 
-	public static function addTags($content_id, array $tags) {
-		$Tag = new TagObj();
-		foreach($tags as $tag) {
-			$data = array(
-				'name'   => $tag,
-				'active' => 1,
-				'weight' => 0,
-			);
-			$Tag->create($data, array('ignore' => true));
-			//If you want to keep track of the last time a tag was added to content, do this
-			//$Tag->create($data, array('on_duplicate' => '`modified` = NOW()'));
-		}
-		$query = new CustomQuery('UPDATE `contents` SET `contents`.`tags` = (SELECT GROUP_CONCAT(DISTINCT `tags`.`id` ORDER BY `tags`.`id` SEPARATOR \',\') FROM `tags` WHERE `tags`.`name` IN (' . implode(', ', array_fill(0, count($tags), '?')) . ')) WHERE `contents`.`id` = ?');
-		$tags[] = $content_id;
-		return $query->execute($tags);
-	}
-	
-	public static function getTags($content_id) {
-		$query = new CustomQuery('SELECT `tags`.* FROM `tags` LEFT JOIN `contents` ON FIND_IN_SET(`tags`.`id`, `contents`.`tags`) WHERE `contents`.`id` = :id');
-		return $query->fetchAll(array(':id' => $content_id));
-	}
-	
+	/*
 	public static function hook_form($object) {
 		if (Controller::$area == 'content' && in_array(Controller::$action, array('create', 'update'))) {
 			$tags = self::getTags($object->array['id']);
@@ -111,6 +142,7 @@ class Tag extends TableCtl {
 		}
 		return true;
 	}
+	*/
 	
 	public static function install(array $options = array()) {
 		$toret = parent::install($options);
