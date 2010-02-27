@@ -74,6 +74,7 @@ class Component extends TableCtl {
 		$toret['Content']     = '/controllers/Content.obj.php';
 		$toret['Value']       = '/controllers/Value.obj.php';
 		$toret['BackendAccount'] = '/controllers/BackendAccount.obj.php';
+		$toret['Account']     = '/controllers/Account.obj.php';
 		$toret['Home']        = '/controllers/Home.obj.php';
 		//Views
 		$toret['HtmlView']    = '/views/HtmlView.obj.php';
