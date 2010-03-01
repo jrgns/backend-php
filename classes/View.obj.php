@@ -42,6 +42,8 @@ class View {
 			if ($controller->checkPermissions()) {
 				$data = $controller->$display_method($data);
 			}
+		} else if (is_null($data)) {
+			Controller::whoops(array('title' => 'Unknown Method', 'message' => 'Method ' . Controller::$area . '::' . Controller::$action . ' does not exist'));
 		}
 		
 		$data = Hook::run('display', 'post', array($data, $controller), array('toret' => $data));
@@ -74,5 +76,18 @@ class View {
 		if (method_exists($this, 'hook_post_output')) {
 			$to_print = $this->hook_post_output($to_print);
 		}
-	}	
+	}
+	
+	public function whoops($msg, $title) {
+		switch ($msg) {
+		case 'Permission Denied':
+			header('HTTP/1.0 401 Unauthorized');
+			break;
+		case 'Unknown Method':
+		case 'Whoops!':
+		default:
+			header('HTTP/1.0 400 Bad Request');
+			break;
+		}
+	}
 }

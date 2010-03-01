@@ -229,6 +229,11 @@ class HtmlView extends View {
 	public static function formsAcceptCharset($content, $charset = 'utf-8') {
 		return str_replace('<form ', '<form accept-charset="' . $charset . '" ', $content);
 	}
+	
+	public function whoops($title, $msg) {
+		Backend::add('Sub Title', $title);
+		Backend::addContent($msg);
+	}
 
 	public static function install() {
 		$toret = true;

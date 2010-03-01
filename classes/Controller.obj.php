@@ -465,8 +465,10 @@ class Controller {
 		}
 		$title = array_key_exists('title', $options) ? $options['title'] : 'Whoops!';
 		$msg = array_key_exists('message', $options) ? $options['message'] : 'Looks like something went wrong...';
-		Backend::add('Sub Title', $title);
-		Backend::addContent($msg);
+		if (is_callable(array(self::$view, 'whoops'))) {
+			call_user_func_array(array(self::$view, 'whoops'), array($title, $msg));
+		} else {
+		}
 		if (array_key_exists('debug', $_REQUEST)) {
 			var_dump($title, $msg);
 			print_stacktrace();
