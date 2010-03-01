@@ -52,8 +52,6 @@ class Controller {
 
 			date_default_timezone_set('Africa/Johannesburg');
 
-			Hook::run('init', 'pre');
-
 			//Debugging
 			self::$debug = false;
 			switch (true) {
@@ -71,6 +69,14 @@ class Controller {
 				ini_set('display_errors', 0);
 			}
 
+			//View
+			self::$view = self::getView();
+			if (!self::$view instanceof View) {
+				die('Unrecognized Request');
+			}
+
+			Hook::run('init', 'pre');
+
 			//Sessions
 			if (array_key_exists('error', $_SESSION)) {
 				Backend::setError($_SESSION['error']);
@@ -84,12 +90,6 @@ class Controller {
 			
 			self::parseQuery();
 
-			//View
-			self::$view = self::getView();
-			if (!self::$view instanceof View) {
-				die('Unrecognized Request');
-			}
-			
 			Hook::run('init', 'post');
 			self::$init = true;
 		}
