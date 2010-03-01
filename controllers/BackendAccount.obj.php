@@ -99,10 +99,9 @@ class BackendAccount extends TableCtl {
 					setcookie(session_name(), '', time() - 42000, '/');
 				}			
 				session_destroy();
-				Controller::redirect(SITE_LINK);
 			}
 		}
-		Controller::redirect();
+		Controller::redirect(SITE_LINK);
 		return true;
 	}
 	

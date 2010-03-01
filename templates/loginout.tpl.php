@@ -1,6 +1,6 @@
 <div id="loginout" class="box span-5">
 <?php if (!BackendAccount::checkUser()): ?>
-	<form method="post" action="#S_SITE_LINK#?q=account/login">
+	<form method="post" action="#S_SITE_LINK#?q=<?php echo class_for_url(BackendAccount::getName()) ?>/login">
 		<div>
 			<label>Username:</label> <input class="text" type="text" name="username"><br>
 			<label>Password:</label> <input class="text" type="password" name="password"><br>
