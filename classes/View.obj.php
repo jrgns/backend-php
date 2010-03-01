@@ -79,15 +79,19 @@ class View {
 	}
 	
 	public function whoops($msg, $title) {
+		$version = '1.1';
 		switch ($msg) {
 		case 'Permission Denied':
-			header('HTTP/1.0 401 Unauthorized');
+			$code = 401;
+			$header = $title;
 			break;
 		case 'Unknown Method':
 		case 'Whoops!':
 		default:
-			header('HTTP/1.0 400 Bad Request');
+			$code = 400;
+			$header = $title;
 			break;
 		}
+		header('HTTP/' . $version . ' ' . $code . ' ' . $header, true, $code);
 	}
 }

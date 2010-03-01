@@ -360,7 +360,7 @@ function curl_request($url, array $parameters = array(), array $options = array(
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	}
 	if (array_key_exists('header_function', $options) && is_callable($options['header_function'])) {
-		curl_setopt($ci, CURLOPT_HEADERFUNCTION, $options['header_function']);
+		curl_setopt($ch, CURLOPT_HEADERFUNCTION, $options['header_function']);
 		curl_setopt($ch, CURLOPT_HEADER, false);
 	} else if (!empty($options['return_header'])) {
 		curl_setopt($ch, CURLOPT_HEADER, true);
