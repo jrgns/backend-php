@@ -135,11 +135,10 @@ class HtmlView extends View {
 	
 	public static function addLastContent($to_print) {
 		//Checking for ob_level > 1, as we're using ob_gzhandler
-		if (ob_get_level() > 1) {
+		$last = '';
+		while (ob_get_level() > 1) {
 			//Ending the ob_start from HtmlView::hook_init
-			$last = ob_get_clean();
-		} else {
-			$last = '';
+			$last .= ob_get_clean();
 		}
 		$start = Backend::get('start');
 		$time = microtime(true) - $start;
