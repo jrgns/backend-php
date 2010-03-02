@@ -198,10 +198,16 @@ class DBObject {
 						$this->object = $result->fetch(PDO::FETCH_OBJ);
 						$this->array = (array)$this->object;
 						$this->loadDeep('object');
+						if (empty($this->meta['id'])) {
+							$this->meta['id'] = $this->array[$this->meta['id_field']];
+						}
 						break;
 					case 'array':
 						$this->array = $result->fetch(PDO::FETCH_ASSOC);
 						$this->loadDeep('array');
+						if (empty($this->meta['id'])) {
+							$this->meta['id'] = $this->array[$this->meta['id_field']];
+						}
 						break;
 					case 'list':
 					default:
@@ -868,7 +874,7 @@ class DBObject {
 		if (count($field_data)) {
 			if (count($value_data) == count($field_data)) {
 				$value_str = implode(', ', $value_data);
-				$query = "UPDATE `$database`.`$table` SET $value_str WHERE `id` = :id";
+				$query = "UPDATE `$database`.`$table` SET $value_str WHERE `$id_field` = :id";
 				$parameters[':id'] = $this->meta['id'];
 			} else {
 				throw new Exception('Insert Query Fields and Values don\'t match');
