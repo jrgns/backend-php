@@ -1,6 +1,6 @@
 <?php
 /**
- * The class file for Config
+ * The class file for BackendConfig
  *
  * @author J Jurgens du Toit (JadeIT cc) <jurgens.dutoit@gmail.com> - initial API and implementation
  * @copyright Copyright (c) 2009 JadeIT cc.
@@ -13,7 +13,7 @@
 /**
  * Base class to handle configurations
  */
-class Config {
+class BackendConfig {
 	protected $config = array();
 
 	public function __construct($config, $site_state = 'production') {
