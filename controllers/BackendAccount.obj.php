@@ -339,6 +339,9 @@ END;
 	
 	public static function daily(array $options = array()) {
 		self::purgeUnconfirmed();
+	}
+	
+	public static function weekly(array $options = array()) {
 		self::userStats();
 	}
 	
@@ -360,11 +363,30 @@ Site Admin
 		);
 	}
 	
-	public static function userStats() {
+	public function action_userStats() {
+		$msg = array();
 		$query = new SelectQuery('users');
 		$query
+			->field('COUNT(*) AS `Total`, SUM(IF(TO_DAYS(NOW()) - TO_DAYS(`added`) < 7, 1, 0)) AS `New`')
 			->filter('`active` = 1')
 			->filter('`confirmed` = 1');
+		if ($stats = $query->fetchAssoc()) {
+			$msg[] = 'There are a total of ' . $stats['Total'] . ' **active** users, of which ' . $stats['New'] . ' signed up in the last 7 days';
+		}
+		$query = new SelectQuery('users');
+		$query
+			->field('COUNT(*) AS `Total`, SUM(IF(TO_DAYS(NOW()) - TO_DAYS(`added`) < 7, 1, 0)) AS `New`')
+			->filter('`active` = 1')
+			->filter('`confirmed` = 1');
+		if ($stats = $query->fetchAssoc()) {
+			$msg[] = 'There are a total of ' . $stats['Total'] . ' **unconfirmed** users, of which ' . $stats['New'] . ' signed up in the last 7 days';
+		}
+		$msg = implode(PHP_EOL . PHP_EOL, $msg);
+		send_email(
+			Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)),
+			'User stats for ' . Backend::get('Title'),
+			$msg
+		);
 	}
 
 	public static function install(array $options = array()) {

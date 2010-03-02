@@ -72,7 +72,7 @@ class BackendSitemap extends AreaCtl {
 		return $filename;
 	}
 	
-	public function weekley(array $options = array()) {
+	public function weekly(array $options = array()) {
 		$url = self::action_generate();
 		if ($url) {
 			self::notifyGoogle($url);
