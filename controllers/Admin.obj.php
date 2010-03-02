@@ -181,6 +181,9 @@ class Admin extends AreaCtl {
 		$toret = Permission::add('anonymous', 'post_install', 'admin') && $toret;
 		$toret = Permission::add('anonymous', 'pre_install', 'admin') && $toret;
 		$toret = Permission::add('anonymous', 'daily', 'admin') && $toret;
+		$toret = Permission::add('anonymous', 'daily', 'admin') && $toret;
+		$toret = Permission::add('authenticated', 'weekly', 'admin') && $toret;
+		$toret = Permission::add('authenticated', 'weekly', 'admin') && $toret;
 
 		return $toret;
 	}
