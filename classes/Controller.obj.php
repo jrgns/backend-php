@@ -200,18 +200,11 @@ class Controller {
 			$view_name = ucwords($_REQUEST['mode']) . 'View';
 		} else {
 			//Check for an extension
-			$id = reset(self::$parameters);
-			if (strpos($id, '.') !== false) {
-				$extension = explode('.', $id);
-				list ($id, $extension) = array(reset($extension), end($extension));
-				self::$parameters[0] = $id;
+			$extension = explode('.', str_replace(dirname($_SERVER['SCRIPT_NAME']), '', $_SERVER['REQUEST_URI']));
+			if (count($extension) > 1) {
+				$extension = current(explode('?', end($extension)));
 			} else {
-				$extension = explode('.', str_replace(dirname($_SERVER['SCRIPT_NAME']), '', $_SERVER['REQUEST_URI']));
-				if (count($extension) > 1) {
-					$extension = current(explode('?', end($extension)));
-				} else {
-					$extension = false;
-				}
+				$extension = false;
 			}
 			if ($extension) {
 				switch (true) {
@@ -235,6 +228,11 @@ class Controller {
 				default:
 					$view_name = false;
 					break;
+				}
+				if ($view_name && !empty($_REQUEST['q'])) {
+					if (substr($_REQUEST['q'], 0 - strlen($extension)) == $extension) {
+						$_REQUEST['q'] = substr($_REQUEST['q'], 0, 0 - strlen($extension) - 1);
+					}
 				}
 			}
 		}
