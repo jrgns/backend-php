@@ -24,11 +24,11 @@
 				?>
 					<td class="image_container">
 						<div class="image_controller">
-							<a href="?q=<?php echo class_for_url($Object) ?>/update/<?php echo $image['id'] ?>"><img src="#SITE_LINK#images/icons/pencil.png"></a>
+							<a href="#SITE_LINK#?q=<?php echo class_for_url($Object) ?>/update/<?php echo $image['id'] ?>"><img src="#SITE_LINK#images/icons/pencil.png"></a>
 							<a href="#" class="delete_link" id="delete_<?php echo $image['id'] ?>"><img src="#SITE_LINK#images/icons/cross.png"></a>
 						</div>
 						<a class="image_link" href="?q=image/display/<?php echo $image['id'] ?>">
-							<img width="<?php echo $image_width ?>" src="?q=image/read/<?php echo $image['id'] ?>.<?php echo $extension ?>" 
+							<img width="<?php echo $image_width ?>" src="#SITE_LINK#?q=image/read/<?php echo $image['id'] ?>.<?php echo $extension ?>" 
 								title="<?php echo $image['title'] ?>" alt="<?php echo $image['title'] ?>" />
 						</a>
 					</td>

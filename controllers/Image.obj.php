@@ -20,7 +20,7 @@ class Image extends File {
 		$extension = end($extension);
 		Backend::add('TabLinks', $this->getTabLinks(Controller::$action));
 		Backend::add('Sub Title', $image->array['name']);
-		Backend::addContent('<div class="image_container"><img src="?q=image/read/' . $image->array['id'] . '.' . $extension . '" title="' . $image->array['title'] . '" alt="' . $image->array['title'] . '" /></div>');
+		Backend::addContent('<div class="image_container"><img src="' . SITE_LINK . '?q=image/read/' . $image->array['id'] . '.' . $extension . '" title="' . $image->array['title'] . '" alt="' . $image->array['title'] . '" /></div>');
 	}
 	
 	public function html_list($content) {
