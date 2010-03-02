@@ -229,7 +229,12 @@ class DBObject {
 	function process($data, $direction) {
 		foreach($data as $name => $value) {
 			if (array_key_exists($name, $this->meta['fields'])) {
-				switch ($this->meta['fields'][$name]) {
+				$options = $this->meta['fields'][$name];
+				if (!is_array($options)) {
+					$options = array('type' => $options);
+				}
+				$type = array_key_exists('type', $options) ? $options['type'] : 'string';
+				switch ($type) {
 				case 'serialized':
 					switch ($direction) {
 					case 'in':
@@ -238,6 +243,11 @@ class DBObject {
 					case 'out':
 						$data[$name] = @unserialize(base64_decode($value));
 						break;
+					}
+					break;
+				case 'text':
+					if (!empty($options['markdown']) && $direction == 'in' && function_exists('markdown')) {
+						$data[$name] = markdown($value);
 					}
 					break;
 				default:
