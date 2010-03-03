@@ -17,7 +17,7 @@
 			<tr>
 				<td><?php echo $permission['action'] ?></td>
 				<?php foreach($roles as $role): if (!in_array($role['name'], array('superadmin', 'nobody'))):
-					$row_name = $permission['subject'] . '_' . $permission['action'];
+					$row_name = $permission['subject'] . '::' . $permission['action'];
 					$checked = 	array_key_exists($row_name, $permissions) && 
 								in_array($role['name'], $permissions[$row_name]);
 				?>

@@ -32,7 +32,14 @@ class GateKeeper {
 	public static function permit($role, $action, $subject, $subject_id, $control) {
 		$toret = false;
 		$params = array(':role' => $role, ':control' => $control, ':action' => $action, ':subject' => $subject, ':subject_id' => $subject_id);
-		$query = new CustomQuery('SELECT `id` FROM `permissions` WHERE `role` = :role AND `control` = :control AND `action` = :action AND `subject` = :subject AND `subject_id` = :subject_id AND system = 0');
+		$query = new SelectQuery('Permission');
+		$query
+			->filter('`role` = :role')
+			->filter('`control` = :control')
+			->filter('`action` = :action')
+			->filter('`subject` = :subject')
+			->filter('`subject_id` = :subject_id')
+			->filter('system = 0');
 		$id = $query->fetchColumn($params);
 		if ($id) {
 			$query = new CustomQuery('UPDATE `permissions` SET `control` = $control WHERE `id` = :id');

@@ -70,17 +70,18 @@ class GateManager extends AreaCtl {
 	public function action_update_permissions() {
 		$toret = true;
 		if (is_post()) {
-			$query = new DeleteQuery('permissions');
+			$query = new DeleteQuery('Permission');
 			if ($query->filter("`role` != 'nobody'")->filter("`role` != 'superadmin'")->execute()) {
 				$permission = new PermissionObj();
 				foreach($_POST as $key => $roles) {
-					list($subject, $action) = explode('_', $key, 2);
+					list($subject, $action) = explode('::', $key, 2);
 					foreach($roles as $role => $value) {
 						$data = array(
 							'subject' => $subject,
 							'action'  => $action,
 							'role'    => $role,
 						);
+						var_dump($data);
 						$toret = $permission->replace($data) && $toret;
 					}
 				}
@@ -114,7 +115,7 @@ class GateManager extends AreaCtl {
 		$query->filter('`active` = 1');
 		$toret->roles = $query->fetchAll();
 
-		$query = new SelectQuery('permissions', array('fields' => "CONCAT(`subject`, '_', `action`), GROUP_CONCAT(DISTINCT `role` ORDER BY `role`) AS `roles`"));
+		$query = new SelectQuery('permissions', array('fields' => "CONCAT(`subject`, '::', `action`), GROUP_CONCAT(DISTINCT `role` ORDER BY `role`) AS `roles`"));
 		$query
 			->filter('`active` = 1')
 			->filter('`subject_id` = 0')
