@@ -337,11 +337,11 @@ END;
 		return $parameters;
 	}
 	
-	public static function daily(array $options = array()) {
+	public function daily(array $options = array()) {
 		self::purgeUnconfirmed();
 	}
 	
-	public static function weekly(array $options = array()) {
+	public function weekly(array $options = array()) {
 		self::userStats();
 	}
 	
@@ -363,7 +363,7 @@ Site Admin
 		);
 	}
 	
-	public function action_userStats() {
+	public static function userStats() {
 		$msg = array();
 		$query = new SelectQuery('users');
 		$query

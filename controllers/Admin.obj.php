@@ -92,7 +92,8 @@ class Admin extends AreaCtl {
 		$components = Component::getActive();
 		foreach($components as $component) {
 			if (is_callable(array($component['name'], 'daily'))) {
-				call_user_func_array(array($component['name'], 'daily'), $options);
+				$object = new $component['name']();
+				call_user_func_array(array($object, 'daily'), $options);
 			}
 		}
 		return true;
@@ -102,7 +103,8 @@ class Admin extends AreaCtl {
 		$components = Component::getActive();
 		foreach($components as $component) {
 			if (is_callable(array($component['name'], 'weekly'))) {
-				call_user_func_array(array($component['name'], 'daily'), $options);
+				$object = new $component['name']();
+				call_user_func_array(array($object, 'weekly'), $options);
 			}
 		}
 		return true;
