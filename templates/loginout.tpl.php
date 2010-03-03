@@ -10,7 +10,7 @@
 	<p>Not a member yet?<br><a href="?q=account/signup">Signup now!</a> It's free... ;)</p>
 <?php else: ?>
 	You are logged in as <?php echo $_SESSION['user']->username ?>
-	<form method="post" action="#S_SITE_LINK#?q=account/logout">
+	<form method="post" action="#S_SITE_LINK#?q=<?php echo class_for_url(BackendAccount::getName()) ?>/logout">
 		<div>
 			<input type="submit" value="Logout" name="do_logout">
 		</div>
