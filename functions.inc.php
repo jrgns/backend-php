@@ -228,7 +228,7 @@ function send_email($recipient, $subject, $message, array $headers = array()) {
 	return mail($recipient, $subject, $message, implode("\r\n", $headers));
 }
 
-function array_flatten(&$array, $key_field = null, $value_field = null) {
+function array_flatten($array, $key_field = null, $value_field = null) {
 	$toret = false;
 	if (is_array($array) && is_array(current($array))) {
 		$toret = array();

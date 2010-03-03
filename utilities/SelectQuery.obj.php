@@ -14,7 +14,7 @@
  * Base class to handle select queries
  */
 class SelectQuery extends Query {
-	protected $joins = array();
+	protected $joins    = array();
 
 	function __construct($table, array $options = array()) {
 		parent::__construct('SELECT', $table, $options);
@@ -36,7 +36,7 @@ class SelectQuery extends Query {
 		}
 		return parent::buildQuery();
 	}
-
+	
 	function leftJoin($table, $conditions) {
 		return $this->join('LEFT', $table, $conditions);
 	}

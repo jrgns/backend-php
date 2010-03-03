@@ -463,6 +463,11 @@ class Controller {
 		}
 		$title = array_key_exists('title', $options) ? $options['title'] : 'Whoops!';
 		$msg = array_key_exists('message', $options) ? $options['message'] : 'Looks like something went wrong...';
+
+		if (Component::isActive('BackendError')) {
+			BackendError::add(0, $title . ': ' . $msg, '', 0, '');
+		}
+
 		if (is_callable(array(self::$view, 'whoops'))) {
 			call_user_func_array(array(self::$view, 'whoops'), array($title, $msg));
 		} else {
