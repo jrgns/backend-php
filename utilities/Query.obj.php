@@ -19,6 +19,7 @@ class Query {
 	protected $action     = false;
 	protected $table      = false;
 	protected $query      = false;
+	protected $distinct   = false;
 	protected $fields     = array();
 	protected $conditions = array();
 	protected $parameters = array();
@@ -112,6 +113,11 @@ class Query {
 		return $toret;
 	}
 	
+	function distinct() {
+		$this->distinct = true;
+		return $this;
+	}
+
 	public function field($field) {
 		if (is_array($field)) {
 			$this->fields = array_merge($this->fields, $field);
@@ -214,6 +220,10 @@ class Query {
 			break;
 		case 'SELECT':
 			$query = $this->action;
+			//TODO Move to SelectQuery
+			if ($this->distinct) {
+				$query .= ' DISTINCT';
+			}
 			if (empty($this->fields)) {
 				$query .= ' *';
 			} else {
