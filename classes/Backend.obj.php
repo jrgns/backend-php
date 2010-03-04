@@ -335,6 +335,15 @@ class Backend {
 	}
 
 	public static function __error_handler($number, $string, $file = false, $line = false, $context = false) {
+		if (!class_exists('Component', false)) {
+			require(BACKEND_FOLDER . '/controllers/Component.obj.php');
+		}
+		if (!class_exists('BackendError', false)) {
+			require(BACKEND_FOLDER . '/controllers/BackendError.obj.php');
+		}
+		if (!class_exists('BackendErrorObj', false)) {
+			require_once(BACKEND_FOLDER . '/models/BackendErrorObj.obj.php');
+		}
 		if (Component::isActive('BackendError')) {
 			BackendError::add($number, $string, $file, $line, $context);
 		}
