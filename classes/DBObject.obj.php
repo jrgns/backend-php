@@ -561,7 +561,7 @@ class DBObject {
 					}
 					break;
 				case 'current_query':
-					$value = Controller::$area . '/' . Controller::$action . '/' . implode('/', Controller::$parameters);
+					$value = get_current_query();
 					break;
 				case 'current_request':
 					if (!empty($_SERVER['REQUEST_URI'])) {

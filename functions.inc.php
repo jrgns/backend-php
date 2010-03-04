@@ -148,6 +148,10 @@ function get_current_url() {
 	return $toret;
 }
 
+function get_current_query() {
+	return Controller::$area . '/' . Controller::$action . '/' . implode('/', Controller::$parameters);
+}
+
 function build_url(array $url) {
 	$toret = '';
 	if (array_key_exists('host', $url)) {
