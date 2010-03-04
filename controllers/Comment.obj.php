@@ -84,9 +84,12 @@ class Comment extends TableCtl {
 	}
 	
 	public function html_create($result) {
-		if ($result instanceof DBObject) {
+		switch (true) {
+		case $result instanceof DBObject:
 			Controller::redirect('?q=' . class_for_url($result->array['foreign_table']) . '/' . $result->array['foreign_id']);
-		}
+			break;
+		} 
+		Controller::redirect('previous');
 		return $result;
 	}
 	
