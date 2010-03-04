@@ -69,7 +69,7 @@ class Query {
 			$parameters = array_merge($this->parameters, $parameters);
 			//Check if we've already executed this query, and that the parameters are the same
 			$check_cache = array_key_exists('check_cache', $options) ? $options['check_cache'] : true;
-			if ($check_cache && $this->last_stmt && serialize($parameters) == serialize($this->last_params)) {
+			if ($check_cache && $this->last_stmt && !count(array_diff_assoc($parameters, $this->last_params))) {
 				if (Controller::$debug >= 2) {
 					var_dump('Executing Cached statement');
 				}
@@ -78,8 +78,9 @@ class Query {
 				$stmt = $this->connection->prepare($this->query);
 				if ($stmt) {
 					if ($stmt->execute($parameters)) {
-						$toret = $stmt;
-						$this->last_stmt = $stmt;
+						$toret             = $stmt;
+						$this->last_stmt   = $stmt;
+						$this->last_params = $parameters;
 					} else {
 						if (Controller::$debug) {
 							$error_info = $stmt->errorInfo();
