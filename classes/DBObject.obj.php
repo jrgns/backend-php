@@ -519,12 +519,12 @@ class DBObject {
 				case 'website':
 					//No break;
 				case 'url':
-					if ($value !== null) {
+					if ($value !== null && $value != '') {
 						if (filter_var($value, FILTER_VALIDATE_URL)) {
 							$value = filter_var($value, FILTER_VALIDATE_URL);
 						} else {
 							Backend::addError('Please supply a valid URL');
-							$value = null;
+							$toret = false;
 						}
 					}
 					break;
@@ -534,7 +534,7 @@ class DBObject {
 							$value = filter_var($value, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED);
 						} else {
 							Backend::addError('Please supply a valid URL with a scheme');
-							$value = null;
+							$toret = false;
 						}
 					}
 					break;
@@ -542,7 +542,7 @@ class DBObject {
 					if ($value !== null) {
 						if (!filter_var($value, FILTER_VALIDATE_IP)) {
 							Backend::addError('Please supply a valid URL with a scheme');
-							$value = null;
+							$toret = false;
 						}
 					} else if (!empty($_SERVER['REMOTE_ADDR'])) {
 						$value = $_SERVER['REMOTE_ADDR'];

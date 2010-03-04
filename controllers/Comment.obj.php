@@ -52,6 +52,8 @@ class Comment extends TableCtl {
 				switch (true) {
 				case $old_user && $old_user['confirmed'] && $old_user['active']:
 					//Attribute quote to user? Seems risque, actually, if I know a user's email address, I can just attribute to him. Auth first
+					Backend::addError('Comment not added. Please login first');
+					return false;
 					break;
 				case $old_user && !$old_user['confirmed'] && $old_user['active']:
 					//Unregistered user commented before
