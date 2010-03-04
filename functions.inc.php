@@ -402,6 +402,14 @@ function curl_request($url, array $parameters = array(), array $options = array(
 		fclose($fp);
 	}
 	$toret = curl_exec($ch);
+	if ($curl_error = curl_errno($ch)) {
+		return false;
+	} else {
+		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		if (!in_array($http_code, array(200))) {
+			return false;
+		}
+	}
 	curl_close($ch);
 	return $toret;
 }
