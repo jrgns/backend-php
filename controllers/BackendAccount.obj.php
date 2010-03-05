@@ -14,6 +14,7 @@ class BackendAccount extends TableCtl {
 	public static $error_msgs = array(
 		1 => 'Please enable cookies. This site can\'t function properly without them',
 		2 => 'Username and password does not match',
+		3 => 'Please supply a username and password',
 	);
 	
 	protected static $name = false;
@@ -26,69 +27,84 @@ class BackendAccount extends TableCtl {
 		}
 		return self::$name;
 	}
+	
+	public static function authenticate_user($username, $password) {
+		
+	}
 
 	function action_login($username = false, $password = false) {
 		$toret = false;
-		if (is_post()) {
-			$toret = true;
-			if (!self::checkUser()) {
-				$username = $username ? $username : (array_key_exists('username', $_REQUEST) ? $_REQUEST['username'] : false);
-				$password = $password ? $password : (array_key_exists('password', $_REQUEST) ? $_REQUEST['password'] : false);
-				if ($username && $password && !empty($_SESSION['cookie_is_working'])) {
-					/*$query = new Query('select', new AccountObj());
-					$query->field('`users`.*');
-							->filter('`users`.`Username` = :username OR `users`.`Mobile` = :username OR `users`.`Email` = :username')
-							->filter('`users`.`password` = MD5(CONCAT(`users`.`salt`, :password, :salt))')
-							->filter('`users`.`active` = 1')
-							->filter('`users`.`confirmed` = 1');
-					die($query);*/
-					$sql = '
-						SELECT `users`.*, GROUP_CONCAT(DISTINCT `roles`.`name` ORDER BY `roles`.`name` SEPARATOR \',\') AS `roles` FROM `users` 
-						LEFT JOIN `assignments` ON `assignments`.`access_type` = \'users\' AND (`users`.`id` = `assignments`.`access_id` OR `assignments`.`access_id` = 0)
-						LEFT JOIN `roles` ON `assignments`.`role_id` = `roles`.`id`
-						WHERE
-							(`users`.`Username` = :username OR `users`.`Mobile` = :username OR `users`.`Email` = :username)
-							AND `users`.`password` = MD5(CONCAT(`users`.`salt`, :password, :salt))
-							AND `users`.`active` = 1
-							AND `users`.`confirmed` = 1
-						GROUP BY `users`.`id`
-							';
-					$User = self::getObject(get_class($this));
-					$params = array(':username' => $username, ':password' => $password, ':salt' => Controller::$salt);
-					$User->load(array('query' => $sql, 'parameters' => $params, 'mode' => 'object'));
-					if ($User->object) {
-						session_regenerate_id();
-						$User->object->roles = empty($User->object->roles) ? array() : explode(',', $User->object->roles);
-						$toret = $User->object;
-						$_SESSION['user'] = $User->object;
-						Backend::addSuccess('Welcome to ' . Backend::getConfig('application.Title') . '!');
-						if (!empty($_SESSION['bookmark'])) {
-							$bookmark = $_SESSION['bookmark'];
-							unset($_SESSION['bookmark']);
-						} else {
-							$bookmark = 'previous';
-						}
-						Controller::redirect($bookmark);
-					} else {
-						Backend::addError(BackendAccount::getError(2));
-						Controller::redirect('previous');
-						$toret = false;
-					}
-				} else if (empty($_SESSION['cookie_is_working'])) {
-					Backend::addError(BackendAccount::getError(1));
-					Controller::redirect('previous');
-					$toret = false;
-				} else {
-					Backend::addError('Please supply a username and password');
-				}
-			}
+		if (!is_post()) {
+			return false;
 		}
-		if ($toret) {
-			Controller::redirect('previous');
+		$toret = true;
+		if (self::checkUser()) {
+			return true;
+		}
+		$username = $username ? $username : (array_key_exists('username', $_REQUEST) ? $_REQUEST['username'] : false);
+		$password = $password ? $password : (array_key_exists('password', $_REQUEST) ? $_REQUEST['password'] : false);
+		if ($username && $password && !empty($_SESSION['cookie_is_working'])) {
+			/*$query = new Query('select', new AccountObj());
+			$query->field('`users`.*');
+					->filter('`users`.`Username` = :username OR `users`.`Mobile` = :username OR `users`.`Email` = :username')
+					->filter('`users`.`password` = MD5(CONCAT(`users`.`salt`, :password, :salt))')
+					->filter('`users`.`active` = 1')
+					->filter('`users`.`confirmed` = 1');
+			die($query);*/
+			$sql = '
+				SELECT `users`.*, GROUP_CONCAT(DISTINCT `roles`.`name` ORDER BY `roles`.`name` SEPARATOR \',\') AS `roles` FROM `users` 
+				LEFT JOIN `assignments` ON `assignments`.`access_type` = \'users\' AND (`users`.`id` = `assignments`.`access_id` OR `assignments`.`access_id` = 0)
+				LEFT JOIN `roles` ON `assignments`.`role_id` = `roles`.`id`
+				WHERE
+					(`users`.`Username` = :username OR `users`.`Mobile` = :username OR `users`.`Email` = :username)
+					AND `users`.`password` = MD5(CONCAT(`users`.`salt`, :password, :salt))
+					AND `users`.`active` = 1
+					AND `users`.`confirmed` = 1
+				GROUP BY `users`.`id`
+					';
+			$User = self::getObject(self::getName());
+			$params = array(':username' => $username, ':password' => $password, ':salt' => Controller::$salt);
+			$User->load(array('query' => $sql, 'parameters' => $params, 'mode' => 'object'));
+			if ($User->object) {
+				session_regenerate_id();
+				$User->object->roles = empty($User->object->roles) ? array() : explode(',', $User->object->roles);
+				$toret = $User->object;
+				$_SESSION['user'] = $User->object;
+				return $User;
+			} else {
+				return -2;
+			}
+		} else if (empty($_SESSION['cookie_is_working'])) {
+			return -1;
 		} else {
-			Backend::addContent(Render::renderFile('loginout.tpl.php'));
+			return -3;
 		}
 		return $toret;
+	}
+	
+	function html_login($result) {
+		switch (true) {
+		case $result instanceof DBObject:
+			Backend::addSuccess('Welcome to ' . Backend::getConfig('application.Title') . '!');
+			if (!empty($_SESSION['bookmark'])) {
+				$bookmark = $_SESSION['bookmark'];
+				unset($_SESSION['bookmark']);
+			} else {
+				$bookmark = 'previous';
+			}
+			Controller::redirect($bookmark);
+			break;
+		case $result === true:
+			Controller::redirect('previous');
+			break;
+		case $result < 0:
+			Backend::addError(BackendAccount::getError(0 - $result));
+			break;
+		default:
+			break;
+		}
+		Backend::addContent(Render::renderFile('loginout.tpl.php'));
+		
 	}
 	
 	function action_logout() {
