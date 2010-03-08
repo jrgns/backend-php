@@ -31,6 +31,18 @@ class BackendAccount extends TableCtl {
 	public static function authenticate_user($username, $password) {
 		
 	}
+	
+	public static function getQuery() {
+		$query = new SelectQuery(BackendAccount::getName());
+		$query
+			->field(array('`users`.*', "GROUP_CONCAT(DISTINCT `roles`.`name` ORDER BY `roles`.`name` SEPARATOR ',') AS `roles`"))
+			->leftJoin('Assignment', array("`assignments`.`access_type` = 'users'", '`users`.`id` = `assignments`.`access_id` OR `assignments`.`access_id` = 0'))
+			->leftJoin('Role', array('`assignments`.`role_id` = `roles`.`id`'))
+			->filter('`users`.`active` = 1')
+			->filter('`users`.`confirmed` = 1')
+			->group('`users`.`id`');
+		return $query;
+	}
 
 	function action_login($username = false, $password = false) {
 		$toret = false;
@@ -44,33 +56,21 @@ class BackendAccount extends TableCtl {
 		$username = $username ? $username : (array_key_exists('username', $_REQUEST) ? $_REQUEST['username'] : false);
 		$password = $password ? $password : (array_key_exists('password', $_REQUEST) ? $_REQUEST['password'] : false);
 		if ($username && $password && !empty($_SESSION['cookie_is_working'])) {
-			/*$query = new Query('select', new AccountObj());
-			$query->field('`users`.*');
-					->filter('`users`.`Username` = :username OR `users`.`Mobile` = :username OR `users`.`Email` = :username')
-					->filter('`users`.`password` = MD5(CONCAT(`users`.`salt`, :password, :salt))')
-					->filter('`users`.`active` = 1')
-					->filter('`users`.`confirmed` = 1');
-			die($query);*/
-			$sql = '
-				SELECT `users`.*, GROUP_CONCAT(DISTINCT `roles`.`name` ORDER BY `roles`.`name` SEPARATOR \',\') AS `roles` FROM `users` 
-				LEFT JOIN `assignments` ON `assignments`.`access_type` = \'users\' AND (`users`.`id` = `assignments`.`access_id` OR `assignments`.`access_id` = 0)
-				LEFT JOIN `roles` ON `assignments`.`role_id` = `roles`.`id`
-				WHERE
-					(`users`.`Username` = :username OR `users`.`Mobile` = :username OR `users`.`Email` = :username)
-					AND `users`.`password` = MD5(CONCAT(`users`.`salt`, :password, :salt))
-					AND `users`.`active` = 1
-					AND `users`.`confirmed` = 1
-				GROUP BY `users`.`id`
-					';
 			$User = self::getObject(self::getName());
+
+			$query = self::getQuery();
+			$query
+				->filter('`users`.`Username` = :username OR `users`.`Mobile` = :username OR `users`.`Email` = :username')
+				->filter('`users`.`password` = MD5(CONCAT(`users`.`salt`, :password, :salt))');
 			$params = array(':username' => $username, ':password' => $password, ':salt' => Controller::$salt);
-			$User->load(array('query' => $sql, 'parameters' => $params, 'mode' => 'object'));
+
+			$User->load(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
 			if ($User->object) {
 				session_regenerate_id();
 				$User->object->roles = empty($User->object->roles) ? array() : explode(',', $User->object->roles);
 				$toret = $User->object;
 				$_SESSION['user'] = $User->object;
-				if (Component::isActive('PersistUser') && !empty($_POST['remember_me'])) {
+				if (Component::isActive('PersistUser')) {
 					PersistUser::remember($User->object);
 				}
 				return $User;
@@ -113,6 +113,9 @@ class BackendAccount extends TableCtl {
 	function action_logout() {
 		if (is_post()) {
 			if (array_key_exists('user', $_SESSION)) {
+				if (Component::isActive('PersistUser')) {
+					PersistUser::forget($_SESSION['user']);
+				}
 				$_SESSION = array();
 				if (isset($_COOKIE[session_name()])) {
 					setcookie(session_name(), '', time() - 42000, '/');
@@ -266,10 +269,6 @@ class BackendAccount extends TableCtl {
 	}
 	
 	public static function hook_start() {
-		if (Component::isActive('PersistUser')) {
-			//TODO Move this to a hook in PersistUser
-			PersistUser::check();
-		}
 		$user = self::checkUser();
 		if (!$user && empty($_SESSION['user'])) {
 			self::setupAnonymous();

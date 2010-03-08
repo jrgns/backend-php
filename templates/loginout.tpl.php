@@ -1,4 +1,4 @@
-<div id="loginout" class="box span-5">
+<div id="loginout" class="box">
 <?php if (!BackendAccount::checkUser()): ?>
 	<form method="post" action="#S_SITE_LINK#?q=<?php echo class_for_url(BackendAccount::getName()) ?>/login">
 		<div>

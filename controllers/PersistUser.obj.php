@@ -1,4 +1,9 @@
 <?php
+/**
+ * Persist user login for two weeks
+ *
+ * Idea from http://fishbowl.pastiche.org/2004/01/19/persistent_login_cookie_best_practice
+ */
 class PersistUser extends TableCtl {
 	public static function remember($user) {
 		//We need a user, but we won't remember the admin user.
@@ -44,17 +49,24 @@ class PersistUser extends TableCtl {
 			if ($persist) {
 				//Get User
 				$class = BackendAccount::getName() . 'Obj';
-				$user = new $class($persist['user_id'], array('load_mode' => 'object'));
-				if ($user) {
-					$_SESSION['user'] = $user->object;
+				$query = BackendAccount::getQuery();
+				$query->filter('`users`.`id` = :id');
+				$params = array(':id' => $persist['user_id']);
+
+				$User = new $class();
+				$User->load(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
+				
+				if ($User) {
+					$User->object->roles = empty($User->object->roles) ? array() : explode(',', $User->object->roles);
+					$_SESSION['user'] = $User->object;
 					//Remove, and reremember
-					if (self::remember($user->object)) {
+					if (self::remember($User->object)) {
 						$query = new CustomQuery('DELETE FROM `persist_users` WHERE `id` = ' . $persist['id'] . ' LIMIT 1');
 						$query->execute();
 					} else {
 						Backend::addError('Could not reremember');
 					}
-					return true;
+					return $User->object;
 				} else {
 					//Backend::addError('Invalid remembered user');
 				}
@@ -62,4 +74,21 @@ class PersistUser extends TableCtl {
 		}
 		return false;
 	}	
+	
+	public static function forget($user) {
+		$query = new CustomQuery('DELETE FROM `persist_users` WHERE `user_id` = :id');
+		$query->execute(array(':id' => $user->id));
+	}
+
+	public static function hook_start() {
+		if (!BackendAccount::checkUser()) {
+			PersistUser::check();
+		}
+	}
+
+	public static function install(array $options = array()) {
+		$toret = parent::install($options);
+		$toret = Hook::add('start', 'pre', __CLASS__, array('global' => true, 'sequence' => 100)) && $toret;
+		return $toret;
+	}
 }
