@@ -12,7 +12,7 @@
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
 class RoleObj extends DBObject {
-	function __construct($meta = array()) {
+	function __construct($meta = array(), array $options = array()) {
 		if (!is_array($meta) && is_numeric($meta)) {
 			$meta = array('id' => $meta);
 		}
@@ -26,7 +26,7 @@ class RoleObj extends DBObject {
 			'modified' => 'lastmodified',
 			'added' => 'dateadded',
 		);
-		return parent::__construct($meta);
+		return parent::__construct($meta, $options);
 	}
 	
 	function validate($data, $action, $options = array()) {

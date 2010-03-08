@@ -23,7 +23,7 @@
 class DocumentObj extends FileObject {
 	public $default_type = 'text/plain';
 
-	function __construct($meta = array()) {
+	function __construct($meta = array(), array $options = array()) {
 		if (!is_array($meta) && is_numeric($meta)) {
 			$meta = array('id' => $meta);
 		}
@@ -36,7 +36,7 @@ class DocumentObj extends FileObject {
 			'modified' => 'lastmodified',
 			'added' => 'dateadded',
 		);
-		return parent::__construct($meta);
+		return parent::__construct($meta, $options);
 	}
 
 	function getMetaInfo($filename) {

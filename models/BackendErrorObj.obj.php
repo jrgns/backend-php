@@ -18,7 +18,7 @@
  * This is the model definition for backend_errors
  */
 class BackendErrorObj extends DBObject {
-	function __construct($meta = array()) {
+	function __construct($meta = array(), array $options = array()) {
 		if (!is_array($meta) && is_numeric($meta)) {
 			$meta = array('id' => $meta);
 		}
@@ -38,7 +38,7 @@ class BackendErrorObj extends DBObject {
 			'stacktrace' => 'text',
 			'added'      => 'lastmodified',
 		);
-		return parent::__construct($meta);
+		return parent::__construct($meta, $options);
 	}
 	
 	function validate($data, $action, $options = array()) {

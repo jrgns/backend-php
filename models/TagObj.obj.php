@@ -21,7 +21,7 @@
  * @package Models
  */
 class TagObj extends DBObject {
-	function __construct($meta = array()) {
+	function __construct($meta = array(), array $options = array()) {
 		if (!is_array($meta) && (is_numeric($meta) || is_string($meta))) {
 			$meta = array('id' => $meta);
 		}
@@ -41,7 +41,7 @@ class TagObj extends DBObject {
 		$meta['keys'] = array(
 			'foreign_table,name' => 'unique',
 		);
-		return parent::__construct($meta);
+		return parent::__construct($meta, $options);
 	}
 
 	public function getSelectSQL($options = array()) {

@@ -23,14 +23,14 @@
 class FileObject extends DBObject {
 	public $default_type = 'text/plain';
 	
-	function __construct($meta = array()) {
+	function __construct($meta = array(), array $options = array()) {
 		$fields = $meta['fields'];
 		$fields['mime_type'] = array_key_exists('mime_type', $fields) ? $fields['mime_type'] : 'string';
 		$fields['from_db']   = array_key_exists('from_db', $fields) ? $fields['from_db'] : 'boolean';
 		$fields['content']   = array_key_exists('content', $fields) ? $fields['content'] : 'long_blob';
 		$fields['meta_info'] = array_key_exists('meta_info', $fields) ? $fields['meta_info'] : 'serialized';
 		$meta['fields'] = $fields;
-		return parent::__construct($meta);
+		return parent::__construct($meta, $options);
 	}
 	
 	function getMetaInfo($filename) {

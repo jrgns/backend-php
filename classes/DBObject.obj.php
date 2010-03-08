@@ -34,7 +34,7 @@ class DBObject {
 	 * - conditions = array(ClassName => array(field_in_child => value | field_in_this_model))
 	 * - relation = single | multiple, defaults to single
 	 */
-	function __construct($meta = array(), array $options = null) {
+	function __construct($meta = array(), array $options = array()) {
 		if (!is_array($meta)) {
 			if (is_numeric($meta)) {
 				$meta = array('id' => $meta);
@@ -54,8 +54,7 @@ class DBObject {
 		$meta['relations'] = array_key_exists('relations', $meta) ? $meta['relations'] : array();
 		$this->meta = $meta;
 
-		$options = $options ? $options : array();
-		$load_type        = array_key_exists('load_mode', $options) ? $options['load_mode'] : $this->load_mode;
+		$load_type  = array_key_exists('load_mode', $options) ? $options['load_mode'] : $this->load_mode;
 		if ($this->checkConnection()) {
 			if ($meta['id']) {
 				$this->load(array('mode' => $load_type));

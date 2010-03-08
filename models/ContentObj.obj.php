@@ -21,7 +21,7 @@
  * @package Models
  */
 class ContentObj extends DBObject {
-	function __construct($meta = array()) {
+	function __construct($meta = array(), array $options = array()) {
 		require_once(BACKEND_FOLDER . '/libraries/Markdown/markdown.php');
 		$this->load_mode = 'object';
 
@@ -55,7 +55,7 @@ class ContentObj extends DBObject {
 			 */
 			//$meta['relations']['Tag'] = array('conditions' => array('id' => array('IN' => 'tags')), 'relation' => 'multiple');
 		//}
-		return parent::__construct($meta);
+		return parent::__construct($meta, $options);
 	}
 
 	function validate($data, $action, $options = array()) {

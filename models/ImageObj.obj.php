@@ -23,7 +23,7 @@
 class ImageObj extends FileObject {
 	public $default_type = 'image/jpeg';
 
-	function __construct($meta = array()) {
+	function __construct($meta = array(), array $options = array()) {
 		if (!is_array($meta)) {
 			if (is_numeric($meta)) {
 				$meta = array('id' => $meta);
@@ -41,7 +41,7 @@ class ImageObj extends FileObject {
 			'modified' => 'lastmodified',
 			'added' => 'dateadded',
 		);
-		return parent::__construct($meta);
+		return parent::__construct($meta, $options);
 	}
 
 	function getMetaInfo($filename) {
