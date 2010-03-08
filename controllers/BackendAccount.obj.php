@@ -70,6 +70,9 @@ class BackendAccount extends TableCtl {
 				$User->object->roles = empty($User->object->roles) ? array() : explode(',', $User->object->roles);
 				$toret = $User->object;
 				$_SESSION['user'] = $User->object;
+				if (Component::isActive('PersistUser') && !empty($_POST['remember_me'])) {
+					PersistUser::remember($User->object);
+				}
 				return $User;
 			} else {
 				return -2;
@@ -263,6 +266,10 @@ class BackendAccount extends TableCtl {
 	}
 	
 	public static function hook_start() {
+		if (Component::isActive('PersistUser')) {
+			//TODO Move this to a hook in PersistUser
+			PersistUser::check();
+		}
 		$user = self::checkUser();
 		if (!$user && empty($_SESSION['user'])) {
 			self::setupAnonymous();
@@ -320,7 +327,7 @@ END;
 	
 	public static function checkUser($user = false) {
 		$toret = false;
-		if (!empty($_SESSION) && array_key_exists('user', $_SESSION) && is_object($_SESSION['user']) && $_SESSION['user']->id > 0) {
+		if (!empty($_SESSION['user']) && is_object($_SESSION['user']) && $_SESSION['user']->id > 0) {
 			$toret = $_SESSION['user'];
 		}
 		return $toret;
