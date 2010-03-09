@@ -270,6 +270,11 @@ class BackendAccount extends TableCtl {
 	
 	public static function hook_start() {
 		$user = self::checkUser();
+		//TODO Maybe move this to hook_init, to get it early on
+		//Check if HTTP Digest Auth headers have been passed down
+		if (!$user && Value::get('CheckHTTPAuth', false)) {
+			$user = self::processHTTPAuth();
+		}
 		if (!$user && empty($_SESSION['user'])) {
 			self::setupAnonymous();
 		} else {
@@ -288,6 +293,32 @@ class BackendAccount extends TableCtl {
 		if (Backend::getConfig('backend.application.user.confirm') && empty($object->array['confirmed'])) {
 			$this->confirmUser($object);
 		}
+	}
+	
+	public static function getHTTPAuth() {
+		$query = new SelectQuery('User');
+		$query->field('password')->filter('`username` = ?');
+		//It's tricky, because the password is not stored in plain text. Use the hash as the password for HTTP Auth requests
+		//jrgns: 98884858b06963be03b23f679aac9bf3
+		return DigestAuthentication::getInstance(array($query, 'fetchColumn'));
+	}
+	
+	public static function processHTTPAuth() {
+		$auth = BackendAccount::getHTTPAuth();
+		if ($username = $auth->process()) {
+			$query = BackendAccount::getQuery();
+			$query->filter('`username` = :username');
+			$User = TableCtl::getObject(BackendAccount::getName());
+			$params = array(':username' => $username);
+			$User->load(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
+			if ($User->object) {
+				session_regenerate_id();
+				$User->object->roles = empty($User->object->roles) ? array() : explode(',', $User->object->roles);
+				$_SESSION['user'] = $User->object;
+				return $User->object;
+			}
+		}
+		return false;
 	}
 	
 	protected function confirmUser($object) {
