@@ -30,7 +30,7 @@ class AreaCtl {
 			var_dump('Checking Method ' . $method);
 		}
 		if (method_exists($this, $method)) {
-			if (!$this->checkPermissions()) {
+			if (!$this->checkPermissions() && Value::get('CheckHTTPAuth', false)) {
 				//If the client is denied, challenge them for HTTP Digest Auth credentials
 				$auth = BackendAccount::getHTTPAuth();
 				$auth->challenge();
