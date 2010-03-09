@@ -49,7 +49,9 @@ class DigestAuthentication {
 	 * The callback function should take the entered username, and return the users password.
 	 */
 	public function process() {
-
+		if (empty($_SERVER['PHP_AUTH_DIGEST'])) {
+			return false;
+		}
 		if (!($data = $this->parseHTTPDigest($_SERVER['PHP_AUTH_DIGEST']))) {
 			return false;
 		}
