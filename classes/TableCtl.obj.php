@@ -23,16 +23,16 @@ class TableCtl extends AreaCtl {
 	protected function getTabLinks($action) {
 		$links = array();
 		if ($action != 'list') {
-			if ($this->checkPermissions(array('action' => 'list'))) {
+			if (Permission::check('list', Controller::$area)) {
 				$links[] = array('link' => '?q=' . Controller::$area . '/list', 'text' => 'List');
 			}
-			if (Controller::$action == 'display' && $this->checkPermissions(array('action' => 'update')) && !empty(Controller::$parameters[0])) {
+			if (Controller::$action == 'display' && !empty(Controller::$parameters[0]) && Permission::check('update', Controller::$area)) {
 				$links[] = array('link' => '?q=' . Controller::$area . '/update/' . Controller::$parameters[0], 'text' => 'Update');
 			}
-			if (Controller::$action == 'update' && $this->checkPermissions(array('action' => 'update')) && !empty(Controller::$parameters[0])) {
+			if (Controller::$action == 'update' && !empty(Controller::$parameters[0]) && Permission::check('display', Controller::$area)) {
 				$links[] = array('link' => '?q=' . Controller::$area . '/display/' . Controller::$parameters[0], 'text' => 'Display');
 			}
-			if ($this->checkPermissions(array('action' => 'create'))) {
+			if (Permission::check('create', Controller::$area)) {
 				$links[] = array('link' => '?q=' . Controller::$area . '/create', 'text' => 'Create');
 			}
 		}

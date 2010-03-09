@@ -31,19 +31,21 @@ $action_name = empty($action_name) ? ucwords(Controller::$action) : $action_name
 				<label id="obj_mobile_label" for="obj_mobile">Mobile</label><br>
 				<input id="obj_mobile" name="obj[mobile]" type="text" class="text" value="<?php echo plain($obj_values['mobile']) ?>">
 			</div>
-			<div id="obj_confirmed_container">
-				<label id="obj_confirmed_label" for="obj_confirmed">Confirmed</label><br>
-				<select id="obj_confirmed" name="obj[confirmed]" class="">
-					<option value="1"<?php if ($obj_values['confirmed']): ?> selected="selected"<?php endif; ?>>Yes</option>
-					<option value="0"<?php if (empty($obj_values['confirmed'])): ?> selected="selected"<?php endif; ?>>No</option>
-				</select>
-			</div>
-			<div id="obj_active_container">
-				<label id="obj_active_label" for="obj_active">Active</label><br>
-				<select id="obj_active" name="obj[active]" class="">
-					<option value="1"<?php if ($obj_values['active']): ?> selected="selected"<?php endif; ?>>Yes</option>
-					<option value="0"<?php if (empty($obj_values['active'])): ?> selected="selected"<?php endif; ?>>No</option>
-				</select>
-			</div>
+			<?php if (Permission::check('manage', BackendAccount::getName())): ?>
+				<div id="obj_confirmed_container">
+					<label id="obj_confirmed_label" for="obj_confirmed">Confirmed</label><br>
+					<select id="obj_confirmed" name="obj[confirmed]" class="">
+						<option value="1"<?php if ($obj_values['confirmed']): ?> selected="selected"<?php endif; ?>>Yes</option>
+						<option value="0"<?php if (empty($obj_values['confirmed'])): ?> selected="selected"<?php endif; ?>>No</option>
+					</select>
+				</div>
+				<div id="obj_active_container">
+					<label id="obj_active_label" for="obj_active">Active</label><br>
+					<select id="obj_active" name="obj[active]" class="">
+						<option value="1"<?php if ($obj_values['active']): ?> selected="selected"<?php endif; ?>>Yes</option>
+						<option value="0"<?php if (empty($obj_values['active'])): ?> selected="selected"<?php endif; ?>>No</option>
+					</select>
+				</div>
+			<?php endif; ?>
 			<input type="submit" value="<?php echo $action_name ?> User" class=""/>
 		</form>

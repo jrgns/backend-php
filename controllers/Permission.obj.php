@@ -50,7 +50,7 @@ class Permission extends TableCtl {
 		$user = (!$user && !empty($_SESSION['user'])) ? $_SESSION['user'] : $user;
 		if (!empty($user->roles)) {
 			$user_roles = $user->roles;
-			$roles = GateKeeper::permittedRoles($action, $subject, $subject_id);
+			$roles = GateKeeper::permittedRoles($action, class_for_url($subject), $subject_id);
 			$intersect = is_array($roles) ? array_intersect($user_roles, $roles) : $user_roles;
 			$toret = count($intersect) ? true : false;
 		}
