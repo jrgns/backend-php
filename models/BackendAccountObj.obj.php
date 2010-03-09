@@ -16,30 +16,35 @@ class BackendAccountObj extends DBObject {
 		if (!is_array($meta) && is_numeric($meta)) {
 			$meta = array('id' => $meta);
 		}
-		$meta['table'] = 'users';
-		$meta['name'] = 'User';
-		$meta['fields'] = array(
-			'id'        => 'primarykey',
-			'name'      => 'string',
-			'surname'   => 'string',
-			'email'     => 'email',
-			'website'   => 'website',
-			'mobile'    => 'telnumber',
-			'username'  => 'string',
-			'password'  => 'password',
-			'salt'      => 'salt',
-			'confirmed' => 'boolean',
-			'active'    => 'boolean',
-			'modified'  => 'lastmodified',
-			'added'     => 'dateadded',
-		);
-		/*$meta['relations'] = array(
-			'roles' => array('model' => 'UserRole', 'conditions' => array('user_id' => 'id')),
-		);*/
-		$meta['keys'] = array(
-			'username' => 'unique',
-			'email'    => 'unique',
-		);		
+		if (!array_key_exists('table', $meta)) {
+			$meta['table'] = 'users';
+		}
+		if (!array_key_exists('name', $meta)) {
+			$meta['name'] = 'User';
+		}
+		if (!array_key_exists('fields', $meta)) {
+			$meta['fields'] = array(
+				'id'        => 'primarykey',
+				'name'      => 'string',
+				'surname'   => 'string',
+				'email'     => 'email',
+				'website'   => 'website',
+				'mobile'    => 'telnumber',
+				'username'  => 'string',
+				'password'  => 'password',
+				'salt'      => 'salt',
+				'confirmed' => 'boolean',
+				'active'    => 'boolean',
+				'modified'  => 'lastmodified',
+				'added'     => 'dateadded',
+			);
+		}
+		if (!array_key_exists('keys', $meta)) {
+			$meta['keys'] = array(
+				'username' => 'unique',
+				'email'    => 'unique',
+			);
+		}
 		return parent::__construct($meta, $options);
 	}
 	

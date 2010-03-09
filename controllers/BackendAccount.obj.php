@@ -283,6 +283,7 @@ class BackendAccount extends TableCtl {
 			}
 		}
 		self::$current_user = $user;
+		Backend::add('BackendAccount', $user);
 	}
 	
 	public static function hook_post_finish() {
