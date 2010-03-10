@@ -35,7 +35,7 @@ class ContentObj extends DBObject {
 			'name' => 'string',
 			'title' => 'title',
 			'markdown' => 'text',
-			'body' => 'text',
+			'body' => array('type' => 'text', 'markdown' => true),
 			'from_file' => 'boolean',
 			'active' => 'boolean',
 			'modified' => 'lastmodified',

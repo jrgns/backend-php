@@ -54,12 +54,13 @@ class Content extends TableCtl {
 		return $toret;
 	}
 	
-	function html_update($content) {
-		$toret = parent::html_update($content);
-		if ($toret) {
+	function html_update($result) {
+		$result = parent::html_update($result);
+		if ($result === true) {
+			$content = self::getObject(get_class($this), Controller::$parameters[0]);
 			Backend::add('Sub Title', 'Update: ' . $content->array['title']);
 		}
-		return $toret;
+		return $result;
 	}
 	
 	private function feed_list($result, $mode) {

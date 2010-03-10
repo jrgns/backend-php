@@ -495,7 +495,7 @@ class DBObject {
 					break;
 				case 'text':
 					if ($value !== null) {
-						$value = simple($value);
+						//$value = simple($value);
 					}
 					break;
 				case 'dateadded':
@@ -876,7 +876,7 @@ class DBObject {
 				$query = "UPDATE `$database`.`$table` SET $value_str WHERE `$id_field` = :id";
 				$parameters[':id'] = $this->meta['id'];
 			} else {
-				throw new Exception('Insert Query Fields and Values don\'t match');
+				throw new Exception('Update Query Fields and Values don\'t match');
 			}
 		}
 		return array($query, count($parameters) ? $parameters : false);
