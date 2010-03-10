@@ -26,7 +26,7 @@ class Permission extends TableCtl {
 		$data = array(
 			'role'       => $role,
 			'action'     => $action,
-			'subject'    => $subject,
+			'subject'    => class_for_url($subject),
 			'subject_id' => $subject_id,
 			'control'    => $control,
 			'system'     => $system,

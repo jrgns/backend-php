@@ -446,14 +446,14 @@ Site Admin
 	public static function install(array $options = array()) {
 		$toret = parent::install($options);
 
-		$toret = Hook::add('start', 'pre', __CLASS__, array('global' => true)) && $toret;
-		$toret = Hook::add('finish', 'post', __CLASS__, array('global' => true)) && $toret;
+		$toret = Hook::add('start', 'pre', self::getName(), array('global' => true)) && $toret;
+		$toret = Hook::add('finish', 'post', self::getName(), array('global' => true)) && $toret;
 		
-		$toret = Permission::add('anonymous', 'signup', 'account') && $toret;
-		$toret = Permission::add('anonymous', 'confirm', 'account') && $toret;
-		$toret = Permission::add('anonymous', 'login', 'account') && $toret;
-		$toret = Permission::add('authenticated', 'logout', 'account') && $toret;
-		$toret = Permission::add('authenticated', 'display', 'account') && $toret;
+		$toret = Permission::add('anonymous', 'signup', self::getName()) && $toret;
+		$toret = Permission::add('anonymous', 'confirm', self::getName()) && $toret;
+		$toret = Permission::add('anonymous', 'login', self::getName()) && $toret;
+		$toret = Permission::add('authenticated', 'logout', self::getName()) && $toret;
+		$toret = Permission::add('authenticated', 'display', self::getName()) && $toret;
 		return $toret;
 	}
 }
