@@ -25,4 +25,8 @@ class Application {
 	 */
 	public static function display_html() {
 	}
+
+	public static function install(array $options = array()) {
+		return true;
+	}
 }
