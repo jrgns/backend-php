@@ -1,4 +1,4 @@
-<form method="post" action="?q=account/signup">
+<form method="post" action="?q=<?php echo class_for_url(BackendAccount::getName()) ?>/signup">
 	<table>
 		<tbody>
 			<tr>
