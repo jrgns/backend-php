@@ -212,7 +212,11 @@ class Backend {
 				}
 				$toret = true;
 			} else {
-				throw new ConnectToDBException('Could not connect to Database ' . $alias);
+				if (Controller::$debug) {
+					throw new ConnectToDBException($e->getMessage());
+				} else {
+					throw new ConnectToDBException('Could not connect to Database ' . $alias);
+				}
 			}
 		}
 		return $toret;
