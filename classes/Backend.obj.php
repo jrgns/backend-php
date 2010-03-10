@@ -182,7 +182,7 @@ class Backend {
 				if (!empty($options['database'])) {
 					$dsn[] = 'dbname=' . $options['database'];
 				}
-				$dsn[] = array_key_exists('host', $options) ? $options['host'] : 'localhost';
+				$dsn[] = 'host=' . (array_key_exists('host', $options) ? $options['host'] : 'localhost');
 				$dsn = strtolower($driver) . ':' . implode(';', $dsn);
 			}
 			$alias    = !empty($options['alias'])              ? $options['alias']    : $name;
