@@ -232,7 +232,14 @@ class Query {
 			}
 			$query .= ' FROM ' . $this->table;
 			break;
+		case 'INSERT':
+			$query  = $this->action . ' INTO ' . $this->table;
+			$fields = array_map(array('Query', 'enclose'), array_keys($this->data));
+			$this->parameters = array_values($this->data);
+			$query .= ' (' . implode(', ', $fields) . ')';
+			$query .= ' VALUES (' . implode(', ', array_fill(0, count($this->parameters), '?')) . ')';
 		}
+		
 		if (!empty($this->conditions)) {
 			$query .= ' WHERE (' . implode(') AND (', $this->conditions) . ')';
 		}
