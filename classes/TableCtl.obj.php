@@ -335,7 +335,7 @@ class TableCtl extends AreaCtl {
 	public function html_create($result) {
 		switch (true) {
 		case $result instanceof DBObject:
-			Controller::redirect('?q=' . $result->getArea() . '/display/' . $result->getMeta('id'));
+			Controller::redirect('?q=' . $result->getArea() . '/' . $result->getMeta('id'));
 			break;
 		default:
 		case $result:
