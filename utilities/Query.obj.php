@@ -215,42 +215,34 @@ class Query {
 	}
 	
 	protected function buildQuery() {
+		$query = $this->buildTable();		
+		if (!empty($this->conditions)) {
+			$query .= PHP_EOL . 'WHERE (' . implode(') AND (', $this->conditions) . ')';
+		}
+		if (!empty($this->group)) {
+			$query .= PHP_EOL . 'GROUP BY ' . implode(', ', $this->group);
+		}
+		if (!empty($this->order)) {
+			$query .= PHP_EOL . 'ORDER BY ' . implode(', ', $this->order);
+		}
+		if (!empty($this->limit)) {
+			$query .= PHP_EOL . 'LIMIT ' . implode(', ', $this->limit);
+		}
+		return $query;
+	}
+	
+	protected function buildTable() {
+		$query = '';
 		switch ($this->action) {
 		case 'DELETE':
-			$query = $this->action . ' FROM ' . $this->table;
-			break;
-		case 'SELECT':
-			$query = $this->action;
-			//TODO Move to SelectQuery
-			if ($this->distinct) {
-				$query .= ' DISTINCT';
-			}
-			if (empty($this->fields)) {
-				$query .= ' *';
-			} else {
-				$query .= ' ' . implode(', ', $this->fields);
-			}
-			$query .= ' FROM ' . $this->table;
+			$query = $this->action . PHP_EOL . 'FROM ' . $this->table;
 			break;
 		case 'INSERT':
 			$query  = $this->action . ' INTO ' . $this->table;
 			$fields = array_map(array('Query', 'enclose'), array_keys($this->data));
 			$this->parameters = array_values($this->data);
-			$query .= ' (' . implode(', ', $fields) . ')';
-			$query .= ' VALUES (' . implode(', ', array_fill(0, count($this->parameters), '?')) . ')';
-		}
-		
-		if (!empty($this->conditions)) {
-			$query .= ' WHERE (' . implode(') AND (', $this->conditions) . ')';
-		}
-		if (!empty($this->group)) {
-			$query .= ' GROUP BY ' . implode(', ', $this->group);
-		}
-		if (!empty($this->order)) {
-			$query .= ' ORDER BY ' . implode(', ', $this->order);
-		}
-		if (!empty($this->limit)) {
-			$query .= ' LIMIT ' . implode(', ', $this->limit);
+			$query .= PHP_EOL . '(' . implode(', ', $fields) . ')';
+			$query .= PHP_EOL . 'VALUES (' . implode(', ', array_fill(0, count($this->parameters), '?')) . ')';
 		}
 		return $query;
 	}

@@ -20,7 +20,17 @@ class SelectQuery extends Query {
 		parent::__construct('SELECT', $table, $options);
 	}
 	
-	protected function buildQuery() {
+	protected function buildTable() {
+		$query = 'SELECT';
+		if ($this->distinct) {
+			$query .= ' DISTINCT';
+		}
+		if (empty($this->fields)) {
+			$query .= ' *';
+		} else {
+			$query .= ' ' . implode(', ', $this->fields);
+		}
+		$query .= PHP_EOL . 'FROM ' . $this->table;
 		if (!empty($this->joins)) {
 			$tables = array();
 			foreach ($this->joins as $type => $join) {
@@ -32,9 +42,9 @@ class SelectQuery extends Query {
 					$tables[] = $one_table;
 				}
 			}
-			$this->table .= ' ' . implode(PHP_EOL, $tables);
+			$query .= PHP_EOL . implode(PHP_EOL, $tables);
 		}
-		return parent::buildQuery();
+		return $query;
 	}
 	
 	function leftJoin($table, $conditions) {
