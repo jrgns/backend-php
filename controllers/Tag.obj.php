@@ -16,9 +16,13 @@ class Tag extends TableCtl {
 		return $links;
 	}
 	
-	public static function getTags($content_id) {
-		$query = new CustomQuery('SELECT `tags`.* FROM `tags` LEFT JOIN `contents` ON FIND_IN_SET(`tags`.`id`, `contents`.`tags`) WHERE `contents`.`id` = :id');
-		return $query->fetchAll(array(':id' => $content_id));
+	public static function getTags($table, $table_id) {
+		$query = new SelectQuery('Tag');
+		$query
+			->leftJoin('TagLink', array('`tags`.`id` = `tag_links`.`tag_id`'))
+			->filter('`tags`.`foreign_table` = :table')
+			->filter('`tag_links`.`foreign_id` = :id');
+		return $query->fetchAll(array(':table' => $table, ':id' => $table_id));
 	}
 	
 	public static function addTags($tags, $foreign_table, $foreign_id) {
