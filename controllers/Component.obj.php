@@ -47,7 +47,11 @@ class Component extends TableCtl {
 		$toret  = array_merge($toret, files_from_folder(BACKEND_FOLDER . '/views/', array('prepend_folder' => true)));
 		$toret  = array_merge($toret, files_from_folder(APP_FOLDER . '/views/', array('prepend_folder' => true)));
 		$toret  = array_merge($toret, files_from_folder(APP_FOLDER . '/classes/', array('prepend_folder' => true)));
-		$toret  = preg_replace('/(' . str_replace('/', '\/', BACKEND_FOLDER) . '\/|' . str_replace('/', '\/', APP_FOLDER) . '\/)/', '/', $toret);
+		
+		$backend = str_replace(array('/', '\\'), array('\/', '\\\\'), BACKEND_FOLDER);
+		$app     = str_replace(array('/', '\\'), array('\/', '\\\\'), APP_FOLDER);
+		$search = '/(' . $backend . '\/|' . $backend . '\\\\|' . $app . '\/|' . $app . '\\\\)/';
+		$toret  = preg_replace($search, '/', $toret);
 
 		$toret  = array_unique(array_merge(array_values($base_c), $toret));
 		
