@@ -418,3 +418,104 @@ function curl_request($url, array $parameters = array(), array $options = array(
 	return $toret;
 }
 
+/**
+ * Find maximum depth of an array
+ *
+ * Do NOT use this function on weird arrays or arrays contiaining objects...
+ *
+ * @param array The array to be measured
+ * @returns int The depth of the array
+ */
+function array_depth(array $array) {
+	$max_depth = 1;
+	foreach($array as $value) {
+		if (is_array($value)) {
+			$depth = array_depth($value) + 1;
+			if ($depth > $max_depth) {
+				$max_depth = $depth;
+			}
+		}
+	}
+	return $max_depth;
+}
+
+function add_periods($start, $number, $periods, $format = 'Y-m-d H:i:s') {
+	return period_diff('add', $start, $number, $periods, $format);
+}
+
+function subtract_periods($start, $number, $periods, $format = 'Y-m-d H:i:s') {
+	return period_diff('subtract', $start, $number, $periods, $format);
+}
+
+function period_diff($op, $start, $number, $periods, $format = 'Y-m-d H:i:s') {
+	$toret = is_string($start) ? strtotime($start) : $start;
+	switch (strtolower($periods)) {
+		case 's':
+		case 'second':
+		case 'seconds':
+			if ($op == 'subtract') {
+				$toret -= $number;
+			} else {
+				$toret += $number;
+			}
+			break;
+		case 'h':
+		case 'hour':
+		case 'hours':
+			if ($op == 'subtract') {
+				$toret -= ($number * 60 * 60);
+			} else {
+				$toret += ($number * 60 * 60);
+			}
+			break;
+		case 'd':
+		case 'day':
+		case 'days':
+			if ($op == 'subtract') {
+				$toret -= ($number * 60 * 60 * 24);
+			} else {
+				$toret += ($number * 60 * 60 * 24);
+			}
+			break;
+		case 'm':
+		case 'minute':
+		case 'minutes':
+			if (strlen($periods) > 1 || $periods == 'm') {
+				if ($op == 'subtract') {
+					$toret -= ($number * 60);
+				} else {
+					$toret += ($number * 60);
+				}
+				break;
+			}
+		case 'month':
+		case 'months':
+			if (strlen($periods) > 1 || $periods == 'M') {
+				if ($op == 'subtract') {
+					$toret = mktime((int)date('G', $toret), (int)date('i', $toret), (int)date('s', $toret), (int)date('n', $toret) - $number);
+				} else {
+					$toret = mktime((int)date('G', $toret), (int)date('i', $toret), (int)date('s', $toret), (int)date('n', $toret) + $number);
+				}
+				break;
+			}
+		case 'w':
+		case 'week':
+		case 'weeks':
+			if ($op == 'subtract') {
+				$toret -= ($number * 60 * 60 * 24 * 7);
+			} else {
+				$toret += ($number * 60 * 60 * 24 * 7);
+			}
+			break;
+		case 'y':
+		case 'year':
+		case 'years':
+			if ($op == 'subtract') {
+				$toret = mktime((int)date('G', $toret), (int)date('i', $toret), (int)date('s', $toret), (int)date('n', $toret), (int)date('j', $toret), (int)date('Y', $toret) - $number);
+			} else {
+				$toret = mktime((int)date('G', $toret), (int)date('i', $toret), (int)date('s', $toret), (int)date('n', $toret), (int)date('j', $toret), (int)date('Y', $toret) + $number);
+			}
+			break;
+	}
+	return date($format, $toret);
+}
