@@ -195,17 +195,25 @@ class DBObject {
 					case 'object':
 					case 'full_object':
 						$this->object = $result->fetch(PDO::FETCH_OBJ);
-						$this->array = (array)$this->object;
-						$this->loadDeep('object');
-						if (empty($this->meta['id'])) {
-							$this->meta['id'] = $this->array[$this->meta['id_field']];
+						if ($this->object) {
+							$this->array = (array)$this->object;
+							$this->loadDeep('object');
+							if (empty($this->meta['id'])) {
+								$this->meta['id'] = $this->array[$this->meta['id_field']];
+							}
+						} else {
+							$this->object = null;
 						}
 						break;
 					case 'array':
 						$this->array = $result->fetch(PDO::FETCH_ASSOC);
-						$this->loadDeep('array');
-						if (empty($this->meta['id'])) {
-							$this->meta['id'] = $this->array[$this->meta['id_field']];
+						if ($this->array) {
+							$this->loadDeep('array');
+							if (empty($this->meta['id'])) {
+								$this->meta['id'] = $this->array[$this->meta['id_field']];
+							}
+						} else {
+							$this->array = null;
 						}
 						break;
 					case 'list':
