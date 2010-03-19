@@ -131,12 +131,23 @@ class Content extends TableCtl {
 		return $toret;
 	}
 	
+	public static function createPreview($content, $ellips = true) {
+		$pattern = '(<br\/?><br\/?>|<!--break-->)';
+		$content = current(split($pattern, $content, 2));
+		if (is_string($ellips)) {
+			return $content . $ellips;
+		} else if ($ellips) {
+			return $content . '&hellip;';
+		}
+		return $content;
+	}
+
 	/**
 	 * Trim content to a certain number of words
 	 *
 	 * Copied from http://www.lullabot.com/articles/trim_a_string_to_a_given_word_count
 	 */
-	public static function createPreview($content, $count = 50, $ellips = true) {
+	public static function trimWords($content, $count = 50, $ellips = true) {
 		$words = explode(' ', $content);
 		if (count($words) > $count) {
 			array_splice($words, $count);
