@@ -13,7 +13,7 @@
 		<managingEditor><?php echo Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)) ?></managingEditor>
 		<webMaster><?php echo Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)) ?></webMaster>
 		
-		<?php foreach($list as $item): ?>
+		<?php if ($list) foreach($list as $item): ?>
 			<item>
 				<title><?php echo htmlspecialchars($item['title']) ?></title>
 				<link><?php echo $item['link'] ?></link>

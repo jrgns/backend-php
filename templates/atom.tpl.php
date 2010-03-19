@@ -5,7 +5,7 @@
 	<link><?php echo $link ?></link>
 	<description><?php echo htmlspecialchars($description) ?></description>
 	<updated><?php echo date('r') ?></updated>
-	<?php foreach($list as $item): ?>
+	<?php if ($list) foreach($list as $item): ?>
 		<entry>
 			<title><?php echo htmlspecialchars($item['title']) ?></title>
 			<link><?php echo $item['link'] ?></link>
