@@ -138,7 +138,9 @@ class TableCtl extends AreaCtl {
 		$obj_name = (class_name(Controller::$area) . 'Obj');
 		if (class_exists($obj_name, true)) {
 			$toret = new $obj_name($id);
-			$toret->read();
+			if (!$toret->read()) {
+				$toret = false;
+			}
 			Hook::run('read', 'post', array($toret), array('toret' => $toret));
 		} else {
 			Controller::whoops();
