@@ -136,7 +136,7 @@ class Content extends TableCtl {
 	 *
 	 * Copied from http://www.lullabot.com/articles/trim_a_string_to_a_given_word_count
 	 */
-	public static function createPreview($content, $count, $ellips = true) {
+	public static function createPreview($content, $count = 50, $ellips = true) {
 		$words = explode(' ', $content);
 		if (count($words) > $count) {
 			array_splice($words, $count);
