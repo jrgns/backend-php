@@ -757,12 +757,18 @@ class DBObject {
 			}
 			if (array_key_exists($name, $data)) {
 				$type = array_key_exists('type', $options) ? $options['type'] : 'string';
-				$field_data[] = $name;
+				$field_data[] = '`' . $name . '`';
 
 				$do_add = true;
 				$just_add = false;
 				$value = null;
+				preg_match(REGEX_SQL_FUNCTION, strtoupper($data[$name]), $matches);
 				switch (true) {
+					case preg_match(REGEX_SQL_FUNCTION, strtoupper($data[$name])):
+						$do_add   = false;
+						$just_add = true;
+						$value = $data[$name];
+						break;
 					case $type == 'lastmodified':
 						$do_add = false;
 						break;
