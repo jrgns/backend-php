@@ -30,8 +30,8 @@ class TagObj extends DBObject {
 		$meta['fields'] = array(
 			'id' => 'primarykey',
 			'parent_id' => array('type' => 'foreignkey', 'default' => 0),
-			'foreign_table' => 'string',
-			'name' => 'title',
+			'foreign_table' => array('type' => 'string', 'string_size' => 80),
+			'name' => array('type' => 'title', 'string_size' => 150),
 			'description' => 'text',
 			'active' => 'boolean',
 			'weight' => 'integer',

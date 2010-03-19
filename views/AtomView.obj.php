@@ -22,9 +22,12 @@ class AtomView extends View {
 	}
 	
 	public static function hook_output($to_print) {
-		$to_print = Render::renderFile('atom.tpl.php');
-		$to_print = HtmlView::replace($to_print);
-		return trim($to_print);
+		if ($to_print) {
+			$to_print = Render::renderFile('atom.tpl.php');
+			$to_print = HtmlView::replace($to_print);
+			return trim($to_print);
+		}
+		return '';
 	}
 }
 

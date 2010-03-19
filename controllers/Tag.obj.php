@@ -94,7 +94,7 @@ class Tag extends TableCtl {
 		return $toret;
 	}
 	
-	public function rss_display($result) {
+	private function feed_display($result, $mode) {
 		if ($result instanceof DBObject) {
 			Backend::add('title', $result->array['name']);
 			Backend::add('link', SITE_LINK . '?q=tag/' . $result->array['id']);
@@ -111,6 +111,14 @@ class Tag extends TableCtl {
 			Backend::add('list', $list);
 		}
 		return $result;
+	}
+
+	function rss_display($result) {
+		return $this->feed_display($result, 'rss');
+	}
+
+	function atom_display($result) {
+		return $this->feed_display($result, 'atom');
 	}
 
 	/*
