@@ -5,6 +5,14 @@
 	<dd>
 		<?php echo $definition['return']['description'] ?>
 	</dd>
+	<dt>URL Parameters</dt>
+	<dd>
+		<?php if (!empty($definition['parameters'])): foreach($definition['parameters'] as $name => $parameter): ?>
+			{tpl:api_parameter.tpl.php}
+		<?php endforeach; else: ?>
+			None
+		<?php endif; ?>
+	</dd>
 	<dt>Required Parameters</dt>
 	<dd>
 		<?php if (!empty($definition['required'])): foreach($definition['required'] as $name => $parameter): ?>

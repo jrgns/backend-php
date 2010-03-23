@@ -3,6 +3,8 @@ class API extends AreaCtl {
 	private static function checkParam($name, $value, $options, &$errors) {
 		$type  = array_key_exists('type', $options)  ? $options['type']  : 'string';
 		$range = array_key_exists('range', $options) ? $options['range'] : false;
+
+		//Add other filters / validateors here
 		settype($value, $type);
 
 		if ($range && !in_array($value, $range)) {
@@ -45,7 +47,7 @@ class API extends AreaCtl {
 
 	public function action_define($class, $function) {
 		if (!is_callable(array($class, 'define_' . $function))) {
-			Backend::addError('Unknown function: ' . $class . ':' . $function);
+			Backend::addError('Unknown function: ' . $class . '::' . $function);
 			return false;
 		}
 		$definition = call_user_func(array($class, 'define_' . $function));
