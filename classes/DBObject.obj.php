@@ -762,42 +762,41 @@ class DBObject {
 				$do_add = true;
 				$just_add = false;
 				$value = null;
-				preg_match(REGEX_SQL_FUNCTION, strtoupper($data[$name]), $matches);
 				switch (true) {
-					case preg_match(REGEX_SQL_FUNCTION, strtoupper($data[$name])):
-						$do_add   = false;
-						$just_add = true;
-						$value = $data[$name];
-						break;
-					case $type == 'lastmodified':
-						$do_add = false;
-						break;
-					case $type == 'dateadded':
-						$do_add = false;
-						$just_add = true;
-						$value = 'NOW()';
-						break;
-					case substr($type, 0, 8) == 'password':
-						/*
-						Use the default for now. method etc should be defined in the options array
-						if (strpos($options, ':') !== false) {
-							$temp = explode(':', $options);
-							if (count($temp) >= 2) {
-								$do_add = false;
-								$just_add = true;
-								$method = $temp[1];
-								$value = $method . '(:' . $name . ')';
-								$parameters[':' . $name] = $data[$name];
-							}
+				case preg_match(REGEX_SQL_FUNCTION, strtoupper($data[$name])):
+					$do_add   = false;
+					$just_add = true;
+					$value = $data[$name];
+					break;
+				case $type == 'lastmodified':
+					$do_add = false;
+					break;
+				case $type == 'dateadded':
+					$do_add = false;
+					$just_add = true;
+					$value = 'NOW()';
+					break;
+				case substr($type, 0, 8) == 'password':
+					/*
+					Use the default for now. method etc should be defined in the options array
+					if (strpos($options, ':') !== false) {
+						$temp = explode(':', $options);
+						if (count($temp) >= 2) {
+							$do_add = false;
+							$just_add = true;
+							$method = $temp[1];
+							$value = $method . '(:' . $name . ')';
+							$parameters[':' . $name] = $data[$name];
 						}
-						if (is_null($value)) {
-							$value = $data[$name];
-						}
-						break;
-						*/
-					default:
+					}
+					if (is_null($value)) {
 						$value = $data[$name];
-						break;
+					}
+					break;
+					*/
+				default:
+					$value = $data[$name];
+					break;
 				}
 				if ($do_add) {
 					$parameters[':' . $name] = $value;
