@@ -1,6 +1,6 @@
 <?php
 /**
- * The class file for InsertQuery
+ * The class file for UpdateQuery
  *
  * @author J Jurgens du Toit (JadeIT cc) <jurgens.dutoit@gmail.com> - initial API and implementation
  * @copyright Copyright (c) 2009 JadeIT cc.
@@ -11,22 +11,23 @@
  * @package Utilities
  */
 /**
- * Class to handle insert queries
+ * Class to handle update queries
  */
-class InsertQuery extends Query {
+class UpdateQuery extends Query {
 	protected $data = array();
 
 	function __construct($table, array $options = array()) {
 		Controller::$debug = true;
-		parent::__construct('INSERT', $table, $options);
+		parent::__construct('UPDATE', $table, $options);
 	}
 
 	protected function buildTable() {
-		$query  = 'INSERT INTO ' . $this->table;
-		$fields = array_map(array('Query', 'enclose'), array_keys($this->data));
-		$this->parameters = array_merge($this->parameters, array_values($this->data));
-		$query .= PHP_EOL . '(' . implode(', ', $fields) . ')';
-		$query .= PHP_EOL . 'VALUES (' . implode(', ', array_fill(0, count($this->parameters), '?')) . ')';
+		$query  = 'UPDATE ' . $this->table . ' SET' . PHP_EOL;
+		$fields = array();
+		foreach($this->data as $field => $value) {
+			$fields[] = Query::enclose($field) . ' = ' . $value;
+		}
+		$query .= implode(', ' . PHP_EOL, $fields);
 		return $query;
 	}
 
@@ -39,5 +40,12 @@ class InsertQuery extends Query {
 			$this->data[$name] = $value;
 		}
 		return $this;
+	}
+
+	public function execute(array $parameters = array(), array $options = array()) {
+		if ($stmt = parent::execute($parameters, $options)) {
+			return $stmt->rowCount();
+		}
+		return $stmt;
 	}
 }

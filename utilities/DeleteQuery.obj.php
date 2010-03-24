@@ -18,6 +18,11 @@ class DeleteQuery extends Query {
 		parent::__construct('DELETE', $table, $options);
 	}
 
+	protected function buildTable() {
+		$query = 'DELETE FROM ' . $this->table;
+		return $query;
+	}
+
 	public function execute(array $parameters = array(), array $options = array()) {
 		if ($stmt = parent::execute($parameters, $options)) {
 			return $stmt->rowCount();

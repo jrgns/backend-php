@@ -233,17 +233,6 @@ class Query {
 	
 	protected function buildTable() {
 		$query = '';
-		switch ($this->action) {
-		case 'DELETE':
-			$query = $this->action . PHP_EOL . 'FROM ' . $this->table;
-			break;
-		case 'INSERT':
-			$query  = $this->action . ' INTO ' . $this->table;
-			$fields = array_map(array('Query', 'enclose'), array_keys($this->data));
-			$this->parameters = array_values($this->data);
-			$query .= PHP_EOL . '(' . implode(', ', $fields) . ')';
-			$query .= PHP_EOL . 'VALUES (' . implode(', ', array_fill(0, count($this->parameters), '?')) . ')';
-		}
 		return $query;
 	}
 	
