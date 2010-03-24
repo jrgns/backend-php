@@ -226,37 +226,28 @@ class BackendAccount extends TableCtl {
 	 */
 	public function action_confirm($salt) {
 		$toret = false;
-		$object = self::getObject(get_class($this));
-		$db = Backend::getDB($account->getMeta('database'));
-		if ($db instanceof PDO) {
-			$query = 'SELECT * FROM `' . $account->getMeta('table') . '` WHERE `salt` = :salt AND `confirmed` = 0 AND `active` = 1';
-			$stmt = $db->prepare($query);
-			if ($stmt && $stmt->execute(array(':salt' => $salt))) {
-				$user = $stmt->fetch(PDO::FETCH_ASSOC);
-				if ($user) {
-					send_email(
-						Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)),
-						'New User: ' . $user['username'],
-						var_export($user, true)
-					);
-					$data = array(
-						'confirmed' => true,
-					);
-					$user = self::getObject(get_class($this), $user['id']);
-					if ($user->update($data)) {
-						Backend::addSuccess('Your user account has been confirmed. You can proceed to the login.');
-					} else {
-						Backend::addError('Could not confirm your account at the moment. Please try again later');
-					}
-				} else {
-					Backend::addError('Could not confirm your account at the moment. Please try again later');
-				}
-			} else {
-				Backend::addError('Could not confirm your account at the moment. Please try again later');
-				if (Controller::$debug) {
-					var_dump($stmt->errorInfo());
-				}
-			}
+		$account = self::getObject(get_class($this));
+		$query = new SelectQuery(BackendAccount::getName());
+		$query
+			->filter('`salt` = :salt')
+			->filter('`confirmed` = 0')
+			->filter('`active` = 1');
+		$user = $query->fetchAssoc(array(':salt' => $salt));
+		if (!$user) {
+			Backend::addError('Could not confirm your account at the moment. Please try again later');
+			return false;
+		}
+		send_email(
+			Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)),
+			'New User: ' . $user['username'],
+			var_export($user, true)
+		);
+		$data = array(
+			'confirmed' => true,
+		);
+		$user = self::getObject(get_class($this), $user['id']);
+		if ($user->update($data)) {
+			Backend::addSuccess('Your user account has been confirmed. You can proceed to the login.');
 		} else {
 			Backend::addError('Could not confirm your account at the moment. Please try again later');
 		}
