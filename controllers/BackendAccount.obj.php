@@ -247,16 +247,19 @@ class BackendAccount extends TableCtl {
 		);
 		$user = self::getObject(get_class($this), $user['id']);
 		if ($user->update($data)) {
-			Backend::addSuccess('Your user account has been confirmed. You can proceed to the login.');
-		} else {
-			Backend::addError('Could not confirm your account at the moment. Please try again later');
+			Backend::addSuccess('Your user account has been confirmed. Please login.');
+			return true;
 		}
-		return $toret;
+
+		Backend::addError('Could not confirm your account at the moment. Please try again later');
+		return false;
 	}
 	
-	public function html_confirm($object) {
-		Backend::add('Sub Title', 'Confirm Account');
-		Controller::redirect('?q=account/display');
+	public function html_confirm($result) {
+		if ($result) {
+			Controller::redirect('?q=account/login');
+		}
+		Controller::redirect('?q=');
 	}
 	
 	public static function hook_start() {
