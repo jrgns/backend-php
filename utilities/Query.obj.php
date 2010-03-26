@@ -82,27 +82,29 @@ class Query {
 						$this->last_stmt   = $stmt;
 						$this->last_params = $parameters;
 					} else {
+						$error_info = $stmt->errorInfo();
+						
+						$verbose_error = array('Query::execute Error:');
+						if (!empty($error_info[2])) {
+							$verbose_error[] = $error_info[2];
+						}
+						if (!empty($error_info[1])) {
+							$verbose_error[] = '(' . $error_info[1] . ')';
+						}
+						$verbose_error = implode(' ', $verbose_error);
+						BackendError::add(0, $verbose_error , __FILE__, __LINE__, 'execute');
+
 						if (Controller::$debug) {
-							$error_info = $stmt->errorInfo();
-							
-							$error = array('Query Error:');
-							if (!empty($error_info[2])) {
-								$error[] = $error_info[2];
-							}
-							if (!empty($error_info[1])) {
-								$error[] = '(' . $error_info[1] . ')';
-							}
-							$error = implode(' ', $error);
 							print_stacktrace();
 							echo 'Error Info:';
 							var_dump($error_info);
 							if (Controller::$debug >= 2) {
 								echo 'Query:<pre>' . PHP_EOL . $stmt->queryString . '</pre>';
 							}
+							$this->last_error = $verbose_error;
 						} else {
-							$error = 'Error executing statement';
+							$this->last_error = 'Error executing statement';
 						}
-						$this->last_error = $error;
 					}
 				} else {
 					$this->last_error = 'Could not prepare statement';
