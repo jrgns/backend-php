@@ -63,7 +63,8 @@ class HtmlView extends View {
 		$to_print = self::addLinks($to_print);
 		$to_print = self::formsAcceptCharset($to_print);
 
-		if (Value::get('admin_installed', false)) {
+		//TODO fix this
+		if (Component::isActive('BackendFilter')) {
 			$BEFilter = new BEFilterObj();
 			$BEFilter->load();
 			$filters = $BEFilter->list ? $BEFilter->list : array();
