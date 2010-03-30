@@ -243,12 +243,10 @@ class TableCtl extends AreaCtl {
 					return false;
 				}
 				$importer_name = get_class($this) . 'Importer';
-				if (class_exists($importer_name, true)) {
-					$count = call_user_func_array(array($importer_name, 'import'), array($file['tmp_name'], $data));
-				} else {
+				if (!class_exists($importer_name, true)) {
 					$importer_name = 'GenericImporter';
-					$count = call_user_func_array(array($importer_name, 'import'), array($this, $file['tmp_name'], $data));
 				}
+				$count = call_user_func_array(array($importer_name, 'import'), array($this, $file['tmp_name'], $data));
 				$error = call_user_func(array($importer_name, 'getLastError'));
 				if (!$count && !empty($error)) {
 					Backend::addError($error);
@@ -407,9 +405,9 @@ class TableCtl extends AreaCtl {
 	}
 
 	public function html_import($result) {
-		Backend::add('Sub Title', 'Import');
 		switch (true) {
 		case $result instanceof DBObject:
+			Backend::add('Sub Title', 'Import');
 			Backend::add('Object', $result);
 			Backend::add('Sub Title', 'Import ' . $result->getMeta('name'));
 			$template_file = singularize(computerize(class_name(Controller::$area))) . '.import.tpl.php';
