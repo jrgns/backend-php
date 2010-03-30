@@ -75,7 +75,9 @@ class Tag extends TableCtl {
 			$query = new SelectQuery('TagLink');
 			$query
 				->leftJoin($result->array['foreign_table'], '`tag_links`.`foreign_id` = `' . $result->array['foreign_table'] . '`.`id`')
-				->filter('`tag_id` = :tag_id');
+				->filter('`tag_id` = :tag_id')
+				//TODO Assuming the foreign table has an added field
+				->order('`' . $result->array['foreign_table'] . '`.`added` DESC');
 			$result->array['list'] = $query->fetchAll(array(':tag_id' => $result->array['id']));
 		}
 		return $result;
