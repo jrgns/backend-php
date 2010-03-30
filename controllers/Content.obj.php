@@ -71,7 +71,11 @@ class Content extends TableCtl {
 			if (!empty($result->list) && is_array($result->list)) {
 				$list = array();
 				foreach($result->list as $item) {
-					$item['link'] = SITE_LINK . '?q=content/' . $item['id'];
+					if (Value::get('clean_urls', false)) {
+						$item['link'] = SITE_LINK . 'content/' . $item['id'];
+					} else {
+						$item['link'] = SITE_LINK . '?q=content/' . $item['id'];
+					}
 					$list[] = $item;
 				}
 			} else {

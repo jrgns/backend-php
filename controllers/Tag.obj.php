@@ -103,10 +103,19 @@ class Tag extends TableCtl {
 			Backend::add('title', $result->array['name']);
 			Backend::add('link', SITE_LINK . '?q=tag/' . $result->array['id']);
 			Backend::add('description', $result->array['description']);
-			if (!empty($result->array['content_list']) && is_array($result->array['content_list'])) {
+			if (!empty($result->array['list']) && is_array($result->array['list'])) {
 				$list = array();
-				foreach($result->array['content_list'] as $item) {
-					$item['link'] = SITE_LINK . '?q=content/' . $item['id'];
+				foreach($result->array['list'] as $item) {
+					$link = SITE_LINK;
+					if (Value::get('clean_urls', false)) {
+						$link .= $result->array['foreign_table'] . '/' . $item['id'];
+					} else {
+						$link .= '?q=' . $result->array['foreign_table'] . '/' . $item['id'];
+					}
+					$item['link'] = $link;
+					if ($result->array['foreign_table'] == 'contents') {
+						$item['body'] = Content::createPreview($item['body']);
+					}
 					$list[] = $item;
 				}
 			} else {
