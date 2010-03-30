@@ -44,7 +44,7 @@ class TwitterAPI {
 		self::$error_msg = false;
 		if (self::started()) {
 			$parameters = array('oauth_token' => self::$auth_token, 'oauth_token_secret' => self::$auth_secret);
-			$result = OAuth::request('http://twitter.com/statuses/mentions.json', $parameters);
+			$result = OAuth::request('http://api.twitter.com/1/statuses/mentions.json', $parameters);
 			if ($result = json_decode($result)) {
 				if (array_key_exists('error', $result)) {
 					self::$error_msg = $result->error;
@@ -67,7 +67,7 @@ class TwitterAPI {
 		if (self::started()) {
 			$parameters = array('oauth_token' => self::$auth_token, 'oauth_token_secret' => self::$auth_secret);
 			$parameters['status'] = $status;
-			$result = OAuth::request('http://twitter.com/statuses/update.json', $parameters, 'POST');
+			$result = OAuth::request('http://api.twitter.com/1/statuses/update.json', $parameters, 'POST');
 			if ($result = json_decode($result)) {
 				if (array_key_exists('error', $result)) {
 					self::$error_msg = $result->error;
