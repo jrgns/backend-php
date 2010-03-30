@@ -57,7 +57,14 @@ class OAuth {
 			'headers'  => array('Expect:'),
 			'callback' => array(__CLASS__, 'handleRequest'),
 		);
-		$returned = curl_request($request, array(), $options);
+		switch (strtoupper($method)) {
+		case 'GET':
+			$returned = curl_request($request, array(), $options);
+			break;
+		default:
+			$returned = curl_request($request, $parameters, $options);
+			break;
+		}
 		if (Controller::$debug >= 2) {
 			var_dump('Returned', $returned);
 		}
@@ -65,16 +72,19 @@ class OAuth {
 	}
 	
 	public static function handleRequest($ch, $returned, $options) {
-		if ($curl_error = curl_errno($ch)) {
-			Backend::addNotice('CURL Error: ' . $curl_error);
+		if (Controller::$debug) {
+			if ($curl_error = curl_errno($ch)) {
+				Backend::addNotice('CURL Error: ' . $curl_error);
+			}
+			$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+			if ($http_code != 200) {
+				Backend::addNotice('HTTP Returned code: ' . $http_code);
+			}
 		}
-		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-		Backend::addNotice('HTTP Returned code: ' . $http_code);
-		var_dump($ch, $returned, $options);
 		return $returned;
 	}
 
-	protected static function get_request($url, array $parameters = array(), $method = 'GET') {
+	protected static function get_request($url, array &$parameters = array(), $method = 'GET') {
 		$parameters['oauth_version']          = empty($parameters['oauth_version'])      ? '1.0'                      : $parameters['oauth_version'];
 		$parameters['oauth_nonce']            = empty($parameters['oauth_nonce'])        ? md5(microtime().mt_rand()) : $parameters['oauth_nonce'];
 		$parameters['oauth_timestamp']        = empty($parameters['oauth_timestamp'])    ? time()                     : $parameters['oauth_timestamp'];
@@ -98,7 +108,14 @@ class OAuth {
 
 		ksort($parameters);
 
-		$request = $url . '?' . http_build_query($parameters);
+		switch (strtoupper($method)) {
+		case 'GET':
+			$request = $url . '?' . http_build_query($parameters);
+			break;
+		default:
+			$request = $url;
+			break;
+		}
 		if (Controller::$debug >= 2) {
 			var_dump('Request', $request);
 		}
