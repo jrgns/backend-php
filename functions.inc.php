@@ -400,17 +400,21 @@ function curl_request($url, array $parameters = array(), array $options = array(
 		break;
 	}
 	if ($filename = Value::get('log_curl_requests', false)) {
-		//$fp = fopen('/var/www/Jrgn5/backend/curl_log.txt', 'a');
 		$fp = fopen($filename, 'a');
 		fwrite($fp, date('Y-m-d H:i:s') . "\t" . $method . "\t" . $url . PHP_EOL);
 		fclose($fp);
 	}
 	$toret = curl_exec($ch);
-	if ($curl_error = curl_errno($ch)) {
+
+	if (!empty($options['callback']) && is_callable($options['callback'])) {
+		$toret = call_user_func_array($options['callback'], array($ch, $toret, $options));
+	} else if ($curl_error = curl_errno($ch)) {
+		curl_close($ch);
 		return false;
 	} else {
 		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		if (!in_array($http_code, array(200))) {
+			curl_close($ch);
 			return false;
 		}
 	}
