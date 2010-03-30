@@ -69,15 +69,17 @@ class Tag extends TableCtl {
 		return false;
 	}
 	
-	public function action_display($id) {
+	public function action_display($id, $start = 0, $count = false) {
 		$result = parent::action_display($id);
 		if ($result instanceof DBObject) {
+			$count = $count ? $count : Value::get('TagContentListLength', 10);
 			$query = new SelectQuery('TagLink');
 			$query
 				->leftJoin($result->array['foreign_table'], '`tag_links`.`foreign_id` = `' . $result->array['foreign_table'] . '`.`id`')
 				->filter('`tag_id` = :tag_id')
 				//TODO Assuming the foreign table has an added field
-				->order('`' . $result->array['foreign_table'] . '`.`added` DESC');
+				->order('`' . $result->array['foreign_table'] . '`.`added` DESC')
+				->limit("$start, $count");
 			$result->array['list'] = $query->fetchAll(array(':tag_id' => $result->array['id']));
 		}
 		return $result;
