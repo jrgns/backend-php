@@ -401,7 +401,11 @@ function curl_request($url, array $parameters = array(), array $options = array(
 	}
 	if ($filename = Value::get('log_curl_requests', false)) {
 		$fp = fopen($filename, 'a');
-		fwrite($fp, date('Y-m-d H:i:s') . "\t" . $method . "\t" . $url . PHP_EOL);
+		if ($method == 'post') {
+			fwrite($fp, date('Y-m-d H:i:s') . "\t" . $method . "\t" . $url . "\t" . http_build_query($parameters) . PHP_EOL);
+		} else {
+			fwrite($fp, date('Y-m-d H:i:s') . "\t" . $method . "\t" . $url . PHP_EOL);
+		}
 		fclose($fp);
 	}
 	$toret = curl_exec($ch);
