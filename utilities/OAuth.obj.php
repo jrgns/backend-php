@@ -52,13 +52,28 @@ class OAuth {
 	
 	public static function request($url, array $parameters = array(), $method = 'GET') {
 		$request = self::get_request($url, $parameters, $method);
-		$returned = curl_request($request, array(), array('method' => $method, 'headers' => array('Expect:')));
+		$options = array(
+			'method'   => $method,
+			'headers'  => array('Expect:'),
+			'callback' => array(__CLASS__, 'handleRequest'),
+		);
+		$returned = curl_request($request, array(), $options);
 		if (Controller::$debug >= 2) {
 			var_dump('Returned', $returned);
 		}
 		return $returned;
 	}
 	
+	public static function handleRequest($ch, $returned, $options) {
+		if ($curl_error = curl_errno($ch)) {
+			Backend::addNotice('CURL Error: ' . $curl_error);
+		}
+		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		Backend::addNotice('HTTP Returned code: ' . $http_code);
+		var_dump($ch, $returned, $options);
+		return $returned;
+	}
+
 	protected static function get_request($url, array $parameters = array(), $method = 'GET') {
 		$parameters['oauth_version']          = empty($parameters['oauth_version'])      ? '1.0'                      : $parameters['oauth_version'];
 		$parameters['oauth_nonce']            = empty($parameters['oauth_nonce'])        ? md5(microtime().mt_rand()) : $parameters['oauth_nonce'];
