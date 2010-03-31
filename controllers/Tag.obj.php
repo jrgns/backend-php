@@ -29,7 +29,9 @@ class Tag extends TableCtl {
 		$tags = array_map('plain', array_map('trim', explode(',', $tags)));
 		$toret = true;
 		foreach($tags as $tag) {
-			$toret = Tag::add($tag, $foreign_table, $foreign_id) && $toret;
+			if (!empty($tag)) {
+				$toret = Tag::add($tag, $foreign_table, $foreign_id) && $toret;
+			}
 		}
 		return $toret;
 	}
