@@ -23,6 +23,7 @@ class DBObject {
 	public $array = null;
 	public $object = null;
 	public $inserted_id;
+	public $list_count = null;
 	
 	//If you set $last_error in a function, reset it in the beginning of the function as well.
 	public $last_error = false;
@@ -220,6 +221,9 @@ class DBObject {
 					case 'list':
 					default:
 						$this->list = $result->fetchAll(PDO::FETCH_ASSOC);
+						$pattern = '/(SELECT\s+).*(\s+|\n)(FROM)/i';
+						$count_query = new CustomQuery(preg_replace($pattern, '$1 COUNT(*) $3', $query));
+						$this->list_count = $count_query->fetchColumn();
 						break;
 					}
 					if ($this->object) {
@@ -532,7 +536,7 @@ class DBObject {
 					if ($value !== null) {
 						if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
 							$value = filter_var($value, FILTER_VALIDATE_EMAIL);
-						} else {
+						} else if (!empty($value)) {
 							Backend::addError('Please supply a valid email address');
 							$toret = false;
 						}
@@ -544,7 +548,7 @@ class DBObject {
 					if ($value !== null && $value != '') {
 						if (filter_var($value, FILTER_VALIDATE_URL)) {
 							$value = filter_var($value, FILTER_VALIDATE_URL);
-						} else {
+						} else if (!empty($value)) {
 							Backend::addError('Please supply a valid URL');
 							$toret = false;
 						}
@@ -554,7 +558,7 @@ class DBObject {
 					if ($value !== null) {
 						if (filter_var($value, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED)) {
 							$value = filter_var($value, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED);
-						} else {
+						} else if (!empty($value)) {
 							Backend::addError('Please supply a valid URL with a scheme');
 							$toret = false;
 						}
