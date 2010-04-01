@@ -199,11 +199,13 @@ class Tag extends TableCtl {
 		return $parameters;
 	}
 
-	
 	public static function install(array $options = array()) {
 		$toret = parent::install($options);
 
 		$toret = Permission::add('anonymous', 'display', __CLASS__) && $toret;
+		$toret = Permission::add('authenticated', 'display', __CLASS__) && $toret;
+		$toret = Permission::add('anonymous', 'list', __CLASS__) && $toret;
+		$toret = Permission::add('authenticated', 'list', __CLASS__) && $toret;
 		
 		$toret = Hook::add('form',    'pre',  __CLASS__) && $toret;
 		$toret = Hook::add('display', 'post', __CLASS__) && $toret;
