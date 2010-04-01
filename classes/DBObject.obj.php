@@ -222,7 +222,7 @@ class DBObject {
 					default:
 						$this->list = $result->fetchAll(PDO::FETCH_ASSOC);
 						$count_query = new CustomQuery(preg_replace(REGEX_MAKE_COUNT_QUERY, '$1 COUNT(*) $3', $query));
-						$this->list_count = $count_query->fetchColumn();
+						$this->list_count = $count_query->fetchColumn($params);
 						break;
 					}
 					if ($this->object) {
