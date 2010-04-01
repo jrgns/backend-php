@@ -221,8 +221,7 @@ class DBObject {
 					case 'list':
 					default:
 						$this->list = $result->fetchAll(PDO::FETCH_ASSOC);
-						$pattern = '/(SELECT\s+).*(\s+|\n)(FROM.*)(\s+|\n)(LIMIT\s.*)$/i';
-						$count_query = new CustomQuery(preg_replace($pattern, '$1 COUNT(*) $3', $query));
+						$count_query = new CustomQuery(preg_replace(REGEX_MAKE_COUNT_QUERY, '$1 COUNT(*) $3', $query));
 						$this->list_count = $count_query->fetchColumn();
 						break;
 					}

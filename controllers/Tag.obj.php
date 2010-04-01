@@ -25,6 +25,16 @@ class Tag extends TableCtl {
 		return $query->fetchAll(array(':table' => $table, ':id' => $table_id));
 	}
 	
+	public static function removeTags($table, $table_id) {
+		/* TODO
+		$query = new SelectQuery('Tag');
+		$query
+			->leftJoin('TagLink', array('`tags`.`id` = `tag_links`.`tag_id`'))
+			->filter('`tags`.`foreign_table` = :table')
+			->filter('`tag_links`.`foreign_id` = :id');
+		return $query->fetchAll(array(':table' => $table, ':id' => $table_id));*/
+	}
+	
 	public static function addTags($tags, $foreign_table, $foreign_id) {
 		$tags = array_map('plain', array_map('trim', explode(',', $tags)));
 		$toret = true;
@@ -74,7 +84,9 @@ class Tag extends TableCtl {
 	public function action_display($id, $start = 0, $count = false) {
 		$result = parent::action_display($id);
 		if ($result instanceof DBObject) {
-			$count = $count ? $count : Value::get('TagContentListLength', 10);
+			$params = array(
+				':tag_id' => $result->array['id']
+			);
 			$query = new SelectQuery('TagLink');
 			$query
 				->leftJoin($result->array['foreign_table'], '`tag_links`.`foreign_id` = `' . $result->array['foreign_table'] . '`.`id`')
@@ -82,7 +94,10 @@ class Tag extends TableCtl {
 				//TODO Assuming the foreign table has an added field
 				->order('`' . $result->array['foreign_table'] . '`.`added` DESC')
 				->limit("$start, $count");
-			$result->array['list'] = $query->fetchAll(array(':tag_id' => $result->array['id']));
+			$result->array['list'] = $query->fetchAll($params);
+
+			$count_query = new CustomQuery(preg_replace(REGEX_MAKE_COUNT_QUERY, '$1 COUNT(*) $3', $query));
+			$result->array['list_count'] = $count_query->fetchColumn($params);
 		}
 		return $result;
 	}
@@ -175,6 +190,15 @@ class Tag extends TableCtl {
 		return true;
 	}
 	*/
+	public static function checkParameters($parameters) {
+		$parameters = parent::checkParameters($parameters);
+		if (Controller::$action == 'display') {
+			$parameters[1] = array_key_exists(1, $parameters) ? $parameters[1] : 0;
+			$parameters[2] = array_key_exists(2, $parameters) ? $parameters[2] : Value::get('TagContentListLength', 10);
+		}
+		return $parameters;
+	}
+
 	
 	public static function install(array $options = array()) {
 		$toret = parent::install($options);
