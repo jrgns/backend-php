@@ -85,19 +85,26 @@ class Tag extends TableCtl {
 	public function action_display($id, $start = 0, $count = false) {
 		$result = parent::action_display($id);
 		if ($result instanceof DBObject) {
+			$tag_link = new SelectQuery('TagLink');
+			$tag_link
+				->field('`foreign_id`')
+				->filter('`tag_id` = :tag_id');
+
+			$foreign = self::getObject($result->array['foreign_table']);
+			list($query, $params) = $foreign->getSelectSQL();
+			$query
+				->field(':tag_id AS `tag_id`')
+				->filter('`' . $foreign->getMeta('id_field') . '` IN (' . $tag_link . ')')
+				->limit("$start, $count");
+
 			$params = array(
 				':tag_id' => $result->array['id']
 			);
-			$query = new SelectQuery('TagLink');
-			$query
-				->leftJoin($result->array['foreign_table'], '`tag_links`.`foreign_id` = `' . $result->array['foreign_table'] . '`.`id`')
-				->filter('`tag_id` = :tag_id')
-				//TODO Assuming the foreign table has an added field
-				->order('`' . $result->array['foreign_table'] . '`.`added` DESC')
-				->limit("$start, $count");
 			$result->array['list'] = $query->fetchAll($params);
 
 			$count_query = new CustomQuery(preg_replace(REGEX_MAKE_COUNT_QUERY, '$1 COUNT(*) $3', $query));
+			/*var_dump($params);
+			die("<pre>$query\n\n$count_query");*/
 			$result->array['list_count'] = $count_query->fetchColumn($params);
 		}
 		return $result;
