@@ -36,7 +36,8 @@ class Tag extends TableCtl {
 	}
 	
 	public static function addTags($tags, $foreign_table, $foreign_id) {
-		$tags = array_map('plain', array_map('trim', explode(',', $tags)));
+		$tags = is_array($tags) ? $tags : explode(',', $tags);
+		$tags = array_map('plain', array_map('trim', $tags));
 		$toret = true;
 		foreach($tags as $tag) {
 			if (!empty($tag)) {
