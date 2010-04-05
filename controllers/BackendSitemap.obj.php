@@ -43,16 +43,17 @@ class BackendSitemap extends AreaCtl {
 			return false;
 		}
 
-		if (Controller::$debug) {
-			Backend::addNotice('Generating sitemap for ' . $area . ' at ' . SITE_FOLDER . '/sitemap_' . $area . '.xml found at ' . SITE_LINK . basename($filename));
-		}
-
 		$filename = SITE_FOLDER . '/sitemap_' . $area . '.xml';
 		$fp = fopen($filename, 'w');
 		if (!$fp) {
 			Backend::addError('Could not generate sitemap: Could not open sitemap file. (' . $area . ')');
 			return false;
 		}
+
+		if (Controller::$debug) {
+			Backend::addNotice('Generating sitemap for ' . $area . ' at ' . SITE_FOLDER . '/sitemap_' . $area . '.xml found at ' . SITE_LINK . basename($filename));
+		}
+
 		$last_date = 0;
 		ob_start();
 		fwrite($fp, '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . PHP_EOL);
