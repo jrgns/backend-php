@@ -97,8 +97,8 @@ class HtmlView extends View {
 			$app_pri = false;
 			$app_sec = false;
 		}
-		$primary   += is_array($app_pri) ? $app_pri : array();
-		$secondary += is_array($app_sec) ? $app_sec : array();
+		$primary   = array_merge($primary, is_array($app_pri) ? $app_pri : array());
+		$secondary = array_merge($secondary, is_array($app_sec) ? $app_sec : array());
 		Backend::add('primary_links', $primary);
 		Backend::add('secondary_links', $secondary);
 		return $data;

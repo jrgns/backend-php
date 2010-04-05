@@ -42,6 +42,11 @@ class BackendSitemap extends AreaCtl {
 			Backend::addError('Could not generate sitemap: Could not generate list. (' . $area . ')');
 			return false;
 		}
+
+		if (Controller::$debug) {
+			Backend::addNotice('Generating sitemap for ' . $area . ' at ' . SITE_FOLDER . '/sitemap_' . $area . '.xml found at ' . SITE_LINK . basename($filename));
+		}
+
 		$filename = SITE_FOLDER . '/sitemap_' . $area . '.xml';
 		$fp = fopen($filename, 'w');
 		if (!$fp) {
