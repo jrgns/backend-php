@@ -1,6 +1,13 @@
 <?php if (!empty($Object)):
 	$fields = $Object->getMeta('fields');
 	$list = $Object->list;
+	$list_count   = $Object->list_count;
+	$area         = empty($area)        ? Controller::$area          : $area;
+	$action       = empty($action)      ? Controller::$action        : $action;
+	$list_start   = empty($list_start)  ? Controller::$parameters[0] : $list_start;
+	$list_length  = empty($list_length) ? Controller::$parameters[1] : $list_length;
+	$pages        = ceil($list_count / $list_length);
+	$current_page = floor($list_start / $list_length) + 1;
 	$odd = false;
 	$row_width = 3;
 	$std_width = 150;
@@ -38,6 +45,7 @@
 			</tr>
 		</tbody>
 	</table>
+	{tpl:list_paging.tpl.php}
 <form class="inline" id="form_list_delete" method="post" action="?q=<?php echo class_for_url($Object) ?>/delete">
 	<input type="hidden" id="delete_id" name="delete_id" value="false" />
 </form>
