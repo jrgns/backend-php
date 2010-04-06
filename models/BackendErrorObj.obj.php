@@ -41,6 +41,16 @@ class BackendErrorObj extends DBObject {
 		return parent::__construct($meta, $options);
 	}
 	
+	public function getSelectSQL($options = array()) {
+		$options['order']  = '`count` DESC';
+		$options['fields'] = array('COUNT(`id`) AS `count`', '`string`', '`file`', '`line`', '`mode`', '`query`');
+		$options['group']  = '`string`, `file`, `line`, `mode`, `query`';
+		if (!Permission::check('manage', 'contacts')) {
+			$options['conditions'] = array('`active` = 1');
+		}
+		return parent::getSelectSQL($options);
+	}
+
 	function validate($data, $action, $options = array()) {
 		$toret = true;
 		$data = parent::validate($data, $action, $options);
