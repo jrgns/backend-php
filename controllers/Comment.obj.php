@@ -75,6 +75,24 @@ class Comment extends TableCtl {
 					$user = new BackendAccountObj();
 					if ($user->create($user_data)) {
 						$_POST['obj']['user_id'] = $user->array['id'];
+
+						$url = SITE_LINK . '?q=account/confirm/' . $object->array['salt'];
+						$app_name = Backend::getConfig('application.Title');
+						$message = <<< END
+Hi {$user->array['name']}!
+
+Thank you for your comment on $app_name. An account has automatically been created for you. To activate it, please click on the following link:
+
+<a href="$url">$url</a>
+
+If the link doesn't work, copy the following URL into your browser's location bar:
+$url
+
+Please note that this account will be deleted if it isn't confirmed in a weeks time.
+
+Regards
+END;
+						send_email($user->array['email'], 'Thank you for your comment.', $message);
 					}
 					break;
 				}
