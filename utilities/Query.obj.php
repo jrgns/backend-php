@@ -117,11 +117,13 @@ class Query {
 	}
 	
 	function distinct() {
+		$this->query = false;
 		$this->distinct = true;
 		return $this;
 	}
 
 	public function field($field) {
+		$this->query = false;
 		if (is_array($field)) {
 			$this->fields = array_merge($this->fields, $field);
 		} else {
@@ -130,7 +132,13 @@ class Query {
 		return $this;
 	}
 	
+	public function setFields(array $fields) {
+		$this->query = false;
+		$this->fields = $fields;
+	}
+	
 	public function filter($condition) {
+		$this->query = false;
 		if (is_array($condition)) {
 			$this->conditions = array_merge($this->conditions, $condition);
 		} else {
@@ -139,7 +147,13 @@ class Query {
 		return $this;
 	}
 	
+	public function setFilter(array $filters) {
+		$this->query = false;
+		$this->conditions = $filters;
+	}
+	
 	public function group($group_field) {
+		$this->query = false;
 		if (is_array($group_field)) {
 			$this->group = array_merge($this->group, $group_field);
 		} else {
@@ -148,7 +162,13 @@ class Query {
 		return $this;
 	}
 	
+	public function setGroup(array $group) {
+		$this->query = false;
+		$this->group = $group;
+	}
+	
 	public function order($order_field) {
+		$this->query = false;
 		if (is_array($order_field)) {
 			$this->order = array_merge($this->group, $order_field);
 		} else {
@@ -157,7 +177,13 @@ class Query {
 		return $this;
 	}
 	
+	public function setOrder(array $order) {
+		$this->query = false;
+		$this->order = $order;
+	}
+	
 	public function limit($one, $two = false) {
+		$this->query = false;
 		if ($two !== false) {
 			$this->limit = array($one, $two);
 		} else {
