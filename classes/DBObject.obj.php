@@ -221,7 +221,11 @@ class DBObject {
 					case 'list':
 					default:
 						$this->list = $result->fetchAll(PDO::FETCH_ASSOC);
+						if ($query instanceof Query) {
+							$query->setOrder(array());
+						}
 						$count_query = new CustomQuery(preg_replace(REGEX_MAKE_COUNT_QUERY, '$1 COUNT(*) $3', $query));
+						
 						$this->list_count = $count_query->fetchColumn($params);
 						break;
 					}
@@ -745,6 +749,9 @@ class DBObject {
 		}
 		if (array_key_exists('order', $options)) {
 			$query->order($options['order']);
+		}
+		if (array_key_exists('group', $options)) {
+			$query->group($options['group']);
 		}
 		return array($query, $parameters);
 	}
