@@ -83,12 +83,9 @@ Hi {$user->array['name']}!
 
 Thank you for your comment on $app_name. An account has automatically been created for you. To activate it, please click on the following link:
 
-<a href="$url">$url</a>
-
-If the link doesn't work, copy the following URL into your browser's location bar:
 $url
 
-Please note that this account will be deleted if it isn't confirmed in a weeks time.
+Please note that you don't need to do this for your comments to show, but this account will be deleted if it isn't confirmed in a weeks time.
 
 Regards
 END;

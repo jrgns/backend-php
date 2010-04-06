@@ -324,10 +324,9 @@ Hi {$object->array['name']}!
 
 Your signup to $app_name was successful. Please click on the following link to activate the account:
 
-<a href="$url">$url</a>
-
-If the link doesn't work, copy the following URL into your browser's location bar:
 $url
+
+Please note that this account will be deleted if it isn't confirmed in a weeks time.
 
 Regards
 END;
