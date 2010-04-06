@@ -33,6 +33,6 @@ class BackendError extends TableCtl {
 			'stacktrace' => var_export($bt, true),
 		);
 		$BE = new BackendErrorObj();
-		return $BE->create($data);
+		return $BE->create($data, array('load' => false));
 	}
 }
