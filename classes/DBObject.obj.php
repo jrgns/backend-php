@@ -549,8 +549,13 @@ class DBObject {
 					//No break;
 				case 'url':
 					if ($value !== null && $value != '') {
-						if ($value = filter_var($value, FILTER_VALIDATE_URL)) {
-							$value = end(explode('://', $value));
+						$parts = parse_url($value);
+						if (empty($parts['scheme'])) {
+							$value = 'http://' . $value;
+						}
+						if (filter_var($value, FILTER_VALIDATE_URL, FILTER_FLAG_HOST_REQUIRED)) {
+							$value = explode('://', $value);
+							$value = end($value);
 						} else if (!empty($value)) {
 							Backend::addError('Please supply a valid URL');
 							$toret = false;
