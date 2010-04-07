@@ -262,13 +262,19 @@ class BackendAccount extends TableCtl {
 		Controller::redirect('?q=');
 	}
 	
-	public static function hook_start() {
+	public static function hook_init() {
 		$user = self::checkUser();
-		//TODO Maybe move this to hook_init, to get it early on
 		//Check if HTTP Digest Auth headers have been passed down
 		if (!$user && Value::get('CheckHTTPAuth', false)) {
 			$user = self::processHTTPAuth();
+			if ($user) {
+				$_SESSION['user'] = $user;
+			}
 		}
+	}
+	
+	public static function hook_start() {
+		$user = self::checkUser();
 		if (!$user && empty($_SESSION['user'])) {
 			self::setupAnonymous();
 		} else {
@@ -439,6 +445,7 @@ Site Admin
 	public static function install(array $options = array()) {
 		$toret = parent::install($options);
 
+		$toret = Hook::add('init', 'pre', self::getName(), array('global' => true, 'sequence' => -10)) && $toret;
 		$toret = Hook::add('start', 'pre', self::getName(), array('global' => true)) && $toret;
 		$toret = Hook::add('finish', 'post', self::getName(), array('global' => true)) && $toret;
 		
