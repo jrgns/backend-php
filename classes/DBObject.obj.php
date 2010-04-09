@@ -520,7 +520,7 @@ class DBObject {
 					break;
 				case 'string':
 					if ($value !== null) {
-						$value = plain($value);
+						//$value = plain($value);
 					}
 					break;
 				case 'text':
@@ -781,6 +781,9 @@ class DBObject {
 		$field_data = array();
 		$value_data = array();
 		$parameters = array();
+
+		$non_parameter_aware = array_key_exists('non_parameter', $options);
+		$non_parameters = array_key_exists('non_parameter', $options) ? $options['non_parameter'] : array();
 		foreach ($fields as $name => $options) {
 			if (!is_array($options)) {
 				$options = array('type' => $options);
@@ -793,7 +796,7 @@ class DBObject {
 				$just_add = false;
 				$value = null;
 				switch (true) {
-				case preg_match(REGEX_SQL_FUNCTION, strtoupper($data[$name])):
+				case $non_parameter_aware && preg_match(REGEX_SQL_FUNCTION, strtoupper($data[$name])):
 					$do_add   = false;
 					$just_add = true;
 					$value = $data[$name];
@@ -824,6 +827,11 @@ class DBObject {
 					}
 					break;
 					*/
+				case in_array($name, $non_parameters):
+					$do_add   = false;
+					$just_add = true;
+					$value = $data[$name];
+					break;
 				default:
 					$value = $data[$name];
 					break;
@@ -860,6 +868,9 @@ class DBObject {
 		$field_data = array();
 		$value_data = array();
 		$parameters = array();
+		
+		$non_parameter_aware = array_key_exists('non_parameter', $options);
+		$non_parameters = array_key_exists('non_parameter', $options) ? $options['non_parameter'] : array();
 		foreach ($fields as $name => $options) {
 			$options = is_array($options) ? $options : array('type' => $options);
 			$type = array_key_exists('type', $options) ? $options['type'] : 'string';
@@ -868,7 +879,7 @@ class DBObject {
 				$just_add = false;
 				$value = null;
 				switch (true) {
-				case preg_match(REGEX_SQL_FUNCTION, strtoupper($data[$name])):
+				case $non_parameter_aware && preg_match(REGEX_SQL_FUNCTION, strtoupper($data[$name])):
 					$do_add   = false;
 					$just_add = true;
 					$value = $data[$name];
@@ -898,6 +909,11 @@ class DBObject {
 					break;
 				case $type == 'dateadded':
 					$do_add = false;
+					break;
+				case in_array($name, $non_parameters):
+					$do_add   = false;
+					$just_add = true;
+					$value = $data[$name];
 					break;
 				default:
 					$value = $data[$name];
