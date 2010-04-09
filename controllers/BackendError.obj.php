@@ -18,7 +18,15 @@
  * This is the controller for the table backend_requests.
  */
 class BackendError extends TableCtl {
-	public static function add($number, $string, $file, $line, $context) {
+	public static function add($one, $two = false, $three = false, $four = false, $five = false) {
+		if (!is_numeric($one) && !$three && !$four && !$five) {
+			self::addBE($one, $two);
+		} else {
+			self::addPHP($one, $two, $three, $four, $five);
+		}
+	}
+	
+	public static function addPHP($number, $string, $file, $line, $context) {
 		$bt = array_reverse(debug_backtrace());
 		//Remove the call to BackendError::add :)
 		array_pop($bt);
@@ -34,5 +42,17 @@ class BackendError extends TableCtl {
 		);
 		$BE = new BackendErrorObj();
 		return $BE->create($data, array('load' => false));
+	}
+	
+	public static function addBE($string, $context = false) {
+		$bt = array_reverse(debug_backtrace());
+		array_pop($bt);
+		$bt      = array_reverse($bt);
+		$info    = reset($bt);
+		if (!$context) {
+			$context = next($bt);
+			$context = var_export($context['args'], true);
+		}
+		self::addPHP(0, $string, basename($info['file']), $info['line'], $context);
 	}
 }
