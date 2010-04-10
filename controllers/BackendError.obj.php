@@ -37,7 +37,7 @@ class BackendError extends TableCtl {
 			'string'     => $string,
 			'file'       => $file,
 			'line'       => $line,
-			'context'    => $context,
+			'context'    => is_string($context) ? $context : var_export($context, true),
 			'stacktrace' => var_export($bt, true),
 		);
 		$BE = new BackendErrorObj();

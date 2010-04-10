@@ -356,13 +356,21 @@ class Backend {
 			preg_match_all('/Missing argument ([0-9]+) for ([\S]+)::([^\(\)]+)\(\), called in ([\S]+) on line ([0-9]+)/', $string, $vars, PREG_SET_ORDER);
 			if (!empty($vars)) {
 				list($matches, $arg_num, $class, $method, $call_file, $call_line) = current($vars);
-				Backend::addError("Missing parameter $arg_num for $class::$method, called in $call_file line $call_line, defined in $file line $line");
+				if (SITE_STATE != 'production') {
+					Backend::addError("Missing parameter $arg_num for $class::$method, called in $call_file line $call_line, defined in $file line $line");
+				} else {
+					Backend::addError('Invalid Parameters');
+				}
 				return true;
 			}
 			preg_match_all('/Missing argument ([0-9]+) for ([\S]+)::([^\(\)]+)\(\)/', $string, $vars, PREG_SET_ORDER);
 			if (!empty($vars)) {
 				list($matches, $arg_num, $class, $method) = current($vars);
-				Backend::addError("Missing parameter $arg_num for $class::$method, defined in $file line $line");
+				if (SITE_STATE != 'production') {
+					Backend::addError("Missing parameter $arg_num for $class::$method, defined in $file line $line");
+				} else {
+					Backend::addError('Invalid Parameters');
+				}
 				return true;
 			}
 			break;
