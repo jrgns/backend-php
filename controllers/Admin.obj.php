@@ -90,24 +90,38 @@ class Admin extends AreaCtl {
 	
 	function action_daily(array $options = array()) {
 		$components = Component::getActive();
+		$result = true;
 		foreach($components as $component) {
 			$object = new $component['name']();
 			if (is_callable(array($object, 'daily'))) {
-				call_user_func_array(array($object, 'daily'), $options);
+				call_user_func_array(array($object, 'daily'), $options) && $result;
 			}
 		}
-		return true;
+		return $result;
 	}
 	
+	public function html_daily($result) {
+		if ($result) {
+			die;
+		}
+	}
+
 	function action_weekly(array $options = array()) {
 		$components = Component::getActive();
+		$result = true;
 		foreach($components as $component) {
 			$object = new $component['name']();
 			if (is_callable(array($object, 'weekly'))) {
-				call_user_func_array(array($object, 'weekly'), $options);
+				$result = call_user_func_array(array($object, 'weekly'), $options) && $result;
 			}
 		}
-		return true;
+		return $result;
+	}
+	
+	public function html_weekly($result) {
+		if ($result) {
+			die;
+		}
 	}
 
 	public function html_install($result) {
@@ -180,11 +194,15 @@ class Admin extends AreaCtl {
 
 		$toret = Hook::add('display', 'post', __CLASS__, array('global' => true, 'mode' => 'html')) && $toret;
 
+		$toret = Permission::add('nobody', 'post_install', 'admin') && $toret;
 		$toret = Permission::add('anonymous', 'post_install', 'admin') && $toret;
+		$toret = Permission::add('nobody', 'pre_install', 'admin') && $toret;
 		$toret = Permission::add('anonymous', 'pre_install', 'admin') && $toret;
+		$toret = Permission::add('nobody', 'daily', 'admin') && $toret;
 		$toret = Permission::add('anonymous', 'daily', 'admin') && $toret;
-		$toret = Permission::add('anonymous', 'daily', 'admin') && $toret;
-		$toret = Permission::add('authenticated', 'weekly', 'admin') && $toret;
+		$toret = Permission::add('authenticated', 'daily', 'admin') && $toret;
+		$toret = Permission::add('nobody', 'weekly', 'admin') && $toret;
+		$toret = Permission::add('anonymous', 'weekly', 'admin') && $toret;
 		$toret = Permission::add('authenticated', 'weekly', 'admin') && $toret;
 
 		return $toret;
