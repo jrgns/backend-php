@@ -1,6 +1,10 @@
 <?php
 class BackendSitemap extends AreaCtl {
 	protected $areas = array();
+	
+	public function action_index() {
+		return $this->action_generate();
+	}
 
 	public function action_generate() {
 		$sitemaps = array();
