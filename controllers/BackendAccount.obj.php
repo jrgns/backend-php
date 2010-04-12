@@ -391,11 +391,11 @@ END;
 	}
 	
 	public function daily(array $options = array()) {
-		self::purgeUnconfirmed();
+		return self::purgeUnconfirmed();
 	}
 	
 	public function weekly(array $options = array()) {
-		self::userStats();
+		return self::userStats();
 	}
 	
 	public static function purgeUnconfirmed() {
@@ -414,6 +414,7 @@ They were unconfirmed, and more than a week old
 Site Admin
 '
 		);
+		return true;
 	}
 	
 	public static function userStats() {
@@ -440,6 +441,7 @@ Site Admin
 			'User stats for ' . Backend::get('Title'),
 			$msg
 		);
+		return true;
 	}
 
 	public static function install(array $options = array()) {
