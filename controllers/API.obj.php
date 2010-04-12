@@ -28,13 +28,14 @@ class API extends AreaCtl {
 		}
 		if (!count($errors) && !empty($definition['optional'])) {
 			foreach($definition['optional'] as $name => $options) {
-				if (!array_key_exists($name, $data)) {
-					if (empty($options['default'])) {
+				if (array_key_exists($name, $data)) {
+					$parameters[$name] = self::checkParam($name, $data[$name], $options, $errors);
+				} else {
+					if (!array_key_exists('default', $options)) {
 						continue;
 					}
-					$data[$name] = $options['default'];
+					$parameters[$name] = $options['default'];
 				}
-				$parameters[$name] = self::checkParam($name, $data[$name], $options, $errors);
 			}
 		}
 
