@@ -84,7 +84,7 @@ class BackendSitemap extends AreaCtl {
 	
 	public function weekly(array $options = array()) {
 		$url = $this->action_generate();
-		if ($url) {
+		if ($url && SITE_STATE == 'production') {
 			$this->notifyGoogle($url);
 		}
 		return true;
