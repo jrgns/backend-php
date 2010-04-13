@@ -246,36 +246,37 @@ class Backend {
 	}
 
 	private static function addSomething($what, $string, $options = array()) {
-		$toret = false;
-		if (!is_null($string)) {
-			if (is_array($string)) {
-				$toret = true;
-				foreach($string as $one_string) {
-					$toret = self::addSomething($what, $one_string, $options) && $toret;
-				}
-			} else {
-				$toret = true;
-				array_push(self::$$what, $string);
-				//Log to file if necessary
-				$log_to_file = defined('BACKEND_INSTALLED') && BACKEND_INSTALLED ? Value::get('log_to_file', false) : false;
-				if ($log_to_file && in_array($what, array('success', 'notice', 'error'))) {
-					@list($file, $log_what) = explode('|', $log_to_file);
-					$file     = empty($file)     ? 'logfile_' . date('Ymd') . 'txt' : $file;
-					$log_what = empty($log_what) ? '*' : explode(',', $log_what);
-					if ((is_array($log_what) && in_array($what, $log_what)) || $log_what == '*') {
-						if (!file_exists(APP_FOLDER . '/logs/')) {
-							mkdir(APP_FOLDER . '/logs/', 0755);
-						}
-						$fp = fopen(APP_FOLDER . '/logs/' . $file, 'a');
-						if ($fp) {
-							$query = Controller::$area . '/' . Controller::$action . '/' . implode('/', Controller::$parameters);
-							fwrite($fp, time() . "\t" . $query . "\t" . $what . "\t" . $string . PHP_EOL);
-						}
+		if (is_null($string)) {
+			return false;
+		}
+		if (is_array($string)) {
+			$result = true;
+			foreach($string as $one_string) {
+				$result = self::addSomething($what, $one_string, $options) && $toret;
+			}
+			return $result;
+		} else {
+			array_push(self::$$what, $string);
+			//Log to file if necessary
+			$log_to_file = defined('BACKEND_INSTALLED') && BACKEND_INSTALLED ? Value::get('log_to_file', false) : false;
+			if ($log_to_file && in_array($what, array('success', 'notice', 'error'))) {
+				@list($file, $log_what) = explode('|', $log_to_file);
+				$file     = empty($file)     ? 'logfile_' . date('Ymd') . 'txt' : $file;
+				$log_what = empty($log_what) ? '*' : explode(',', $log_what);
+				if ((is_array($log_what) && in_array($what, $log_what)) || $log_what == '*') {
+					if (!file_exists(APP_FOLDER . '/logs/')) {
+						mkdir(APP_FOLDER . '/logs/', 0755);
+					}
+					$fp = fopen(APP_FOLDER . '/logs/' . $file, 'a');
+					if ($fp) {
+						$query = Controller::$area . '/' . Controller::$action . '/' . implode('/', Controller::$parameters);
+						fwrite($fp, time() . "\t" . $query . "\t" . $what . "\t" . $string . PHP_EOL);
 					}
 				}
 			}
+			return true;
 		}
-		return $toret;
+		return false;
 	}
 	
 	static public function addContent($content, $options = array()) {

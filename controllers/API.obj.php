@@ -5,7 +5,14 @@ class API extends AreaCtl {
 		$range = array_key_exists('range', $options) ? $options['range'] : false;
 
 		//Add other filters / validateors here
-		settype($value, $type);
+		switch($type) {
+		case 'numeric':
+			settype($value, 'int');
+			break;
+		default:
+			settype($value, $type);
+			break;
+		}
 
 		if ($range && !in_array($value, $range)) {
 			$errors[] = 'Incorrect value for parameter: ' . $name . '. ' . $value . ' given.';
