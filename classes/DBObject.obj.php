@@ -801,6 +801,13 @@ class DBObject {
 					$just_add = true;
 					$value = $data[$name];
 					break;
+				case substr($type, 0, 8) == 'password':
+					if (!is_null($data[$name])) {
+						if (is_null($value)) {
+							$value = $data[$name];
+						}
+					}
+					break;
 				case $type == 'lastmodified':
 					$do_add = false;
 					break;
@@ -809,24 +816,6 @@ class DBObject {
 					$just_add = true;
 					$value = 'NOW()';
 					break;
-				case substr($type, 0, 8) == 'password':
-					/*
-					Use the default for now. method etc should be defined in the options array
-					if (strpos($options, ':') !== false) {
-						$temp = explode(':', $options);
-						if (count($temp) >= 2) {
-							$do_add = false;
-							$just_add = true;
-							$method = $temp[1];
-							$value = $method . '(:' . $name . ')';
-							$parameters[':' . $name] = $data[$name];
-						}
-					}
-					if (is_null($value)) {
-						$value = $data[$name];
-					}
-					break;
-					*/
 				case in_array($name, $non_parameters):
 					$do_add   = false;
 					$just_add = true;
@@ -886,16 +875,6 @@ class DBObject {
 					break;
 				case substr($type, 0, 8) == 'password':
 					if (!is_null($data[$name])) {
-						/*if (strpos($type, ':') !== false) {
-							$temp = explode(':', $type);
-							if (count($temp) >= 2) {
-								$do_add = false;
-								$just_add = true;
-								$method = $temp[1];
-								$value = $method . '(:' . $name . ')';
-								$parameters[':' . $name] = $data[$name];
-							}
-						}*/
 						if (is_null($value)) {
 							$value = $data[$name];
 						}
