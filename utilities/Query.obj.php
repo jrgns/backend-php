@@ -167,6 +167,10 @@ class Query {
 		$this->group = $group;
 	}
 	
+	public function getGroup() {
+		return $this->group;
+	}
+	
 	public function order($order_field) {
 		$this->query = false;
 		if (is_array($order_field)) {
@@ -180,6 +184,10 @@ class Query {
 	public function setOrder(array $order) {
 		$this->query = false;
 		$this->order = $order;
+	}
+	
+	public function getOrder() {
+		return $this->order;
 	}
 	
 	public function limit($one, $two = false) {
