@@ -1,4 +1,3 @@
-<h3><?php echo $class ?>::<?php echo $function ?></h3>
 <div class="description"><?php echo $definition['description'] ?></div>
 <dl>
 	<dt>Return: <span class="large bottom"><code><strong><?php echo $definition['return']['type'] ?></strong></code></span></dt>
@@ -30,3 +29,6 @@
 		<?php endif; ?>
 	</dd>
 </dl>
+<p>
+	<a href="?q=<?php echo Controller::$area . '/define/' . Controller::$parameters[0] ?>">Up</a> | <a href="?q=<?php echo Controller::$area ?>">Top</a>
+</p>

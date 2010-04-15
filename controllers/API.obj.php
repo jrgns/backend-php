@@ -52,15 +52,65 @@ class API extends AreaCtl {
 		Backend::addError($errors);
 		return false;
 	}
-
-	public function action_define($class, $function) {
-		if (!is_callable(array($class, 'define_' . $function))) {
-			Backend::addError('Unknown function: ' . $class . '::' . $function);
+	
+	public function action_index() {
+		$components = Component::getActive();
+		if (!$components) {
 			return false;
 		}
-		$definition = call_user_func(array($class, 'define_' . $function));
-		if (!$definition) {
-			return false;
+		$results = array();
+		foreach(Component::getActive() as $component) {
+			$methods = get_class_methods($component['name']);
+			if (!$methods) {
+				continue;
+			}
+			$results[$component['name']] = array();
+			foreach($methods as $method) {
+				if (substr($method, 0, 7) == 'define_') {
+					$results[$component['name']][$method] = call_user_func(array($component['name'], $method));
+				}
+			}
+			if (count($results[$component['name']])) {
+				ksort($results[$component['name']]);
+			} else {
+				unset($results[$component['name']]);
+			}
+		}
+		ksort($results);
+		return count($results) ? $results : false;
+	}
+	
+	public function html_index($result) {
+		Backend::add('actions', $result);
+		Backend::addContent(Render::renderFile('api.index.tpl.php'));
+	}
+
+	public function action_define($class, $function = false) {
+		if ($function) {
+			if (!is_callable(array($class, 'define_' . $function))) {
+				Backend::addError('Unknown function: ' . $class . '::' . $function);
+				return false;
+			}
+			$definition = call_user_func(array($class, 'define_' . $function));
+			if (!$definition) {
+				return false;
+			}
+		} else {
+			$methods = get_class_methods($class);
+			if (!$methods) {
+				return false;
+			}
+			$definition = array();
+			foreach($methods as $method) {
+				if (substr($method, 0, 7) == 'define_') {
+					$definition[$method] = call_user_func(array($class, $method));
+				}
+			}
+			if (count($definition)) {
+				ksort($definition);
+			} else {
+				$definition = false;
+			}
 		}
 
 		return array(
@@ -72,7 +122,13 @@ class API extends AreaCtl {
 	
 	public function html_define($values) {
 		if ($values) {
-			Backend::addContent(Render::renderFile('api_function.tpl.php', $values));
+			if ($values['function']) {
+				Backend::add('Sub Title', $values['class'] . '::' . $values['function']);
+				Backend::addContent(Render::renderFile('api_function.tpl.php', $values));
+			} else {
+				Backend::add('Sub Title', $values['class']);
+				Backend::addContent(Render::renderFile('api_class.tpl.php', $values));
+			}
 		}
 		return true;
 	}
