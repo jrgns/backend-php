@@ -47,6 +47,16 @@ class Backend {
 		require(BACKEND_FOLDER . '/constants.inc.php');
 		require(BACKEND_FOLDER . '/functions.inc.php');
 		require(BACKEND_FOLDER . '/modifiers.inc.php');
+
+		if (file_exists(APP_FOLDER . '/constants.inc.php')) {
+			include(APP_FOLDER . '/constants.inc.php');
+		}
+		if (file_exists(APP_FOLDER . '/functions.inc.php')) {
+			include(APP_FOLDER . '/functions.inc.php');
+		}
+		if (file_exists(APP_FOLDER . '/modifiers.inc.php')) {
+			include(APP_FOLDER . '/modifiers.inc.php');
+		}
 		include(BACKEND_FOLDER . '/libraries/Markdown/markdown.php');
 		spl_autoload_register(array('Backend', '__autoload'));
 		set_error_handler    (array('Backend', '__error_handler'));
