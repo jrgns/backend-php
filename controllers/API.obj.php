@@ -132,4 +132,14 @@ class API extends AreaCtl {
 		}
 		return true;
 	}
+
+	public static function install(array $options = array()) {
+		$toret = parent::install($options);
+
+		$toret = Permission::add('nobody', 'define', __CLASS__) && $toret;
+		$toret = Permission::add('authenticated', 'define', __CLASS__) && $toret;
+		$toret = Permission::add('nobody', 'index', __CLASS__) && $toret;
+		$toret = Permission::add('authenticated', 'index', __CLASS__) && $toret;
+		return $toret;
+	}
 }
