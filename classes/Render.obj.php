@@ -18,10 +18,41 @@
   */
 class Render {
 	public static $do_cache = true;
+	private static $init = false;
+	private static $cache_folder = false;
+	
+	private static function init() {
+		if (!self::$init) {
+			self::$do_cache = Backend::getConfig('backend.application.renderer.use_cache', true);
+			
+			if (self::$do_cache) {
+				if (defined('SITE_FOLDER')) {
+					self::$cache_folder = SITE_FOLDER . '/cache/';
+				} else {
+					self::$cache_folder = APP_FOLDER . '/cache/';
+				}
+				//Check the cache folder
+				if (!file_exists(self::$cache_folder)) {
+					mkdir(self::$cache_folder, 0755);
+				}
+
+				if (!is_writable(self::$cache_folder)) {
+					if (SITE_STATE != 'production') {
+						Backend::addError('Render::Cache folder unwritable (' . $cache_folder . ')');
+					} else {
+						Backend::addError('Render::Cache folder unwritable');
+					}
+				}
+			}
+			self::$init = true;
+		}
+	}
 
 	public static function createTemplate($destination, $origin) {
-		$template_file    = self::buildTemplate($origin);
-		$template_content = self::evalTemplate($template_file);
+		self::init();
+		
+		$template_content = self::buildTemplate($origin);
+		$template_content = self::evalTemplate($template_content);
 		$template_loc     = Backend::getConfig('backend.templates.location', 'templates');
 		$dest_file        = APP_FOLDER . '/' . $template_loc . '/' . $destination;
 		if (@file_put_contents($dest_file, $template_content)) {
@@ -38,14 +69,18 @@ class Render {
 		return false;
 	}
 
-	public static function renderFile($filename, array $values = array()) {
+	public static function renderFile($template_name, array $values = array()) {
+		self::init();
+
 		//Build the template
-		$cache_file = self::buildTemplate($filename);
-		//Run the PHP in the template
-		$toret = self::evalTemplate($cache_file, $values);
-		//Parse the #Variables# in the template
-		$toret = self::parseVariables($toret, $values);
-		return $toret;
+		$content = self::buildTemplate($template_name);
+		if ($content) {
+			//We need to run the content and parse it's variables
+			$content = self::evalContent($content, $values);
+			//Parse the #Variables# in the content
+			$content = self::parseVariables($content, $values);
+		}
+		return $content;
 	}
 	
 	/**
@@ -54,12 +89,15 @@ class Render {
 	 * A template can be defined on three levels (in order of specificity):
 	 * + Framework level
 	 * + Application level
+	 * + Site level
 	 * + Theme level
 	 * Should a template not exist on Theme level, the Application level template will be used.
 	 * If it does not exist on Application level, the Framework level template will be used.
 	 * @todo TODO Consider caching the template locations for faster lookups?
 	 */
 	public static function checkTemplateFile($filename) {
+		self::init();
+
 		$toret = false;
 		$template_loc = Backend::getConfig('backend.templates.location', 'templates');
 		if (Component::isActive('Theme')) {
@@ -71,6 +109,8 @@ class Render {
 		//Check the theme first.
 		if ($theme && is_readable($theme['path'] . '/' . $filename)) {
 			$toret = $theme['path'] . '/' . $filename;
+		} else if (defined('SITE_FOLDER') && is_readable(SITE_FOLDER . '/' . $template_loc . '/' . $filename)) {
+			$toret = SITE_FOLDER . '/'. $template_loc . '/' . $filename;
 		} else if (is_readable(APP_FOLDER . '/' . $template_loc . '/' . $filename)) {
 			$toret = APP_FOLDER . '/'. $template_loc . '/' . $filename;
 		} else if (is_readable(BACKEND_FOLDER . '/' . $template_loc . '/' . $filename)) {
@@ -79,27 +119,33 @@ class Render {
 		return $toret;
 	}
 
-	private static function buildTemplate($filename) {
-		$filename = self::checkTemplateFile($filename);
-		$toret = false;
-		if ($filename) {
-			$cached_file = self::getCacheFile($filename);
-			$cache_filename = self::getCacheFilename($filename);
-			if ($cached_file) {
-				$toret = true;
-			} else {
-				$content = file_get_contents($filename);
-				//Check for other templates within the template
-				while (preg_match_all('/{tpl:(.*\.tpl.php)}/', $content, $templates, PREG_SET_ORDER) && is_array($templates) && count($templates) > 0) {
-					foreach ($templates as $temp_arr) {
-						$temp_file = $temp_arr[1];
-						$inner_filename = self::buildTemplate($temp_file);
-						if ($inner_filename) {
-							$inner_content = file_get_contents($inner_filename);
-						} else {
-							$inner_content = '<!--Missing Template-->';
-							//Backend::addError('Unknown Inner Template: ' . $temp_file);
-						}
+	/**
+	 * Takes a template, and expands all other templates within it.
+	 *
+	 * @param string The name of a template.
+	 * @return string The expanded template.
+	 */
+	private static function buildTemplate($template) {
+		$template_file = self::checkTemplateFile($template);
+		if (empty($template_file)) {
+			return false;
+		}
+		
+		$content = false;
+		if (self::$do_cache) {
+			//Check Cache
+			$content = self::getCacheFile($template_file);
+		}
+		//Build the Tempate
+		if (!$content) {
+			$content = file_get_contents($template_file);
+			//Check for other templates within the template
+			while (preg_match_all('/{tpl:(.*\.tpl.php)}/', $content, $templates, PREG_SET_ORDER) && is_array($templates) && count($templates) > 0) {
+				foreach ($templates as $temp_arr) {
+					$temp_file = $temp_arr[1];
+					Backend::addNotice('Building ' . $temp_file);
+					$inner_content = self::buildTemplate($temp_file);
+					if ($inner_content) {
 						if (Controller::$debug) {
 							 if (!empty($_REQUEST['debug']) && $_REQUEST['debug'] == 'templates') {
 								$inner_content = '<code class="template_name">{' . basename($temp_file) . '}</code>' . $inner_content;
@@ -110,26 +156,25 @@ class Render {
 						$content = str_replace($temp_arr[0], $inner_content, $content);
 					}
 				}
-				if (is_writable(SITE_FOLDER . '/cache/')) {
-					file_put_contents($cache_filename, $content);
-					if (Controller::$debug) {
-						var_dump('Render::Written Cache file for ' . $cache_filename);
-					}
-					$toret = true;
-				} else {
-					if (Controller::$debug) {
-						var_dump($cache_filename);
-					}
-					die('Render::Cache folder unwritable (' . SITE_FOLDER . '/cache/' . ')');
-				}
 			}
 		}
-		return $toret ? $cache_filename : false;
+		if ($content && self::$do_cache) {
+			$cache_file = self::getCacheFileName($template_file);
+			if (!file_exists($cache_file)) {
+				file_put_contents($cache_file, $content);
+			}
+		}
+		return $content;
 	}
-
-	private static function getCacheFilename($filename) {
-		$toret = false;
-		if (is_readable($filename)) {
+	
+	/**
+	 * Get the cache name of a template file.
+	 *
+	 * @param string The absolute filename of the template.
+	 * @return string Name of the template file, or false if it does not exist.
+	 */
+	private static function getCacheFilename($template_file) {
+		if (is_readable($template_file)) {
 			parse_str($_SERVER['QUERY_STRING'], $variables);
 			if (array_key_exists('recache', $variables)) {
 				unset($variables['recache']);
@@ -137,48 +182,41 @@ class Render {
 			if (array_key_exists('nocache', $variables)) {
 				unset($variables['nocache']);
 			}
-			$toret = SITE_FOLDER . '/cache/' . md5($_SERVER['SCRIPT_NAME'] . $variables . $filename) . '.' . filemtime($filename) . '.php';
+			return self::$cache_folder . md5($_SERVER['SCRIPT_NAME'] . $variables . $template_file) . '.' . filemtime($template_file) . '.php';
 		} else {
-			var_dump('Render::Template does not exist');
+			Backend::addError('Render::Template does not exist: ' . $template_file);
+			return false;
 		}
-		return $toret;
 	}
 
-	private static function getCacheFile($filename) {
-		$toret = false;
-
-		switch (true) {
-			case array_key_exists('nocache', $_REQUEST):
-			case array_key_exists('HTTP_PRAGMA', $_SERVER) && $_SERVER['HTTP_PRAGMA'] == 'no-cache':
-			case array_key_exists('HTTP_CACHE_CONTROL', $_SERVER) && in_array($_SERVER['HTTP_CACHE_CONTROL'], array('no-cache', 'max-age=0')):
-				self::$do_cache = false;
-				break;
+	/**
+	 * Get the contents of a cached template file, if it's a valid cache file.
+	 *
+	 * A cache file is invalid if it's older than specified (currently a day), or we have a recache request
+	 *
+	 * @param string The absolute name of the template.
+	 * @return string The contents of the cached template file.
+	 */
+	private static function getCacheFile($template_file) {
+		$cache_file = self::getCacheFilename($template_file);
+		if (!file_exists($cache_file)) {
+			return false;
+		}
+		if (array_key_exists('recache', $_REQUEST)) {
+			unlink($cache_file);
+			return false;
 		}
 
-		if (Backend::getConfig('backend.application.renderer.use_cache', true) && self::$do_cache) {
-			//Check the cache folder
-			if (!file_exists(BACKEND_FOLDER . '/cache/')) {
-				mkdir(BACKEND_FOLDER . '/cache/', 0755);
-			}
-				$cache_file = self::getCacheFilename($filename);
-			if (file_exists($cache_file)) {
-				if (array_key_exists('recache', $_REQUEST)) {
-					var_dump('Render::Recaching File');
-					unlink($cache_file);
-				} else {
-					//A day previous (Looks weird, but it works.)
-					$expire_time = mktime(-1);
-					if (filemtime($cache_file) >= $expire_time) {
-						$toret = file_get_contents($cache_file);
-					} else {
-						unlink($cache_file);
-					}
-				}
-			}
+		//A day previous (Looks weird, but it works.)
+		$expire_time = mktime(-1);
+		if (filemtime($cache_file) >= $expire_time) {
+			return file_get_contents($cache_file);
+		} else {
+			unlink($cache_file);
+			return false;
 		}
-		return $toret;
 	}
-
+	
 	/**
 	 * This function translates all #Variables# into their Backend values
 	 */
@@ -196,20 +234,33 @@ class Render {
 
 	/**
 	 * This function runs a template, making all the Backend variables available as PHP vars
+	 *
+	 * This isn't used anymore, but should we decide that `eval` is to slow, we can use this again
 	 */
 	private static function evalTemplate($template, array $vars = array()) {
-		$toret = false;
-		if (file_exists($template)) {
-			$vars = array_merge(Backend::getAll(), $vars);
-
-			$keys = array_keys($vars);
-			$keys = array_map(create_function('$elm', "return str_replace(' ', '_', \$elm);"), $keys);
-			extract(array_combine($keys, array_values($vars)));
-			ob_start();
-			include($template);
-			$toret = ob_get_clean();
+		if (!file_exists($template)) {
+			return false;
 		}
-		return $toret;
+
+		$vars = array_merge(Backend::getAll(), $vars);
+		$keys = array_keys($vars);
+		$keys = array_map(create_function('$elm', "return str_replace(' ', '_', \$elm);"), $keys);
+
+		extract(array_combine($keys, array_values($vars)));
+		ob_start();
+		include($template);
+		return ob_get_clean();
+	}
+
+	private static function evalContent($content, array $vars = array()) {
+		$vars = array_merge(Backend::getAll(), $vars);
+		$keys = array_keys($vars);
+		$keys = array_map(create_function('$elm', "return str_replace(' ', '_', \$elm);"), $keys);
+
+		extract(array_combine($keys, array_values($vars)));
+		ob_start();
+		eval('?>' . $content);
+		return ob_get_clean();
 	}
 
 	public static function getTemplateVarName($name) {
