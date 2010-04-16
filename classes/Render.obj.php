@@ -157,8 +157,8 @@ class Render {
 								$inner_content = '<!--' . basename($temp_file) . '-->' . $inner_content . '<!-- End of ' . basename($temp_file) . '-->';
 							}
 						}
-						$content = str_replace($temp_arr[0], $inner_content, $content);
 					}
+					$content = str_replace($temp_arr[0], $inner_content, $content);
 				}
 			}
 		}
