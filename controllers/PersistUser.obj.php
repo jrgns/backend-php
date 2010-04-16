@@ -22,7 +22,7 @@ class PersistUser extends TableCtl {
 					->field('MD5(CONCAT(`id`, `user_id`, `random`))')
 					->filter('`id`= :id');
 				$hash = $query->fetchColumn(array(':id' => $persist->array['id']));
-				if (setcookie('remembered', $hash, time() + 60 * 60 * 24 * 14, SITE_SUB_FOLDER)) {
+				if (setcookie('remembered', $hash, time() + 60 * 60 * 24 * 14, WEB_SUB_FOLDER)) {
 					return true;
 				} else {
 					Backend::addError('Could not set cookie to remember login');

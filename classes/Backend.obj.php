@@ -44,6 +44,9 @@ class Backend {
 		if (!defined('SITE_STATE')) {
 			define('SITE_STATE', 'production');
 		}
+		if (defined('SITE_FOLDER') && !defined('APP_FOLDER')) {
+			define('APP_FOLDER', SITE_FOLDER);
+		}
 		require(BACKEND_FOLDER . '/constants.inc.php');
 		require(BACKEND_FOLDER . '/functions.inc.php');
 		require(BACKEND_FOLDER . '/modifiers.inc.php');
@@ -51,10 +54,19 @@ class Backend {
 		if (file_exists(APP_FOLDER . '/constants.inc.php')) {
 			include(APP_FOLDER . '/constants.inc.php');
 		}
+		if (defined('SITE_FOLDER') && file_exists(SITE_FOLDER . '/constants.inc.php')) {
+			include(APP_FOLDER . '/constants.inc.php');
+		}
 		if (file_exists(APP_FOLDER . '/functions.inc.php')) {
 			include(APP_FOLDER . '/functions.inc.php');
 		}
+		if (defined('SITE_FOLDER') && file_exists(SITE_FOLDER . '/functions.inc.php')) {
+			include(APP_FOLDER . '/functions.inc.php');
+		}
 		if (file_exists(APP_FOLDER . '/modifiers.inc.php')) {
+			include(APP_FOLDER . '/modifiers.inc.php');
+		}
+		if (defined('SITE_FOLDER') && file_exists(SITE_FOLDER . '/modifiers.inc.php')) {
 			include(APP_FOLDER . '/modifiers.inc.php');
 		}
 		include(BACKEND_FOLDER . '/libraries/Markdown/markdown.php');
@@ -72,17 +84,17 @@ class Backend {
 			if (substr($folder, strlen($folder) - 1) != '/') {
 				$folder .= '/';
 			}
-			define('SITE_SUB_FOLDER', $folder);
+			define('WEB_SUB_FOLDER', $folder);
 		} else {
-			define('SITE_SUB_FOLDER', '/');
+			define('WEB_SUB_FOLDER', '/');
 		}
-		Backend::add('SITE_SUB_FOLDER', SITE_SUB_FOLDER);
+		Backend::add('WEB_SUB_FOLDER', WEB_SUB_FOLDER);
 		
 		$domain = !empty($url['host']) ? $url['host'] : 'localhost';
 		define('SITE_DOMAIN', $domain);
 		Backend::add('SITE_DOMAIN', SITE_DOMAIN);
 
-		$url = SITE_DOMAIN . SITE_SUB_FOLDER;
+		$url = SITE_DOMAIN . WEB_SUB_FOLDER;
 		define('SITE_LINK', 'http://' . $url);
 		if (Backend::getConfig('backend.application.use_ssl', false)) {
 			define('S_SITE_LINK', 'https://' . $url);
@@ -396,18 +408,38 @@ class Backend {
 	static public function __autoload($classname) {
 		$included = false;
 		//TODO eventually cache / determine by class name exactly where the file should be to improve performance
-		$folders = array(
-			APP_FOLDER . '/models/' => 'model',
-			BACKEND_FOLDER . '/models/' => 'model',
-			APP_FOLDER . '/controllers/' => 'controller',
-			BACKEND_FOLDER . '/controllers/' => 'controller',
-			APP_FOLDER . '/classes/' => 'class',
-			BACKEND_FOLDER . '/classes/' => 'class',
-			APP_FOLDER . '/views/' => 'view',
-			BACKEND_FOLDER . '/views/' => 'view',
-			APP_FOLDER . '/utilities/' => 'utility',
-			BACKEND_FOLDER . '/utilities/' => 'utility',
-		);
+		if (defined('SITE_FOLDER')) {
+			$folders = array(
+				SITE_FOLDER . '/controllers/' => 'controller',
+				APP_FOLDER . '/controllers/' => 'controller',
+				BACKEND_FOLDER . '/controllers/' => 'controller',
+				SITE_FOLDER . '/models/' => 'model',
+				APP_FOLDER . '/models/' => 'model',
+				BACKEND_FOLDER . '/models/' => 'model',
+				SITE_FOLDER . '/classes/' => 'class',
+				APP_FOLDER . '/classes/' => 'class',
+				BACKEND_FOLDER . '/classes/' => 'class',
+				SITE_FOLDER . '/views/' => 'view',
+				APP_FOLDER . '/views/' => 'view',
+				BACKEND_FOLDER . '/views/' => 'view',
+				SITE_FOLDER . '/utilities/' => 'utility',
+				APP_FOLDER . '/utilities/' => 'utility',
+				BACKEND_FOLDER . '/utilities/' => 'utility',
+			);
+		} else {
+			$folders = array(
+				APP_FOLDER . '/controllers/' => 'controller',
+				BACKEND_FOLDER . '/controllers/' => 'controller',
+				APP_FOLDER . '/models/' => 'model',
+				BACKEND_FOLDER . '/models/' => 'model',
+				APP_FOLDER . '/classes/' => 'class',
+				BACKEND_FOLDER . '/classes/' => 'class',
+				APP_FOLDER . '/views/' => 'view',
+				BACKEND_FOLDER . '/views/' => 'view',
+				APP_FOLDER . '/utilities/' => 'utility',
+				BACKEND_FOLDER . '/utilities/' => 'utility',
+			);
+		}
 		foreach($folders as $folder => $type) {
 			$file = $folder . $classname . '.obj.php';
 			if (file_exists($file)) {

@@ -44,7 +44,7 @@ class Controller {
 
 	public static function init() {
 		if (!self::$init) {
-			session_set_cookie_params(0, SITE_SUB_FOLDER, null, null, true);
+			session_set_cookie_params(0, WEB_SUB_FOLDER, null, null, true);
 			session_name('Controller');
 			session_start();
 

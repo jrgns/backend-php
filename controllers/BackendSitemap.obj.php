@@ -14,13 +14,13 @@ class BackendSitemap extends AreaCtl {
 			}
 		}
 		if (count($sitemaps)) {
-			$fp = fopen(SITE_FOLDER . '/sitemap_index.xml', 'w');
+			$fp = fopen(WEB_FOLDER . '/sitemap_index.xml', 'w');
 			if (!$fp) {
 				Backend::addError('Could not generate sitemap index: Could not open file');
 				return false;
 			}
 			fwrite($fp, Render::renderFile('sitemap_index.tpl.php', array('sitemaps' => $sitemaps)));
-			return SITE_FOLDER . '/sitemap_index.xml';
+			return WEB_FOLDER . '/sitemap_index.xml';
 		}
 		return false;
 	}
@@ -47,7 +47,7 @@ class BackendSitemap extends AreaCtl {
 			return false;
 		}
 
-		$filename = SITE_FOLDER . '/sitemap_' . $area . '.xml';
+		$filename = WEB_FOLDER . '/sitemap_' . $area . '.xml';
 		$fp = fopen($filename, 'w');
 		if (!$fp) {
 			Backend::addError('Could not generate sitemap: Could not open sitemap file. (' . $area . ')');
@@ -55,7 +55,7 @@ class BackendSitemap extends AreaCtl {
 		}
 
 		if (Controller::$debug) {
-			Backend::addNotice('Generating sitemap for ' . $area . ' at ' . SITE_FOLDER . '/sitemap_' . $area . '.xml found at ' . SITE_LINK . basename($filename));
+			Backend::addNotice('Generating sitemap for ' . $area . ' at ' . WEB_FOLDER . '/sitemap_' . $area . '.xml found at ' . SITE_LINK . basename($filename));
 		}
 
 		$last_date = 0;

@@ -24,7 +24,7 @@ class Theme extends TableCtl {
 			$name = $name ? $name : Value::get('default_theme', 'backend');
 			$theme = Theme::retrieve($name);
 			if ($theme) {
-				$theme['path'] = str_replace(array('#BACKEND_FOLDER#', '#APP_FOLDER#', '#SITE_FOLDER#'), array(BACKEND_FOLDER, APP_FOLDER, SITE_FOLDER), $theme['path']);
+				$theme['path'] = str_replace(array('#BACKEND_FOLDER#', '#APP_FOLDER#', '#SITE_FOLDER#', '#WEB_FOLDER#'), array(BACKEND_FOLDER, APP_FOLDER, SITE_FOLDER, WEB_FOLDER), $theme['path']);
 			}
 		}
 		return $theme;

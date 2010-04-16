@@ -38,10 +38,10 @@ class HtmlView extends View {
 		//TODO if someone can land a script file in the correct place, he can insert JS at will...
 		$comp_script = '/scripts/' . Controller::$area . '.component.js';
 		$comp_style  = '/styles/' . Controller::$area . '.component.css';
-		if (file_exists(SITE_FOLDER . $comp_script)) {
+		if (file_exists(WEB_FOLDER . $comp_script)) {
 			Backend::addScript(SITE_LINK . $comp_script);
 		}
-		if (file_exists(SITE_FOLDER . $comp_style)) {
+		if (file_exists(WEB_FOLDER . $comp_style)) {
 			Backend::addStyle(SITE_LINK . $comp_style);
 		}
 		return $results;

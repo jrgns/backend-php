@@ -12,7 +12,8 @@
 
 define('BACKEND_FOLDER', '/var/www/Jrgn5/backend');
 define('APP_FOLDER', BACKEND_FOLDER . '/webapp');
-define('SITE_FOLDER', BACKEND_FOLDER . '/public');
+define('WEB_FOLDER', BACKEND_FOLDER . '/public');
+//define('SITE_FOLDER', APP_FOLDER . '/sites/liveserver.com');
 
 switch ($_SERVER['HTTP_HOST']) {
 case 'www.liveserver.com':
