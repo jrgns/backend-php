@@ -40,7 +40,6 @@ class Render {
 						return;
 					}
 				}
-				Backend::addNotice('Cache Folder ' . self::$cache_folder);
 
 				if (!is_writable(self::$cache_folder)) {
 					if (SITE_STATE != 'production') {
@@ -149,7 +148,6 @@ class Render {
 			while (preg_match_all('/{tpl:(.*\.tpl.php)}/', $content, $templates, PREG_SET_ORDER) && is_array($templates) && count($templates) > 0) {
 				foreach ($templates as $temp_arr) {
 					$temp_file = $temp_arr[1];
-					Backend::addNotice('Building ' . $temp_file);
 					$inner_content = self::buildTemplate($temp_file);
 					if ($inner_content) {
 						if (Controller::$debug) {
