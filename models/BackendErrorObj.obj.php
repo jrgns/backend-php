@@ -45,9 +45,6 @@ class BackendErrorObj extends DBObject {
 		$options['order']  = '`count` DESC';
 		$options['fields'] = array('COUNT(`id`) AS `count`', '`string`', '`file`', '`line`', '`mode`', '`query`', 'MAX(`added`) AS `last`');
 		$options['group']  = '`string`, `file`, `line`, `mode`, `query`';
-		if (!Permission::check('manage', 'contacts')) {
-			$options['conditions'] = array('`active` = 1');
-		}
 		return parent::getSelectSQL($options);
 	}
 

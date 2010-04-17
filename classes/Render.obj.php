@@ -43,7 +43,7 @@ class Render {
 
 				if (!is_writable(self::$cache_folder)) {
 					if (SITE_STATE != 'production') {
-						Backend::addError('Render::Cache folder unwritable (' . $cache_folder . ')');
+						Backend::addError('Render::Cache folder unwritable (' . self::$cache_folder . ')');
 					} else {
 						Backend::addError('Render::Cache folder unwritable');
 					}
