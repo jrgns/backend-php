@@ -46,9 +46,9 @@ class ValueObj extends DBObject {
 	}
 
 	public function getRetrieveSQL() {
-		extract($this->meta);
-		$database = Backend::get('DB_' . $database, $database);
-		return 'SELECT * FROM `' . $database . '`.`' . $table . '` WHERE `id` = :parameter OR `name` = :parameter';
+		$query = new SelectQuery(__CLASS__);
+		$query->filter('`id` = :parameter OR `name` = :parameter');
+		return $query;
 	}
 }
 

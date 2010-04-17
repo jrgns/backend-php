@@ -32,7 +32,7 @@ class BackendError extends TableCtl {
 		array_pop($bt);
 
 		$data = array(
-			'mode'       => Controller::$view->mode,
+			'mode'       => is_object(Controller::$view) ? Controller::$view->mode : 'uninitialized',
 			'number'     => $number,
 			'string'     => $string,
 			'file'       => $file,
