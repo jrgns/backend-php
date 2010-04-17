@@ -173,8 +173,26 @@ class Content extends TableCtl {
 		}
 	}
 	
+	public static function hook_init() {
+		if (empty($_REQUEST['q'])) {
+			return;
+		}
+		$query = $_REQUEST['q'];
+		if (substr($query, -1) == '/') {
+			$query = substr($query, 0, strlen($query) - 1);
+		}
+		$select = new SelectQuery('Content');
+		$select->filter('`name` = :query');
+		$row = $select->fetchAssoc(array(':query' => $query));
+		if ($row) {
+			$_REQUEST['q'] = 'content/' . $row['id'];
+		}
+	}
+	
 	public static function install(array $options = array()) {
 		$toret = parent::install($options);
+
+		$toret = Hook::add('init', 'pre', __CLASS__, array('global' => true)) && $toret;
 
 		$toret = Permission::add('anonymous', 'display', 'content') && $toret;
 		$toret = Permission::add('anonymous', 'list', 'content') && $toret;
