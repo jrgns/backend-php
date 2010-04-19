@@ -696,7 +696,8 @@ class DBObject {
 	}
 	
 	public function getSource() {
-		return '`' . $this->meta['database'] . '`.`' . $this->meta['table'] . '`';
+		$database = Backend::getDBDefinition($this->meta['database']);
+		return '`' . $database['database'] . '`.`' . $this->meta['table'] . '`';
 	}
 	
 	public function getSelectSQL($options = array()) {

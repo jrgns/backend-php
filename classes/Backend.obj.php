@@ -228,9 +228,9 @@ class Backend {
 				if (array_key_exists($alias, self::$DB)) {
 					Backend::addNotice('Overwriting existing DB definition: ' . $alias);
 				}
-				self::$DB[$name] = array('dsn' => $dsn, 'username' => $username, 'password' => $password, 'connection' => $connection);
+				self::$DB[$name] = array('database' => $options['database'], 'dsn' => $dsn, 'username' => $username, 'password' => $password, 'connection' => $connection);
 				if ($alias != $name) {
-					self::$DB[$alias] = array('dsn' => $dsn, 'username' => $username, 'password' => $password, 'connection' => $connection);
+					self::$DB[$alias] = array('database' => $options['database'], 'dsn' => $dsn, 'username' => $username, 'password' => $password, 'connection' => $connection);
 				}
 				$toret = true;
 			} else {
@@ -251,20 +251,27 @@ class Backend {
 	 * @returns PDO The PDO DB connection, or false.
 	 */
 	static function getDB($name = false) {
-		$toret = false;
-		if (self::checkSelf()) {
-			$name = $name ? $name : 'default';
-			if ($name && array_key_exists($name, self::$DB) && array_key_exists('connection', self::$DB[$name]) && self::$DB[$name]['connection'] instanceof PDO) {
-				$toret = self::$DB[$name]['connection'];
-			} else if (array_key_exists('default', self::$DB) && array_key_exists('connection', self::$DB['default']) && self::$DB['default']['connection'] instanceof PDO) {
-				$toret = self::$DB['default']['connection'];
-			} else if (current(self::$DB) instanceof PDO) {
-				$toret = current(self::$DB);
-			} else if (self::$DB instanceof PDO) {
-				$toret = self::$DB;
-			}
+		$definition = self::getDBDefinition($name);
+		if ($definition) {
+			return $definition['connection'];
 		}
-		return $toret;
+		return false;
+	}
+
+	static function getDBDefinition($name = false) {
+		if (!self::checkSelf()) {
+			return false;
+		}
+		$name = $name ? $name : 'default';
+		if ($name && array_key_exists($name, self::$DB) && array_key_exists('connection', self::$DB[$name]) && self::$DB[$name]['connection'] instanceof PDO) {
+			return self::$DB[$name];
+		} else if (array_key_exists('default', self::$DB) && array_key_exists('connection', self::$DB['default']) && self::$DB['default']['connection'] instanceof PDO) {
+			return self::$DB['default'];
+		} else if (current(self::$DB) instanceof PDO) {
+			return current(self::$DB);
+		} else if (self::$DB instanceof PDO) {
+			return self::$DB;
+		}
 	}
 
 	private static function addSomething($what, $string, $options = array()) {
