@@ -181,7 +181,7 @@ function humanize($string) {
 function computerize($string, $separator = '_') {
 	$array = preg_split('/([A-Z][^A-Z]+)/', $string, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
 	if (is_array($array)) {
-		$array = array_map('strtolower', $array);
+		$array = array_map('trim', array_map('strtolower', $array));
 		$string = implode($separator, $array);
 	}
 	return $string;

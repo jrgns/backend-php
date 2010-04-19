@@ -47,27 +47,30 @@ class Backend {
 		if (defined('SITE_FOLDER') && !defined('APP_FOLDER')) {
 			define('APP_FOLDER', SITE_FOLDER);
 		}
+		if (defined('APP_FOLDER') && !defined('SITE_FOLDER')) {
+			define('SITE_FOLDER', APP_FOLDER);
+		}
 		require(BACKEND_FOLDER . '/constants.inc.php');
 		require(BACKEND_FOLDER . '/functions.inc.php');
 		require(BACKEND_FOLDER . '/modifiers.inc.php');
 
 		if (file_exists(APP_FOLDER . '/constants.inc.php')) {
-			include(APP_FOLDER . '/constants.inc.php');
+			include_once(APP_FOLDER . '/constants.inc.php');
 		}
 		if (defined('SITE_FOLDER') && file_exists(SITE_FOLDER . '/constants.inc.php')) {
-			include(APP_FOLDER . '/constants.inc.php');
+			include_once(APP_FOLDER . '/constants.inc.php');
 		}
 		if (file_exists(APP_FOLDER . '/functions.inc.php')) {
-			include(APP_FOLDER . '/functions.inc.php');
+			include_once(APP_FOLDER . '/functions.inc.php');
 		}
 		if (defined('SITE_FOLDER') && file_exists(SITE_FOLDER . '/functions.inc.php')) {
-			include(APP_FOLDER . '/functions.inc.php');
+			include_once(SITE_FOLDER . '/functions.inc.php');
 		}
 		if (file_exists(APP_FOLDER . '/modifiers.inc.php')) {
-			include(APP_FOLDER . '/modifiers.inc.php');
+			include_once(APP_FOLDER . '/modifiers.inc.php');
 		}
 		if (defined('SITE_FOLDER') && file_exists(SITE_FOLDER . '/modifiers.inc.php')) {
-			include(APP_FOLDER . '/modifiers.inc.php');
+			include_once(SITE_FOLDER . '/modifiers.inc.php');
 		}
 		include(BACKEND_FOLDER . '/libraries/Markdown/markdown.php');
 		spl_autoload_register(array('Backend', '__autoload'));
