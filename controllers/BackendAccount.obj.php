@@ -399,7 +399,7 @@ END;
 	}
 	
 	public static function purgeUnconfirmed() {
-		$query = new DeleteQuery('users');
+		$query = new DeleteQuery(BackendAccount::getName());
 		$query
 			->filter('`confirmed` = 0')
 			->filter('`added` < DATE_SUB(DATE(NOW()), INTERVAL 1 WEEK)');
@@ -419,7 +419,7 @@ Site Admin
 	
 	public static function userStats() {
 		$msg = array();
-		$query = new SelectQuery('users');
+		$query = new SelectQuery(BackendAccount::getName());
 		$query
 			->field('COUNT(*) AS `Total`, SUM(IF(TO_DAYS(NOW()) - TO_DAYS(`added`) < 7, 1, 0)) AS `New`')
 			->filter('`active` = 1')
@@ -427,7 +427,7 @@ Site Admin
 		if ($stats = $query->fetchAssoc()) {
 			$msg[] = 'There are a total of ' . $stats['Total'] . ' **active** users, of which ' . $stats['New'] . ' signed up in the last 7 days';
 		}
-		$query = new SelectQuery('users');
+		$query = new SelectQuery(BackendAccount::getName());
 		$query
 			->field('COUNT(*) AS `Total`, SUM(IF(TO_DAYS(NOW()) - TO_DAYS(`added`) < 7, 1, 0)) AS `New`')
 			->filter('`active` = 1')
@@ -445,6 +445,7 @@ Site Admin
 	}
 
 	public static function install(array $options = array()) {
+		$options['install_model'] = array_key_exists('install_model', $options) ? $options['install_model'] : false;
 		$toret = parent::install($options);
 
 		$toret = Hook::add('init', 'pre', self::getName(), array('global' => true, 'sequence' => -10)) && $toret;

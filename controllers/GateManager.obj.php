@@ -40,10 +40,15 @@ class GateManager extends AreaCtl {
 		if ($id) {
 			$toret->role = Role::retrieve($id, 'dbobject');
 			if ($toret->role) {
-				$query = new CustomQuery("SELECT * FROM `permissions` WHERE `role` = :role");
+				$query = new SelectQuery('Permission');
+				$query->filter('`role` = :role');
 				$toret->permissions = $query->fetchAll(array(':role' => $toret->role->array['name']));
 
-				$query = new CustomQuery("SELECT * FROM `assignments` LEFT JOIN `users` ON `users`.`id` = `assignments`.`access_id` WHERE `assignments`.`access_type` = 'users' AND (`role_id` = :role OR `role_id` = 0)");
+				$query = new SelectQuery('Assignment');
+				$query
+					->leftJoin(BackendAccount::getName(), array('`users`.`id` = `assignments`.`access_id`'))
+					->filter("`assignments`.`access_type` = 'users'")
+					->filter('`role_id` = :role OR `role_id` = 0');
 				$toret->assignments = $query->fetchAll(array(':role' => $toret->role->array['id']));
 			} else {
 				$toret->permissions = null;

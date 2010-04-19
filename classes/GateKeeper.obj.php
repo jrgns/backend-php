@@ -42,15 +42,18 @@ class GateKeeper {
 			->filter('system = 0');
 		$id = $query->fetchColumn($params);
 		if ($id) {
-			$query = new CustomQuery('UPDATE `permissions` SET `control` = $control WHERE `id` = :id');
-			$params = array(':id' => $id);
+			$query = new UpdateQuery('Permission');
+			$query
+				->data(array('control' => ':control'))
+				->filter('`id` = :id');
+			return $query->execute(array(':id' => $id, ':control' => $control));
 		} else {
-			$query = new CustomQuery('INSERT INTO `permissions` (`role`, `control`, `action`, `subject`, `subject_id`) VALUES (:role, :control, :action, :subject, :subject_id)');
+			$data = array('role', 'control', 'action', 'subject', 'subject_id');
+			$data = array_combine($data, array_values($params));
+			$query = new InsertQuery('Permission');
+			$query->data($data);
+			return $query->execute();
 		}
-		if ($query->execute($params)) {
-			$toret = true;
-		}
-		return $toret;
 	}
 	
 	public static function assign($role_id, $access_type, $access_id) { 
@@ -61,13 +64,20 @@ class GateKeeper {
 				$role_id = $role_id['id'];
 			}
 			$params = array(':role_id' => $role_id, ':access_type' => $access_type, ':access_id' => $access_id);
-			$query = new CustomQuery('SELECT `id` FROM `assignments` WHERE `role_id`= :role_id AND `access_type` = :access_type AND `access_id` = :access_id');
+			$query = new SelectQuery('Assignment');
+			$query
+				->filter('`role_id`= :role_id')
+				->filter('`access_type` = :access_type')
+				->filter('`access_id` = :access_id');
 			$id = $query->fetchColumn($params);
 			if ($id) {
 				$toret = true;
 			} else {
-				$query = new CustomQuery('INSERT INTO `assignments` (`role_id`, `access_type`, `access_id`) VALUES (:role_id, :access_type, :access_id)'); 
-				$toret = $query->execute($params) ? true : false;
+				$keys = array('role_id', 'access_type', 'access_id');
+				$data = array_combine($keys, array_values($params));
+				$query = new InsertQuery('Assignment');
+				$query->data($data);
+				$toret = $query->execute() ? true : false;
 			}
 		//}
 		return $toret;
@@ -75,7 +85,12 @@ class GateKeeper {
 
 	public static function dropPermissions($action, $subject, $subject_id) { 
 		$params = array(':action' => $action, ':subject' => $subject, ':subject_id' => $subject_id);
-		$query = new CustomQuery('DELETE FROM `permissions` WHERE `action` = :action AND `subject` = :subject AND `subject_id` = :subject_id AND system = 0');
+		$query = new DeleteQuery('Permission');
+		$query
+			->filter('`action` = :action')
+			->filter('`subject` = :subject')
+			->filter('`subject_id` = :subject_id')
+			->filter('system = 0');
 		return $query->execute($params);
 	}
   
@@ -130,8 +145,8 @@ class GateKeeper {
 		if (!count($where)) {
 			$where[] = '1';
 		}
-		$sql = 'SELECT DISTINCT `id`, `role` FROM `permissions` WHERE ' . implode(' AND ', $where); 
-		$query = new CustomQuery($sql);
+		$query = new SelectQuery('Permission');
+		$query->filter($where);
 
 		$rows = $query->fetchAll($params);
 		if ($rows) {
@@ -145,25 +160,20 @@ class GateKeeper {
 	
 	private static function permissionHolders($action = '*', $subject = '*', $subject_id = 0) {
 		$toret = false;
-		$where = array();
+		$query = new SelectQuery('Permission');
 		$params = array();
 		if ($action != '*') {
-			$where[] = "(`action` = :action OR `action` = '*')";
+			$query->filter("(`action` = :action OR `action` = '*')");
 			$params[':action'] = $action;
 		}
 		if ($subject != '*') {
-			$where[] = "(`subject` = :subject OR `subject` = '*')";
+			$query->filter("(`subject` = :subject OR `subject` = '*')");
 			$params[':subject'] = $subject;
 		}
-		if ($subject_id != '0') {
-			$where[] = "(`subject_id` = :subject_id OR `subject_id` = 0)";
+		if ($subject_id != '0') {			
+			$query->filter("(`subject_id` = :subject_id OR `subject_id` = 0)");
 			$params[':subject_id'] = $subject_id;
 		}
-		if (!count($where)) {
-			$where[] = '1';
-		}
-		$sql = 'SELECT DISTINCT `id`, `role`, `control`, `action`, `subject`, `subject_id` FROM `permissions` WHERE ' . implode(' AND ', $where);
-		$query = new CustomQuery($sql);
 		$toret = $query->fetchAll($params);
 		return $toret;
 	}
@@ -175,7 +185,10 @@ class GateKeeper {
 	public static function dropAccess($access_type, $access_id) { 
 		$toret = false;
 		$params = array(':access_type' => $access_type, ':access_id' => $access_id);
-		$query = new CustomQuery('DELETE FROM `assignments` WHERE `access_type` = :access_type AND `access_id` = :access_id'); 
+		$query = new DeleteQuery('Assignment');
+		$query
+			->filter('`access_type` = :access_type')
+			->filter('`access_id` = :access_id');
 		$toret = $query->execute($params) ? true : false;
 		return $toret;
 	}

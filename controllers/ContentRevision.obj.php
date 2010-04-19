@@ -12,7 +12,10 @@
  */
 class ContentRevision extends TableCtl {
 	public function action_display($id) {
-		$query = new CustomQuery('SELECT * FROM `content_revisions` WHERE `content_id` = :id ORDER BY `added` DESC');
+		$query = new SelectQuery('ContentRevision');
+		$query
+			->filter('`content_id` = :id')
+			->order('`added` DESC');
 		$revisions = $query->fetchAll(array(':id' => $id));
 		$content = new ContentObj($id);
 		if ($content->object) {

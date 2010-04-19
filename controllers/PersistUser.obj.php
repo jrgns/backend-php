@@ -26,7 +26,10 @@ class PersistUser extends TableCtl {
 					return true;
 				} else {
 					Backend::addError('Could not set cookie to remember login');
-					$query = new CustomQuery('DELETE FROM `persist_users` WHERE `id` = :id LIMIT 1');
+					$query = new DeleteQuery('PersistUser');
+					$query
+						->filter('`id` = :id')
+						->limit(1);
 					$query->execute(array(':id' => $id));
 				}
 			} else {
@@ -61,8 +64,11 @@ class PersistUser extends TableCtl {
 					$_SESSION['user'] = $User->object;
 					//Remove, and reremember
 					if (self::remember($User->object)) {
-						$query = new CustomQuery('DELETE FROM `persist_users` WHERE `id` = ' . $persist['id'] . ' LIMIT 1');
-						$query->execute();
+						$query = new DeleteQuery('PersistUser');
+						$query
+							->filter('`id` = :id')
+							->limit(1);
+						$query->execute(array(':id' => $persist['id']));
 					} else {
 						Backend::addError('Could not reremember');
 					}
@@ -76,7 +82,8 @@ class PersistUser extends TableCtl {
 	}	
 	
 	public static function forget($user) {
-		$query = new CustomQuery('DELETE FROM `persist_users` WHERE `user_id` = :id');
+		$query = new DeleteQuery('PersistUser');
+		$query->filter('`user_id` = :id');
 		$query->execute(array(':id' => $user->id));
 	}
 
