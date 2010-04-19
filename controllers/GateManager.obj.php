@@ -108,7 +108,7 @@ class GateManager extends AreaCtl {
 	
 	public function action_permissions() {
 		$toret = new stdClass();
-		$query = new SelectQuery('permissions');
+		$query = new SelectQuery('Permission');
 		$query
 			->filter('`active` = 1')
 			->filter("`role` = 'nobody'")
@@ -116,11 +116,11 @@ class GateManager extends AreaCtl {
 			->group('`subject`, `action` WITH ROLLUP');
 		$toret->base_perms = $query->fetchAll();
 		
-		$query = new SelectQuery('roles');
+		$query = new SelectQuery('Role');
 		$query->filter('`active` = 1');
 		$toret->roles = $query->fetchAll();
 
-		$query = new SelectQuery('permissions', array('fields' => "CONCAT(`subject`, '::', `action`), GROUP_CONCAT(DISTINCT `role` ORDER BY `role`) AS `roles`"));
+		$query = new SelectQuery('Permission', array('fields' => "CONCAT(`subject`, '::', `action`), GROUP_CONCAT(DISTINCT `role` ORDER BY `role`) AS `roles`"));
 		$query
 			->filter('`active` = 1')
 			->filter('`subject_id` = 0')

@@ -81,7 +81,7 @@ class Render {
 		$content = self::buildTemplate($template_name);
 		if ($content) {
 			//We need to run the content and parse it's variables
-			$content = self::evalContent($content, $values);
+			$content = self::evalContent($template_name, $content, $values);
 			//Parse the #Variables# in the content
 			$content = self::parseVariables($content, $values);
 		}
@@ -256,14 +256,24 @@ class Render {
 		return ob_get_clean();
 	}
 
-	private static function evalContent($content, array $vars = array()) {
+	/**
+	 * @todo get a better way to report warnings and errors in eval code
+	 */
+	private static function evalContent($template_name, $content, array $vars = array()) {
 		$vars = array_merge(Backend::getAll(), $vars);
 		$keys = array_keys($vars);
 		$keys = array_map(create_function('$elm', "return str_replace(' ', '_', \$elm);"), $keys);
 
 		extract(array_combine($keys, array_values($vars)));
 		ob_start();
-		eval('?>' . $content);
+		if (Controller::$debug) {
+			$result = eval('?>' . $content);
+		} else {
+			$result = @eval('?>' . $content);
+		}
+		if ($result === false) {
+			Backend::addError('Error evaluating template ' . $template_name);
+		}
 		return ob_get_clean();
 	}
 

@@ -976,6 +976,8 @@ class DBObject {
 				break;
 			case 'website':
 				//No break;
+			case 'url':
+				//No break;
 			case 'email':
 				//No break;
 			case 'telnumber':
@@ -1062,7 +1064,7 @@ class DBObject {
 				$field_arr[] = 'DATETIME';
 				break;
 			default:
-				var_dump('CreateSQL Failure: ', $field, $options);
+				var_dump('InstallSQL Failure: ', $field, $options);
 				break;
 			}
 			if ($null) {

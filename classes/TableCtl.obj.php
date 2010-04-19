@@ -55,7 +55,6 @@ class TableCtl extends AreaCtl {
 	 * Action for listing an area's records
 	 */
 	public function action_list($start, $count, array $options = array()) {
-		$toret = false;
 		$object = self::getObject(get_class($this));
 		if ($object) {
 			$toret = true;
@@ -67,11 +66,11 @@ class TableCtl extends AreaCtl {
 				$limit = false;
 			}
 			$object->load(array_merge(array('limit' => $limit), $options));
-			$toret = $object;
+			return $object;
 		} else {
 			Controller::whoops();
+			return false;
 		}
-		return $toret;
 	}
 	
 	/**
