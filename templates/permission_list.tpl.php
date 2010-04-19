@@ -1,7 +1,10 @@
 <form method="post" action="?q=gate_manager/update_permissions">
 	<table>
-	<?php $last = false;
+	<?php
+		$last = false;
+		$even = false;
 		if ($base_perms) foreach($base_perms as $permission):
+			$even = $even ? false : true;
 			if (empty($permission['action'])) {
 				continue;
 			}
@@ -14,7 +17,7 @@
 				<?php endif; endforeach; ?>
 			</tr>
 			<?php endif; ?>
-			<tr>
+			<tr class="<?php echo $even ? 'even' : '' ?>">
 				<td><?php echo $permission['action'] ?></td>
 				<?php foreach($roles as $role): if (!in_array($role['name'], array('superadmin', 'nobody'))):
 					$row_name = $permission['subject'] . '::' . $permission['action'];

@@ -9,7 +9,7 @@
 			<li><a href="?q=admin/update">Update Application</a></li>
 		</ul>
 	</dd>
-	<?php foreach($admin_links as $name => $links): ?>
+	<?php if (is_array($admin_links)): foreach($admin_links as $name => $links): ?>
 	<dt><?php echo $name ?></dt>
 	<dd>
 		<ul>
@@ -18,5 +18,5 @@
 			<?php endforeach; ?>
 		</ul>
 	</dd>
-	<?php endforeach; ?>
+	<?php endforeach; endif; ?>
 </dl>
