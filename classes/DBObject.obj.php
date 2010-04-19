@@ -466,7 +466,7 @@ class DBObject {
 			$query = $this->getInstallSQL();
 			if ($query) {
 				if ($drop_table) {
-					$table = $this->meta['table'];
+					$table = $this->getSource();
 					$drop_query = new CustomQuery('DROP TABLE IF EXISTS `' . $table . '`', array('connection' => $this->db));
 					$drop_query->execute();
 					Backend::addNotice('Dropping table ' . $table);
@@ -764,10 +764,8 @@ class DBObject {
 	
 	public function getRetrieveSQL() {
 		extract($this->meta);
-		$db_def = Backend::getDBDefinition($database);
-		$database = $db_def ? $db_def['database'] : $database;
 
-		$query = 'SELECT * FROM `' . $database . '`.`' . $table . '` WHERE `' . $id_field . '` = :parameter';
+		$query = 'SELECT * FROM ' . $this->getSource() . ' WHERE `' . $id_field . '` = :parameter';
 		if (array_key_exists('name', $fields)) {
 			$query .= ' OR `name` = :parameter';
 		}
@@ -779,8 +777,6 @@ class DBObject {
 
 	public function getCreateSQL($data, array $options = array()) {
 		extract($this->meta);
-		$db_def = Backend::getDBDefinition($database);
-		$database = $db_def ? $db_def['database'] : $database;
 		
 		$query = false;
 		$field_data = array();
@@ -842,7 +838,7 @@ class DBObject {
 			if (count($value_data) == count($field_data)) {
 				$field_str = implode(', ', $field_data);
 				$value_str = implode(', ', $value_data);
-				$query = "INSERT INTO `$database`.`$table` ($field_str) VALUES ($value_str)";
+				$query = 'INSERT INTO ' . $this->getSource() . " ($field_str) VALUES ($value_str)";
 				if (!empty($options['on_duplicate'])) {
 					$query .= ' ON DUPLICATE KEY UPDATE ' . $options['on_duplicate'];
 				} else if (!empty($options['ignore'])) {
@@ -857,8 +853,6 @@ class DBObject {
 
 	public function getUpdateSQL($data, array $options = array()) {
 		extract($this->meta);
-		$db_def = Backend::getDBDefinition($database);
-		$database = $db_def ? $db_def['database'] : $database;
 
 		$query = false;
 		$field_data = array();
@@ -918,7 +912,7 @@ class DBObject {
 		if (count($field_data)) {
 			if (count($value_data) == count($field_data)) {
 				$value_str = implode(', ', $value_data);
-				$query = "UPDATE `$database`.`$table` SET $value_str WHERE `$id_field` = :id";
+				$query = 'UPDATE ' . $this->getSource() . " SET $value_str WHERE `$id_field` = :id";
 				$parameters[':id'] = $this->meta['id'];
 			} else {
 				throw new Exception('Update Query Fields and Values don\'t match');
@@ -1106,7 +1100,7 @@ class DBObject {
 			$query_fields = array_merge($query_fields, $query_keys);
 		}
 
-		$query = 'CREATE TABLE IF NOT EXISTS `' . $database .'`.`' . $table . '` (';
+		$query = 'CREATE TABLE IF NOT EXISTS ' . $this->getSource() . ' (';
 		$query .= "\n\t" . implode(",\n\t", $query_fields);
 		$query .= "\n)";
 		if (!empty($engine)) {
