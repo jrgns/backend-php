@@ -764,7 +764,9 @@ class DBObject {
 	
 	public function getRetrieveSQL() {
 		extract($this->meta);
-		$database = Backend::get('DB_' . $database, $database);
+		$db_def = Backend::getDBDefinition($database);
+		$database = $db_def ? $db_def['database'] : $database;
+
 		$query = 'SELECT * FROM `' . $database . '`.`' . $table . '` WHERE `' . $id_field . '` = :parameter';
 		if (array_key_exists('name', $fields)) {
 			$query .= ' OR `name` = :parameter';
@@ -777,7 +779,9 @@ class DBObject {
 
 	public function getCreateSQL($data, array $options = array()) {
 		extract($this->meta);
-		$database = Backend::get('DB_' . $database, $database);
+		$db_def = Backend::getDBDefinition($database);
+		$database = $db_def ? $db_def['database'] : $database;
+		
 		$query = false;
 		$field_data = array();
 		$value_data = array();
@@ -853,7 +857,9 @@ class DBObject {
 
 	public function getUpdateSQL($data, array $options = array()) {
 		extract($this->meta);
-		$database = Backend::get('DB_' . $database, $database);
+		$db_def = Backend::getDBDefinition($database);
+		$database = $db_def ? $db_def['database'] : $database;
+
 		$query = false;
 		$field_data = array();
 		$value_data = array();
@@ -925,9 +931,8 @@ class DBObject {
 		$query = false;
 		if ($id) {
 			extract($this->meta);
-			$database = Backend::get('DB_' . $database, $database);
-			$query = "DELETE FROM `$database`.`$table`";
-			$query .= " WHERE `$table`.`$id_field` = :{$table}_id LIMIT 1";
+			$query = new DeleteQuery($this);
+			$query->filter("`$table`.`$id_field` = :{$table}_id LIMIT 1");
 		}
 		return $query;
 	}
