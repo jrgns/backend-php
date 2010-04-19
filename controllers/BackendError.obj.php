@@ -18,11 +18,20 @@
  * This is the controller for the table backend_requests.
  */
 class BackendError extends TableCtl {
+	private static $adding = false;
 	public static function add($one, $two = false, $three = false, $four = false, $five = false) {
-		if (!is_numeric($one) && !$three && !$four && !$five) {
-			self::addBE($one, $two);
+		if (!self::$adding) {
+			self::$adding = true;
+			if (!is_numeric($one) && !$three && !$four && !$five) {
+				self::addBE($one, $two);
+			} else {
+				self::addPHP($one, $two, $three, $four, $five);
+			}
+			self::$adding = false;
 		} else {
-			self::addPHP($one, $two, $three, $four, $five);
+			var_dump($one, $two, $three, $four, $five);
+			print_stacktrace();
+			die('Recursive Backend Errors');
 		}
 	}
 	
