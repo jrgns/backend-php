@@ -381,11 +381,19 @@ class Backend {
 		if (!class_exists('BackendErrorObj', false)) {
 			require_once(BACKEND_FOLDER . '/models/BackendErrorObj.obj.php');
 		}
+		//Record Errors
 		if (Component::isActive('BackendError')) {
-			BackendError::add($number, $string, $file, $line, $context);
+			switch ($number) {
+			case E_STRICT:
+				break;
+			default:
+				BackendError::add($number, $string, $file, $line, $context);
+				break;
+			}
 		}
+		//Interpret or Bypass Errors
 		switch ($number) {
-		case 2:
+		case E_WARNING:
 			preg_match_all('/Missing argument ([0-9]+) for ([\S]+)::([^\(\)]+)\(\), called in ([\S]+) on line ([0-9]+)/', $string, $vars, PREG_SET_ORDER);
 			if (!empty($vars)) {
 				list($matches, $arg_num, $class, $method, $call_file, $call_line) = current($vars);
@@ -406,6 +414,12 @@ class Backend {
 				}
 				return true;
 			}
+			break;
+		case E_STRICT:
+			if (SITE_STATE == 'production') {
+				return true;
+			}
+			return true;
 			break;
 		}
 		return false;
