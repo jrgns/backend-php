@@ -455,7 +455,10 @@ class TableCtl extends AreaCtl {
 	}
 	
 	public static function retrieve($parameter = false, $return = 'array') {
-		if (!$parameter && $return == 'array') {
+		if (is_null($parameter)) {
+			return null;
+		}
+		if ($parameter === false && $return == 'array') {
 			$return = 'dbobject';
 		}
 
