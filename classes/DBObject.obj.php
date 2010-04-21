@@ -191,8 +191,7 @@ class DBObject {
 				if (!($query instanceof Query)) {
 					$query = new CustomQuery($query, array('connection' => $this->db));
 				}
-				$result = $query->execute($params);
-				if ($result) {
+				if ($result = $query->execute($params)) {
 					switch ($options['mode']) {
 					case 'object':
 					case 'full_object':
@@ -293,8 +292,7 @@ class DBObject {
 				$data = $this->process($data, 'in');
 				list ($query, $params) = $this->getCreateSQL($data, $options);
 				$query = new CustomQuery($query, array('connection' => $this->db));
-				$toret = $query->execute($params);
-				if ($toret) {
+				if ($toret = $query->execute($params)) {
 					//TODO This will potentially break if there are triggers in use
 					$this->inserted_id = $this->db->lastInsertId();
 					$this->array       = $data;

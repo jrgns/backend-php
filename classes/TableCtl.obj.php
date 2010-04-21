@@ -96,6 +96,9 @@ class TableCtl extends AreaCtl {
 					$toret = false;
 					Backend::addError('Could not add ' . $object->getMeta('name'));
 				}
+				if (!empty($object->last_error)) {
+					Backend::addNotice($object->last_error);
+				}
 			}
 			Backend::add('obj_values', $data);
 		} else {
