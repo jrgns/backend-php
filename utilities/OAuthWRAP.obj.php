@@ -75,7 +75,6 @@ class OAuthWRAP {
 			'headers'  => array('Expect:'),
 			'callback' => array(__CLASS__, 'handleRequest'),
 		);
-		var_dump($request, $parameters);
 		switch (strtoupper($method)) {
 		case 'GET':
 			$returned = curl_request($request, array(), $options);
@@ -133,25 +132,13 @@ class OAuthWRAP {
 
 	public function getAuthURL(array $parameters = array()) {
 		return $this->get_request($this->parameters['authorize_url'], $parameters);
-		$returned = self::request();
-		var_dump($returned);
-		parse_str($returned, $vars);
-		if (count($vars) == 2) {
-			return $vars;
-		} else {
-			return false;
-		}
 	}
 
 	public function getAccessToken(array $parameters = array()) {
+		$parameters['client_secret'] = $this->parameters['consumer_secret'];
 		$returned = self::request($this->parameters['access_url'], $parameters);
-		var_dump($returned); die;
 		parse_str($returned, $vars);
-		if (count($vars) == 4) {
-			return $vars;
-		} else {
-			return false;
-		}
+		return $vars;
 	}
 }
 
