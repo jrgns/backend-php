@@ -1,5 +1,32 @@
 <?php
 class OAuth {
+	private static $instances = array();
+	private $parameters = array();
+	
+	public static function getInstance($provider) {
+		if (array_key_exists($provider, self::$instances)) {
+			return self::$instances[$provider];
+		}
+		$parameters = array(
+			'consumer_key'    => Backend::getConfig($provider . '.oauth.consumer.key'),
+			'consumer_secret' => Backend::getConfig($provider . '.oauth.consumer.secret'),
+			'request_url'     => Backend::getConfig($provider . '.oauth.request.url'),
+			'access_url'      => Backend::getConfig($provider . '.oauth.access.url'),
+			'authorize_url'   => Backend::getConfig($provider . '.oauth.authorize.url'),
+		);
+		self::$instances[$provider] = new self($parameters);
+		return self::$instances[$provider];
+	}
+	
+	private function __construct($parameters) {
+		if (empty($parameters['consumer_key']) || empty($parameters['consumer_secret'])) {
+			return false;
+		}
+		$this->parameters = $parameters;
+	}
+
+	private function __clone() {}
+
 	public static function encode($input) {
 		if (is_array($input)) {
 			return array_map(array('OAuth', 'encode'), $input);
@@ -42,16 +69,16 @@ class OAuth {
 		return strtoupper($method) . '&' . self::encode($string) . '&' . self::encode(implode('&', $query));
 	}
 
-	public static function sign_request($base, $token_secret = '') {
-		$key = self::encode(Backend::getConfig('oauth.consumer.secret')) . '&' . self::encode($token_secret);
+	public function sign_request($base, $token_secret = '') {
+		$key = self::encode($this->parameters['consumer_secret']) . '&' . self::encode($token_secret);
 		if (Controller::$debug >= 2) {
 			var_dump('Key', $key);
 		}
 		return base64_encode(hash_hmac('sha1', $base, $key, true));
 	}
 	
-	public static function request($url, array $parameters = array(), $method = 'GET') {
-		$request = self::get_request($url, $parameters, $method);
+	public function request($url, array $parameters = array(), $method = 'GET') {
+		$request = $this->get_request($url, $parameters, $method);
 		$options = array(
 			'method'   => $method,
 			'headers'  => array('Expect:'),
@@ -84,11 +111,11 @@ class OAuth {
 		return $returned;
 	}
 
-	protected static function get_request($url, array &$parameters = array(), $method = 'GET') {
+	protected function get_request($url, array &$parameters = array(), $method = 'GET') {
 		$parameters['oauth_version']          = empty($parameters['oauth_version'])      ? '1.0'                      : $parameters['oauth_version'];
 		$parameters['oauth_nonce']            = empty($parameters['oauth_nonce'])        ? md5(microtime().mt_rand()) : $parameters['oauth_nonce'];
 		$parameters['oauth_timestamp']        = empty($parameters['oauth_timestamp'])    ? time()                     : $parameters['oauth_timestamp'];
-		$parameters['oauth_consumer_key']     = empty($parameters['oauth_consumer_key']) ? Backend::getConfig('oauth.consumer.key') : $parameters['oauth_consumer_key'];
+		$parameters['oauth_consumer_key']     = empty($parameters['oauth_consumer_key']) ? $this->parameters['consumer_key'] : $parameters['oauth_consumer_key'];
 		$parameters['oauth_signature_method'] = 'HMAC-SHA1';
 
 		//Don't pass the secret as a parameter, just use it
@@ -122,8 +149,8 @@ class OAuth {
 		return $request;
 	}
 
-	public static function getAuthToken(array $parameters = array()) {
-		$returned = self::request(Backend::getConfig('oauth.request.url'), $parameters);
+	public function getAuthToken(array $parameters = array()) {
+		$returned = self::request($this->parameters['request_url'], $parameters);
 		parse_str($returned, $vars);
 		if (count($vars) == 2) {
 			return $vars;
@@ -132,8 +159,8 @@ class OAuth {
 		}
 	}
 
-	public static function getAccessToken(array $parameters = array()) {
-		$returned = self::request(Backend::getConfig('oauth.access.url'), $parameters);
+	public function getAccessToken(array $parameters = array()) {
+		$returned = self::request($this->parameters['access_url'], $parameters);
 		parse_str($returned, $vars);
 		if (count($vars) == 4) {
 			return $vars;

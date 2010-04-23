@@ -1,10 +1,16 @@
 <?php
 class Twitter extends TableCtl {
+	private $oauth = false;
+
+	public function __construct() {
+		$this->oauth = OAuth::getInstance('twitter');
+	}
+	
 	public function action_request_auth() {
-		$token = OAuth::getAuthToken();
+		$token = $this->oauth->getAuthToken();
 		if ($token) {
 			$_SESSION['OAuthAuthToken'] = $token;
-			$url = Backend::getConfig('oauth.authorize.url');
+			$url = Backend::getConfig('twitter.oauth.authorize.url');
 			$url .= '?oauth_token=' . OAuth::encode($token['oauth_token']);
 			Controller::redirect($url);
 		} else if (array_key_exists('OAuthAuthToken', $_SESSION)) {
@@ -16,7 +22,7 @@ class Twitter extends TableCtl {
 	public function action_authorized() {
 		$auth_t = array_key_exists('OAuthAuthToken', $_SESSION) ? $_SESSION['OAuthAuthToken'] : false;
 		if ($auth_t) {
-			$access_t = OAuth::getAccessToken($auth_t);
+			$access_t = $this->oauth->getAccessToken($auth_t);
 			if ($access_t) {
 				Backend::addSuccess('Sucessfully logged into Twitter');
 				$data = array(

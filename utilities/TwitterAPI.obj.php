@@ -4,6 +4,7 @@ class TwitterAPI {
 	public static $error_msg    = false;
 	private static $auth_token  = false;
 	private static $auth_secret = false;
+	private static $oauth       = false;
 	
 	public static function init($token, $secret) {
 		if (!$token || !$secret) {
@@ -14,6 +15,7 @@ class TwitterAPI {
 			self::$auth_token  = $token;
 			self::$auth_secret = $secret;
 			self::$started = true;
+			self::$oauth = OAuth::getInstance('twitter');
 			return true;
 		}
 	}
@@ -50,7 +52,7 @@ class TwitterAPI {
 			return false;
 		}
 		$parameters = array('oauth_token' => self::$auth_token, 'oauth_token_secret' => self::$auth_secret);
-		$returned = OAuth::request('http://api.twitter.com/1/statuses/mentions.json', $parameters);
+		$returned = self::$oauth->request('http://api.twitter.com/1/statuses/mentions.json', $parameters);
 		if (!$returned) {
 			self::$error_msg = 'Invalid Twitter API request';
 			return false;
@@ -75,7 +77,7 @@ class TwitterAPI {
 		}
 		$parameters = array('oauth_token' => self::$auth_token, 'oauth_token_secret' => self::$auth_secret);
 		$parameters['status'] = $status;
-		$returned = OAuth::request('http://api.twitter.com/1/statuses/update.json', $parameters, 'POST');
+		$returned = self::$oauth->request('http://api.twitter.com/1/statuses/update.json', $parameters, 'POST');
 		if (!$returned) {
 			self::$error_msg = 'Invalid Twitter API request';
 			return false;
