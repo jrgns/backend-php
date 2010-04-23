@@ -340,7 +340,15 @@ class Backend {
 	}
 	
 	static public function getError() {
-		return self::$error;
+		$counts = array_count_values(self::$error);
+		$result = array();
+		foreach($counts as $value => $count) {
+			if ($count > 1) {
+				$value .= ' (' . $count . ')';
+			}
+			$result[] = $value;
+		}
+		return $result;
 	}
 	
 	static public function setError(array $errors = array()) {
@@ -352,7 +360,15 @@ class Backend {
 	}
 	
 	static public function getNotice() {
-		return self::$notice;
+		$counts = array_count_values(self::$notice);
+		$result = array();
+		foreach($counts as $value => $count) {
+			if ($count > 1) {
+				$value .= ' (' . $count . ')';
+			}
+			$result[] = $value;
+		}
+		return $result;
 	}
 
 	static public function setNotice(array $notices = array()) {
@@ -364,7 +380,15 @@ class Backend {
 	}
 	
 	static public function getSuccess() {
-		return self::$success;
+		$counts = array_count_values(self::$success);
+		$result = array();
+		foreach($counts as $value => $count) {
+			if ($count > 1) {
+				$value .= ' (' . $count . ')';
+			}
+			$result[] = $value;
+		}
+		return $result;
 	}
 
 	static public function setSuccess(array $successes = array()) {

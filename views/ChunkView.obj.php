@@ -19,9 +19,9 @@
  */
 class ChunkView extends HtmlView {
 	public static function hook_output($to_print) {
-		Backend::add('BackendErrors', array_unique(array_filter(Backend::getError())));
-		Backend::add('BackendSuccess', array_unique(array_filter(Backend::getSuccess())));
-		Backend::add('BackendNotices', array_unique(array_filter(Backend::getNotice())));
+		Backend::add('BackendErrors', Backend::getError());
+		Backend::add('BackendSuccess', Backend::getSuccess());
+		Backend::add('BackendNotices', Backend::getNotice());
 		Backend::setError();
 		Backend::setSuccess();
 		Backend::setNotice();
