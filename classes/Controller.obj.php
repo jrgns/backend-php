@@ -54,11 +54,15 @@ class Controller {
 
 			//Debugging
 			self::$debug = false;
-			switch (true) {
-				case array_key_exists('debug', $_REQUEST):
-					//Default to lowest level
-					self::$debug = is_numeric($_REQUEST['debug']) ? (int)$_REQUEST['debug'] : 1;
-					break;
+
+			$user = BackendAccount::checkUser();
+			if (SITE_STATE != 'production' || ($user && in_array('superadmin', $user->roles))) {
+				switch (true) {
+					case array_key_exists('debug', $_REQUEST):
+						//Default to lowest level
+						self::$debug = is_numeric($_REQUEST['debug']) ? (int)$_REQUEST['debug'] : 1;
+						break;
+				}
 			}
 
 			Backend::add('debug', self::$debug);
