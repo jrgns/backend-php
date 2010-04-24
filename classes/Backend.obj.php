@@ -397,13 +397,13 @@ class Backend {
 
 	public static function __error_handler($number, $string, $file = false, $line = false, $context = false) {
 		if (!class_exists('Component', false)) {
-			require(BACKEND_FOLDER . '/controllers/Component.obj.php');
+			self::__autoload('Component');
 		}
 		if (!class_exists('BackendError', false)) {
-			require(BACKEND_FOLDER . '/controllers/BackendError.obj.php');
+			self::__autoload('BackendError');
 		}
 		if (!class_exists('BackendErrorObj', false)) {
-			require_once(BACKEND_FOLDER . '/models/BackendErrorObj.obj.php');
+			self::__autoload('BackendErrorObj');
 		}
 		//Record Errors
 		if (Component::isActive('BackendError')) {
@@ -461,15 +461,19 @@ class Backend {
 				SITE_FOLDER . '/controllers/' => 'controller',
 				APP_FOLDER . '/controllers/' => 'controller',
 				BACKEND_FOLDER . '/controllers/' => 'controller',
+
 				SITE_FOLDER . '/models/' => 'model',
 				APP_FOLDER . '/models/' => 'model',
 				BACKEND_FOLDER . '/models/' => 'model',
+
 				SITE_FOLDER . '/classes/' => 'class',
 				APP_FOLDER . '/classes/' => 'class',
 				BACKEND_FOLDER . '/classes/' => 'class',
+
 				SITE_FOLDER . '/views/' => 'view',
 				APP_FOLDER . '/views/' => 'view',
 				BACKEND_FOLDER . '/views/' => 'view',
+
 				SITE_FOLDER . '/utilities/' => 'utility',
 				APP_FOLDER . '/utilities/' => 'utility',
 				BACKEND_FOLDER . '/utilities/' => 'utility',
@@ -478,12 +482,16 @@ class Backend {
 			$folders = array(
 				APP_FOLDER . '/controllers/' => 'controller',
 				BACKEND_FOLDER . '/controllers/' => 'controller',
+
 				APP_FOLDER . '/models/' => 'model',
 				BACKEND_FOLDER . '/models/' => 'model',
+
 				APP_FOLDER . '/classes/' => 'class',
 				BACKEND_FOLDER . '/classes/' => 'class',
+
 				APP_FOLDER . '/views/' => 'view',
 				BACKEND_FOLDER . '/views/' => 'view',
+
 				APP_FOLDER . '/utilities/' => 'utility',
 				BACKEND_FOLDER . '/utilities/' => 'utility',
 			);
