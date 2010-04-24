@@ -19,13 +19,24 @@ class BackendAccount extends TableCtl {
 	
 	protected static $name = false;
 	
-	public static $current_user = false;
+	protected static $current_user = false;
 	
 	public static function getName() {
 		if (empty(self::$name)) {
 			self::$name = Value::get('BackendAccount', 'Account');
 		}
 		return self::$name;
+	}
+	
+	public static function getCurrentUser() {
+		return self::$current_user;
+	}
+	
+	public static function getCurrentUserID() {
+		if (self::$current_user) {
+			return self::$current_user->id;
+		}
+		return false;
 	}
 	
 	public static function authenticate_user($username, $password) {
@@ -112,6 +123,7 @@ class BackendAccount extends TableCtl {
 	
 	function action_logout() {
 		if (is_post()) {
+			self::$current_user = false;
 			if (array_key_exists('user', $_SESSION)) {
 				if (Component::isActive('PersistUser')) {
 					PersistUser::forget($_SESSION['user']);
@@ -137,6 +149,7 @@ class BackendAccount extends TableCtl {
 					Backend::addSuccess('Your account details have been updated');
 					$User->load(array('mode' => 'full_object'));
 					$_SESSION['user'] = $User->object;
+					self::$current_user = $User->object;
 				} else {
 					Backend::addError('We could not update your account details');
 				}
@@ -268,7 +281,8 @@ class BackendAccount extends TableCtl {
 		if (!$user && Value::get('CheckHTTPAuth', false)) {
 			$user = self::processHTTPAuth();
 			if ($user) {
-				$_SESSION['user'] = $user;
+				$_SESSION['user']   = $user;
+				self::$current_user = $user;
 			}
 		}
 	}
@@ -315,7 +329,8 @@ class BackendAccount extends TableCtl {
 			if ($User->object) {
 				session_regenerate_id();
 				$User->object->roles = empty($User->object->roles) ? array() : explode(',', $User->object->roles);
-				$_SESSION['user'] = $User->object;
+				$_SESSION['user']   = $User->object;
+				self::$current_user = $user->object;
 				return $User->object;
 			}
 		}
@@ -356,11 +371,13 @@ END;
 	}
 	
 	public static function checkUser($user = false) {
-		$toret = false;
-		if (!empty($_SESSION['user']) && is_object($_SESSION['user']) && $_SESSION['user']->id > 0) {
-			$toret = $_SESSION['user'];
+		if (!empty(self::$current_user)) {
+			return self::$current_user;
 		}
-		return $toret;
+		if (!empty($_SESSION['user']) && is_object($_SESSION['user']) && $_SESSION['user']->id > 0) {
+			return $_SESSION['user'];
+		}
+		return false;
 	}
 	
 	public static function getGravatar($email, $size = 120) {
