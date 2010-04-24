@@ -25,6 +25,22 @@ class Tag extends TableCtl {
 		return $query->fetchAll(array(':table' => $table, ':id' => $table_id));
 	}
 	
+	public static function getTagNames($table, $table_id) {
+		$query = new SelectQuery('Tag');
+		$query
+			->field('`tags`.`id`, `tags`.`name`')
+			->leftJoin('TagLink', array('`tags`.`id` = `tag_links`.`tag_id`'))
+			->filter('`tags`.`foreign_table` = :table')
+			->filter('`tag_links`.`foreign_id` = :id');
+		$result = $query->fetchAll(array(':table' => $table, ':id' => $table_id), array('with_key' => true));
+		if ($result) {
+			foreach($result as $key => $value) {
+				$result[$key] = current(current($value));
+			}
+		}
+		return $result;
+	}
+	
 	public static function removeTags($table, $table_id) {
 		/* TODO
 		$query = new SelectQuery('Tag');
