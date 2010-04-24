@@ -31,6 +31,15 @@ class BackendQuery extends TableCtl {
 			$_REQUEST['q'] = $query['query'];
 		}
 	}
+	
+	public static function add($alias, $query) {
+		$data = array(
+			'alias' => $alias,
+			'query' => $query,
+		);
+		$BQ = new BackendQueryObj();
+		return $BQ->create($data);
+	}
 
 	public static function install(array $options = array()) {
 		$toret = parent::install($options);
