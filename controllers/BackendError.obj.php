@@ -20,18 +20,21 @@
 class BackendError extends TableCtl {
 	private static $adding = false;
 	public static function add($one, $two = false, $three = false, $four = false, $five = false) {
-		if (!self::$adding) {
-			self::$adding = true;
-			if (!is_numeric($one) && !$three && !$four && !$five) {
-				self::addBE($one, $two);
+		//Some low level utilities only checks if the class exists, not if it is active
+		if (Component::isActive('BackendError')) {
+			if (!self::$adding) {
+				self::$adding = true;
+				if (!is_numeric($one) && !$three && !$four && !$five) {
+					self::addBE($one, $two);
+				} else {
+					self::addPHP($one, $two, $three, $four, $five);
+				}
+				self::$adding = false;
 			} else {
-				self::addPHP($one, $two, $three, $four, $five);
+				var_dump($one, $two, $three, $four, $five);
+				print_stacktrace();
+				die('Recursive Backend Errors');
 			}
-			self::$adding = false;
-		} else {
-			var_dump($one, $two, $three, $four, $five);
-			print_stacktrace();
-			die('Recursive Backend Errors');
 		}
 	}
 	

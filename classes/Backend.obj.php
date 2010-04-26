@@ -399,14 +399,14 @@ class Backend {
 		if (!class_exists('Component', false)) {
 			self::__autoload('Component');
 		}
-		if (!class_exists('BackendError', false)) {
-			self::__autoload('BackendError');
-		}
-		if (!class_exists('BackendErrorObj', false)) {
-			self::__autoload('BackendErrorObj');
-		}
-		//Record Errors
 		if (Component::isActive('BackendError')) {
+			if (!class_exists('BackendError', false)) {
+				self::__autoload('BackendError');
+			}
+			if (!class_exists('BackendErrorObj', false)) {
+				self::__autoload('BackendErrorObj');
+			}
+			//Record Errors
 			switch ($number) {
 			case E_STRICT:
 				break;
