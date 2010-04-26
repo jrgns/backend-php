@@ -17,7 +17,6 @@ class UpdateQuery extends Query {
 	protected $data = array();
 
 	function __construct($table, array $options = array()) {
-		Controller::$debug = true;
 		parent::__construct('UPDATE', $table, $options);
 	}
 
