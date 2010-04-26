@@ -129,7 +129,10 @@ class Backend {
 			self::initDBs($dbs);
 		}
 		
-		define('BACKEND_INSTALLED', Value::get('admin_installed', false));
+		//Dont use Value::get, because it might not be installed yet
+		$query = new SelectQuery('Value');
+		$query->field('`value`')->filter('`name` = \'admin_installed\'');
+		define('BACKEND_INSTALLED', $query->fetchColumn());
 	}
 	
 	static public function add($name, $value) {
@@ -290,11 +293,17 @@ class Backend {
 		} else {
 			array_push(self::$$what, $string);
 			//Log to file if necessary
-			$log_to_file = defined('BACKEND_INSTALLED') && BACKEND_INSTALLED ? Value::get('log_to_file', false) : false;
-			if ($log_to_file && in_array($what, array('success', 'notice', 'error'))) {
+			if (defined('BACKEND_INSTALLED') && BACKEND_INSTALLED) {
+				$log_to_file = Value::get('log_to_file', false);
+			} else {
+				//Only use this pre installation
+				$log_to_file = Backend::get('log_to_file');
+			}
+
+			if ($log_to_file) {
 				@list($file, $log_what) = explode('|', $log_to_file);
 				$file     = empty($file)     ? 'logfile_' . date('Ymd') . 'txt' : $file;
-				$log_what = empty($log_what) ? '*' : explode(',', $log_what);
+				$log_what = empty($log_what) ? array('success', 'notice', 'error') : explode(',', $log_what);
 				if ((is_array($log_what) && in_array($what, $log_what)) || $log_what == '*') {
 					if (!file_exists(APP_FOLDER . '/logs/')) {
 						mkdir(APP_FOLDER . '/logs/', 0755);
@@ -399,21 +408,21 @@ class Backend {
 		if (!class_exists('Component', false)) {
 			self::__autoload('Component');
 		}
-		if (Component::isActive('BackendError')) {
-			if (!class_exists('BackendError', false)) {
-				self::__autoload('BackendError');
-			}
-			if (!class_exists('BackendErrorObj', false)) {
-				self::__autoload('BackendErrorObj');
-			}
-			//Record Errors
-			switch ($number) {
-			case E_STRICT:
-				break;
-			default:
+		if (!class_exists('BackendError', false)) {
+			self::__autoload('BackendError');
+		}
+		if (!class_exists('BackendErrorObj', false)) {
+			self::__autoload('BackendErrorObj');
+		}
+		//Record Errors
+		switch ($number) {
+		case E_STRICT:
+			break;
+		default:
+			if (defined('BACKEND_INSTALLED') && BACKEND_INSTALLED && Component::isActive('BackendError')) {
 				BackendError::add($number, $string, $file, $line, $context);
-				break;
 			}
+			break;
 		}
 		//Interpret or Bypass Errors
 		switch ($number) {

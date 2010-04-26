@@ -27,6 +27,8 @@ class Admin extends AreaCtl {
 		$installed = Value::get('admin_installed', false);
 		if (!$installed) {
 			//if (is_post()) {
+				$install_log_file = 'install_log_' . date('Ymd_His') . '.txt';
+				Backend::add('log_to_file', $install_log_file);
 				if (!Component::pre_install()) {
 					Backend::addError('Could not pre install Component');
 					return false; 
@@ -45,8 +47,7 @@ class Admin extends AreaCtl {
 				}
 			
 				$original = Value::get('log_to_file', false);
-				//Value::set('log_to_file', 'install_log.txt');
-				Value::set('log_to_file', 'install_log_' . date('Ymd_His') . '.txt');
+				Value::set('log_to_file', $install_log_file);
 
 				Backend::addNotice(PHP_EOL . PHP_EOL . 'Installation started at ' . date('Y-m-d H:i:s'));
 
