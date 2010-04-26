@@ -462,7 +462,7 @@ Site Admin
 	}
 
 	public static function install(array $options = array()) {
-		$options['install_model'] = array_key_exists('install_model', $options) ? $options['install_model'] : false;
+		$options['install_model'] = array_key_exists('install_model', $options) ? $options['install_model'] : true;
 		$toret = parent::install($options);
 
 		$toret = Hook::add('init', 'pre', self::getName(), array('global' => true, 'sequence' => -10)) && $toret;
