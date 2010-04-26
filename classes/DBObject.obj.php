@@ -469,7 +469,7 @@ class DBObject {
 					$drop_query->execute();
 					Backend::addNotice('Dropping table ' . $table);
 					if (!empty($drop_query->last_error)) {
-						$this->last_error = $query->last_error;
+						$this->last_error = $drop_query->last_error;
 					}
 				}
 				$query = new CustomQuery($query, array('connection' => $this->db));
