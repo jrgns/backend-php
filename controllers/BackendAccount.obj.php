@@ -330,7 +330,7 @@ class BackendAccount extends TableCtl {
 				session_regenerate_id();
 				$User->object->roles = empty($User->object->roles) ? array() : explode(',', $User->object->roles);
 				$_SESSION['user']   = $User->object;
-				self::$current_user = $user->object;
+				self::$current_user = $User->object;
 				return $User->object;
 			}
 		}
