@@ -1,17 +1,17 @@
 <?php
 class GenericImporter {
-	public static $last_error = false;
+	public static $error_msg = false;
 
 	public static function import($controller, $filename, $data) {
-		self::$last_error = false;
+		self::$error_msg = false;
 		$fp = fopen($filename, 'r');
 		if (!$fp)  {
-			self::$last_error = 'Could not read uploaded file';
+			self::$error_msg = 'Could not read uploaded file';
 			return false;
 		}
 		$obj_name = get_class($controller) . 'Obj';
 		if (!class_exists($obj_name, true)) {
-			self::$last_error = 'The Object definition is missing';
+			self::$error_msg = 'The Object definition is missing';
 			return false;
 		}
 
@@ -34,7 +34,7 @@ class GenericImporter {
 				}
 				$count++;
 			} else {
-				self::$last_error = 'Number of imported fields does not match defined fields';
+				self::$error_msg = 'Number of imported fields does not match defined fields';
 				return false;
 			}
 		}
@@ -42,6 +42,6 @@ class GenericImporter {
 	}
 	
 	public static function getLastError() {
-		return self::$last_error;
+		return self::$error_msg;
 	}
 }

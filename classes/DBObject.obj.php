@@ -25,8 +25,8 @@ class DBObject {
 	public $inserted_id;
 	public $list_count = null;
 	
-	//If you set $last_error in a function, reset it in the beginning of the function as well.
-	public $last_error = false;
+	//If you set $error_msg in a function, reset it in the beginning of the function as well.
+	public $error_msg = false;
 
 	/**
 	 * Construct a DB Object
@@ -64,11 +64,11 @@ class DBObject {
 	}
 	
 	private function checkConnection() {
-		$this->last_error = false;
+		$this->error_msg = false;
 		if (!$this->db instanceof PDO) {
 			$this->db = Backend::getDB($this->meta['database']);
 			if (!$this->db instanceof PDO) {
-				$this->last_error = 'No Database setup';
+				$this->error_msg = 'No Database setup';
 				BackendError::add(0, get_class($this) . ': No Database setup', __FILE__, __LINE__, 'checkConnection');
 				return false;
 			}
@@ -165,7 +165,7 @@ class DBObject {
 	
 	public function load($options = array()) {
 		$result = false;
-		$this->last_error = false;
+		$this->error_msg = false;
 		if ($this->checkConnection()) {
 			if (!array_key_exists('mode', $options)) {
 				if (empty($this->meta['id'])) {
@@ -234,16 +234,16 @@ class DBObject {
 					if ($this->array) {
 						$this->array = $this->process($this->array, 'out');
 					}
-				} else if (!empty($query->last_error)) {
-					$this->last_error = $query->last_error;
+				} else if (!empty($query->error_msg)) {
+					$this->error_msg = $query->error_msg;
 				}
 			} else {
 				BackendError::add(0, get_class($this) . ': No Query to Load', __FILE__, __LINE__, 'load');
-				$this->last_error = 'No Query to Load';
+				$this->error_msg = 'No Query to Load';
 			}
 		} else {
 			BackendError::add(0, get_class($this) . ': DB Connection Error', __FILE__, __LINE__, 'load');
-			$this->last_error = 'DB Connection Error';
+			$this->error_msg = 'DB Connection Error';
 		}
 		return $result;
 	}
@@ -285,7 +285,7 @@ class DBObject {
 	
 	public function create($data, array $options = array()) {
 		$toret = false;
-		$this->last_error = false;
+		$this->error_msg = false;
 		if ($this->checkConnection()) {
 			$data = $this->validate($data, 'create', $options);
 			if ($data) {
@@ -302,20 +302,20 @@ class DBObject {
 					if (array_key_exists('load', $options) ? $options['load'] : true) {
 						$this->load();
 					}
-				} else if (!empty($query->last_error)) {
-					$this->last_error = $query->last_error;
+				} else if (!empty($query->error_msg)) {
+					$this->error_msg = $query->error_msg;
 				}
 			}
 		} else {
 			BackendError::add(0, get_class($this) . ': DB Connection Error', __FILE__, __LINE__, 'create');
-			$this->last_error = 'DB Connection error';
+			$this->error_msg = 'DB Connection error';
 		}
 		return $toret;
 	}
 	
 	public function replace($data, $options = array()) {
 		$toret = false;
-		$this->last_error = false;
+		$this->error_msg = false;
 		if ($this->checkConnection()) {
 			$data = $this->validate($data, 'create', $options);
 			if ($data) {
@@ -332,20 +332,20 @@ class DBObject {
 					if (array_key_exists('load', $options) ? $options['load'] : true) {
 						$this->load();
 					}
-				} else if (!empty($query->last_error)) {
-					$this->last_error = $query->last_error;
+				} else if (!empty($query->error_msg)) {
+					$this->error_msg = $query->error_msg;
 				}
 			}
 		} else {
 			BackendError::add(0, get_class($this) . ': DB Connection Error', __FILE__, __LINE__, 'replace');
-			$this->last_error = 'DB Connection Error';
+			$this->error_msg = 'DB Connection Error';
 		}
 		return $toret;
 	}
 	
 	public function retrieve($parameter) {
 		$toret = null;
-		$this->last_error = false;
+		$this->error_msg = false;
 		if ($this->checkConnection()) {
 			$query = $this->getRetrieveSQL();
 			if ($query) {
@@ -353,23 +353,23 @@ class DBObject {
 				if ($stmt->execute(array(':parameter' => $parameter))) {
 					$toret = $stmt->fetch(PDO::FETCH_ASSOC);
 					$toret = $toret ? $toret : null;
-				} else if (!empty($query->last_error)) {
-					$this->last_error = $query->last_error;
+				} else if (!empty($query->error_msg)) {
+					$this->error_msg = $query->error_msg;
 				}
 			} else {
 				BackendError::add(0, get_class($this) . ': No retrieve SQL for ' . get_class($this), __FILE__, __LINE__, 'retrieve');
-				$this->last_error = 'No retrieve SQL for ' . class_name($this);
+				$this->error_msg = 'No retrieve SQL for ' . class_name($this);
 			}
 		} else {
 			BackendError::add(0, get_class($this) . ': Connection Error', __FILE__, __LINE__, 'retrieve');
-			$this->last_error = 'DB Connection Error';
+			$this->error_msg = 'DB Connection Error';
 		}
 		return $toret;
 	}
 	
 	public function read($mode = false) {
 		$toret = null;
-		$this->last_error = false;
+		$this->error_msg = false;
 		if ($this->checkConnection()) {
 			$id = $this->meta['id'];
 			$mode = $mode ? $mode : ($id ? $this->load_mode : 'list');
@@ -392,14 +392,14 @@ class DBObject {
 			}
 		} else {
 			BackendError::add(0, get_class($this) . ': DB Connection Error', __FILE__, __LINE__, 'read');
-			$this->last_error = 'DB Connection Error';
+			$this->error_msg = 'DB Connection Error';
 		}
 		return $toret;
 	}
 
 	function update($data, $options = array()) {
 		$toret = false;
-		$this->last_error = false;
+		$this->error_msg = false;
 		if ($this->checkConnection()) {
 			$data = $this->validate($data, 'update', $options);
 			if ($data) {
@@ -411,54 +411,54 @@ class DBObject {
 					if (array_key_exists('load', $options) ? $options['load'] : true) {
 						$this->load();
 					}
-				} else if (!empty($query->last_error)) {
-					$this->last_error = $query->last_error;
+				} else if (!empty($query->error_msg)) {
+					$this->error_msg = $query->error_msg;
 				}
 			}
 		} else {
 			BackendError::add(0, get_class($this) . ': DB Connection Error', __FILE__, __LINE__, 'update');
-			$this->last_error = 'DB Connection Error';
+			$this->error_msg = 'DB Connection Error';
 		}
 		return $toret;
 	}
 	
 	function delete() {
 		$toret = false;
-		$this->last_error = false;
+		$this->error_msg = false;
 		if ($this->checkConnection()) {
 			extract($this->meta);
 			$query = new CustomQuery("DELETE FROM `$table` WHERE `$id_field` = :id LIMIT 1", array('connection' => $this->db));
 			$toret = $query->execute(array(':id' => $this->meta['id']));
-			if (!empty($query->last_error)) {
-				$this->last_error = $query->last_error;
+			if (!empty($query->error_msg)) {
+				$this->error_msg = $query->error_msg;
 			}
 		} else {
 			BackendError::add(0, get_class($this) . ': DB Connection Error', __FILE__, __LINE__, 'delete');
-			$this->last_error = 'DB Connection Error';
+			$this->error_msg = 'DB Connection Error';
 		}
 		return $toret;
 	}
 	
 	function truncate() {
 		$toret = false;
-		$this->last_error = false;
+		$this->error_msg = false;
 		if ($this->checkConnection()) {
 			extract($this->meta);
 			$query = new CustomQuery("TRUNCATE `$table`", array('connection' => $this->db));
 			$toret = $query->execute();
-			if (!empty($query->last_error)) {
-				$this->last_error = $query->last_error;
+			if (!empty($query->error_msg)) {
+				$this->error_msg = $query->error_msg;
 			}
 		} else {
 			BackendError::add(0, get_class($this) . ': DB Connection Error', __FILE__, __LINE__, 'truncate');
-			$this->last_error = 'DB Connection Error';
+			$this->error_msg = 'DB Connection Error';
 		}
 		return $toret;
 	}
 	
 	public function install(array $options = array()) {
 		$toret = false;
-		$this->last_error = false;
+		$this->error_msg = false;
 		if ($this->checkConnection()) {
 			$drop_table = array_key_exists('drop_table', $options) ? $options['drop_table'] : false;
 			$query = $this->getInstallSQL();
@@ -468,28 +468,28 @@ class DBObject {
 					$drop_query = new CustomQuery('DROP TABLE IF EXISTS `' . $table . '`', array('connection' => $this->db));
 					$drop_query->execute();
 					Backend::addNotice('Dropping table ' . $table);
-					if (!empty($drop_query->last_error)) {
-						$this->last_error = $drop_query->last_error;
+					if (!empty($drop_query->error_msg)) {
+						$this->error_msg = $drop_query->error_msg;
 					}
 				}
 				$query = new CustomQuery($query, array('connection' => $this->db));
 				$toret = $query->execute();
-				if (!empty($query->last_error)) {
-					$this->last_error = $query->last_error;
+				if (!empty($query->error_msg)) {
+					$this->error_msg = $query->error_msg;
 				}
 			} else {
 				BackendError::add(0, get_class($this) . ': No Install SQL for ' . class_name($this), __FILE__, __LINE__, 'install');
-				$this->last_error = 'No Install SQL for ' . class_name($this);
+				$this->error_msg = 'No Install SQL for ' . class_name($this);
 			}
 		} else {
 			BackendError::add(0, get_class($this) . ': DB Connection Error', __FILE__, __LINE__, 'install');
-			$this->last_error = 'DB Connection error';
+			$this->error_msg = 'DB Connection error';
 		}
 		return $toret;
 	}
 	
 	function validate($data, $action, $options = array()) {
-		//TODO Try to use $this->last_error here
+		//TODO Try to use $this->error_msg here
 		$ret_data = array();
 		$toret = true;
 		if (is_array($data)) {

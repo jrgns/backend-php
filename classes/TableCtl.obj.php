@@ -96,8 +96,8 @@ class TableCtl extends AreaCtl {
 					$toret = false;
 					Backend::addError('Could not add ' . $object->getMeta('name'));
 				}
-				if (!empty($object->last_error)) {
-					Backend::addNotice($object->last_error);
+				if (!empty($object->error_msg)) {
+					Backend::addNotice($object->error_msg);
 				}
 			}
 			Backend::add('obj_values', $data);
@@ -477,8 +477,8 @@ class TableCtl extends AreaCtl {
 			} else {
 				$object->load();
 			}
-			if (!empty($object->last_error)) {
-				Backend::addError($object->last_error);
+			if (!empty($object->error_msg)) {
+				Backend::addError($object->error_msg);
 			} else if ($object) {
 				switch ($return) {
 				case 'list':
@@ -574,7 +574,7 @@ class TableCtl extends AreaCtl {
 			$model = new $model();
 			$toret = $model->install($options);
 			if (!$toret) {
-				Backend::addError('Could not install ' . get_class($model) . ' Model: ' . $model->last_error);
+				Backend::addError('Could not install ' . get_class($model) . ' Model: ' . $model->error_msg);
 			}
 		} else {
 			Backend::addError($model . ' does not exist');

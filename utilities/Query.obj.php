@@ -30,7 +30,7 @@ class Query {
 	protected $last_stmt   = false;
 	protected $last_params = array();
 	
-	public $last_error = false;
+	public $error_msg = false;
 	
 	/**
 	 * @param The type of query this is. Must be one of SELECT, INSERT, DELETE, UPDATE or SHOW.
@@ -61,7 +61,7 @@ class Query {
 	
 	public function execute(array $parameters = array(), array $options = array()) {
 		$toret = false;
-		$this->last_error = false;
+		$this->error_msg = false;
 		if (empty($this->query)) {
 			$this->query = $this->buildQuery();
 		}
@@ -103,17 +103,20 @@ class Query {
 							if (Controller::$debug >= 2) {
 								echo 'Query:<pre>' . PHP_EOL . $stmt->queryString . '</pre>';
 							}
-							$this->last_error = $verbose_error;
+							$this->error_msg = $verbose_error;
 						} else {
-							$this->last_error = 'Error executing statement';
+							$this->error_msg = 'Error executing statement';
+							if (!empty($error_info[1])) {
+								$this->error_msg .=  '(' . $error_info[1] . ')';
+							}
 						}
 					}
 				} else {
-					$this->last_error = 'Could not prepare statement';
+					$this->error_msg = 'Could not prepare statement';
 				}
 			}
 		} else {
-			$this->last_error = 'Could not execute query';
+			$this->error_msg = 'Could not execute query';
 		}
 		return $toret;
 	}
