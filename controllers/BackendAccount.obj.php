@@ -408,11 +408,15 @@ END;
 	}
 	
 	public function daily(array $options = array()) {
-		return self::purgeUnconfirmed();
+		if (get_class($this) == BackendAccount::getName()) {
+			return self::purgeUnconfirmed();
+		}
 	}
 	
 	public function weekly(array $options = array()) {
-		return self::userStats();
+		if (get_class($this) == BackendAccount::getName()) {
+			return self::userStats();
+		}
 	}
 	
 	public static function purgeUnconfirmed() {
