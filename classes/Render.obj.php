@@ -57,7 +57,11 @@ class Render {
 		self::init();
 		
 		$template_content = self::buildTemplate($origin);
-		$template_content = self::evalTemplate($template_content);
+		$template_content = self::evalContent($origin, $template_content);
+		if (!$template_content) {
+			Backend::addError('Could not generate template');
+			return false;
+		}
 		$template_loc     = Backend::getConfig('backend.templates.location', 'templates');
 		$dest_file        = APP_FOLDER . '/' . $template_loc . '/' . $destination;
 		if (@file_put_contents($dest_file, $template_content)) {
