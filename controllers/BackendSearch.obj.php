@@ -1,6 +1,6 @@
 <?php
 class BackendSearch extends TableCtl {
-	public static function search(TableCtl $controller, $term) {
+	public static function search(TableCtl $controller, $term, $filter = false) {
 		$object = call_user_func(array(get_class($controller), 'getObject'));
 		if ($object) {
 			$params = array($object->getSource());
@@ -13,6 +13,15 @@ class BackendSearch extends TableCtl {
 				->filter('`table` = ?')
 				->filter('`word` IN (' . implode(', ', array_fill(0, count($terms), '?')) . ')')
 				->order('`count` DESC, `sequence`');
+			if ($filter) {
+				if (is_array($filter)) {
+					foreach($filter as $one_fil) {
+						$query->filter($one_fil);
+					}
+				} else {
+					$query->filter($filter);
+				}
+			}
 			$result = $query->fetchAll($params);
 			return $result;
 		}
