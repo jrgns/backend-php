@@ -3,13 +3,18 @@ class BackendSearch extends TableCtl {
 	public static function search(TableCtl $controller, $term) {
 		$object = call_user_func(array(get_class($controller), 'getObject'));
 		if ($object) {
-			$table  = $object->getSource();
+			$params = array($object->getSource());
+			$terms  = split('[ ,]', $term);
+			$params = array_merge($params, $terms);
 			$query  = new SelectQuery(__CLASS__);
 			$query
-				->filter('`table` = :table')
-				->filter('`word` IN (\'' . trim(str_replace(' ', "','", $term)) . '\')')
+				->field('`' . $object->getMeta('table') . '`.*')
+				->leftJoin(get_class($controller), '`' . $object->getMeta('table') . '`.`' . $object->getMeta('id_field') . '` = `table_id`')
+				->filter('`table` = ?')
+				->filter('`word` IN (' . implode(', ', array_fill(0, count($terms), '?')) . ')')
 				->order('`count` DESC, `sequence`');
-			return $query->fetchAll(array(':table' => $table));
+			$result = $query->fetchAll($params);
+			return $result;
 		}
 		return false;
 	}
