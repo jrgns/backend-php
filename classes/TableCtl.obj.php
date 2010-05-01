@@ -538,7 +538,7 @@ class TableCtl extends AreaCtl {
 	
 	public static function getObject($obj_name = false, $id = false) {
 		$toret = false;
-		$obj_name = $obj_name ? class_name($obj_name) : class_name(Controller::$area);
+		$obj_name = $obj_name ? class_name($obj_name) : class_name(get_called_class());
 		$obj_name .= 'Obj';
 		if (Component::isActive($obj_name)) {
 			if ($id) {
