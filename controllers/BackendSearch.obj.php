@@ -8,7 +8,7 @@ class BackendSearch extends TableCtl {
 			$params = array_merge($params, $terms);
 			$query  = new SelectQuery(__CLASS__);
 			$query
-				->field('`' . $object->getMeta('table') . '`.*')
+				->field('DISTINCT `' . $object->getMeta('table') . '`.*')
 				->leftJoin(get_class($controller), '`' . $object->getMeta('table') . '`.`' . $object->getMeta('id_field') . '` = `table_id`')
 				->filter('`table` = ?')
 				->filter('`word` IN (' . implode(', ', array_fill(0, count($terms), '?')) . ')')
