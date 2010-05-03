@@ -4,6 +4,9 @@ class reCAPTCHA {
 	
 	public static function show() {
 		$key = Backend::getConfig('application.recaptcha.public_key');
+		if (!empty(self::$error_msg)) {
+			$key .= '&error=' . self::$error_msg;
+		}
 		echo <<< END
 <script>
 RecaptchaOptions = {
@@ -49,5 +52,16 @@ END;
 			return false;
 		}
 		return true;
+	}
+	
+	public static function translate($error) {
+		switch ($error) {
+		case 'incorrect-captcha-sol':
+			return 'Invalid CAPTCHA response.';
+			break;
+		default:
+			return $error;
+			break;
+		}
 	}
 }
