@@ -380,7 +380,7 @@ function curl_request($url, array $parameters = array(), array $options = array(
 		curl_setopt($ch, CURLOPT_USERPWD, $options['username'] . ':' . $options['password']);
 	}
 
-	$method = array_key_exists('method', $options) && in_array(strtolower($options['method']), array('get', 'post', 'pust')) ? strtolower($options['method']) : 'get';
+	$method = array_key_exists('method', $options) && in_array(strtolower($options['method']), array('get', 'post', 'put')) ? strtolower($options['method']) : 'get';
 	switch ($method) {
 	case 'put':
 		curl_setopt($ch, CURLOPT_PUT, true);

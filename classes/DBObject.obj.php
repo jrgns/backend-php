@@ -624,12 +624,15 @@ class DBObject {
 					}
 					break;
 				}
+				
 				if (!is_null($value)) {
-					$ret_data[$name] = $value;
-				} else if (!empty($options['required'])) {
-					Backend::addError('Missing ' . $name);
-					$toret = false;
-					break;
+					if (empty($value) && !empty($options['required'])) {
+						Backend::addError('Missing ' . $name);
+						$toret = false;
+						break;
+					} else {
+						$ret_data[$name] = $value;
+					}
 				}
 			}
 		}
