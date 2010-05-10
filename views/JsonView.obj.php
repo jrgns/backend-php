@@ -20,6 +20,10 @@ class JsonView extends TextView {
 		$this->mode = 'json';
 	}
 	
+	public static function hook_init() {
+		ob_start();
+	}
+
 	public static function hook_output($to_print) {
 		switch (Controller::$action) {
 		case 'list':
@@ -34,14 +38,25 @@ class JsonView extends TextView {
 			break;
 		}
 		$object = new stdClass();
-		$object->result = $to_print;
-		$object->error = Backend::getError();
-		$object->notice = Backend::getNotice();
+		$object->result  = $to_print;
+		$object->error   = Backend::getError();
+		$object->notice  = Backend::getNotice();
 		$object->success = Backend::getSuccess();
+		$last = '';
+		while (ob_get_level() > 1) {
+			//Ending the ob_start from HtmlView::hook_init
+			$last .= ob_get_clean();
+		}
+		$object->output  = $last;
 		Backend::setError();
 		Backend::setNotice();
 		Backend::setSuccess();
 		return json_encode($object);
 	}
-}
 
+	public static function install() {
+		$toret = true;
+		Hook::add('init', 'pre', __CLASS__, array('global' => 1, 'mode' => 'json')) && $toret;
+		return $toret;
+	}
+}
