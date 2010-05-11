@@ -25,6 +25,24 @@ class BackendRequest extends TableCtl {
 		$BR = new BackendRequestObj();
 		return $BR->create($data);
 	}
+	
+	public static function userLastSeen($user_id) {
+		$query = new SelectQuery('BackendRequest');
+		$query
+			->field('MAX(`added`) AS `last_visit`')
+			->filter('`user_id` = :user_id')
+			->group('`user_id`');
+		return $query->fetchColumn(array(':user_id' => $user_id));
+	}
+	
+	public static function userVisits($user_id) {
+		$query = new SelectQuery('BackendRequest');
+		$query
+			->field('COUNT(*) AS `visits`')
+			->filter('`user_id` = :user_id')
+			->group('`user_id`');
+		return $query->fetchColumn(array(':user_id' => $user_id));
+	}
 
 	public static function install(array $options = array()) {
 		$toret = parent::install($options);
