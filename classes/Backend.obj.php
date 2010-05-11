@@ -130,9 +130,19 @@ class Backend {
 		}
 		
 		//Dont use Value::get, because it might not be installed yet
-		$query = new SelectQuery('Value');
-		$query->field('`value`')->filter('`name` = \'admin_installed\'');
-		define('BACKEND_INSTALLED', $query->fetchColumn());
+		$installed = false;
+		$db = self::getDB();
+		if ($db instanceof PDO) {
+			$stmt = $db->prepare('SELECT * FROM `values` WHERE `name` = \'admin_installed\'');
+			if ($stmt) {
+				$stmt->execute();
+				$row = $stmt->fetch(PDO::FETCH_ASSOC);
+				if ($row) {
+					$installed = $row['value'];
+				}
+			}
+		}
+		define('BACKEND_INSTALLED', $installed);
 	}
 	
 	static public function add($name, $value) {
@@ -278,6 +288,7 @@ class Backend {
 		} else if (self::$DB instanceof PDO) {
 			return self::$DB;
 		}
+		return false;
 	}
 
 	private static function addSomething($what, $string, $options = array()) {
