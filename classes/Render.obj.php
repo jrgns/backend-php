@@ -107,6 +107,14 @@ class Render {
 	public static function checkTemplateFile($filename) {
 		self::init();
 
+		$mobile = false;
+		if (Component::isActive('Wurfl')) {
+			$device   = Wurfl::getDevice();
+			if (($device && $device->getCapability('mobile_browser') != '') || array_key_exists('mobile', $_REQUEST)) {
+				$mobile = true;
+			}
+		}
+
 		$toret = false;
 		$template_loc = Backend::getConfig('backend.templates.location', 'templates');
 		if (Component::isActive('Theme')) {
@@ -115,13 +123,28 @@ class Render {
 			$theme = false;
 		}
 
-		//Check the theme first.
-		if ($theme && is_readable($theme['path'] . '/' . $filename)) {
+		//Mobile and Theme
+		if ($mobile && $theme && is_readable($theme['path'] . '/mobile_' . $filename)) {
+			$toret = $theme['path'] . '/mobile_' . $filename;
+		//Theme
+		} else if ($theme && is_readable($theme['path'] . '/' . $filename)) {
 			$toret = $theme['path'] . '/' . $filename;
+		//Mobile and SITE FOLDER
+		} else if ($mobile && defined('SITE_FOLDER') && is_readable(SITE_FOLDER . '/' . $template_loc . '/mobile_' . $filename)) {
+			$toret = SITE_FOLDER . '/'. $template_loc . '/mobile_' . $filename;
+		//SITE FOLDER
 		} else if (defined('SITE_FOLDER') && is_readable(SITE_FOLDER . '/' . $template_loc . '/' . $filename)) {
 			$toret = SITE_FOLDER . '/'. $template_loc . '/' . $filename;
+		//Mobile and APP FOLDER
+		} else if ($mobile && is_readable(APP_FOLDER . '/' . $template_loc . '/mobile_' . $filename)) {
+			$toret = APP_FOLDER . '/'. $template_loc . '/mobile_' . $filename;
+		//APP FOLDER
 		} else if (is_readable(APP_FOLDER . '/' . $template_loc . '/' . $filename)) {
 			$toret = APP_FOLDER . '/'. $template_loc . '/' . $filename;
+		//Mobile and BACKEND_FOLDER
+		} else if ($mobile && is_readable(BACKEND_FOLDER . '/' . $template_loc . '/mobile_' . $filename)) {
+			$toret = BACKEND_FOLDER . '/'. $template_loc . '/mobile_' . $filename;
+		//BACKEND_FOLDER
 		} else if (is_readable(BACKEND_FOLDER . '/' . $template_loc . '/' . $filename)) {
 			$toret = BACKEND_FOLDER . '/'. $template_loc . '/' . $filename;
 		}

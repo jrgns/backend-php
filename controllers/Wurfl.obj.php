@@ -5,15 +5,14 @@ if (!defined('WURFL_DIR')) {
 if (!defined('RESOURCES_DIR')) {
 	define('RESOURCES_DIR', Backend::getConfig('application.wurfl.resources'));
 }
-require_once WURFL_DIR. 'WURFLManagerProvider.php';
+if (WURFL_DIR) {
+	require_once WURFL_DIR. 'WURFLManagerProvider.php';
+}
 
 class Wurfl extends AreaCtl {
+	private static $device = false;
 	public function action_test() {
-		$wurflConfigFile = RESOURCES_DIR . 'wurfl-config.xml';
-		$wurflManager    = WURFL_WURFLManagerProvider::getWURFLManager($wurflConfigFile);
-		
-		$requestingDevice = $wurflManager->getDeviceForHttpRequest($_SERVER);
-		
+		$requestingDevice = self::getDevice();
 		$content = '<ul>';
 		$content .= '<li>ID: ' . $requestingDevice->id . '</li>';
 		$content .= '<li>Brand Name: ' . $requestingDevice->getCapability("brand_name") . '</li>';
@@ -25,5 +24,33 @@ class Wurfl extends AreaCtl {
 		Backend::addContent($content);
 
 		return false;
+	}
+	
+	public static function getDevice() {
+		if (self::$device) {
+			return self::$device;
+		}
+		if (RESOURCES_DIR && class_exists('WURFL_WURFLManagerProvider')) {
+			$wurflConfigFile = RESOURCES_DIR . 'wurfl-config.xml';
+			$wurflManager    = WURFL_WURFLManagerProvider::getWURFLManager($wurflConfigFile);
+			self::$device    = $wurflManager->getDeviceForHttpRequest($_SERVER);
+			return self::$device;
+		} else {
+			Backend::addError('Could not find WURFL resources');
+			return false;
+		}
+	}
+	
+	public static function hook_init() {
+		/*$device = self::getDevice();
+		if ($device) {
+			var_dump($device->getCapability('mobile_browser')); die;
+		}*/
+	}
+	
+	public static function install(array $options = array()) {
+		$toret = parent::install($options);
+		//Hook::add('init', 'pre', __CLASS__, array('global' => 1)) && $toret;
+		return $toret;
 	}
 }
