@@ -69,7 +69,9 @@ class DBObject {
 			$this->db = Backend::getDB($this->meta['database']);
 			if (!$this->db instanceof PDO) {
 				$this->error_msg = 'No Database setup';
-				BackendError::add(0, get_class($this) . ': No Database setup', __FILE__, __LINE__, 'checkConnection');
+				if (class_exists('BackendError', false)) {
+					BackendError::add(get_class($this) . ': No Database setup', 'checkConnection');
+				}
 				return false;
 			}
 		}
@@ -238,11 +240,15 @@ class DBObject {
 					$this->error_msg = $query->error_msg;
 				}
 			} else {
-				BackendError::add(0, get_class($this) . ': No Query to Load', __FILE__, __LINE__, 'load');
+				if (class_exists('BackendError', false)) {
+					BackendError::add(get_class($this) . ': No Query to Load', 'load');
+				}
 				$this->error_msg = 'No Query to Load';
 			}
 		} else {
-			BackendError::add(0, get_class($this) . ': DB Connection Error', __FILE__, __LINE__, 'load');
+			if (class_exists('BackendError', false)) {
+				BackendError::add(get_class($this) . ': DB Connection Error', 'load');
+			}
 			$this->error_msg = 'DB Connection Error';
 		}
 		return $result;
@@ -307,7 +313,9 @@ class DBObject {
 				}
 			}
 		} else {
-			BackendError::add(0, get_class($this) . ': DB Connection Error', __FILE__, __LINE__, 'create');
+			if (class_exists('BackendError', false)) {
+				BackendError::add(get_class($this) . ': DB Connection Error', 'create');
+			}
 			$this->error_msg = 'DB Connection error';
 		}
 		return $toret;
@@ -337,7 +345,9 @@ class DBObject {
 				}
 			}
 		} else {
-			BackendError::add(0, get_class($this) . ': DB Connection Error', __FILE__, __LINE__, 'replace');
+			if (class_exists('BackendError', false)) {
+				BackendError::add(get_class($this) . ': DB Connection Error', 'replace');
+			}
 			$this->error_msg = 'DB Connection Error';
 		}
 		return $toret;
@@ -357,11 +367,15 @@ class DBObject {
 					$this->error_msg = $query->error_msg;
 				}
 			} else {
-				BackendError::add(0, get_class($this) . ': No retrieve SQL for ' . get_class($this), __FILE__, __LINE__, 'retrieve');
-				$this->error_msg = 'No retrieve SQL for ' . class_name($this);
+				if (class_exists('BackendError', false)) {
+					BackendError::add(get_class($this) . ': No Retrieve SQL', 'retrieve');
+				}
+				$this->error_msg = 'No Retrieve SQL for ' . class_name($this);
 			}
 		} else {
-			BackendError::add(0, get_class($this) . ': Connection Error', __FILE__, __LINE__, 'retrieve');
+			if (class_exists('BackendError', false)) {
+				BackendError::add(get_class($this) . ': DB Connection Error', 'retrieve');
+			}
 			$this->error_msg = 'DB Connection Error';
 		}
 		return $toret;
@@ -391,13 +405,15 @@ class DBObject {
 				break;
 			}
 		} else {
-			BackendError::add(0, get_class($this) . ': DB Connection Error', __FILE__, __LINE__, 'read');
+			if (class_exists('BackendError', false)) {
+				BackendError::add(get_class($this) . ': DB Connection Error', 'read');
+			}
 			$this->error_msg = 'DB Connection Error';
 		}
 		return $toret;
 	}
 
-	function update($data, $options = array()) {
+	public function update($data, $options = array()) {
 		$toret = false;
 		$this->error_msg = false;
 		if ($this->checkConnection()) {
@@ -416,7 +432,9 @@ class DBObject {
 				}
 			}
 		} else {
-			BackendError::add(0, get_class($this) . ': DB Connection Error', __FILE__, __LINE__, 'update');
+			if (class_exists('BackendError', false)) {
+				BackendError::add(get_class($this) . ': DB Connection Error', 'update');
+			}
 			$this->error_msg = 'DB Connection Error';
 		}
 		return $toret;
@@ -433,7 +451,9 @@ class DBObject {
 				$this->error_msg = $query->error_msg;
 			}
 		} else {
-			BackendError::add(0, get_class($this) . ': DB Connection Error', __FILE__, __LINE__, 'delete');
+			if (class_exists('BackendError', false)) {
+				BackendError::add(get_class($this) . ': DB Connection Error', 'delete');
+			}
 			$this->error_msg = 'DB Connection Error';
 		}
 		return $toret;
@@ -450,7 +470,9 @@ class DBObject {
 				$this->error_msg = $query->error_msg;
 			}
 		} else {
-			BackendError::add(0, get_class($this) . ': DB Connection Error', __FILE__, __LINE__, 'truncate');
+			if (class_exists('BackendError', false)) {
+				BackendError::add(get_class($this) . ': DB Connection Error', 'truncate');
+			}
 			$this->error_msg = 'DB Connection Error';
 		}
 		return $toret;
@@ -478,11 +500,15 @@ class DBObject {
 					$this->error_msg = $query->error_msg;
 				}
 			} else {
-				BackendError::add(0, get_class($this) . ': No Install SQL for ' . class_name($this), __FILE__, __LINE__, 'install');
+				if (class_exists('BackendError', false)) {
+					BackendError::add(get_class($this) . ': No Install SQL', 'install');
+				}
 				$this->error_msg = 'No Install SQL for ' . class_name($this);
 			}
 		} else {
-			BackendError::add(0, get_class($this) . ': DB Connection Error', __FILE__, __LINE__, 'install');
+			if (class_exists('BackendError', false)) {
+				BackendError::add(get_class($this) . ': DB Connection Error', 'install');
+			}
 			$this->error_msg = 'DB Connection error';
 		}
 		return $toret;

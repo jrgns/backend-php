@@ -93,7 +93,7 @@ class Query {
 						}
 						$verbose_error = implode(' ', $verbose_error);
 						if (class_exists('BackendError', false)) {
-							BackendError::add(0, $verbose_error , __FILE__, __LINE__, 'execute');
+							BackendError::add($verbose_error, 'execute');
 						}
 
 						if (Controller::$debug) {
