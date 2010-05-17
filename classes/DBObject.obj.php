@@ -81,7 +81,7 @@ class DBObject {
 		if (Component::isActive($class_name)) {
 			$conds = array();
 			$params = array();
-			$parent = new $class_name();
+			$relation = new $class_name();
 			$conditions = array_key_exists('conditions', $options) ? $options['conditions'] : false;
 			$type       = array_key_exists('type', $options)       ? $options['type']       : 'single';
 			if ($conditions) {
@@ -118,9 +118,9 @@ class DBObject {
 			} else {
 				$mode = $load_mode;
 			}
-			$parent->load(array('conditions' => $conds, 'parameters' => $params, 'mode' => $mode));
-			$parent->loadDeep($mode);
-			return $parent;
+			$relation->load(array('conditions' => $conds, 'parameters' => $params, 'mode' => $mode));
+			$relation->loadDeep($mode);
+			return $relation;
 		}
 		return null;
 	}
