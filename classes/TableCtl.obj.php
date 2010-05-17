@@ -45,7 +45,7 @@ class TableCtl extends AreaCtl {
 	public function action_display($id) {
 		$toret = false;
 		$object = self::getObject(get_class($this));
-		if ($object && $id > 0) {
+		if ($object && !empty($id)) {
 			$toret = self::action_read($id);
 		}
 		return $toret;

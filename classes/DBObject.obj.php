@@ -222,6 +222,7 @@ class DBObject {
 						$this->list = $result->fetchAll(PDO::FETCH_ASSOC);
 						if ($query instanceof Query) {
 							$query->setOrder(array());
+							$query->setGroup(array());
 						}
 						$count_query = new CustomQuery(preg_replace(REGEX_MAKE_COUNT_QUERY, '$1 COUNT(*) $3', $query));
 						
