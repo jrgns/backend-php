@@ -191,7 +191,7 @@ class Render {
 		}
 		if ($content && self::$do_cache) {
 			$cache_file = self::getCacheFileName($template_file);
-			if (!file_exists($cache_file)) {
+			if (!file_exists($cache_file) || array_key_exists('recache', $_REQUEST)) {
 				file_put_contents($cache_file, $content);
 			}
 		}
@@ -210,8 +210,8 @@ class Render {
 			if (array_key_exists('recache', $variables)) {
 				unset($variables['recache']);
 			}
-			if (array_key_exists('nocache', $variables)) {
-				unset($variables['nocache']);
+			if (array_key_exists('debug', $variables)) {
+				unset($variables['debug']);
 			}
 			return self::$cache_folder . md5($_SERVER['SCRIPT_NAME'] . $variables . $template_file) . '.' . filemtime($template_file) . '.php';
 		} else {
