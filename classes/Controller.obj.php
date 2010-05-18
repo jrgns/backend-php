@@ -241,7 +241,12 @@ class Controller {
 			}
 		}
 		if (!$view_name) {
-			$mime_ranges = Parser::accept_header();
+			$default_precedence = array(
+				'text/html' => (float)1,
+				'application/xhtml+xml' => 0.9,
+				'application/xml' => 0,
+			);
+			$mime_ranges = Parser::accept_header(false, $default_precedence);
 			if ($mime_ranges) {
 				$types = array();
 				$main_types = array();

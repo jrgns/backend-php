@@ -14,7 +14,7 @@
  * Base class to handle parsing
  */
 class Parser {
-	public static function accept_header($header = false) {
+	public static function accept_header($header = false, array $default_precedence = array()) {
 		$toret = null;
 		$header = $header ? $header : (array_key_exists('HTTP_ACCEPT', $_SERVER) ? $_SERVER['HTTP_ACCEPT']: false);
 		if ($header) {
@@ -24,7 +24,11 @@ class Parser {
 				$one_type = explode(';', $one_type);
 				$type = array_shift($one_type);
 				if ($type) {
-					list($precedence, $tokens) = self::accept_header_options($one_type);
+					$options = array();
+					if (array_key_exists($type, $default_precedence)) {
+						$options['precedence'] = $default_precedence[$type];
+					}
+					list($precedence, $tokens) = self::accept_header_options($one_type, $default_precedence);
 					if (strpos($type, '/') !== false) {
 						list($main_type, $sub_type) = array_map('trim', explode('/', $type));
 					} else {
@@ -39,8 +43,8 @@ class Parser {
 		return $toret;
 	}
 	
-	public static function accept_header_options($type_options) {
-		$precedence = (float)1;
+	public static function accept_header_options($type_options, array $options = array()) {
+		$precedence = array_key_exists('presedence', $options) ? $options['precedence'] : 0.5;
 		$tokens = array();
 		if (is_string($type_options)) {
 			$type_options = explode(';', $type_options);
