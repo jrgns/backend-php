@@ -183,7 +183,10 @@ class Backend {
 	}
 	
 	static private function initConfigs() {
-		$ini_file = array_key_exists('config_file', self::$options) ? self::$options['config_file'] : BACKEND_FOLDER . '/configs/configure.ini';
+		if (array_key_exists('config_file', self::$options)) {
+			$ini_file = self::$options['config_file'];
+		}
+		$ini_file = defined('SITE_FOLDER') ? SITE_FOLDER . '/configs/configure.ini' : APP_FOLDER . '/configs/configure.ini';
 		self::$config = new BackendConfig($ini_file, SITE_STATE);
 	}
 	

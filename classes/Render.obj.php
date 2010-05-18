@@ -34,7 +34,11 @@ class Render {
 				//Check the cache folder
 				if (!file_exists(self::$cache_folder)) {
 					if (@!mkdir(self::$cache_folder, 0755)) {
-						Backend::addError('Cannot create cache folder');
+						if (SITE_STATE != 'production') {
+							Backend::addError('Cannot create cache folder ' . self::$cache_folder);
+						} else {
+							Backend::addError('Cannot create cache folder');
+						}
 						self::$do_cache = false;
 						self::$init = true;
 						return;
