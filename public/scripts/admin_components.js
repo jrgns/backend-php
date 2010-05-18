@@ -13,6 +13,16 @@ function toggleActive(evt) {
 				} else {
 					$('a#component_' + json.result['id']).html('No');
 				}
+				if (json.error.length > 0) {
+					alert('here');
+					add_error(json.error);
+				}
+				if (json.notice.length > 0) {
+					add_notice(json.notice);
+				}
+				if (json.success.length > 0) {
+					add_success(json.success);
+				}
 			} catch (e) {
 				$('a#component_' + id).html('JS Error');
 			}
