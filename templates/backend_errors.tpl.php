@@ -1,9 +1,10 @@
-<?php if (isset($BackendErrors) && count($BackendErrors)): ?>
-	<div class="error span-23 prepend-1">
-		<ul class="bottom loud large">
+<div class="error span-23 prepend-1" id="backend_error_container"<?php if (!isset($BackendErrors) || count($BackendErrors) == 0): ?> style="display: none;"<?php endif; ?>>
+	<ul class="bottom loud large" id="backend_error">
+		<?php if (isset($BackendErrors) && count($BackendErrors)): ?>
 			<?php foreach($BackendErrors as $error): ?>
 				<li><?php echo $error ?></li>
 			<?php endforeach; ?>
-		</ul>
-	</div>
-<?php endif; ?>
+		<?php endif; ?>
+	</ul>
+</div>
+

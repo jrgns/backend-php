@@ -1,9 +1,10 @@
-<?php if (isset($BackendNotices) && count($BackendNotices)): ?>
-	<div class="notice span-23 last">
-		<ul class="bottom loud large">
+<div class="notice span-23 last" id="backend_notice_container"<?php if (!isset($BackendNotices) || count($BackendNotices) == 0): ?> style="display: none;"<?php endif; ?>>
+	<ul class="bottom loud large" id="backend_notice">
+		<?php if (isset($BackendNotices) && count($BackendNotices)): ?>
 			<?php foreach($BackendNotices as $notice): ?>
 				<li><?php echo $notice ?></li>
 			<?php endforeach; ?>
-		</ul>
-	</div>
-<?php endif; ?>
+		<?php endif; ?>
+	</ul>
+</div>
+
