@@ -30,6 +30,8 @@ class BackendConfig {
 		} else if (is_string($config) && file_exists($config)) {
 			$config = parse_ini_file($config, true);
 			self::__construct($config, $site_state);
+		} else {
+			die('Unknown config: ' . $config);
 		}
 	}
 	

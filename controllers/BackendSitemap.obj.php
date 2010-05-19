@@ -59,6 +59,7 @@ class BackendSitemap extends AreaCtl {
 		}
 
 		$last_date = 0;
+		//TODO Why is this here, and where's its ending ob_ call?
 		ob_start();
 		fwrite($fp, '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . PHP_EOL);
 		foreach($object->list as $row) {

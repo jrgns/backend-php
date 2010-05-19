@@ -29,7 +29,6 @@ main();
 
 function main() {
 	$start = microtime(true);
-	ob_start('ob_gzhandler');
 	require(BACKEND_FOLDER . '/classes/Backend.obj.php');
 	Backend::init();
 	Backend::add('start', $start);

@@ -39,6 +39,10 @@ class Backend {
 	}
 	
 	static public function init(array $options = array()) {
+		if (ob_get_level() === 0) {
+			ob_start('ob_gzhandler');
+		}
+
 		self::$initialized = true;
 		self::$options = $options;
 		if (!defined('SITE_STATE')) {
@@ -190,8 +194,9 @@ class Backend {
 	static private function initConfigs() {
 		if (array_key_exists('config_file', self::$options)) {
 			$ini_file = self::$options['config_file'];
+		} else {
+			$ini_file = defined('SITE_FOLDER') ? SITE_FOLDER . '/configs/configure.ini' : APP_FOLDER . '/configs/configure.ini';
 		}
-		$ini_file = defined('SITE_FOLDER') ? SITE_FOLDER . '/configs/configure.ini' : APP_FOLDER . '/configs/configure.ini';
 		self::$config = new BackendConfig($ini_file, SITE_STATE);
 	}
 	
