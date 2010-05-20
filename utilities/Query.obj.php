@@ -202,7 +202,7 @@ class Query {
 			$this->limit = array($one, $two);
 		} else {
 			if (is_string($one)) {
-				$tmp = split('[,]\s*', $one);
+				$tmp = preg_split('/[,]\s*/', $one);
 			} else if (is_array($one)) {
 				$tmp = $one;
 			}

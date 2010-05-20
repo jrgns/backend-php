@@ -136,8 +136,8 @@ class Content extends TableCtl {
 	}
 	
 	public static function createPreview($content, $ellips = true) {
-		$pattern = '(<br\/?><br\/?>|<!--break-->)';
-		$content = current(split($pattern, $content, 2));
+		$pattern = '/(<br\/?><br\/?>|<!--break-->)/';
+		$content = current(preg_split($pattern, $content, 2));
 		if (is_string($ellips)) {
 			return $content . $ellips;
 		} else if ($ellips) {

@@ -3,8 +3,7 @@ class BackendSearch extends TableCtl {
 	public static function search(TableCtl $controller, $term, $filter = false) {
 		$object = call_user_func(array(get_class($controller), 'getObject'));
 		if ($object) {
-			$params = array($object->getSource());
-			$terms  = split('[ ,]', $term);
+			$terms  = preg_split('/[ ,]/', $term);
 			$params = array_merge($params, $terms);
 			$query  = new SelectQuery(__CLASS__);
 			$query
