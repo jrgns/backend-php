@@ -12,7 +12,7 @@
 ?>
 	<div id="content_container">
 		<?php foreach($list as $content): ?>
-			{tpl:content_preview.tpl.php}
+			{tpl:content.preview.tpl.php}
 		<?php endforeach; ?>
 	</div>
 	{tpl:list_paging.tpl.php}
