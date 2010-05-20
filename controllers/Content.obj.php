@@ -135,6 +135,36 @@ class Content extends TableCtl {
 		return $toret;
 	}
 	
+	function action_search_index() {
+		if (Component::isActive('BackendSearch')) {
+			return BackendSearch::doIndex($this, array('title', 'markdown'));
+		} else {
+			Backend::addError('Backend Search is not enabled');
+			return false;
+		}
+	}
+	
+	function action_search($term = false) {
+		if (Component::isActive('BackendSearch')) {
+			$term = (!$term && array_key_exists('term', $_REQUEST)) ? $_REQUEST['term'] : $term;
+			$result = array('term' => $term);
+			if ($term) {
+				$result['results'] = BackendSearch::search($this, $term, array('`contents`.`active` = 1'));
+			}
+			return $result;
+		} else {
+			Backend::addError('Backend Search is not enabled');
+		}
+		return false;
+	}
+	
+	function html_search($result) {
+		foreach($result as $name => $value) {
+			Backend::add($name, $value);
+		}
+		Backend::addContent(Render::renderFile('backend_search.tpl.php'));
+	}
+	
 	public static function createPreview($content, $ellips = true) {
 		$pattern = '/(<br\/?><br\/?>|<!--break-->)/';
 		$content = current(preg_split($pattern, $content, 2));

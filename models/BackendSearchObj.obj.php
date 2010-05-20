@@ -26,9 +26,9 @@ class BackendSearchObj extends DBObject {
 		$meta['name'] = 'BackendSearch';
 		$meta['fields'] = array(
 			'id' => 'primarykey',
-			'table' => array('type' => 'string', 'string_size' => 255),
+			'table' => array('type' => 'string', 'string_size' => 124),
 			'table_id' => 'number',
-			'word' => array('type' => 'string', 'string_size' => 255),
+			'word' => array('type' => 'string', 'string_size' => 124),
 			'count' => 'number',
 			'sequence' => 'number',
 			'added' => 'lastmodified',

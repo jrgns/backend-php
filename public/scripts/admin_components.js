@@ -14,7 +14,6 @@ function toggleActive(evt) {
 					$('a#component_' + json.result['id']).html('No');
 				}
 				if (json.error.length > 0) {
-					alert('here');
 					add_error(json.error);
 				}
 				if (json.notice.length > 0) {

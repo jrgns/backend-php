@@ -4,7 +4,7 @@ class BackendSearch extends TableCtl {
 		$object = call_user_func(array(get_class($controller), 'getObject'));
 		if ($object) {
 			$terms  = preg_split('/[ ,]/', $term);
-			$params = array_merge($params, $terms);
+			$params = array_merge(array($object->getSource()), $terms);
 			$query  = new SelectQuery(__CLASS__);
 			$query
 				->field('DISTINCT `' . $object->getMeta('table') . '`.*')
@@ -32,9 +32,11 @@ class BackendSearch extends TableCtl {
 			$fields = array($fields);
 		}
 		$object = $controller->action_list('all', 0);
+		$total = false;
 		if ($object->list) {
+			$total = 0;
+			$first = current($object->list);
 			foreach($fields as $field) {
-				$first = current($object->list);
 				if (array_key_exists($field, $first)) {
 					$result = 0;
 					foreach($object->list as $row) {
@@ -55,6 +57,7 @@ class BackendSearch extends TableCtl {
 								$b_search = new BackendSearchObj();
 								if ($b_search->create($data)) {
 									$result++;
+									$total++;
 								} else {
 									Backend::addError('Could not add ' . $word . ' to ' . get_class($controller) . '::' . $field . ' index');
 								}
@@ -69,6 +72,7 @@ class BackendSearch extends TableCtl {
 				}
 			}
 		}
+		return $total;
 	}
 	
 	private static function filter($word, $count = null) {
