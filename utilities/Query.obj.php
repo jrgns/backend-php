@@ -93,7 +93,7 @@ class Query {
 						}
 						$verbose_error = implode(' ', $verbose_error);
 						if (class_exists('BackendError', false)) {
-							BackendError::add(0, $verbose_error , __FILE__, __LINE__, 'execute');
+							BackendError::add($verbose_error, 'execute');
 						}
 
 						if (Controller::$debug) {
@@ -137,7 +137,7 @@ class Query {
 		return $this;
 	}
 	
-	public function setFields(array $fields) {
+	public function setFields(array $fields = array()) {
 		$this->query = false;
 		$this->fields = $fields;
 	}
@@ -149,12 +149,13 @@ class Query {
 		} else {
 			$this->conditions[] = $condition;
 		}
+		$this->conditions = array_filter(array_unique($this->conditions));
 		return $this;
 	}
 	
-	public function setFilter(array $filters) {
+	public function setFilter(array $filters = array()) {
 		$this->query = false;
-		$this->conditions = $filters;
+		$this->conditions = array_filter(array_unique($filters));
 	}
 	
 	public function group($group_field) {
@@ -167,7 +168,7 @@ class Query {
 		return $this;
 	}
 	
-	public function setGroup(array $group) {
+	public function setGroup(array $group = array()) {
 		$this->query = false;
 		$this->group = $group;
 	}
@@ -186,7 +187,7 @@ class Query {
 		return $this;
 	}
 	
-	public function setOrder(array $order) {
+	public function setOrder(array $order = array()) {
 		$this->query = false;
 		$this->order = $order;
 	}

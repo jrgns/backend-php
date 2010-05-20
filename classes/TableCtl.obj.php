@@ -233,7 +233,6 @@ class TableCtl extends AreaCtl {
 		$obj_name = (class_name(Controller::$area) . 'Obj');
 		if (class_exists($obj_name, true)) {
 			$object = new $obj_name();
-			$object->load();
 			if (is_post()) {
 				if (empty($_FILES) || !array_key_exists('import_file', $_FILES)) {
 					Backend::addError('There is a problem with the HTML Form');

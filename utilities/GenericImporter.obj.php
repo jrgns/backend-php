@@ -1,8 +1,8 @@
 <?php
 class GenericImporter {
-	public static $error_msg = false;
+	protected static $error_msg = false;
 
-	public static function import($controller, $filename, $data) {
+	public static function import($controller, $filename, $data, array $options = array()) {
 		self::$error_msg = false;
 		$fp = fopen($filename, 'r');
 		if (!$fp)  {
@@ -14,9 +14,16 @@ class GenericImporter {
 			self::$error_msg = 'The Object definition is missing';
 			return false;
 		}
-
+		
 		$Object = new $obj_name();
-		$names = array_keys($Object->getMeta('fields'));
+		$headers = array_key_exists('headers', $options) ? $options['headers'] : true;
+		if ($headers === true) { //First line is the headers
+			$names = array_filter(fgetcsv($fp));
+		} else if (is_array($headers)) { //We were given the headers
+			$names = $headers;
+		} else {
+			$names = array_keys($Object->getMeta('fields'));
+		}
 		if (is_array($data)) {
 			$names = array_merge($names, array_keys($data));
 		}
@@ -28,11 +35,21 @@ class GenericImporter {
 			}
 			if ($name_count == count($line)) {
 				$line = array_combine($names, $line);
-				$toret = $Object->create($line);
+				if (is_callable(array($controller, 'preLineImport'))) {
+					$n_line = $controller->preLineImport($line);
+				} else {
+					$n_line = $line;
+				}
+				$toret = $Object->create($n_line);
 				if (!$toret) {
 					break;
 				}
 				$count++;
+				if (is_callable(array($controller, 'postLineImport'))) {
+					if ($controller->postLineImport($Object, $line) === false) {
+						break;
+					}
+				}
 			} else {
 				self::$error_msg = 'Number of imported fields does not match defined fields';
 				return false;
