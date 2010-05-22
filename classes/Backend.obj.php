@@ -246,7 +246,7 @@ class Backend {
 					//This might be problematic if there shouldn't be a username/password?
 					$connection = new PDO($dsn, $username, $password);
 				} catch (Exception $e) {
-					if (Controller::$debug) {
+					if (array_key_exists('debug', $_REQUEST)) {
 						throw new ConnectToDBException($e->getMessage());
 					} else {
 						throw new ConnectToDBException('Could not connect to Database ' . $name);
@@ -263,7 +263,7 @@ class Backend {
 				}
 				$toret = true;
 			} else {
-				if (Controller::$debug) {
+				if (array_key_exists('debug', $_REQUEST)) {
 					throw new ConnectToDBException($e->getMessage());
 				} else {
 					throw new ConnectToDBException('Could not connect to Database ' . $alias);
@@ -332,10 +332,12 @@ class Backend {
 					if (!file_exists(APP_FOLDER . '/logs/')) {
 						mkdir(APP_FOLDER . '/logs/', 0755);
 					}
-					$fp = fopen(APP_FOLDER . '/logs/' . $file, 'a');
-					if ($fp) {
-						$query = Controller::$area . '/' . Controller::$action . '/' . implode('/', Controller::$parameters);
-						fwrite($fp, time() . "\t" . $query . "\t" . $what . "\t" . $string . PHP_EOL);
+					if (is_writable(APP_FOLDER . '/logs/' . $file)) {
+						$fp = fopen(APP_FOLDER . '/logs/' . $file, 'a');
+						if ($fp) {
+							$query = Controller::$area . '/' . Controller::$action . '/' . implode('/', Controller::$parameters);
+							fwrite($fp, time() . "\t" . $query . "\t" . $what . "\t" . $string . PHP_EOL);
+						}
 					}
 				}
 			}

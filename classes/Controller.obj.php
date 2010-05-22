@@ -66,7 +66,7 @@ class Controller {
 			}
 
 			Backend::add('debug', self::$debug);
-			if (true || self::$debug) {
+			if (SITE_STATE != 'production' || self::$debug) {
 				ini_set('display_errors', 1);
 				ini_set('error_reporting', E_ALL | E_STRICT);
 			} else {

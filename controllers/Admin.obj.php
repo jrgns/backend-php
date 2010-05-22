@@ -26,49 +26,47 @@ class Admin extends AreaCtl {
 		$toret = false;
 		$installed = Value::get('admin_installed', false);
 		if (!$installed) {
-			//if (is_post()) {
-				$install_log_file = 'install_log_' . date('Ymd_His') . '.txt';
-				Backend::add('log_to_file', $install_log_file);
-				if (!Component::pre_install()) {
-					Backend::addError('Could not pre install Component');
-					return false; 
-				}
-				if (!Permission::pre_install()) {
-					Backend::addError('Could not pre install Permission');
-					return false;
-				}
-				if (!Hook::pre_install()) {
-					Backend::addError('Could not pre install Hook');
-					return false;
-				}
-				if (!Value::pre_install()) {
-					Backend::addError('Could not pre install Value');
-					return false;
-				}
-			
-				$original = Value::get('log_to_file', false);
-				Value::set('log_to_file', $install_log_file);
+			$install_log_file = 'install_log_' . date('Ymd_His') . '.txt';
+			Backend::add('log_to_file', $install_log_file);
+			if (!Component::pre_install()) {
+				Backend::addError('Could not pre install Component');
+				return false; 
+			}
+			if (!Permission::pre_install()) {
+				Backend::addError('Could not pre install Permission');
+				return false;
+			}
+			if (!Hook::pre_install()) {
+				Backend::addError('Could not pre install Hook');
+				return false;
+			}
+			if (!Value::pre_install()) {
+				Backend::addError('Could not pre install Value');
+				return false;
+			}
+		
+			$original = Value::get('log_to_file', false);
+			Value::set('log_to_file', $install_log_file);
 
-				Backend::addNotice(PHP_EOL . PHP_EOL . 'Installation started at ' . date('Y-m-d H:i:s'));
+			Backend::addNotice(PHP_EOL . PHP_EOL . 'Installation started at ' . date('Y-m-d H:i:s'));
 
-				$components = Component::getActive();
-				if ($components) {
-					$toret = true;
+			$components = Component::getActive();
+			if ($components) {
+				$toret = true;
 
-					$components = array_flatten($components, null, 'name');
+				$components = array_flatten($components, null, 'name');
 
-					foreach($components as $component) {
-						Backend::addNotice('Installing ' . $component);
-						if (class_exists($component, true) && method_exists($component, 'install')) {
-							if (!call_user_func_array(array($component, 'install'), array())) {
-								Backend::addError('Error on installing ' . $component);
-								$toret = false;
-							}
+				foreach($components as $component) {
+					Backend::addNotice('Installing ' . $component);
+					if (class_exists($component, true) && method_exists($component, 'install')) {
+						if (!call_user_func_array(array($component, 'install'), array())) {
+							Backend::addError('Error on installing ' . $component);
+							$toret = false;
 						}
 					}
 				}
-				Value::set('log_to_file', $original);
-			//}
+			}
+			Value::set('log_to_file', $original);
 		}
 		return $toret;
 	}
