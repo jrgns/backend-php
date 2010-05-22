@@ -530,9 +530,12 @@ class Backend {
 			);
 		}
 		foreach($folders as $folder => $type) {
-			$file = $folder . $classname . '.obj.php';
-			if (file_exists($file)) {
-				include($file);
+			if (file_exists($folder . $classname . '.obj.php')) {
+				include($folder . $classname . '.obj.php');
+				$included = true;
+				break;
+			} else if ($type == 'controller' && file_exists($folder . $classname . '/index.php')) {
+				include($folder . $classname . '/index.php');
 				$included = true;
 				break;
 			}

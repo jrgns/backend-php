@@ -86,7 +86,6 @@ class GateManager extends AreaCtl {
 							'action'  => $action,
 							'role'    => $role,
 						);
-						var_dump($data);
 						$toret = $permission->replace($data) && $toret;
 					}
 				}
