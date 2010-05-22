@@ -357,6 +357,7 @@ function curl_request($url, array $parameters = array(), array $options = array(
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
     curl_setopt($ch, CURLOPT_TIMEOUT, 30);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 
 	if (array_key_exists('output', $options) && $options['output']) {
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
@@ -527,3 +528,15 @@ function period_diff($op, $start, $number, $periods, $format = 'Y-m-d H:i:s') {
 	}
 	return date($format, $toret);
 }
+
+function bzr_get_file_revision($filename) {
+	if (file_exists($filename)) {
+		if (exec('bzr log -l 1 --line ' . $filename, $array) && count($array)) {
+			$row = array_shift($array);
+			$toret = explode(':', $row);
+			return $toret[0];
+		}
+	}
+	return false;
+}
+
