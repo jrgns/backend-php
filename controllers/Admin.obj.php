@@ -80,7 +80,9 @@ class Admin extends AreaCtl {
 	function action_components() {
 		$toret = array();
 		
-		$toret = Component::retrieve(false, 'list');
+		$component = new ComponentObj();
+		$component->read(array('order' => '`filename`'));
+		$toret = $component->list;
 		if (Controller::$debug) {
 			var_dump('Component List:', $toret);
 		}
