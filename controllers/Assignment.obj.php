@@ -29,7 +29,7 @@ class Assignment extends TableCtl {
 			'`roles`.`name` AS `role`',
 		);
 		list ($query, $params) = $Assignments->getSelectSQL(array('conditions' => $conditions, 'joins' => $joins, 'fields' => $fields, 'limit' => $limit));
-		$Assignments->load(array('query' => $query, 'parameters' => $params));
+		$Assignments->read(array('query' => $query, 'parameters' => $params));
 		Backend::add('Assignments', $Assignments);
 		Backend::addContent(Render::renderFile('assignment_list.tpl.php'));
 	}

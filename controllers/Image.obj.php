@@ -68,9 +68,9 @@ class Image extends File {
 		if (class_exists($obj_name, true)) {
 			$object = new $obj_name();
 			if ($start === 'all') {
-				$object->load(array());
+				$object->read(array());
 			} else {
-				$object->load(array('limit' => "$start, $count"));
+				$object->read(array('limit' => "$start, $count"));
 			}
 			$toret = $object;
 		} else {

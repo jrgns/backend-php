@@ -66,7 +66,7 @@ class HtmlView extends View {
 		//TODO fix this
 		if (Component::isActive('BackendFilter')) {
 			$BEFilter = new BEFilterObj();
-			$BEFilter->load();
+			$BEFilter->read();
 			$filters = $BEFilter->list ? $BEFilter->list : array();
 		
 			foreach($filters as $row) {

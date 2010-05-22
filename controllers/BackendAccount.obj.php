@@ -75,7 +75,7 @@ class BackendAccount extends TableCtl {
 				->filter('`users`.`password` = MD5(CONCAT(`users`.`salt`, :password, :salt))');
 			$params = array(':username' => $username, ':password' => $password, ':salt' => Controller::$salt);
 
-			$User->load(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
+			$User->read(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
 			if ($User->object) {
 				session_regenerate_id();
 				$User->object->roles = empty($User->object->roles) ? array() : explode(',', $User->object->roles);
@@ -147,7 +147,7 @@ class BackendAccount extends TableCtl {
 			if (is_post()) {
 				if ($User->update($data)) {
 					Backend::addSuccess('Your account details have been updated');
-					$User->load(array('mode' => 'full_object'));
+					$User->read(array('mode' => 'full_object'));
 					$_SESSION['user'] = $User->object;
 					self::$current_user = $User->object;
 				} else {
@@ -325,7 +325,7 @@ class BackendAccount extends TableCtl {
 			$query->filter('`username` = :username');
 			$User = TableCtl::getObject(BackendAccount::getName());
 			$params = array(':username' => $username);
-			$User->load(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
+			$User->read(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
 			if ($User->object) {
 				session_regenerate_id();
 				$User->object->roles = empty($User->object->roles) ? array() : explode(',', $User->object->roles);

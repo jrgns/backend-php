@@ -57,7 +57,7 @@ class PersistUser extends TableCtl {
 				$params = array(':id' => $persist['user_id']);
 
 				$User = new $class();
-				$User->load(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
+				$User->read(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
 				
 				if ($User) {
 					$User->object->roles = empty($User->object->roles) ? array() : explode(',', $User->object->roles);

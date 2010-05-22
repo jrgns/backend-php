@@ -40,15 +40,10 @@ class TableCtl extends AreaCtl {
 	}
 	
 	/**
-	 * Display does nothing but display (hahaha) the content fetched by DBObject::read
+	 * Display does nothing but display (hahaha) the content fetched by action_read
 	 */
 	public function action_display($id) {
-		$toret = false;
-		$object = self::getObject(get_class($this));
-		if ($object && !empty($id)) {
-			$toret = self::action_read($id);
-		}
-		return $toret;
+		return self::action_read($id, 'dbobject');
 	}
 	
 	/**
@@ -65,7 +60,7 @@ class TableCtl extends AreaCtl {
 			} else {
 				$limit = false;
 			}
-			$object->load(array_merge(array('limit' => $limit), $options));
+			$object->read(array_merge(array('limit' => $limit), $options));
 			return $object;
 		} else {
 			Controller::whoops();
@@ -135,19 +130,8 @@ class TableCtl extends AreaCtl {
 	/**
 	 * Action for reading a record in an area
 	 */
-	public function action_read($id) {
-		$toret = null;
-		$obj_name = (class_name(Controller::$area) . 'Obj');
-		if (class_exists($obj_name, true)) {
-			$toret = new $obj_name($id);
-			if (!$toret->read()) {
-				$toret = false;
-			}
-			Hook::run('read', 'post', array($toret), array('toret' => $toret));
-		} else {
-			Controller::whoops();
-		}
-		return $toret;
+	public function action_read($id, $mode = 'array') {
+		return call_user_func_array(array(class_name(Controller::$area), 'retrieve'), array($id, $mode));
 	}
 	
 	/**
@@ -469,12 +453,12 @@ class TableCtl extends AreaCtl {
 			if ($parameter) {
 				$query = $object->getRetrieveSQL();
 				if ($query) {
-					$object->load(array('query' => $query, 'parameters' => array(':parameter' => $parameter), 'mode' => ($return == 'dbobject' ? 'object' : $return)));
+					$object->read(array('query' => $query, 'parameters' => array(':parameter' => $parameter), 'mode' => ($return == 'dbobject' ? 'object' : $return)));
 				} else {
 					$object = null;
 				}
 			} else {
-				$object->load();
+				$object->read();
 			}
 			if (!empty($object->error_msg)) {
 				Backend::addError($object->error_msg);

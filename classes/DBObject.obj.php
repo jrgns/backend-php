@@ -58,7 +58,7 @@ class DBObject {
 		$load_type  = array_key_exists('load_mode', $options) ? $options['load_mode'] : $this->load_mode;
 		if ($this->checkConnection()) {
 			if ($meta['id']) {
-				$this->load(array('mode' => $load_type));
+				$this->read(array('mode' => $load_type));
 			}
 		}
 	}
@@ -120,7 +120,7 @@ class DBObject {
 			} else {
 				$mode = $load_mode;
 			}
-			$relation->load(array('conditions' => $conds, 'parameters' => $params, 'mode' => $mode));
+			$relation->read(array('conditions' => $conds, 'parameters' => $params, 'mode' => $mode));
 			$relation->loadDeep($mode);
 			return $relation;
 		}
@@ -154,18 +154,25 @@ class DBObject {
 	}
 	
 	public function loadArray(array $options = array()) {
-		$this->load(array_merge($options, array('mode' => 'array')));
+		$this->read(array_merge($options, array('mode' => 'array')));
 	}
 	
 	public function loadObject(array $options = array()) {
-		$this->load(array_merge($options, array('mode' => 'object')));
+		$this->read(array_merge($options, array('mode' => 'object')));
 	}
 	
 	public function loadList(array $options = array()) {
-		$this->load(array_merge($options, array('mode' => 'list')));
+		$this->read(array_merge($options, array('mode' => 'list')));
 	}
 	
 	public function load($options = array()) {
+		return $this->read($options);
+	}
+
+	public function read($options = array()) {
+		if (is_string($options)) {
+			$options = array('mode' => $options);
+		}
 		$result = false;
 		$this->error_msg = false;
 		if ($this->checkConnection()) {
@@ -307,7 +314,7 @@ class DBObject {
 					$this->meta['id']  = $this->inserted_id;
 					$toret             = $this->inserted_id;
 					if (array_key_exists('load', $options) ? $options['load'] : true) {
-						$this->load();
+						$this->read();
 					}
 				} else if (!empty($query->error_msg)) {
 					$this->error_msg = $query->error_msg;
@@ -339,7 +346,7 @@ class DBObject {
 					$this->meta['id']  = $this->inserted_id;
 					$toret             = $this->inserted_id;
 					if (array_key_exists('load', $options) ? $options['load'] : true) {
-						$this->load();
+						$this->read();
 					}
 				} else if (!empty($query->error_msg)) {
 					$this->error_msg = $query->error_msg;
@@ -382,38 +389,6 @@ class DBObject {
 		return $toret;
 	}
 	
-	public function read($mode = false) {
-		$toret = null;
-		$this->error_msg = false;
-		if ($this->checkConnection()) {
-			$id = $this->meta['id'];
-			$mode = $mode ? $mode : ($id ? $this->load_mode : 'list');
-			switch ($mode) {
-			case 'array':
-			case 'object':
-			case 'full_object':
-				$this->load(array('mode' => $mode));
-				if (in_array($mode, array('object', 'full_object'))) {
-					$toret = $this->object;
-				} else {
-					$toret = $this->array;
-				}
-				break;
-			default:
-			case 'list':
-				$this->load(array('mode' => 'list'));
-				$toret = $this->list;
-				break;
-			}
-		} else {
-			if (class_exists('BackendError', false)) {
-				BackendError::add(get_class($this) . ': DB Connection Error', 'read');
-			}
-			$this->error_msg = 'DB Connection Error';
-		}
-		return $toret;
-	}
-
 	public function update($data, $options = array()) {
 		$toret = false;
 		$this->error_msg = false;
@@ -426,7 +401,7 @@ class DBObject {
 				$toret = $query->execute($params);
 				if ($toret) {
 					if (array_key_exists('load', $options) ? $options['load'] : true) {
-						$this->load();
+						$this->read();
 					}
 				} else if (!empty($query->error_msg)) {
 					$this->error_msg = $query->error_msg;

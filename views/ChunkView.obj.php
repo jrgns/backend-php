@@ -38,7 +38,7 @@ class ChunkView extends HtmlView {
 
 		if (Value::get('admin_installed', false)) {
 			$BEFilter = new BEFilterObj();
-			$BEFilter->load();
+			$BEFilter->read();
 			$filters = $BEFilter->list ? $BEFilter->list : array();
 		
 			foreach($filters as $row) {

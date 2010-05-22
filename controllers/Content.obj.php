@@ -104,17 +104,7 @@ class Content extends TableCtl {
 	}
 
 	function action_display($id) {
-		$toret = false;
-		if (is_numeric($id)) {
-			$toret = self::action_read($id);
-		} else {
-			$conds = array('`name` = :name');
-			$params = array(':name' => $id);
-
-			$toret = new ContentObj();
-			list($query, $params) = $toret->getSelectSQL(array('parameters' => $params, 'conditions' => $conds));
-			$toret->loadObject(array('query' => $query, 'parameters' => $params));
-		}
+		$toret = Content::retrieve($id, 'dbobject');
 
 		if ($toret && !empty($toret->object)) {
 			if (!$this->checkPermissions(array('subject_id' => $toret->object->id, 'subject' => 'content'))) {
