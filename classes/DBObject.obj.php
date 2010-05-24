@@ -94,10 +94,10 @@ class DBObject {
 					} else {
 						$operator = '=';
 					}
-					
+
 					if ($load_mode == 'array') {
 						$value = array_key_exists($name, $this->array) ? $this->array[$name] : $name;
-					} else if ($type == 'object') {
+					} else if ($load_mode == 'object') {
 						$value = array_key_exists($name, $this->object) ? $this->object->$name : $name;
 					}
 					switch ($operator) {
@@ -136,7 +136,7 @@ class DBObject {
 				case 'multiple':
 					if ($mode == 'array') {
 						$this->array[$class]  = $relation->list ? $relation->list : array();
-					} else if (!$mode == 'object') {
+					} else if ($mode == 'object') {
 						$this->object->$class = $relation->list ? $relation->list : array();
 					}
 					break;
@@ -144,7 +144,7 @@ class DBObject {
 				case 'single':
 					if ($mode == 'array') {
 						$this->array[$class]  = $relation->array  ? $relation->array  : false;
-					} else if (!$mode == 'object') {
+					} else if ($mode == 'object') {
 						$this->object->$class = $relation->object ? $relation->object : false;
 					}
 					break;
@@ -206,11 +206,11 @@ class DBObject {
 					case 'full_object':
 						$this->object = $result->fetch(PDO::FETCH_OBJ);
 						if ($this->object) {
-							$this->array = (array)$this->object;
 							$this->loadDeep('object');
 							if (empty($this->meta['id'])) {
 								$this->meta['id'] = $this->array[$this->meta['id_field']];
 							}
+							$this->array = (array)$this->object;
 						} else {
 							$this->object = null;
 						}
