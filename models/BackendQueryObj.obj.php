@@ -32,6 +32,9 @@ class BackendQueryObj extends DBObject {
 			'modified' => 'lastmodified',
 			'added' => 'dateadded',
 		);
+		$meta['keys'] = array(
+			'alias' => 'unique',
+		);
 		return parent::__construct($meta, $options);
 	}
 	

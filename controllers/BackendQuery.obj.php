@@ -19,7 +19,7 @@
  */
 class BackendQuery extends TableCtl {
 	public static function hook_init() {
-		if (empty($_REQUEST['q'])) {
+		if (!array_key_exists('q', $_REQUEST)) {
 			return;
 		}
 		$query = $_REQUEST['q'];
