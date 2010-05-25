@@ -100,15 +100,26 @@ class Content extends TableCtl {
 			$_POST['obj']['title'] = humanize($id);
 		}
 		$toret = parent::action_create();
+		if ($toret instanceof DBObject) {
+			/* TODO This can easily "overwrite" existing urls */
+			if (Component::isActive('BackendQuery')) {
+				BackendQuery::add($toret->array['name'], 'content/display/' . $toret->array['id']);
+			}
+		}
 		return $toret;
 	}
 
 	function action_display($id) {
 		$toret = Content::retrieve($id, 'dbobject');
 
-		if ($toret && !empty($toret->object)) {
+		if ($toret instanceof DBObject && !empty($toret->object)) {
 			if (!$this->checkPermissions(array('subject_id' => $toret->object->id, 'subject' => 'content'))) {
 				Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to display ' . $toret->object->title));
+				$toret = false;
+			}
+		} else if ($toret instanceof DBObject && $id == 'last') {
+			$toret->read(array('limit' => 1, 'conditions' => array('`active` = 1'), 'order' => '`added` DESC', 'mode' => 'object'));
+			if (!$toret->object) {
 				$toret = false;
 			}
 		} else if (Permission::check('create', 'content')) {

@@ -450,7 +450,7 @@ class TableCtl extends AreaCtl {
 		$obj_name = get_called_class() . 'Obj';
 		if ($obj_name && class_exists($obj_name, true)) {
 			$object = new $obj_name();
-			if ($parameter) {
+			if ($parameter !== false) {
 				$query = $object->getRetrieveSQL();
 				if ($query) {
 					$object->read(array('query' => $query, 'parameters' => array(':parameter' => $parameter), 'mode' => ($return == 'dbobject' ? 'object' : $return)));
