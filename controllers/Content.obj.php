@@ -76,6 +76,7 @@ class Content extends TableCtl {
 					} else {
 						$item['link'] = SITE_LINK . '?q=content/' . $item['id'];
 					}
+					$item['body'] = Content::createPreview($item['body'], false);
 					$list[] = $item;
 				}
 			} else {
