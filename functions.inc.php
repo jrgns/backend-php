@@ -216,20 +216,22 @@ function reseed() {
 	Value::set('seed', $new_seed);
 }
 
-/**
- * Wrapper for sending emails
- *
- * @todo Extend this to check the recipient formats, handle recipients as an array, etc.
- */
-function send_email($recipient, $subject, $message, array $headers = array()) {
-	$headers = array_change_key_case($headers);
-	if (!array_key_exists('from', $headers)) {
-		$headers['from'] = Value::get('site_email', 'info@' . SITE_DOMAIN);
+if (!function_exists('send_email')) {
+	/**
+	 * Wrapper for sending emails
+	 *
+	 * @todo Extend this to check the recipient formats, handle recipients as an array, etc.
+	 */
+	function send_email($recipient, $subject, $message, array $headers = array()) {
+		$headers = array_change_key_case($headers);
+		if (!array_key_exists('from', $headers)) {
+			$headers['from'] = Value::get('site_email', 'info@' . SITE_DOMAIN);
+		}
+		foreach($headers as $name => $value) {
+			$headers[$name] = ucwords($name) . ': ' . $value;
+		}
+		return mail($recipient, $subject, $message, implode("\r\n", $headers));
 	}
-	foreach($headers as $name => $value) {
-		$headers[$name] = ucwords($name) . ': ' . $value;
-	}
-	return mail($recipient, $subject, $message, implode("\r\n", $headers));
 }
 
 function array_flatten($array, $key_field = null, $value_field = null) {

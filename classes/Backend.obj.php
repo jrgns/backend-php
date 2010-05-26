@@ -54,9 +54,6 @@ class Backend {
 		if (defined('APP_FOLDER') && !defined('SITE_FOLDER')) {
 			define('SITE_FOLDER', APP_FOLDER);
 		}
-		require(BACKEND_FOLDER . '/constants.inc.php');
-		require(BACKEND_FOLDER . '/functions.inc.php');
-		require(BACKEND_FOLDER . '/modifiers.inc.php');
 
 		if (file_exists(APP_FOLDER . '/constants.inc.php')) {
 			include_once(APP_FOLDER . '/constants.inc.php');
@@ -76,6 +73,10 @@ class Backend {
 		if (defined('SITE_FOLDER') && file_exists(SITE_FOLDER . '/modifiers.inc.php')) {
 			include_once(SITE_FOLDER . '/modifiers.inc.php');
 		}
+		require(BACKEND_FOLDER . '/constants.inc.php');
+		require(BACKEND_FOLDER . '/functions.inc.php');
+		require(BACKEND_FOLDER . '/modifiers.inc.php');
+
 		include(BACKEND_FOLDER . '/libraries/Markdown/markdown.php');
 		spl_autoload_register(array('Backend', '__autoload'));
 		set_error_handler    (array('Backend', '__error_handler'));
