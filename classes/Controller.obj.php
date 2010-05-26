@@ -228,6 +228,12 @@ class Controller {
 				case in_array($extension, array('html', 'htm', 'php')):
 					$view_name = 'HtmlView';
 					break;
+				case $extension == 'atom':
+					$view_name = 'AtomView';
+					break;
+				case $extension == 'rss':
+					$view_name = 'RssView';
+					break;
 				case in_array($extension, array('js')):
 				default:
 					$view_name = false;
