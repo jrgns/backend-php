@@ -208,7 +208,12 @@ class DBObject {
 						if ($this->object) {
 							$this->loadDeep('object');
 							if (empty($this->meta['id'])) {
-								$this->meta['id'] = $this->array[$this->meta['id_field']];
+								if (property_exists($this->object, $this->meta['id_field'])) {
+									$id_field_name = $this->meta['id_field'];
+									$this->meta['id'] = $this->object->$id_field_name;
+								} else {
+									BackendError::add('Non existant ID Field', get_class($this));
+								}
 							}
 							$this->array = (array)$this->object;
 						} else {
@@ -220,7 +225,11 @@ class DBObject {
 						if ($this->array) {
 							$this->loadDeep('array');
 							if (empty($this->meta['id'])) {
-								$this->meta['id'] = $this->array[$this->meta['id_field']];
+								if (array_key_exists($this->meta['id_field'], $this->array)) {
+									$this->meta['id'] = $this->array[$this->meta['id_field']];
+								} else {
+									BackendError::add('Non existant ID Field', get_class($this));
+								}
 							}
 						} else {
 							$this->array = null;
