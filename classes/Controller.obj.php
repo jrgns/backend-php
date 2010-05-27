@@ -200,50 +200,6 @@ class Controller {
 		$view_name = false;
 		if (array_key_exists('mode', $_REQUEST)) {
 			$view_name = ucwords($_REQUEST['mode']) . 'View';
-		} else {
-			//Check for an extension
-			//TODO Maybe move this whole section to Request?
-			$extension = explode('.', str_replace(dirname($_SERVER['SCRIPT_NAME']), '', $_SERVER['REQUEST_URI']));
-			if (count($extension) > 1) {
-				$extension = current(explode('?', end($extension)));
-			} else {
-				$extension = false;
-			}
-			if ($extension) {
-				switch (true) {
-				case $extension == 'css':
-					$view_name = 'CssView';
-					break;
-				case $extension == 'json':
-					$view_name = 'JsonView';
-					break;
-				case $extension == 'txt':
-					$view_name = 'TextView';
-					break;
-				//Extend the image array!
-				case in_array($extension, array('png', 'jpg', 'jpeg', 'gif', 'bmp')):
-					$view_name = 'ImageView';
-					break;
-				case in_array($extension, array('html', 'htm', 'php')):
-					$view_name = 'HtmlView';
-					break;
-				case $extension == 'atom':
-					$view_name = 'AtomView';
-					break;
-				case $extension == 'rss':
-					$view_name = 'RssView';
-					break;
-				case in_array($extension, array('js')):
-				default:
-					$view_name = false;
-					break;
-				}
-				if ($view_name && !empty($_REQUEST['q'])) {
-					if (substr($_REQUEST['q'], 0 - strlen($extension)) == $extension) {
-						$_REQUEST['q'] = substr($_REQUEST['q'], 0, 0 - strlen($extension) - 1);
-					}
-				}
-			}
 		}
 		if (!$view_name) {
 			$default_precedence = array(
