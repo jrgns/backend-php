@@ -19,14 +19,12 @@
  */
 class BackendQuery extends TableCtl {
 	public static function hook_init($query) {
-		if (substr($query, -1) == '/') {
-			$query = substr($query, 0, strlen($query) - 1);
+		$backend_query = BackendQuery::retrieve($query);
+		if ($backend_query) {
+			$_REQUEST['q'] = $backend_query['query'];
+			return $backend_query['query'];
 		}
-		$query = BackendQuery::retrieve($query);
-		if ($query) {
-			$_REQUEST['q'] = $query['query'];
-		}
-		return $query['query'];
+		return $query;
 	}
 	
 	public static function add($alias, $query) {
