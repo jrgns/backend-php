@@ -312,7 +312,7 @@ class Backend {
 		if (is_array($string)) {
 			$result = true;
 			foreach($string as $one_string) {
-				$result = self::addSomething($what, $one_string, $options) && $toret;
+				$result = self::addSomething($what, $one_string, $options) && $result;
 			}
 			return $result;
 		} else {
