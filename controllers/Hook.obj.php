@@ -85,9 +85,9 @@ class Hook extends TableCtl {
 					//var_dump($toret);
 					if (!is_null($toret)) {
 						$result = $toret;
-					}
-					if (count($parameters)) {
-						$parameters[$return_index] = $toret;
+						if (count($parameters)) {
+							$parameters[$return_index] = $toret;
+						}
 					}
 				}
 			}
