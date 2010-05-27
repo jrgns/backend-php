@@ -14,8 +14,6 @@
 /**
  * The main controller for the Backend
  *
- * @TODO We need to check which modujles are available / enabled.
- * @TODO We need to enable different hooks for all enabled components. The hook_start will, as an example, be called in Controller::start
  */
 class Controller {
 	public static $debug;
@@ -26,7 +24,7 @@ class Controller {
 	public static $parameters = array();
 	
 	//TODO move this to the config or Application class
-	public static $salt = 'Change this to something random!';
+	public static $salt = false;
 	public static $view = false;
 		
 	protected static $started = false;
@@ -48,14 +46,14 @@ class Controller {
 			session_name('Controller');
 			session_start();
 
-			self::check_quotes();
-
 			date_default_timezone_set('Africa/Johannesburg');
 
-			//Debugging
-			self::$debug = false;
+			self::check_quotes();
+			self::$salt = Backend::getConfig('application.salt', 'Change this to something random!');
 
 			$user = BackendAccount::checkUser();
+			//Debugging
+			self::$debug = false;
 			if (SITE_STATE != 'production' || ($user && in_array('superadmin', $user->roles))) {
 				switch (true) {
 					case array_key_exists('debug', $_REQUEST):
@@ -79,7 +77,9 @@ class Controller {
 				die('Unrecognized Request');
 			}
 
-			Hook::run('init', 'pre');
+			$query = Request::getQuery();
+			$query = Hook::run('init', 'pre', array($query));
+			self::parseQuery($query);
 
 			//Sessions
 			if (array_key_exists('error', $_SESSION)) {
@@ -92,8 +92,6 @@ class Controller {
 				Backend::setSuccess($_SESSION['success']);
 			}
 			
-			self::parseQuery();
-
 			Hook::run('init', 'post');
 			self::$init = true;
 		}
@@ -204,6 +202,7 @@ class Controller {
 			$view_name = ucwords($_REQUEST['mode']) . 'View';
 		} else {
 			//Check for an extension
+			//TODO Maybe move this whole section to Request?
 			$extension = explode('.', str_replace(dirname($_SERVER['SCRIPT_NAME']), '', $_SERVER['REQUEST_URI']));
 			if (count($extension) > 1) {
 				$extension = current(explode('?', end($extension)));
@@ -334,9 +333,7 @@ class Controller {
 		}
 	}
 	
-	protected static function parseQuery($query = false) {
-		$query = Request::getQuery($query);
-		
+	protected static function parseQuery($query) {
 		if (!Value::get('admin_installed', false) && !in_array($query, array('admin/pre_install', 'admin/install'))) {
 			$query = 'admin/pre_install';
 		}
