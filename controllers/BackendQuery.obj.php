@@ -18,11 +18,7 @@
  * This is the controller for the table backend_queries.
  */
 class BackendQuery extends TableCtl {
-	public static function hook_init() {
-		if (!array_key_exists('q', $_REQUEST)) {
-			return;
-		}
-		$query = $_REQUEST['q'];
+	public static function hook_init($query) {
 		if (substr($query, -1) == '/') {
 			$query = substr($query, 0, strlen($query) - 1);
 		}
@@ -30,6 +26,7 @@ class BackendQuery extends TableCtl {
 		if ($query) {
 			$_REQUEST['q'] = $query['query'];
 		}
+		return $query['query'];
 	}
 	
 	public static function add($alias, $query) {
