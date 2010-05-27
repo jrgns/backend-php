@@ -72,9 +72,9 @@ class Hook extends TableCtl {
 	}
 	
 	public static function run($hook_name, $type, array $parameters = array(), array $options = array()) {
-		$toret        = array_key_exists('toret', $options) ? $options['toret'] : null;
+		$result       = array_key_exists('toret', $options) ? $options['toret'] : null;
 		$return_index = array_key_exists('return_index', $options) ? $options['return_index'] : null;
-		if (is_null($return_index) && count($parameters)) {
+		if (count($parameters) && is_null($return_index)) {
 			$return_index = 0;
 		}
 		if ($hooks = self::get($hook_name, $type)) {
@@ -82,13 +82,18 @@ class Hook extends TableCtl {
 				if (Component::isActive($hook['class']) && is_callable(array($hook['class'], $hook['method']))) {
 					//var_dump('Running ' . $hook['class'] . '::' . $hook['method'] . ' for hook ' . $hook_name . '-' . $type);
 					$toret = call_user_func_array(array($hook['class'], $hook['method']), $parameters);
-					if (count($parameters) && !is_null($return_index)) {
+					//var_dump($toret);
+					if (!is_null($toret)) {
+						$result = $toret;
+					}
+					if (count($parameters)) {
 						$parameters[$return_index] = $toret;
 					}
 				}
 			}
 		}
-		return $toret;
+		//die;
+		return $result;
 	}
 	
 	public static function install(array $options = array()) {
