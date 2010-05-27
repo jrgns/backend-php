@@ -274,16 +274,28 @@ class DBObject {
 				case 'serialized':
 					switch ($direction) {
 					case 'in':
-						$data[$name] = base64_encode(serialize($value));
+						if (is_array($data)) {
+							$data[$name] = base64_encode(serialize($value));
+						} else if (is_object($data)) {
+							$data->$name = base64_encode(serialize($value));
+						}
 						break;
 					case 'out':
-						$data[$name] = @unserialize(base64_decode($value));
+						if (is_array($data)) {
+							$data[$name] = @unserialize(base64_decode($value));
+						} else if (is_object($data)) {
+							$data->$name = @unserialize(base64_decode($value));
+						}
 						break;
 					}
 					break;
 				case 'text':
 					if (!empty($options['markdown']) && $direction == 'in' && function_exists('markdown')) {
-						$data[$name] = markdown($value);
+						if (is_array($data)) {
+							$data[$name] = markdown($value);
+						} else if (is_object($data)) {
+							$data->$name = markdown($value);
+						}
 					}
 					break;
 				default:
