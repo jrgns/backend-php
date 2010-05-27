@@ -71,15 +71,15 @@ class Controller {
 				ini_set('display_errors', 0);
 			}
 
+			$query = Request::getQuery();
+			$query = Hook::run('init', 'pre', array($query));
+			self::parseQuery($query);
+
 			//View
 			self::$view = self::getView();
 			if (!self::$view instanceof View) {
 				die('Unrecognized Request');
 			}
-
-			$query = Request::getQuery();
-			$query = Hook::run('init', 'pre', array($query));
-			self::parseQuery($query);
 
 			//Sessions
 			if (array_key_exists('error', $_SESSION)) {
