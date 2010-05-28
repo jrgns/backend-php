@@ -35,10 +35,14 @@ class GenericImporter {
 			}
 			if ($name_count == count($line)) {
 				$line = array_combine($names, $line);
+				//Return false from preLineImport if you dont want the line to be imported
 				if (is_callable(array($controller, 'preLineImport'))) {
 					$n_line = $controller->preLineImport($line);
 				} else {
 					$n_line = $line;
+				}
+				if (!$n_line) {
+					continue;
 				}
 				$toret = $Object->create($n_line);
 				if (!$toret) {
@@ -46,7 +50,8 @@ class GenericImporter {
 				}
 				$count++;
 				if (is_callable(array($controller, 'postLineImport'))) {
-					if ($controller->postLineImport($Object, $line) === false) {
+					//Return false from postLineImport if you want the import process to stop
+					if ($controller->postLineImport($Object, $n_line) === false) {
 						break;
 					}
 				}
