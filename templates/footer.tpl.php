@@ -1,10 +1,10 @@
 <div id="footer" class="span-24 small quiet">					
 	<hr class="bottom">
 	<p class="bottom">
-		The backend for your website - info at backend-php.net
+		Powered by <a href="http://backend-php.net" target="_top">backend-php.net</a>
 	</p>
 	<p>
-		&copy; <a href="http://www.jadeit.co.za">JadeIT</a> <?php echo date('Y') ?>
+		&copy; <a href="http://#CopyrightOwnerWebsite#">#CopyrightOwner#</a> <?php echo date('Y') ?>
 	</p>
 </div>
 
