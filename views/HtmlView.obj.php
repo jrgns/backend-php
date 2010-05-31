@@ -35,6 +35,7 @@ class HtmlView extends View {
 			}
 		}
 		//TODO Add site_link, and other vars, as JS vars
+		Backend::addScriptContent('var site_link = \'' . SITE_LINK . '\';');
 		//TODO if someone can land a script file in the correct place, he can insert JS at will...
 		$comp_script = '/scripts/' . Controller::$area . '.component.js';
 		$comp_style  = '/styles/' . Controller::$area . '.component.css';
@@ -75,7 +76,6 @@ class HtmlView extends View {
 				}
 			}
 		}
-
 		return $to_print;
 	}
 	
@@ -87,6 +87,7 @@ class HtmlView extends View {
 		Backend::addScript(SITE_LINK . 'scripts/backend.js');
 		Backend::add('Styles', array_unique(array_filter(Backend::getStyles())));
 		Backend::add('Scripts', array_unique(array_filter(Backend::getScripts())));
+		Backend::add('ScriptContent', array_unique(array_filter(Backend::getScriptContent())));
 		$app_class = Backend::getConfig('backend.application.class', 'Application');
 		$primary = Links::get('primary');
 		$secondary = Links::get('secondary');

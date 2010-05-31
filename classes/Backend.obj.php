@@ -27,6 +27,7 @@ class Backend {
 
 	protected static $content = array();
 	protected static $scripts = array();
+	protected static $script_content = array();
 	protected static $styles = array();	
 
 	static private function checkSelf() {
@@ -330,15 +331,17 @@ class Backend {
 				$file     = empty($file)     ? 'logfile_' . date('Ymd') . 'txt' : $file;
 				$log_what = empty($log_what) ? array('success', 'notice', 'error') : explode(',', $log_what);
 				if ((is_array($log_what) && in_array($what, $log_what)) || $log_what == '*') {
-					if (!file_exists(APP_FOLDER . '/logs/')) {
-						mkdir(APP_FOLDER . '/logs/', 0755);
-					}
 					if (is_writable(APP_FOLDER . '/logs/' . $file)) {
+						if (!file_exists(APP_FOLDER . '/logs/')) {
+							mkdir(APP_FOLDER . '/logs/', 0755);
+						}
 						$fp = fopen(APP_FOLDER . '/logs/' . $file, 'a');
 						if ($fp) {
 							$query = Controller::$area . '/' . Controller::$action . '/' . implode('/', Controller::$parameters);
 							fwrite($fp, time() . "\t" . $query . "\t" . $what . "\t" . $string . PHP_EOL);
 						}
+					} else {
+						array_push(self::$error, 'Log location is unwriteable');
 					}
 				}
 			}
@@ -363,6 +366,22 @@ class Backend {
 		return self::$scripts;
 	}
 	
+	static public function setScript(array $scripts = array()) {
+		self::$scripts = $scripts;
+	}
+	
+	static public function addScriptContent($content, $options = array()) {
+		return self::addSomething('script_content', $content, $options);
+	}
+	
+	static public function getScriptContent() {
+		return self::$script_content;
+	}
+
+	static public function setScriptContent(array $content = array()) {
+		self::$script_content = $content;
+	}
+
 	static public function addStyle($style, $options = array()) {
 		return self::addSomething('styles', $style, $options);
 	}
@@ -430,7 +449,7 @@ class Backend {
 	static public function setSuccess(array $successes = array()) {
 		self::$success = $successes;
 	}
-
+	
 	public static function __error_handler($number, $string, $file = false, $line = false, $context = false) {
 		if (!class_exists('Component', false)) {
 			self::__autoload('Component');
