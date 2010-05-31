@@ -77,7 +77,11 @@ class Render {
 		} else {
 			$error = error_get_last();
 			if (strpos($error['message'], 'Permission denied') !== false) {
-				Backend::addError('Permission denied. Check writeability of templates folder.');
+				if (Controller::$debug) {
+					Backend::addError('Permission denied. Check writeability of templates folder ' . dirname($dest_file) . '.');
+				} else {
+					Backend::addError('Permission denied. Check writeability of templates folder.');
+				}
 			}
 		}
 		return false;

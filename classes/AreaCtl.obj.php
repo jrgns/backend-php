@@ -27,7 +27,7 @@ class AreaCtl {
 		}
 		$method = 'action_' . Controller::$action;
 		if (Controller::$debug) {
-			var_dump('Checking Method ' . $method);
+			var_dump('Checking Method ' . $method . ' for ' . get_class($this));
 		}
 		if (method_exists($this, $method)) {
 			if (!$this->checkPermissions() && Value::get('CheckHTTPAuth', false)) {
