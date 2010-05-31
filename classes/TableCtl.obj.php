@@ -233,8 +233,12 @@ class TableCtl extends AreaCtl {
 				}
 				$count = call_user_func_array(array($importer_name, 'import'), array($this, $file['tmp_name'], $data));
 				$error = call_user_func(array($importer_name, 'getLastError'));
-				if (!$count && !empty($error)) {
-					Backend::addError($error);
+				if (!empty($error)) {
+					if (!$count) {
+						Backend::addError($error);
+					} else {
+						Backend::addNotice($error);
+					}
 				}
 				return $count;
 			}

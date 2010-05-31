@@ -57,6 +57,9 @@ class GenericImporter {
 				}
 			} else {
 				self::$error_msg = 'Number of imported fields does not match defined fields';
+				if ($count > 0) {
+					return $count;
+				}
 				return false;
 			}
 		}
