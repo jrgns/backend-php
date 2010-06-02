@@ -101,7 +101,7 @@ class Admin extends AreaCtl {
 		return $result;
 	}
 	
-	public function html_daily($result) {
+	public function json_daily($result) {
 		if ($result) {
 			die;
 		}
@@ -119,7 +119,7 @@ class Admin extends AreaCtl {
 		return $result;
 	}
 	
-	public function html_weekly($result) {
+	public function json_weekly($result) {
 		if ($result) {
 			die;
 		}
