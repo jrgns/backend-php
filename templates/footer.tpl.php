@@ -3,8 +3,13 @@
 	<p class="bottom">
 		Powered by <a href="http://backend-php.net" target="_top">backend-php.net</a>
 	</p>
-	<p>
-		&copy; <a href="http://#CopyrightOwnerWebsite#">#CopyrightOwner#</a> <?php echo date('Y') ?>
-	</p>
+	<?php if (!empty($CopyrightOwnerWebsite) || !empty($CopyrightOwner)): ?>
+		<p>
+			&copy; <?php if (!empty($CopyrightOwnerWebsite)): ?><a href="http://#CopyrightOwnerWebsite#" target="_top"><?php endif; ?>
+				<?php echo empty($CopyrightOwner) ? $CopyrightOwnerWebsite : $CopyrightOwner ?>
+			<?php if (!empty($CopyrightOwnerWebsite)): ?></a><?php endif; ?>
+			<?php echo date('Y') ?>
+		</p>
+	<?php endif; ?>
 </div>
 
