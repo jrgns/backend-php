@@ -1145,6 +1145,10 @@ class DBObject {
 		return $toret;
 	}
 	
+	public function getObjectName() {
+		return $this->getMeta('name');
+	}
+	
 	public function getArea() {
 		return class_for_url(get_class($this));
 	}
