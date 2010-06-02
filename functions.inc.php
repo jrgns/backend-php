@@ -55,23 +55,25 @@ function update_links($content, $new_vars) {
 	if (count($new_vars)) {
 		preg_match_all('/(<a\s+.*?href=[\'"]|<form\s+.*?action=[\'"]|<link\s+.*?href=[\'"])(.*?)[\'"]/', $toret, $matches);
 		if (count($matches) == 3) {
-			$matched = $matches[0];
+			$matched = array();
 			$links = $matches[1];
 			$urls = $matches[2];
 			$replacements = array();
 			foreach ($urls as $key => $url) {
-				$query = parse_url($url);
-				if (array_key_exists('scheme', $query)) {
-					$query['scheme'] = $query['scheme'] . '://';
+				if ($query = @parse_url($url)) {
+					$matched[] = $matches[0][$key];
+					if (array_key_exists('scheme', $query)) {
+						$query['scheme'] = $query['scheme'] . '://';
+					}
+					if (array_key_exists('query', $query)) {
+						parse_str($query['query'], $vars);
+					} else {
+						$vars = array();
+					}
+					$query['query'] = '?' . http_build_query(array_merge($vars, $new_vars));
+					$to_rep = $links[$key] . implode('', $query) . '"';
+					$replacements[] = $to_rep;
 				}
-				if (array_key_exists('query', $query)) {
-					parse_str($query['query'], $vars);
-				} else {
-					$vars = array();
-				}
-				$query['query'] = '?' . http_build_query(array_merge($vars, $new_vars));
-				$to_rep = $links[$key] . implode('', $query) . '"';
-				$replacements[] = $to_rep;
 			}
 			$toret = str_replace($matched, $replacements, $toret);
 		}
