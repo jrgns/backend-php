@@ -44,6 +44,8 @@ class Query {
 		}
 		if (array_key_exists('connection', $options) && $options['connection'] instanceof PDO) {
 			$this->connection = $options['connection'];
+		} else {
+			$this->connection = self::getConnection($table);
 		}
 		$this->action = $action;
 		$this->table = self::getTable($table);
@@ -304,12 +306,29 @@ class Query {
 			}
 			$components = array_flatten($components, null, 'name');
 			if (in_array($table, $components) && class_exists($table . 'Obj', true)) {
-				$name = $table . 'Obj';
+				$name  = $table . 'Obj';
 				$table = new $name();
 				$table = $table->getSource();
 			}
 		}
 		return self::enclose($table);
+	}
+	
+	public static function getConnection($table) {
+		if ($table instanceof DBObject) {
+			return $table->getConnection();
+		} else if ($components = Component::getActive()) {
+			if (substr($table, -3) == 'Obj') {
+				$table = substr($table, 0, strlen($table) - 3);
+			}
+			$components = array_flatten($components, null, 'name');
+			if (in_array($table, $components) && class_exists($table . 'Obj', true)) {
+				$name  = $table . 'Obj';
+				$table = new $name();
+				return $table->getConnection();
+			}
+		}
+		return false;
 	}
 	
 	public function __toString() {

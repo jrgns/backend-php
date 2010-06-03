@@ -724,6 +724,13 @@ class DBObject {
 		return '`' . $database['database'] . '`.`' . $this->meta['table'] . '`';
 	}
 	
+	public function getConnection() {
+		if ($this->db instanceof PDO) {
+			return $this->db;
+		}
+		return false;
+	}
+	
 	public function getSelectSQL($options = array()) {
 		extract($this->meta);
 
