@@ -290,7 +290,7 @@ class BackendAccount extends TableCtl {
 	public static function hook_start() {
 		$user = self::checkUser();
 		if (!$user && empty($_SESSION['user'])) {
-			self::setupAnonymous();
+			call_user_func(array(self::getName(), 'setupAnonymous'));
 		} else {
 			if ($user && in_array('superadmin', $user->roles)) {
 				Backend::addNotice('You are the super user. Be carefull, careless clicking costs lives...');
