@@ -55,6 +55,17 @@ class HtmlView extends View {
 		Backend::setError();
 		Backend::setSuccess();
 		Backend::setNotice();
+		
+		$content = Backend::getContent();
+		if (empty($content)) {
+			ob_start();
+			var_dump($to_print);
+			$content = ob_get_clean();
+			if (substr($content, 0, 4) != '<pre') {
+				$content = '<pre>' . $content . '</pre>';
+			}
+			Backend::addContent($content);
+		}
 
 		$to_print = Render::renderFile('index.tpl.php');
 
