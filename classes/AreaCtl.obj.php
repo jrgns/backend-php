@@ -29,18 +29,18 @@ class AreaCtl {
 		if (Controller::$debug) {
 			var_dump('Checking Method ' . $method . ' for ' . get_class($this));
 		}
-		if (method_exists($this, $method)) {
-			if (!$this->checkPermissions() && Value::get('CheckHTTPAuth', false)) {
-				//If the client is denied, challenge them for HTTP Digest Auth credentials
-				$auth = BackendAccount::getHTTPAuth();
-				$auth->challenge();
-			}
-			if ($this->checkPermissions()) {
+		if (!$this->checkPermissions() && Value::get('CheckHTTPAuth', false)) {
+			//If the client is denied, challenge them for HTTP Digest Auth credentials
+			$auth = BackendAccount::getHTTPAuth();
+			$auth->challenge();
+		}
+		if ($this->checkPermissions()) {
+			if (method_exists($this, $method)) {
 				$toret = call_user_func_array(array($this, $method), Controller::$parameters);
-			} else {
-				Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to ' . Controller::$action . ' ' . get_class($this)));
-				$toret = false;
 			}
+		} else {
+			Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to ' . Controller::$action . ' ' . get_class($this)));
+			$toret = false;
 		}
 		return $toret;
 	}
