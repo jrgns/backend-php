@@ -270,7 +270,11 @@ class Query {
 			$query .= PHP_EOL . 'ORDER BY ' . implode(', ', $this->order);
 		}
 		if (!empty($this->limit)) {
-			$query .= PHP_EOL . 'LIMIT ' . implode(', ', $this->limit);
+			if (get_class($this) == 'SelectQuery') {
+				$query .= PHP_EOL . 'LIMIT ' . implode(', ', $this->limit);
+			} else {
+				$query .= PHP_EOL . 'LIMIT ' . end($this->limit);
+			}
 		}
 		return $query;
 	}
