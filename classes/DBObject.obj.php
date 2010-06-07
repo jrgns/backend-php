@@ -411,30 +411,31 @@ class DBObject {
 	}
 	
 	public function update($data, $options = array()) {
-		$toret = false;
 		$this->error_msg = false;
-		if ($this->checkConnection()) {
-			$data = $this->validate($data, 'update', $options);
-			if ($data) {
-				$data = $this->process($data, 'in');
-				list ($query, $params) = $this->getUpdateSQL($data, $options);
-				$query = new CustomQuery($query, array('connection' => $this->db));
-				$toret = $query->execute($params);
-				if ($toret) {
-					if (array_key_exists('load', $options) ? $options['load'] : true) {
-						$this->read();
-					}
-				} else if (!empty($query->error_msg)) {
-					$this->error_msg = $query->error_msg;
-				}
-			}
-		} else {
+		if (!$this->checkConnection()) {
 			if (class_exists('BackendError', false)) {
 				BackendError::add(get_class($this) . ': DB Connection Error', 'update');
 			}
 			$this->error_msg = 'DB Connection Error';
+			return false;
 		}
-		return $toret;
+		$data = $this->validate($data, 'update', $options);
+		if (!$data) {
+			return false;
+		}
+		$data = $this->process($data, 'in');
+		list ($query, $params) = $this->getUpdateSQL($data, $options);
+		$query = new CustomQuery($query, array('connection' => $this->db));
+		$result = $query->execute($params);
+		if ($result) {
+			if (array_key_exists('load', $options) ? $options['load'] : true) {
+				$this->read();
+			}
+			return $result;
+		} else if (!empty($query->error_msg)) {
+			$this->error_msg = $query->error_msg;
+			return false;
+		}
 	}
 	
 	function delete() {

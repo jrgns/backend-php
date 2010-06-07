@@ -61,6 +61,7 @@ function pluralize($string) {
 					'equipment',
 					'data',
 					'capital',
+					'access',
 	);
 
 	// save some time in the case that singular and plural are the same
@@ -141,6 +142,7 @@ function singularize($string) {
 					'equipment',
 					'data',
 					'capital',
+					'access',
 	);
 
 	// save some time in the case that singular and plural are the same
