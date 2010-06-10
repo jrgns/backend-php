@@ -32,8 +32,12 @@ class Wurfl extends AreaCtl {
 		}
 		if (RESOURCES_DIR && class_exists('WURFL_WURFLManagerProvider')) {
 			$wurflConfigFile = RESOURCES_DIR . 'wurfl-config.xml';
-			$wurflManager    = WURFL_WURFLManagerProvider::getWURFLManager($wurflConfigFile);
-			self::$device    = $wurflManager->getDeviceForHttpRequest($_SERVER);
+			try {
+				$wurflManager    = WURFL_WURFLManagerProvider::getWURFLManager($wurflConfigFile);
+				self::$device    = $wurflManager->getDeviceForHttpRequest($_SERVER);
+			} catch (Exception $e) {
+				Backend::addError('Wurfl error: ' . $e->getMessage());
+			}
 			return self::$device;
 		} else {
 			Backend::addError('Could not find WURFL resources');
