@@ -13,14 +13,18 @@ class Wurfl extends AreaCtl {
 	private static $device = false;
 	public function action_test() {
 		$requestingDevice = self::getDevice();
-		$content = '<ul>';
-		$content .= '<li>ID: ' . $requestingDevice->id . '</li>';
-		$content .= '<li>Brand Name: ' . $requestingDevice->getCapability("brand_name") . '</li>';
-		$content .= '<li>Model Name: ' . $requestingDevice->getCapability("model_name") . '</li>';
-		$content .= '<li>Xhtml Preferred Markup: ' . $requestingDevice->getCapability("preferred_markup") . '</li>';
-		$content .= '<li>Resolution Width: ' . $requestingDevice->getCapability("resolution_width") . '</li>';
-		$content .= '<li>Resolution Height: ' . $requestingDevice->getCapability("resolution_height") . '</li>';
-		$content .= '</ul>';
+		if ($requestingDevice) {
+			$content = '<ul>';
+			$content .= '<li>ID: ' . $requestingDevice->id . '</li>';
+			$content .= '<li>Brand Name: ' . $requestingDevice->getCapability("brand_name") . '</li>';
+			$content .= '<li>Model Name: ' . $requestingDevice->getCapability("model_name") . '</li>';
+			$content .= '<li>Xhtml Preferred Markup: ' . $requestingDevice->getCapability("preferred_markup") . '</li>';
+			$content .= '<li>Resolution Width: ' . $requestingDevice->getCapability("resolution_width") . '</li>';
+			$content .= '<li>Resolution Height: ' . $requestingDevice->getCapability("resolution_height") . '</li>';
+			$content .= '</ul>';
+		} else {
+			$content = '<p>Could not get device information</p>';
+		}
 		Backend::addContent($content);
 
 		return false;
@@ -36,7 +40,9 @@ class Wurfl extends AreaCtl {
 				$wurflManager    = WURFL_WURFLManagerProvider::getWURFLManager($wurflConfigFile);
 				self::$device    = $wurflManager->getDeviceForHttpRequest($_SERVER);
 			} catch (Exception $e) {
-				Backend::addError('Wurfl error: ' . $e->getMessage());
+				if (Controller::$debug) {
+					Backend::addError('Wurfl Error: ' . $e->getMessage());
+				}
 			}
 			return self::$device;
 		} else {
