@@ -118,9 +118,13 @@ class Render {
 
 		$mobile = false;
 		if (Component::isActive('Wurfl')) {
-			$device   = Wurfl::getDevice();
-			if (($device && $device->getCapability('mobile_browser') != '') || array_key_exists('mobile', $_REQUEST)) {
-				$mobile = true;
+			try {
+				$device   = Wurfl::getDevice();
+				if (($device && $device->getCapability('mobile_browser') != '') || array_key_exists('mobile', $_REQUEST)) {
+					$mobile = true;
+				}
+			} catch (Exception $e) {
+				Backend::addError('Wurfl Error: ' . $e->getMessage());
 			}
 		}
 
