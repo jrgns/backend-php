@@ -10,7 +10,7 @@ if (WURFL_DIR) {
 }
 
 class Wurfl extends AreaCtl {
-	private static $device = false;
+	private static $device = null;
 	public function action_test() {
 		$requestingDevice = self::getDevice();
 		if ($requestingDevice) {
@@ -31,7 +31,7 @@ class Wurfl extends AreaCtl {
 	}
 	
 	public static function getDevice() {
-		if (self::$device) {
+		if (!is_null(self::$device)) {
 			return self::$device;
 		}
 		if (RESOURCES_DIR && class_exists('WURFL_WURFLManagerProvider')) {
@@ -43,8 +43,9 @@ class Wurfl extends AreaCtl {
 				if (Controller::$debug) {
 					Backend::addError('Wurfl Error: ' . $e->getMessage());
 				}
+				return false;
 			}
-			return self::$device;
+			return self::$device ? self::$device : false;
 		} else {
 			Backend::addError('Could not find WURFL resources');
 			return false;
