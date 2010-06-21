@@ -28,6 +28,12 @@ class BackendAccount extends TableCtl {
 		return self::$name;
 	}
 	
+	public static function getTable() {
+		$obj_name = self::getName() . 'Obj';
+		$obj = new $obj_name();
+		return $obj->getMeta('table');
+	}
+	
 	public static function getCurrentUser() {
 		return self::$current_user;
 	}
@@ -46,12 +52,12 @@ class BackendAccount extends TableCtl {
 	public static function getQuery() {
 		$query = new SelectQuery(BackendAccount::getName());
 		$query
-			->field(array('`users`.*', "GROUP_CONCAT(DISTINCT `roles`.`name` ORDER BY `roles`.`name` SEPARATOR ',') AS `roles`"))
-			->leftJoin('Assignment', array("`assignments`.`access_type` = 'users'", '`users`.`id` = `assignments`.`access_id` OR `assignments`.`access_id` = 0'))
+			->field(array('`' . BackendAccount::getTable() . '`.*', "GROUP_CONCAT(DISTINCT `roles`.`name` ORDER BY `roles`.`name` SEPARATOR ',') AS `roles`"))
+			->leftJoin('Assignment', array("`assignments`.`access_type` = 'users'", '`' . BackendAccount::getTable() . '`.`id` = `assignments`.`access_id` OR `assignments`.`access_id` = 0'))
 			->leftJoin('Role', array('`assignments`.`role_id` = `roles`.`id`'))
-			->filter('`users`.`active` = 1')
-			->filter('`users`.`confirmed` = 1')
-			->group('`users`.`id`');
+			->filter('`' . BackendAccount::getTable() . '`.`active` = 1')
+			->filter('`' . BackendAccount::getTable() . '`.`confirmed` = 1')
+			->group('`' . BackendAccount::getTable() . '`.`id`');
 		return $query;
 	}
 
@@ -71,8 +77,8 @@ class BackendAccount extends TableCtl {
 
 			$query = self::getQuery();
 			$query
-				->filter('`users`.`Username` = :username OR `users`.`Mobile` = :username OR `users`.`Email` = :username')
-				->filter('`users`.`password` = MD5(CONCAT(`users`.`salt`, :password, :salt))');
+				->filter('`' . BackendAccount::getTable() . '`.`Username` = :username OR `' . BackendAccount::getTable() . '`.`Mobile` = :username OR `' . BackendAccount::getTable() . '`.`Email` = :username')
+				->filter('`' . BackendAccount::getTable() . '`.`password` = MD5(CONCAT(`' . BackendAccount::getTable() . '`.`salt`, :password, :salt))');
 			$params = array(':username' => $username, ':password' => $password, ':salt' => Controller::$salt);
 
 			$User->read(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
