@@ -83,10 +83,14 @@ class AreaCtl {
 		$subject = !empty($options['subject']) ? $options['subject'] : (
 			!empty(Controller::$area) ? Controller::check_reverse_map('area', Controller::$area) : '*'
 		);
-		$subject_id = !empty($options['subject_id']) ? $options['subject_id'] : (
-			!empty(Controller::$parameters[0]) ? Controller::check_reverse_map('id', Controller::$parameters[0]) : 0
-		);
-
+		if (count(Controller::$parameters) === 1) {
+			$subject_id = !empty($options['subject_id']) ? $options['subject_id'] : (
+				!empty(Controller::$parameters[0]) ? Controller::check_reverse_map('id', Controller::$parameters[0]) : 0
+			);
+		} else {
+			$subject_id = 0;
+		}
+		
 		if (Value::get('admin_installed', false)) {
 			$roles = GateKeeper::permittedRoles($action, $subject, $subject_id);
 			if (!empty($_SESSION['user'])) {
