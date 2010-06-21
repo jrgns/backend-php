@@ -183,7 +183,7 @@ class Query {
 		$this->query = false;
 		if (is_array($order_field)) {
 			$this->order = array_merge($this->group, $order_field);
-		} else {
+		} else if (!empty($order_field)) {
 			$this->order[] = $order_field;
 		}
 		return $this;
