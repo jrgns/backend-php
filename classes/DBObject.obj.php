@@ -86,6 +86,7 @@ class DBObject {
 			$relation = new $class_name();
 			$conditions = array_key_exists('conditions', $options) ? $options['conditions'] : false;
 			$type       = array_key_exists('type', $options)       ? $options['type']       : 'single';
+			$order      = array_key_exists('order', $options)      ? $options['order']      : false;
 			if ($conditions) {
 				foreach($conditions as $field => $name) {
 					if (is_array($name)) {
@@ -120,7 +121,7 @@ class DBObject {
 			} else {
 				$mode = $load_mode;
 			}
-			$relation->read(array('conditions' => $conds, 'parameters' => $params, 'mode' => $mode));
+			$relation->read(array('mode' => $mode, 'conditions' => $conds, 'parameters' => $params, 'order' => $order));
 			$relation->loadDeep($mode);
 			return $relation;
 		}
