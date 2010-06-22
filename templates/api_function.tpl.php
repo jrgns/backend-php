@@ -1,5 +1,11 @@
 <div class="description"><?php echo $definition['description'] ?></div>
 <dl>
+	<?php if (!empty($definition['example'])): ?>
+		<dt>Example</dt>
+		<dd>
+			<?php echo $definition['example'] ?>
+		</dd>
+	<?php endif; ?>
 	<dt>Return: <span class="large bottom"><code><strong><?php echo $definition['return']['type'] ?></strong></code></span></dt>
 	<dd>
 		<?php echo $definition['return']['description'] ?>
