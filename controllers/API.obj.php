@@ -59,6 +59,16 @@ class API extends AreaCtl {
 			return false;
 		}
 		$results = array();
+
+		if (!empty($_SESSION['user'])) {
+			if (is_object($_SESSION['user']) && property_exists($_SESSION['user'], 'roles')) {
+				$user_roles = $_SESSION['user']->roles;
+			} else {
+				$user_roles = array();
+			}
+		} else {
+			$user_roles = array('anonymous');
+		}
 		foreach(Component::getActive() as $component) {
 			$methods = get_class_methods($component['name']);
 			if (!$methods) {
@@ -66,8 +76,9 @@ class API extends AreaCtl {
 			}
 			$results[$component['name']] = array();
 			foreach($methods as $method) {
-				if (substr($method, 0, 7) == 'define_') {
-					$results[$component['name']][$method] = call_user_func(array($component['name'], $method));
+				if (substr($method, 0, 7) == 'define_' &&
+					Permission::check(substr($method, 7), $component['name'])) {
+						$results[$component['name']][$method] = call_user_func(array($component['name'], $method));
 				}
 			}
 			if (count($results[$component['name']])) {
@@ -138,8 +149,14 @@ class API extends AreaCtl {
 
 		$toret = Permission::add('nobody', 'define', __CLASS__) && $toret;
 		$toret = Permission::add('authenticated', 'define', __CLASS__) && $toret;
+		$toret = Permission::add('bi', 'define', __CLASS__) && $toret;
+		$toret = Permission::add('bisp', 'define', __CLASS__) && $toret;
+		$toret = Permission::add('user', 'define', __CLASS__) && $toret;
 		$toret = Permission::add('nobody', 'index', __CLASS__) && $toret;
 		$toret = Permission::add('authenticated', 'index', __CLASS__) && $toret;
+		$toret = Permission::add('bi', 'index', __CLASS__) && $toret;
+		$toret = Permission::add('bisp', 'index', __CLASS__) && $toret;
+		$toret = Permission::add('user', 'index', __CLASS__) && $toret;
 		return $toret;
 	}
 }
