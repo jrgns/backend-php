@@ -178,10 +178,9 @@ function humanize($string) {
  * Return computer safe strings. 
 *
 * Can't find the original site. New implementation from http://blog.charlvn.za.net/2007/11/php-camelcase-explode-20.html
-* @todo check that BB gets converted to b_b, OpenID to open_i_d
 */
 function computerize($string, $separator = '_') {
-	$array = preg_split('/([A-Z][^A-Z]+)/', $string, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+	$array = preg_split('/([A-Z][^A-Z]*)/', $string, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
 	if (is_array($array)) {
 		$array = array_map('trim', array_map('strtolower', $array));
 		$string = implode($separator, $array);
