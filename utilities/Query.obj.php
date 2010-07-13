@@ -159,6 +159,12 @@ class Query {
 	public function setFilter(array $filters = array()) {
 		$this->query = false;
 		$this->conditions = array_filter(array_unique($filters));
+		return $this;
+	}
+
+	public function setParameters(array $parameters = array()) {
+		$this->parmaeters = $parameters;
+		return $this;
 	}
 	
 	public function group($group_field) {
