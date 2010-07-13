@@ -35,7 +35,11 @@ class SelectQuery extends Query {
 			$tables = array();
 			foreach ($this->joins as $type => $join) {
 				foreach ($join as $table => $conditions) {
-					$one_table = $type . ' JOIN ' . Query::enclose($table);
+					$one_table = $type . ' JOIN ';
+					if (strpos($table, ' AS ') === false) {
+						$table = Query::enclose($table);
+					}
+					$one_table .= $table;
 					if (!empty($conditions)) {
 						$one_table .= ' ON (' . implode(') AND (', $conditions) . ')';
 					}
@@ -47,23 +51,23 @@ class SelectQuery extends Query {
 		return $query;
 	}
 	
-	function leftJoin($table, $conditions) {
-		return $this->join('LEFT', $table, $conditions);
+	function leftJoin($table, $conditions, array $options = array()) {
+		return $this->join('LEFT', $table, $conditions, $options);
 	}
 	
-	function rightJoin($table, $conditions) {
-		return $this->join('RIGHT', $table, $conditions);
+	function rightJoin($table, $conditions, array $options = array()) {
+		return $this->join('RIGHT', $table, $conditions, $options);
 	}
 
-	function innerJoin($table, $conditions) {
-		return $this->join('INNER', $table, $conditions);
+	function innerJoin($table, $conditions, array $options = array()) {
+		return $this->join('INNER', $table, $conditions, $options);
 	}
 
-	function outerJoin($table, $conditions) {
-		return $this->join('OUTER', $table, $conditions);
+	function outerJoin($table, $conditions, array $options = array()) {
+		return $this->join('OUTER', $table, $conditions, $options);
 	}
 
-	function join($type, $table, $conditions) {
+	function join($type, $table, $conditions, array $options = array()) {
 		$type = strtoupper($type);
 		if (!in_array($type, array('RIGHT', 'LEFT', 'INNER', 'OUTER'))) {
 			throw new Exception('Unsupported Join Type');
@@ -74,7 +78,19 @@ class SelectQuery extends Query {
 		if (!array_key_exists($type, $this->joins)) {
 			$this->joins[$type] = array();
 		}
-		$table = Query::getTable($table);
+		if ($table instanceof Query) {
+			$table = $table->__toString();
+			if (array_key_exists('alias', $options)) {
+				$table = '(' . $table . ') AS ' . Query::enclose($options['alias']);
+			} else {
+				trigger_error('Joined sub queries should have aliases', E_USER_ERROR);
+			}
+		} else {
+			$table = Query::getTable($table);
+			if (array_key_exists('alias', $options)) {
+				$table = Query::enclose($table) . ' AS ' . Query::enclose($options['alias']);
+			}
+		}
 		if (array_key_exists($table, $this->joins[$type])) {
 			$this->joins[$type][$table] = array_merge($this->joins[$type][$table], $conditions);
 		} else {

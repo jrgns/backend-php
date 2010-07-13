@@ -330,6 +330,9 @@ class Query {
 	public static function getTable($table) {
 		if ($table instanceof DBObject) {
 			$table = $table->getSource();
+		} else if ($table instanceof Query) {
+			//Dont enclose
+			return $table->table;
 		} else if ($components = Component::getActive()) {
 			if (substr($table, -3) == 'Obj') {
 				$table = substr($table, 0, strlen($table) - 3);
