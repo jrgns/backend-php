@@ -223,6 +223,33 @@ class TableCtl extends AreaCtl {
 					return false;
 				}
 				$file = $_FILES['import_file'];
+				if ($file['error']) {
+					switch($file['error']) {
+					case UPLOAD_ERR_INI_SIZE:
+						$msg = 'File exceeds PHP size limit';
+						break;
+					case UPLOAD_ERR_FORM_SIZE:
+						$msg = 'File exceeds form size limit';
+						break;
+					case UPLOAD_ERR_PARTIAL:
+						$msg = 'File unload partially uploaded';
+						break;
+					case UPLOAD_ERR_NO_FILE:
+						$msg = 'No file uploaded';
+						break;
+					case UPLOAD_ERR_NO_TMP_DIR:
+						$msg = 'Temporary folder doesn\'t exist';
+						break;
+					case UPLOAD_ERR_CANT_WRITE:
+						$msg = 'Can\'t create temporary file';
+						break;
+					case UPLOAD_ERR_EXTENSION:
+						$msg = 'File upload prohibited by PHP extension';
+						break;
+					}
+					Backend::addError('Could not upload file: ' . $msg);
+					return false;
+				}
 				if (!in_array($file['type'], array('text/csv', 'application/octet-stream'))) {
 					Backend::addError('This import can only handle CSV files. The uploaded file is ' . $file['type']);
 					return false;
