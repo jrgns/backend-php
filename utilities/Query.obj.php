@@ -25,6 +25,7 @@ class Query {
 	protected $parameters = array();
 	protected $group      = array();
 	protected $order      = array();
+	protected $having     = array();
 	protected $limit      = array();
 
 	protected $last_stmt   = false;
@@ -198,6 +199,22 @@ class Query {
 		return $this->order;
 	}
 	
+	public function having($condition) {
+		$this->query = false;
+		if (is_array($condition)) {
+			$this->having = array_merge($this->having, $condition);
+		} else {
+			$this->having[] = $condition;
+		}
+		$this->having = array_filter(array_unique($this->having));
+		return $this;
+	}
+	
+	public function setHaving(array $having = array()) {
+		$this->query  = false;
+		$this->having = array_filter(array_unique($having));
+	}
+	
 	public function limit($one, $two = false) {
 		$this->query = false;
 		if ($two !== false) {
@@ -268,6 +285,9 @@ class Query {
 		}
 		if (!empty($this->order)) {
 			$query .= PHP_EOL . 'ORDER BY ' . implode(', ', $this->order);
+		}
+		if (!empty($this->having)) {
+			$query .= PHP_EOL . 'HAVING (' . implode(') AND (', $this->having) . ')';
 		}
 		if (!empty($this->limit)) {
 			if (get_class($this) == 'SelectQuery') {
