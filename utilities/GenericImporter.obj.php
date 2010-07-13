@@ -30,6 +30,7 @@ class GenericImporter {
 		$name_count = count($names);
 		$count = 0;
 		while(($line = fgetcsv($fp)) !== false) {
+			set_time_limit(30);
 			if (is_array($data)) {
 				$line = array_merge($line, $data);
 			}
