@@ -76,9 +76,15 @@ class API extends AreaCtl {
 			}
 			$results[$component['name']] = array();
 			foreach($methods as $method) {
-				if (substr($method, 0, 7) == 'define_' &&
-					Permission::check(substr($method, 7), $component['name'])) {
-						$results[$component['name']][$method] = call_user_func(array($component['name'], $method));
+				if (substr($method, 0, 7) == 'action_' && Permission::check(substr($method, 7), $component['name'])) {
+					$define_method = preg_replace('/^action_/', 'define_', $method);
+					if (in_array($define_method, $methods)) {
+						$results[$component['name']][$method] = call_user_func(array($component['name'], $define_method));
+					} else {
+						$results[$component['name']][$method] = array(
+							'description' => 'Undocumented',
+						);
+					}
 				}
 			}
 			if (count($results[$component['name']])) {
