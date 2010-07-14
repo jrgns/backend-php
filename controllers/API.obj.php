@@ -80,7 +80,7 @@ class API extends AreaCtl {
 					$define_method = preg_replace('/^action_/', 'define_', $method);
 					if (in_array($define_method, $methods)) {
 						$results[$component['name']][$method] = call_user_func(array($component['name'], $define_method));
-					} else {
+					} else if (array_key_exists('show_undocumented', $_REQUEST)) {
 						$results[$component['name']][$method] = array(
 							'description' => 'Undocumented',
 						);
