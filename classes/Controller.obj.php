@@ -83,13 +83,13 @@ class Controller {
 
 			//Sessions
 			if (array_key_exists('error', $_SESSION)) {
-				Backend::setError($_SESSION['error']);
+				Backend::addError($_SESSION['error']);
 			}
 			if (array_key_exists('notice', $_SESSION)) {
-				Backend::setNotice($_SESSION['notice']);
+				Backend::addNotice($_SESSION['notice']);
 			}
 			if (array_key_exists('success', $_SESSION)) {
-				Backend::setSuccess($_SESSION['success']);
+				Backend::addSuccess($_SESSION['success']);
 			}
 			
 			Hook::run('init', 'post');
