@@ -210,7 +210,11 @@ class Backend {
 	static private function initDBs($dbs) {
 		if (is_array($dbs)) {
 			foreach($dbs as $name => $db) {
-				self::addDB($name, $db);
+				try {
+					self::addDB($name, $db);
+				} catch (Exception $e) {
+					Backend::addError($e->getMessage());
+				}
 			}
 		}
 	}
