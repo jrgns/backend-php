@@ -486,7 +486,7 @@ class DBObject {
 			if ($query) {
 				if ($drop_table) {
 					$table = $this->getSource();
-					$drop_query = new CustomQuery('DROP TABLE IF EXISTS `' . $table . '`', array('connection' => $this->db));
+					$drop_query = new CustomQuery('DROP TABLE IF EXISTS ' . Query::getTable($this) . '', array('connection' => $this->db));
 					$drop_query->execute();
 					Backend::addNotice('Dropping table ' . $table);
 					if (!empty($drop_query->error_msg)) {
