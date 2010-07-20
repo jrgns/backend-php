@@ -70,9 +70,9 @@ class BackendAccount extends TableCtl {
 		if (self::checkUser()) {
 			return true;
 		}
-		$username = $username ? $username : (array_key_exists('username', $_REQUEST) ? $_REQUEST['username'] : false);
-		$password = $password ? $password : (array_key_exists('password', $_REQUEST) ? $_REQUEST['password'] : false);
-		if ($username && $password && !empty($_SESSION['cookie_is_working'])) {
+		$username = $username ? $username : (array_key_exists('username', $_POST) ? $_POST['username'] : false);
+		$password = $password ? $password : (array_key_exists('password', $_POST) ? $_POST['password'] : false);
+		if ($username && $password) {
 			$User = self::getObject(self::getName());
 
 			$query = self::getQuery();
