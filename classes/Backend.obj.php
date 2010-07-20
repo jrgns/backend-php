@@ -468,6 +468,12 @@ class Backend {
 		switch ($number) {
 		case E_STRICT:
 			break;
+		case E_DEPRECATED:
+			if (SITE_STATE == 'production') {
+				break;
+			} else {
+				//Go through to the DEFAULT
+			}
 		default:
 			if (defined('BACKEND_INSTALLED') && BACKEND_INSTALLED && Component::isActive('BackendError')) {
 				BackendError::add($number, $string, $file, $line, $context);
@@ -502,7 +508,13 @@ class Backend {
 			if (SITE_STATE == 'production') {
 				return true;
 			}
-			return true;
+			return false;
+			break;
+		case E_DEPRECATED:
+			if (SITE_STATE == 'production') {
+				return true;
+			}
+			return false;
 			break;
 		}
 		return false;
