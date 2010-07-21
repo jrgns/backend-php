@@ -664,11 +664,7 @@ class DBObject {
 		return ($toret && count($ret_data)) ? $ret_data : false;
 	}
 	
-	function fromPost(array $data = array()) {
-		$data = count($data) ? $data : $_POST;
-		if (array_key_exists('obj', $data)) {
-			$data = $data['obj'];
-		}
+	function fromPost() {
 		$toret = array();
 		foreach($this->meta['fields'] as $name => $options) {
 			$options = is_array($options) ? $options : array('type' => $options);
@@ -715,7 +711,19 @@ class DBObject {
 					$toret[$name] = null;
 				}
 			} else {
-				$toret[$name] = array_key_exists($name, $data) ? $data[$name] : null;
+				if (function_exists('filter_input')) {
+					$filter         = array_key_exists('filter', $options) ? $options['filter'] : FILTER_DEFAULT;
+					$filter_options = array_key_exists('filter_options', $options) ? $options['filter_options'] : array();
+					$value          = filter_input(INPUT_POST, $name, $filter, $filter_options);
+					if ($value === false) {
+						$value = null;
+						Backend::addError('Invalid input');
+					}
+					$toret[$name] = $value;
+				} else {
+					//TODO Maybe write some customized filter code here?
+					$toret[$name] = array_key_exists($name, $_POST) ? $_POST[$name] : null;
+				}
 			}
 		}
 		return $toret;

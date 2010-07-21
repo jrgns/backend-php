@@ -37,8 +37,8 @@ class FileObject extends DBObject {
 		return null;
 	}
 
-	function fromPost(array $data = array()) {
-		$data = parent::fromPost($data);
+	function fromPost() {
+		$data = parent::fromPost();
 		$fields = $this->meta['fields'];
 		if (array_key_exists('mime_type', $fields) && array_key_exists('from_db', $fields) && array_key_exists('content', $fields)) {
 			switch (true) {
