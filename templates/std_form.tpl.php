@@ -60,6 +60,12 @@ $action_name = empty($action_name) ? ucwords(Controller::$action) : $action_name
 					$field_str .= "\t\t\t\t\t" . '<option value="1"<?php if ($obj_values[\'' . $name . '\']): ?> selected="selected"<?php endif; ?>>Yes</option>' . PHP_EOL;
 					$field_str .= "\t\t\t\t" . '</select>';
 					break;
+				case $field == 'date':
+				case $field == 'time':
+				case $field == 'datetime':
+					//TODO Maybe add some jquery stuph to this later
+					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="text" class="text" value="<?php echo plain($obj_values[\'' . $name . '\']) ?>">';
+					break;
 				default:
 					$field_str = '';
 					break;
