@@ -710,15 +710,18 @@ class DBObject {
 				} else {
 					$toret[$name] = null;
 				}
-			} else {
+			} else if (array_key_exists('obj', $_POST) && array_key_exists($name, $_POST['obj'])) {
 				$filter         = array_key_exists('filter', $options) ? $options['filter'] : FILTER_DEFAULT;
 				$filter_options = array_key_exists('filter_options', $options) ? $options['filter_options'] : array();
-				$value          = filter_input(INPUT_POST, $name, $filter, $filter_options);
+				$value          = filter_var($_POST['obj'][$name], $filter, $filter_options);
+
 				if ($value === false) {
 					$value = null;
 					Backend::addError('Invalid input');
 				}
 				$toret[$name] = $value;
+			} else {
+				$toret[$name] = null;
 			}
 		}
 		return $toret;
