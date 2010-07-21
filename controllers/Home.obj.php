@@ -1,8 +1,12 @@
 <?php
 class Home extends AreaCtl {
 	function html_index() {
-		Backend::add('Sub Title', 'Welcome');
-		Backend::addContent('Welcome to #Title#');
+		if (Render::checkTemplateFile('home.index.tpl.php')) {
+			Backend::addContent(Render::renderFile('home.index.tpl.php', $results));
+		} else {
+			Backend::add('Sub Title', 'Welcome');
+			Backend::addContent('Welcome to #Title#');
+		}
 		return true;
 	}
 	
