@@ -284,3 +284,32 @@ function proper_case_keys($array) {
 	return $toret;
 }
 
+/********************************
+ * Retro-support of filter_input()
+ ********************************/
+if (!function_exists('filter_input')) {
+	define('INPUT_POST', 1);
+	define('INPUT_GET', 2);
+	define('INPUT_COOKIE', 4);
+	define('INPUT_SERVER', 8);
+	define('INPUT_ENV', 16);
+
+	function filter_input($type, $name, $filter = null, $filter_options = array()) {
+		$value = null;
+		if ($type & INPUT_POST && array_key_exists($name, $_POST)) {
+			$value = $_POST[$name];
+		} else if ($type & INPUT_GET && array_key_exists($name, $_GET)) {
+			$value = $_GET[$name];
+		} else if ($type & INPUT_COOKIE && array_key_exists($name, $_COOKIE)) {
+			$value = $_COOKIE[$name];
+		} else if ($type & INPUT_SERVER && array_key_exists($name, $_SERVER)) {
+			$value = $_SERVER[$name];
+		} else if ($type & INPUT_ENV && array_key_exists($name, $_ENV)) {
+			$value = $_ENV[$name];
+		}
+		if (!is_null($value)) {
+			//TODO Write customized filter code here
+		}
+		return $value;
+	}
+}

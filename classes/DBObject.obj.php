@@ -711,19 +711,14 @@ class DBObject {
 					$toret[$name] = null;
 				}
 			} else {
-				if (function_exists('filter_input')) {
-					$filter         = array_key_exists('filter', $options) ? $options['filter'] : FILTER_DEFAULT;
-					$filter_options = array_key_exists('filter_options', $options) ? $options['filter_options'] : array();
-					$value          = filter_input(INPUT_POST, $name, $filter, $filter_options);
-					if ($value === false) {
-						$value = null;
-						Backend::addError('Invalid input');
-					}
-					$toret[$name] = $value;
-				} else {
-					//TODO Maybe write some customized filter code here?
-					$toret[$name] = array_key_exists($name, $_POST) ? $_POST[$name] : null;
+				$filter         = array_key_exists('filter', $options) ? $options['filter'] : FILTER_DEFAULT;
+				$filter_options = array_key_exists('filter_options', $options) ? $options['filter_options'] : array();
+				$value          = filter_input(INPUT_POST, $name, $filter, $filter_options);
+				if ($value === false) {
+					$value = null;
+					Backend::addError('Invalid input');
 				}
+				$toret[$name] = $value;
 			}
 		}
 		return $toret;
