@@ -289,11 +289,11 @@ class Query {
 		if (!empty($this->group)) {
 			$query .= PHP_EOL . 'GROUP BY ' . implode(', ', $this->group);
 		}
-		if (!empty($this->order)) {
-			$query .= PHP_EOL . 'ORDER BY ' . implode(', ', $this->order);
-		}
 		if (!empty($this->having)) {
 			$query .= PHP_EOL . 'HAVING (' . implode(') AND (', $this->having) . ')';
+		}
+		if (!empty($this->order)) {
+			$query .= PHP_EOL . 'ORDER BY ' . implode(', ', $this->order);
 		}
 		if (!empty($this->limit)) {
 			if (get_class($this) == 'SelectQuery') {
