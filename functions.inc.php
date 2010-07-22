@@ -544,3 +544,9 @@ function bzr_get_file_revision($filename) {
 	return false;
 }
 
+/**
+ * Works the same as the MySQL IFNULL function
+ */
+function ifnull($var, $value) {
+	return is_null($var) ? $value : $var;
+}
