@@ -60,7 +60,7 @@ class Backend {
 			include_once(APP_FOLDER . '/constants.inc.php');
 		}
 		if (defined('SITE_FOLDER') && file_exists(SITE_FOLDER . '/constants.inc.php')) {
-			include_once(APP_FOLDER . '/constants.inc.php');
+			include_once(SITE_FOLDER . '/constants.inc.php');
 		}
 		if (file_exists(APP_FOLDER . '/functions.inc.php')) {
 			include_once(APP_FOLDER . '/functions.inc.php');
