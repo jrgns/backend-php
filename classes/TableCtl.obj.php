@@ -75,30 +75,29 @@ class TableCtl extends AreaCtl {
 	 * how to work around this?
 	 */
 	public function action_create() {
-		$toret = false;
 		$object = self::getObject(get_class($this));
-		if ($object) {
-			$toret = true;
-			//We need to check if the post data is valid in some way?
-			$data = $object->fromPost();
-			if (is_post()) {
-				$data = Hook::run('create', 'pre', array($data, $object), array('toret' => $data));
-				if ($object->create($data)) {
-					Hook::run('create', 'post', array($data, $object));
-					Backend::addSuccess($object->getMeta('name') . ' Added');
-					$toret = $object;
-				} else {
-					$toret = false;
-					Backend::addError('Could not add ' . $object->getMeta('name'));
-				}
-				if (!empty($object->error_msg)) {
-					Backend::addNotice($object->error_msg);
-				}
-			}
-			Backend::add('obj_values', $data);
-		} else {
+		if (!$object) {
 			Controller::whoops();
+			return false;
 		}
+		$result = true;
+		//We need to check if the post data is valid in some way?
+		$data = $object->fromPost();
+		if (is_post()) {
+			$data = Hook::run('create', 'pre', array($data, $object), array('toret' => $data));
+			if ($object->create($data)) {
+				Hook::run('create', 'post', array($data, $object));
+				Backend::addSuccess($object->getMeta('name') . ' Added');
+				$result = $object;
+			} else {
+				Backend::addError('Could not add ' . $object->getMeta('name'));
+				$result = false;
+			}
+			if (!empty($object->error_msg)) {
+				Backend::addNotice($object->error_msg);
+			}
+		}
+		Backend::add('obj_values', $data);
 		return $toret;
 	}
 	
