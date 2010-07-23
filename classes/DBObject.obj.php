@@ -666,10 +666,13 @@ class DBObject {
 	
 	function fromPost() {
 		$toret = array();
+		$data = array_key_exists('obj', $_POST) && is_array($_POST['obj']) ? $_POST['obj'] : $_POST;
 		foreach($this->meta['fields'] as $name => $options) {
 			$options = is_array($options) ? $options : array('type' => $options);
 
-			$type = array_key_exists('type', $options) ? $options['type'] : 'string';
+			$type           = array_key_exists('type', $options) ? $options['type'] : 'string';
+			$filter         = array_key_exists('filter', $options) ? $options['filter'] : FILTER_DEFAULT;
+			$filter_options = array_key_exists('filter_options', $options) ? $options['filter_options'] : array();
 			if (in_array($type, array('tiny_blob', 'blob', 'medium_blob', 'long_blob'))) {
 				if (!empty($_FILES['obj'])) {
 					if ($_FILES['obj']['error'][$name]) {
@@ -710,16 +713,12 @@ class DBObject {
 				} else {
 					$toret[$name] = null;
 				}
-			} else if (array_key_exists('obj', $_POST) && array_key_exists($name, $_POST['obj'])) {
-				$filter         = array_key_exists('filter', $options) ? $options['filter'] : FILTER_DEFAULT;
-				$filter_options = array_key_exists('filter_options', $options) ? $options['filter_options'] : array();
-				$value          = filter_var($_POST['obj'][$name], $filter, $filter_options);
-
-				if ($value === false) {
-					$value = null;
+			} else if (array_key_exists($name, $data)) {
+				$toret[$name] = filter_var($data[$name], $filter, $filter_options);
+				if ($toret[$name] === false) {
+					$toret[$name] = null;
 					Backend::addError('Invalid input');
 				}
-				$toret[$name] = $value;
 			} else {
 				$toret[$name] = null;
 			}

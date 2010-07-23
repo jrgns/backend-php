@@ -98,7 +98,7 @@ class TableCtl extends AreaCtl {
 			}
 		}
 		Backend::add('obj_values', $data);
-		return $toret;
+		return $result;
 	}
 	
 	public function action_replace() {
