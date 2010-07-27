@@ -31,7 +31,7 @@ class HtmlView extends View {
 		if (Permission::check(Controller::$action, Controller::$area) && !method_exists($controller, $display_method)) {
 			$template_file = Controller::$area . '.' . Controller::$action . '.tpl.php';
 			if (Render::checkTemplateFile($template_file)) {
-				Backend::addContent(Render::renderFile($template_file, $results));
+				Backend::addContent(Render::renderFile($template_file, is_null($results) ? array() : $results));
 			}
 		}
 		//TODO Add site_link, and other vars, as JS vars
@@ -244,8 +244,12 @@ class HtmlView extends View {
 	}
 	
 	public function whoops($title, $msg) {
-		Backend::add('Sub Title', $title);
-		Backend::addContent($msg);
+		if ($msg == 'Component is Inactive') {
+			parent::whoops($title, $msg);
+		} else {
+			Backend::add('Sub Title', $title);
+			Backend::addContent($msg);
+		}
 	}
 
 	public static function install() {

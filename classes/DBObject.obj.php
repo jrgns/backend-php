@@ -121,6 +121,9 @@ class DBObject {
 			} else {
 				$mode = $load_mode;
 			}
+			if (Controller::$debug >= 2) {
+				var_dump(get_class($relation), $mode, $conds, $params, $order);
+			}
 			$relation->read(array('mode' => $mode, 'conditions' => $conds, 'parameters' => $params, 'order' => $order));
 			$relation->loadDeep($mode);
 			return $relation;

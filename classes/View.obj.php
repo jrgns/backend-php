@@ -78,18 +78,22 @@ class View {
 		}
 	}
 	
-	public function whoops($msg, $title) {
+	public function whoops($title, $msg) {
 		$version = '1.1';
-		switch ($msg) {
+		switch ($title) {
 		case 'Permission Denied':
 			$code = 401;
-			$header = $title;
+			$header = $msg;
 			break;
 		case 'Unknown Method':
 		case 'Whoops!':
 		default:
-			$code = 400;
-			$header = $title;
+			if ($msg == 'Component is Inactive') {
+				$code = 404;
+			} else {
+				$code = 400;
+			}
+			$header = $msg;
 			break;
 		}
 		header('HTTP/' . $version . ' ' . $code . ' ' . $header, true, $code);
