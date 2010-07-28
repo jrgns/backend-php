@@ -244,11 +244,11 @@ function array_flatten($array, $key_field = null, $value_field = null) {
 			foreach($array as $row) {
 				$toret[] = current($row);
 			}
-		} else if ($value_field === true && $key_field == true) {
+		} else if ($value_field === true && $key_field === true) {
 			foreach($array as $row) {
 				$toret[array_shift($row)] = array_shift($row);
 			}
-		} else if ($value_field === true && $key_field == true && array_key_exists($value_field, current($array)) && array_key_exists($key_field, current($array))) {
+		} else if ($value_field === true && $key_field === true && array_key_exists($value_field, current($array)) && array_key_exists($key_field, current($array))) {
 			foreach($array as $row) {
 				$toret[$row[$key_field]] = $row[$value_field];
 			}
