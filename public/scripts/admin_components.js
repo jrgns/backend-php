@@ -5,7 +5,7 @@ $(document).ready(function() {
 function toggleActive(evt) {
 	var id = $(this).attr('id').replace(/^component_/, '');
 	if (id) {
-		$('a#component_' + id).html('<img src="images/loading1.gif" alt="Loading..."/>');
+		$('a#component_' + id).html('<img src="' + site_link + 'images/loading1.gif" alt="Loading..."/>');
 		$.getJSON('?q=component/toggle/' + id + '/active&mode=json', function(json) {
 			try {
 				if (json.result['active'] == 1) {

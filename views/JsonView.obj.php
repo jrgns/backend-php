@@ -25,23 +25,12 @@ class JsonView extends TextView {
 	}
 
 	public static function hook_output($to_print) {
-		switch (Controller::$action) {
-		case 'list':
-			$to_print = $to_print instanceof DBObject ? $to_print->list : $to_print;
-			break;
-		case 'display':
-			if ($to_print instanceof DBObject && !empty(Controller::$parameters[0])) {
-				$to_print = !empty($to_print->object) ? $to_print->object : $to_print->array;
-			}
-			break;
-		default:
-			break;
-		}
 		$object = new stdClass();
 		$object->result  = $to_print;
 		$object->error   = Backend::getError();
 		$object->notice  = Backend::getNotice();
 		$object->success = Backend::getSuccess();
+		$object->content = Backend::getContent();
 		$last = '';
 		while (ob_get_level() > 1) {
 			//Ending the ob_start from HtmlView::hook_init

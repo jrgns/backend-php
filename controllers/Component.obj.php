@@ -34,7 +34,7 @@ class Component extends TableCtl {
 	
 	public function json_toggle($result) {
 		if ($result instanceof ComponentObj) {
-			Controller::redirect('?q=' . Controller::$area . '/' . $result->array['id']);
+			Controller::redirect('?q=' . Controller::$area . '/read/' . $result->array['id']);
 		}
 		return $result;
 	}

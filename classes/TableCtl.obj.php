@@ -306,6 +306,23 @@ class TableCtl extends AreaCtl {
 		return $object;
 	}
 	
+	public function json_display($result) {
+		if ($result instanceof DBObject) {
+			switch (true) {
+			case !empty($result->array):
+				$result = $result->array;
+				break;
+			case !empty($result->object):
+				$result = $result->object;
+				break;
+			default:
+				$result = false;
+				break;
+			}
+		}
+		return $result;
+	}
+	
 	/**
 	 * Output a list of records in HTML
 	 *
@@ -339,6 +356,13 @@ class TableCtl extends AreaCtl {
 			}
 		}
 		return $object;
+	}
+	
+	public function json_list($result) {
+		if ($result instanceof DBObject) {
+			$result = $result->list;
+		}
+		return $result;
 	}
 	
 	/**
