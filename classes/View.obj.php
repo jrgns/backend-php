@@ -38,12 +38,8 @@ class View {
 		}
 		
 		$display_method = $this->mode . '_' . Controller::$action;
-		if (method_exists($controller, $display_method)) {
-			if ($controller->checkPermissions()) {
-				$data = $controller->$display_method($data);
-			}
-		} else if (is_null($data)) {
-			Controller::whoops(array('title' => 'Unknown Method', 'message' => 'Method ' . Controller::$area . '::' . Controller::$action . ' does not exist'));
+		if (method_exists($controller, $display_method) && $controller->checkPermissions()) {
+			$data = $controller->$display_method($data);
 		}
 		
 		$data = Hook::run('display', 'post', array($data, $controller), array('toret' => $data));

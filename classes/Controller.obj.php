@@ -23,14 +23,15 @@ class Controller {
 
 	public static $parameters = array();
 	
-	//TODO move this to the config or Application class
 	public static $salt = false;
 	public static $view = false;
 		
 	protected static $started = false;
-	protected static $init = false;
+	protected static $init    = false;
 	
-	public static $firephp = false;
+	public static $firephp    = false;
+	
+	private static $whoopsed  = false;
 	
 	public static function serve(array $info = array()) {
 		self::init();
@@ -158,29 +159,30 @@ class Controller {
 	public static function finish() {
 		Hook::run('finish', 'pre');
 
-		$_SESSION['error'] = Backend::getError();
-		$_SESSION['notice'] = Backend::getNotice();
+		$_SESSION['error']   = Backend::getError();
+		$_SESSION['notice']  = Backend::getNotice();
 		$_SESSION['success'] = Backend::getSuccess();
-		if (empty($_SESSION['previous_url']) || !is_array($_SESSION['previous_url'])) {
-			$_SESSION['previous_url'] = array();
-		}
-		$_SESSION['previous_url'][self::$view->mode] = $_SERVER['REQUEST_URI'];
+		if (!self::$whoopsed) {
+			if (empty($_SESSION['previous_url']) || !is_array($_SESSION['previous_url'])) {
+				$_SESSION['previous_url'] = array();
+			}
+			$_SESSION['previous_url'][self::$view->mode] = $_SERVER['REQUEST_URI'];
 
-		if (empty($_SESSION['previous_area']) || !is_array($_SESSION['previous_area'])) {
-			$_SESSION['previous_area'] = array();
-		}
-		$_SESSION['previous_area'][self::$view->mode] = self::$area;
+			if (empty($_SESSION['previous_area']) || !is_array($_SESSION['previous_area'])) {
+				$_SESSION['previous_area'] = array();
+			}
+			$_SESSION['previous_area'][self::$view->mode] = self::$area;
 
-		if (empty($_SESSION['previous_action']) || !is_array($_SESSION['previous_action'])) {
-			$_SESSION['previous_action'] = array();
-		}
-		$_SESSION['previous_action'][self::$view->mode] = self::$action;
+			if (empty($_SESSION['previous_action']) || !is_array($_SESSION['previous_action'])) {
+				$_SESSION['previous_action'] = array();
+			}
+			$_SESSION['previous_action'][self::$view->mode] = self::$action;
 		
-		if (empty($_SESSION['previous_parameters']) || !is_array($_SESSION['previous_parameters'])) {
-			$_SESSION['previous_parameters'] = array();
+			if (empty($_SESSION['previous_parameters']) || !is_array($_SESSION['previous_parameters'])) {
+				$_SESSION['previous_parameters'] = array();
+			}
+			$_SESSION['previous_parameters'][self::$view->mode] = self::$parameters;
 		}
-		$_SESSION['previous_parameters'][self::$view->mode] = self::$parameters;
-		
 		Hook::run('finish', 'post');
 	}
 	
@@ -426,6 +428,7 @@ class Controller {
 	}
 	
 	public static function whoops($options = array()) {
+		self::$whoopsed = true;
 		if (!is_array($options)) {
 			$options = array('message' => $options);
 		}

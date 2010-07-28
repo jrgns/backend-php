@@ -37,6 +37,8 @@ class AreaCtl {
 		if ($this->checkPermissions()) {
 			if (method_exists($this, $method)) {
 				$toret = call_user_func_array(array($this, $method), Controller::$parameters);
+			} else {
+				Controller::whoops(array('title' => 'Unknown Method', 'message' => 'Method ' . Controller::$area . '::' . Controller::$action . ' does not exist'));
 			}
 		} else {
 			Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to ' . Controller::$action . ' ' . get_class($this)));
