@@ -355,6 +355,25 @@ if (!function_exists('get_called_class')) {
 } 
 
 function curl_request($url, array $parameters = array(), array $options = array()) {
+	if (!empty($options['cache']) && $options['cache'] > 0) {
+		$cache = $options['cache'];
+		if (count($parameters)) {
+			$cache_file = $url . '?' . http_build_query($parameters);
+		} else {
+			$cache_file = $url;
+		}
+		$cache_file = md5($cache_file);
+		if (defined('SITE_FOLDER')) {
+			$cache_file = SITE_FOLDER . '/cache/' . $cache_file;
+		} else {
+			$cache_file = APP_FOLDER . '/cache/' . $cache_file;
+		}
+		if (file_exists($cache_file) && filemtime($cache_file) >= time() - $cache) {
+			return file_get_contents($cache_file);
+		}
+	} else {
+		$cache = false;
+	}
 	$ch = curl_init($url);
 	
 	curl_setopt($ch, CURLOPT_USERAGENT, 'Backend / PHP');
@@ -418,16 +437,23 @@ function curl_request($url, array $parameters = array(), array $options = array(
 	if (!empty($options['callback']) && is_callable($options['callback'])) {
 		$toret = call_user_func_array($options['callback'], array($ch, $toret, $options));
 	} else if ($curl_error = curl_errno($ch)) {
-		curl_close($ch);
-		return false;
+		$toret = false;
 	} else {
 		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		if (!in_array($http_code, array(200))) {
-			curl_close($ch);
-			return false;
+			$toret = false;
 		}
 	}
 	curl_close($ch);
+
+	if ($toret && $cache) {
+		file_put_contents($cache_file, $toret);
+	}
+
+	//Don't know if this is a good idea, but if we couldn't fetch the file, and an older one exists, return it
+	if (!$toret && $cache && file_exists($cache_file)) {
+		$toret = file_get_contents($cache_file);
+	}
 	return $toret;
 }
 
