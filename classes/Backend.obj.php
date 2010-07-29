@@ -548,6 +548,10 @@ class Backend {
 				SITE_FOLDER . '/utilities/' => 'utility',
 				APP_FOLDER . '/utilities/' => 'utility',
 				BACKEND_FOLDER . '/utilities/' => 'utility',
+
+				SITE_FOLDER . '/widgets/' => 'widget',
+				APP_FOLDER . '/widgets/' => 'widget',
+				BACKEND_FOLDER . '/widgets/' => 'widget',
 			);
 		} else {
 			$folders = array(
@@ -565,6 +569,9 @@ class Backend {
 
 				APP_FOLDER . '/utilities/' => 'utility',
 				BACKEND_FOLDER . '/utilities/' => 'utility',
+
+				APP_FOLDER . '/widgets/' => 'widget',
+				BACKEND_FOLDER . '/widgets/' => 'widget',
 			);
 		}
 		foreach($folders as $folder => $type) {
