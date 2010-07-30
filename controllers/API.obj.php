@@ -4,7 +4,7 @@ class API extends AreaCtl {
 		$type  = array_key_exists('type', $options)  ? $options['type']  : 'string';
 		$range = array_key_exists('range', $options) ? $options['range'] : false;
 
-		//Add other filters / validateors here
+		//Add other filters / validators here
 		switch($type) {
 		case 'numeric':
 			settype($value, 'int');
@@ -21,27 +21,63 @@ class API extends AreaCtl {
 		return $value;
 	}
 
-	public static function extract($definition, $data) {
+	public static function extract($definition, $data = 'get') {
 		$parameters = array();
 		$errors     = array();
+		if (is_string($data) && defined('INPUT_' . strtoupper($data))) {
+			$from = constant('INPUT_' . strtoupper($data));
+		} else {
+			$from = INPUT_GET;
+		}
 		if (!empty($definition['required'])) {
 			foreach($definition['required'] as $name => $options) {
-				if (!array_key_exists($name, $data)) {
-					$errors[] = 'Missing required parameter: ' . $name;
-					continue;
+				if (is_array($data)) {
+					//Old way to do it.
+					if (!array_key_exists($name, $data)) {
+						$errors[] = 'Missing required parameter: ' . $name;
+						continue;
+					}
+					$parameters[$name] = self::checkParam($name, $data[$name], $options, $errors);
+				} else {
+					//New way to do it
+					$value = filter_input($from, $name);
+					if (is_null($value)) {
+						$errors[] = 'Missing required parameter: ' . $name;
+						continue;
+					} else if ($value === false) {
+						$errors[] = 'Invalid required parameter: ' . $name;
+						continue;
+					}
+					$parameters[$name] = self::checkParam($name, $value, $options, $errors);
 				}
-				$parameters[$name] = self::checkParam($name, $data[$name], $options, $errors);
 			}
 		}
 		if (!count($errors) && !empty($definition['optional'])) {
 			foreach($definition['optional'] as $name => $options) {
-				if (array_key_exists($name, $data)) {
-					$parameters[$name] = self::checkParam($name, $data[$name], $options, $errors);
-				} else {
-					if (!array_key_exists('default', $options)) {
-						continue;
+				if (is_array($data)) {
+					//Old way to do it.
+					if (array_key_exists($name, $data)) {
+						$parameters[$name] = self::checkParam($name, $data[$name], $options, $errors);
+					} else {
+						if (!array_key_exists('default', $options)) {
+							continue;
+						}
+						$parameters[$name] = $options['default'];
 					}
-					$parameters[$name] = $options['default'];
+				} else {
+					//New way to do it
+					$value = filter_input($from, $name);
+					if (is_null($value)) {
+						if (!array_key_exists('default', $options)) {
+							continue;
+						}
+						$parameters[$name] = $options['default'];
+					} else if ($value === false) {
+						$errors[] = 'Invalid required parameter: ' . $name;
+						continue;
+					} else {
+						$parameters[$name] = self::checkParam($name, $value, $options, $errors);
+					}
 				}
 			}
 		}

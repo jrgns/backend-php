@@ -1,5 +1,6 @@
 		<p class="large bottom">
-			<strong><?php echo $name ?></strong> (<code><?php echo $parameter['type'] ?></code>)<br>
+			<strong><?php echo $name ?></strong> (<code><?php echo $parameter['type'] ?></code>)
+			<?php if (!empty($parameter['optional'])): ?> - Optional<?php endif; ?><br>
 		</p>
 		<p><?php echo $parameter['description'] ?>
 			<?php if(!empty($parameter['range'])): ?>
