@@ -313,3 +313,33 @@ if (!function_exists('filter_input')) {
 		return $value;
 	}
 }
+
+/**
+ * This function will take a string in the format of a single item or
+ * multiple items in the format 1,2,3,4,5 or an array of items.
+ * The output will be a readable set of items with the last two items 
+ * separated by " and ".
+ *
+ * Retrieved from http://www.hashbangcode.com/blog/format-list-items-php-449.html on 30/07/2010
+ *
+ * @param  string|array $numbers The list of items as a string or array.
+ * @return string                The formatted items.
+ */
+function and_items($numbers) {
+    if (is_array($numbers)) {
+        // If numbers is an array then implode it into a comma separated string.
+        $numbers = implode(',', $numbers);
+    }
+ 
+    if (is_string($numbers)) {
+        // Make sure all commas have a single space character after them.
+        $numbers = preg_replace("/(\s*?,\s*)/", ", ", $numbers);
+        // Remove any spare commas
+        $numbers = preg_replace("/(,\s)+/", ", ", $numbers);        
+        // The string contains commas, find the last comma in the string.
+        $lastCommaPos = strrpos($numbers, ',') - strlen($numbers);
+        // Replace the last ocurrance of a comma with " and "
+        $numbers = substr($numbers, 0, $lastCommaPos) . str_replace(',', ' and', substr($numbers, $lastCommaPos));
+    }
+    return $numbers;
+}
