@@ -367,10 +367,21 @@ class DBObject {
 				$toret = $query->execute($params);
 				if ($toret) {
 					//TODO This will potentially break if there are triggers in use
-					$this->inserted_id = $this->db->lastInsertId();
-					$this->meta['id']  = $this->inserted_id;
-					$toret             = $this->inserted_id;
+					$id_options =
+						is_array($this->meta['fields'][$this->meta['id_field']]) ?
+						$this->meta['fields'][$this->meta['id_field']] :
+						array('type' => $this->meta['fields'][$this->meta['id_field']]);
+					if (empty($id_options['non_automatic'])) {
+						$new_id = $this->db->lastInsertId();
+					} else if (!empty($data[$this->meta['id_field']])) {
+						$new_id = $data[$this->meta['id_field']];
+					} else {
+						$new_id = false;
+					}
+					$this->inserted_id = $new_id;
+					$toret             = $new_id;
 					if (array_key_exists('load', $options) ? $options['load'] : true) {
+						$this->meta['id']  = $new_id;
 						$this->read();
 					}
 				} else if (!empty($query->error_msg)) {
