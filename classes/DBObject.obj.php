@@ -528,6 +528,13 @@ class DBObject {
 				$value = array_key_exists($name, $data) ? $data[$name] : null;
 				switch($type) {
 				case 'primarykey':
+					if (empty($options['non_automatic'])) {
+						$value = null;
+					} else if (is_null($value)) {
+						Backend::addError('Missing ' . $name);
+						$toret = false;
+					}
+					break;
 				case 'lastmodified':
 					$value = null;
 					break;
