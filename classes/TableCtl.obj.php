@@ -360,6 +360,7 @@ class TableCtl extends AreaCtl {
 	
 	public function json_list($result) {
 		if ($result instanceof DBObject) {
+			Backend::addContent(array('list_count' => $result->list_count), array('as_is' => 1));
 			$result = $result->list;
 		}
 		return $result;
