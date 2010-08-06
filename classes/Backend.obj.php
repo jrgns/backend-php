@@ -314,7 +314,7 @@ class Backend {
 		if (is_null($string)) {
 			return false;
 		}
-		if (is_array($string)) {
+		if (is_array($string) && empty($options['as_is'])) {
 			$result = true;
 			foreach($string as $one_string) {
 				$result = self::addSomething($what, $one_string, $options) && $result;
@@ -323,11 +323,12 @@ class Backend {
 		} else {
 			array_push(self::$$what, $string);
 			//Log to file if necessary
+			$log_to_file = array_key_exists('log_to_file', $options) ? $options['log_to_file'] : true;
 			if (defined('BACKEND_INSTALLED') && BACKEND_INSTALLED) {
-				$log_to_file = Value::get('log_to_file', false);
+				$log_to_file = $log_to_file && Value::get('log_to_file', false);
 			} else {
 				//Only use this pre installation
-				$log_to_file = Backend::get('log_to_file');
+				$log_to_file = $log_to_file && Backend::get('log_to_file');
 			}
 
 			if ($log_to_file) {
@@ -355,6 +356,7 @@ class Backend {
 	}
 	
 	static public function addContent($content, $options = array()) {
+		$options['log_to_file'] = array_key_exists('log_to_file', $options) ? $options['log_to_file'] : true;
 		return self::addSomething('content', $content, $options);
 	}
 	
