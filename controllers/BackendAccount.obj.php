@@ -62,16 +62,18 @@ class BackendAccount extends TableCtl {
 	}
 
 	function action_login($username = false, $password = false) {
-		$toret = false;
 		if (!is_post()) {
 			return false;
 		}
-		$toret = true;
 		if (self::checkUser()) {
 			return true;
 		}
-		$username = $username ? $username : (array_key_exists('username', $_POST) ? $_POST['username'] : false);
-		$password = $password ? $password : (array_key_exists('password', $_POST) ? $_POST['password'] : false);
+		if (!$username) {
+			$username = filter_input(INPUT_POST, 'username');
+		}
+		if (!$password) {
+			$password = filter_input(INPUT_POST, 'password');
+		}
 		if ($username && $password) {
 			$User = self::getObject(self::getName());
 
@@ -79,7 +81,11 @@ class BackendAccount extends TableCtl {
 			$query
 				->filter('`' . BackendAccount::getTable() . '`.`Username` = :username OR `' . BackendAccount::getTable() . '`.`Mobile` = :username OR `' . BackendAccount::getTable() . '`.`Email` = :username')
 				->filter('`' . BackendAccount::getTable() . '`.`password` = MD5(CONCAT(`' . BackendAccount::getTable() . '`.`salt`, :password, :salt))');
-			$params = array(':username' => $username, ':password' => $password, ':salt' => Controller::$salt);
+			$params = array(
+				':username' => $username,
+				':password' => $password,
+				':salt' => Controller::$salt
+			);
 
 			$User->read(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
 			if ($User->object) {
@@ -99,7 +105,7 @@ class BackendAccount extends TableCtl {
 		} else {
 			return -3;
 		}
-		return $toret;
+		return true;
 	}
 	
 	function html_login($result) {
