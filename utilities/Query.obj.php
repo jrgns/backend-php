@@ -143,6 +143,7 @@ class Query {
 	public function setFields(array $fields = array()) {
 		$this->query = false;
 		$this->fields = $fields;
+		return $this;
 	}
 	
 	public function filter($condition) {
@@ -180,6 +181,7 @@ class Query {
 	public function setGroup(array $group = array()) {
 		$this->query = false;
 		$this->group = $group;
+		return $this;
 	}
 	
 	public function getGroup() {
@@ -199,6 +201,7 @@ class Query {
 	public function setOrder(array $order = array()) {
 		$this->query = false;
 		$this->order = $order;
+		return $this;
 	}
 	
 	public function getOrder() {
@@ -219,6 +222,7 @@ class Query {
 	public function setHaving(array $having = array()) {
 		$this->query  = false;
 		$this->having = array_filter(array_unique($having));
+		return $this;
 	}
 	
 	public function limit($one, $two = false) {
@@ -279,6 +283,7 @@ class Query {
 		} else {
 			$this->query = $query;
 		}
+		return $this;
 	}
 	
 	protected function buildQuery() {
