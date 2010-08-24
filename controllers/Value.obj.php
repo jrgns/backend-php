@@ -29,7 +29,7 @@ class Value extends TableCtl {
 			} else {
 				$toret = Value::retrieve($name);
 				if ($toret) {
-					$toret = !empty($toret['value']) ? $toret['value'] : $default;
+					$toret = array_key_exists('value', $toret) ? $toret['value'] : $default;
 				} else if (!is_null($default)) {
 					$toret = $default;
 					Value::set($name, $default);
