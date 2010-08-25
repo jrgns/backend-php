@@ -1,6 +1,6 @@
 <?php
 /**
- * The file that defines the JsonView class.
+ * The file that defines the TextView class.
  *
  * @author J Jurgens du Toit (JadeIT cc) <jurgens.dutoit@gmail.com> - initial API and implementation
  * @copyright Copyright (c) 2009 JadeIT cc.
@@ -12,7 +12,7 @@
  */
  
 /**
- * Default class to handle JsonView specific functions
+ * Default class to handle TextView specific functions
  */
 class TextView extends View {
 	function __construct() {
