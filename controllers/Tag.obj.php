@@ -35,7 +35,7 @@ class Tag extends TableCtl {
 		$result = $query->fetchAll(array(':table' => $table, ':id' => $table_id), array('with_key' => true));
 		if ($result) {
 			foreach($result as $key => $value) {
-				$result[$key] = current(current($value));
+				$result[$key] = current($value);
 			}
 		}
 		return $result;

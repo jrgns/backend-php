@@ -48,10 +48,12 @@ class Controller {
 			session_start();
 
 			date_default_timezone_set('Africa/Johannesburg');
+			
 
 			self::check_quotes();
 			self::$salt = Backend::getConfig('application.salt', 'Change this to something random!');
 
+			//TODO jrgns: Don't know if I like this here...
 			$user = BackendAccount::checkUser();
 			//Debugging
 			self::$debug = false;
@@ -75,7 +77,7 @@ class Controller {
 			$query = Request::getQuery();
 			$query = Hook::run('init', 'pre', array($query));
 			self::parseQuery($query);
-
+			
 			//View
 			self::$view = self::getView();
 			if (!self::$view instanceof View) {

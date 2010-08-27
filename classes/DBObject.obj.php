@@ -323,109 +323,108 @@ class DBObject {
 	}
 	
 	public function create($data, array $options = array()) {
-		$toret = false;
 		$this->error_msg = false;
-		if ($this->checkConnection()) {
-			$data = $this->validate($data, 'create', $options);
-			if ($data) {
-				$data = $this->process($data, 'in');
-				list ($query, $params) = $this->getCreateSQL($data, $options);
-				$query = new CustomQuery($query, array('connection' => $this->db));
-				if ($toret = $query->execute($params)) {
-					//TODO This will potentially break if there are triggers in use
-					$this->inserted_id = $this->db->lastInsertId();
-					$this->array       = $data;
-					$this->array['id'] = $this->inserted_id;
-					$this->meta['id']  = $this->inserted_id;
-					$toret             = $this->inserted_id;
-					if (array_key_exists('load', $options) ? $options['load'] : true) {
-						$this->read();
-					}
-				} else if (!empty($query->error_msg)) {
-					$this->error_msg = $query->error_msg;
-				}
-			}
-		} else {
+		if (!$this->checkConnection()) {
 			if (class_exists('BackendError', false)) {
 				BackendError::add(get_class($this) . ': DB Connection Error', 'create');
 			}
 			$this->error_msg = 'DB Connection error';
+			return false;
 		}
-		return $toret;
+		if ($data = $this->validate($data, 'create', $options)) {
+			$data = $this->process($data, 'in');
+			list ($query, $params) = $this->getCreateSQL($data, $options);
+			$query = new CustomQuery($query, array('connection' => $this->db));
+			if ($result = $query->execute($params, $options)) {
+				//TODO This will potentially break if there are triggers in use
+				$this->inserted_id = $this->db->lastInsertId();
+				$this->array       = $data;
+				$this->array['id'] = $this->inserted_id;
+				$this->meta['id']  = $this->inserted_id;
+				$result            = $this->inserted_id;
+				if (array_key_exists('load', $options) ? $options['load'] : true) {
+					$this->read();
+				}
+				return $result;
+			}
+			if (!empty($query->error_msg)) {
+				$this->error_msg = $query->error_msg;
+			}
+		}
+		return false;
 	}
 	
-	public function replace($data, $options = array()) {
-		$toret = false;
+	public function replace($data, array $options = array()) {
 		$this->error_msg = false;
-		if ($this->checkConnection()) {
-			$data = $this->validate($data, 'create', $options);
-			if ($data) {
-				$data = $this->process($data, 'in');
-				list ($query, $params) = $this->getCreateSQL($data, $options);
-				$query = preg_replace('/^INSERT/', 'REPLACE', $query);
-				$query = new CustomQuery($query, array('connection' => $this->db));
-				$toret = $query->execute($params);
-				if ($toret) {
-					//TODO This will potentially break if there are triggers in use
-					$id_options =
-						is_array($this->meta['fields'][$this->meta['id_field']]) ?
-						$this->meta['fields'][$this->meta['id_field']] :
-						array('type' => $this->meta['fields'][$this->meta['id_field']]);
-					if (empty($id_options['non_automatic'])) {
-						$new_id = $this->db->lastInsertId();
-					} else if (!empty($data[$this->meta['id_field']])) {
-						$new_id = $data[$this->meta['id_field']];
-					} else {
-						$new_id = false;
-					}
-					$this->inserted_id = $new_id;
-					$toret             = $new_id;
-					if (array_key_exists('load', $options) ? $options['load'] : true) {
-						$this->meta['id']  = $new_id;
-						$this->read();
-					}
-				} else if (!empty($query->error_msg)) {
-					$this->error_msg = $query->error_msg;
-				}
-			}
-		} else {
+		if (!$this->checkConnection()) {
 			if (class_exists('BackendError', false)) {
 				BackendError::add(get_class($this) . ': DB Connection Error', 'replace');
 			}
 			$this->error_msg = 'DB Connection Error';
+			return false;
 		}
-		return $toret;
+		if ($data = $this->validate($data, 'create', $options)) {
+			$data = $this->process($data, 'in');
+			list ($query, $params) = $this->getCreateSQL($data, $options);
+			$query = preg_replace('/^INSERT/', 'REPLACE', $query);
+			$query = new CustomQuery($query, array('connection' => $this->db));
+			;
+			if ($result = $query->execute($params, $options)) {
+				//TODO This will potentially break if there are triggers in use
+				$id_options =
+					is_array($this->meta['fields'][$this->meta['id_field']]) ?
+					$this->meta['fields'][$this->meta['id_field']] :
+					array('type' => $this->meta['fields'][$this->meta['id_field']]);
+				if (empty($id_options['non_automatic'])) {
+					$new_id = $this->db->lastInsertId();
+				} else if (!empty($data[$this->meta['id_field']])) {
+					$new_id = $data[$this->meta['id_field']];
+				} else {
+					$new_id = false;
+				}
+				$this->inserted_id = $new_id;
+				$result            = $new_id;
+				if (array_key_exists('load', $options) ? $options['load'] : true) {
+					$this->meta['id']  = $new_id;
+					$this->read();
+				}
+				return $result;
+			}
+			if (!empty($query->error_msg)) {
+				$this->error_msg = $query->error_msg;
+			}
+		}
+		return false;
 	}
 	
 	public function retrieve($parameter) {
-		$toret = null;
 		$this->error_msg = false;
-		if ($this->checkConnection()) {
-			$query = $this->getRetrieveSQL();
-			if ($query) {
-				$stmt = $this->db->prepare($query);
-				if ($stmt->execute(array(':parameter' => $parameter))) {
-					$toret = $stmt->fetch(PDO::FETCH_ASSOC);
-					$toret = $toret ? $toret : null;
-				} else if (!empty($query->error_msg)) {
-					$this->error_msg = $query->error_msg;
-				}
-			} else {
-				if (class_exists('BackendError', false)) {
-					BackendError::add(get_class($this) . ': No Retrieve SQL', 'retrieve');
-				}
-				$this->error_msg = 'No Retrieve SQL for ' . class_name($this);
-			}
-		} else {
+		if (!$this->checkConnection()) {
 			if (class_exists('BackendError', false)) {
 				BackendError::add(get_class($this) . ': DB Connection Error', 'retrieve');
 			}
 			$this->error_msg = 'DB Connection Error';
+			return null;
 		}
-		return $toret;
+		if ($query = $this->getRetrieveSQL()) {
+			$stmt = $this->db->prepare($query);
+			if ($stmt->execute(array(':parameter' => $parameter))) {
+				$result = $stmt->fetch(PDO::FETCH_ASSOC);
+				return $result ? $result : null;
+			}
+			if (!empty($query->error_msg)) {
+				$this->error_msg = $query->error_msg;
+			}
+		} else {
+			if (class_exists('BackendError', false)) {
+				BackendError::add(get_class($this) . ': No Retrieve SQL', 'retrieve');
+			}
+			$this->error_msg = 'No Retrieve SQL for ' . class_name($this);
+		}
+		return null;
 	}
 	
-	public function update($data, $options = array()) {
+	public function update($data, array $options = array()) {
 		$this->error_msg = false;
 		if (!$this->checkConnection()) {
 			if (class_exists('BackendError', false)) {
@@ -441,54 +440,57 @@ class DBObject {
 		$data = $this->process($data, 'in');
 		list ($query, $params) = $this->getUpdateSQL($data, $options);
 		$query = new CustomQuery($query, array('connection' => $this->db));
-		$result = $query->execute($params);
-		if ($result) {
+		if ($result = $query->execute($params, $options)) {
 			if (array_key_exists('load', $options) ? $options['load'] : true) {
 				$this->read();
 			}
 			return $result;
-		} else if (!empty($query->error_msg)) {
-			$this->error_msg = $query->error_msg;
-			return false;
 		}
+		if (!empty($query->error_msg)) {
+			$this->error_msg = $query->error_msg;
+		}
+		return false;
 	}
 	
-	function delete() {
-		$toret = false;
+	function delete(array $options = array()) {
 		$this->error_msg = false;
-		if ($this->checkConnection()) {
-			extract($this->meta);
-			$query = new CustomQuery("DELETE FROM `$table` WHERE `$id_field` = :id LIMIT 1", array('connection' => $this->db));
-			$toret = $query->execute(array(':id' => $this->meta['id']));
-			if (!empty($query->error_msg)) {
-				$this->error_msg = $query->error_msg;
-			}
-		} else {
+		if (!$this->checkConnection()) {
 			if (class_exists('BackendError', false)) {
 				BackendError::add(get_class($this) . ': DB Connection Error', 'delete');
 			}
 			$this->error_msg = 'DB Connection Error';
+			return false;
 		}
-		return $toret;
+		extract($this->meta);
+		$query = new CustomQuery("DELETE FROM `$table` WHERE `$id_field` = :id LIMIT 1", array('connection' => $this->db));
+		if ($result = $query->execute(array(':id' => $this->meta['id']), $options)) {
+			return $result;
+		}
+		if (!empty($query->error_msg)) {
+			$this->error_msg = $query->error_msg;
+		}
+		return false;
 	}
 	
-	function truncate() {
+	function truncate(array $options = array()) {
 		$toret = false;
 		$this->error_msg = false;
-		if ($this->checkConnection()) {
-			extract($this->meta);
-			$query = new CustomQuery("TRUNCATE `$table`", array('connection' => $this->db));
-			$toret = $query->execute();
-			if (!empty($query->error_msg)) {
-				$this->error_msg = $query->error_msg;
-			}
-		} else {
+		if (!$this->checkConnection()) {
 			if (class_exists('BackendError', false)) {
 				BackendError::add(get_class($this) . ': DB Connection Error', 'truncate');
 			}
 			$this->error_msg = 'DB Connection Error';
+			return false;
 		}
-		return $toret;
+		extract($this->meta);
+		$query = new CustomQuery("TRUNCATE `$table`", array('connection' => $this->db));
+		if ($result = $query->execute(array(), $options)) {
+			return $result;
+		}
+		if (!empty($query->error_msg)) {
+			$this->error_msg = $query->error_msg;
+		}
+		return false;
 	}
 	
 	public function install(array $options = array()) {

@@ -46,7 +46,7 @@ class GateManager extends AreaCtl {
 
 				$query = new SelectQuery('Assignment');
 				$query
-					->leftJoin(BackendAccount::getName(), array('`users`.`id` = `assignments`.`access_id`'))
+					->leftJoin(BackendAccount::getName(), array('`' . BackendAccount::getTable() . '`.`id` = `assignments`.`access_id`'))
 					->filter("`assignments`.`access_type` = 'users'")
 					->filter('`role_id` = :role OR `role_id` = 0');
 				$toret->assignments = $query->fetchAll(array(':role' => $toret->role->array['id']));
@@ -128,7 +128,7 @@ class GateManager extends AreaCtl {
 		$permissions = $query->fetchAll(array(), array('with_key' => 1));
 		$toret->permissions = array();
 		foreach($permissions as $key => $value) {
-			$toret->permissions[$key] = explode(',', current(current($value)));
+			$toret->permissions[$key] = explode(',', current($value));
 		}
 		return $toret;
 	}

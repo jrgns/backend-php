@@ -52,12 +52,8 @@ class BackendAccount extends TableCtl {
 	public static function getQuery() {
 		$query = new SelectQuery(BackendAccount::getName());
 		$query
-			->field(array('`' . BackendAccount::getTable() . '`.*', "GROUP_CONCAT(DISTINCT `roles`.`name` ORDER BY `roles`.`name` SEPARATOR ',') AS `roles`"))
-			->leftJoin('Assignment', array("`assignments`.`access_type` = 'users'", '`' . BackendAccount::getTable() . '`.`id` = `assignments`.`access_id` OR `assignments`.`access_id` = 0'))
-			->leftJoin('Role', array('`assignments`.`role_id` = `roles`.`id`'))
 			->filter('`' . BackendAccount::getTable() . '`.`active` = 1')
-			->filter('`' . BackendAccount::getTable() . '`.`confirmed` = 1')
-			->group('`' . BackendAccount::getTable() . '`.`id`');
+			->filter('`' . BackendAccount::getTable() . '`.`confirmed` = 1');
 		return $query;
 	}
 
@@ -90,7 +86,6 @@ class BackendAccount extends TableCtl {
 			$User->read(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
 			if ($User->object) {
 				session_regenerate_id();
-				$User->object->roles = empty($User->object->roles) ? array() : explode(',', $User->object->roles);
 				$toret = $User->object;
 				$_SESSION['user'] = $User->object;
 				if (Component::isActive('PersistUser')) {
@@ -340,7 +335,6 @@ class BackendAccount extends TableCtl {
 			$User->read(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
 			if ($User->object) {
 				session_regenerate_id();
-				$User->object->roles = empty($User->object->roles) ? array() : explode(',', $User->object->roles);
 				$_SESSION['user']   = $User->object;
 				self::$current_user = $User->object;
 				return $User->object;

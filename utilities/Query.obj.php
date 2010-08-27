@@ -95,7 +95,7 @@ class Query {
 							$verbose_error[] = '(' . $error_info[1] . ')';
 						}
 						$verbose_error = implode(' ', $verbose_error);
-						if (class_exists('BackendError', false)) {
+						if (class_exists('BackendError', false) && empty($options['dont_moan'])) {
 							BackendError::add($verbose_error, 'execute');
 						}
 
@@ -253,15 +253,22 @@ class Query {
 	}
 	
 	public function fetchAll(array $parameters = array(), array $options = array()) {
-		$toret = $this->execute($parameters);
-		if ($toret) {
-			if (empty($options['with_key'])) {
-				$toret = $toret->fetchAll(PDO::FETCH_ASSOC);
+		if ($results = $this->execute($parameters)) {
+			if (!empty($options['with_key'])) {
+				//
+				$results = $results->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
+				$results = array_map('reset', $results);
+			} else if (array_key_exists('column', $options)) {
+				//Fetch only one column
+				$results = $results->fetchAll(PDO::FETCH_COLUMN, $options['column']);
+			} else if (!empty($options['group'])) {
+				//Groups values by the first column
+				$results = $results->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_GROUP);
 			} else {
-				$toret = $toret->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
+				$results = $results->fetchAll(PDO::FETCH_ASSOC);
 			}
 		}
-		return $toret;
+		return $results;
 	}
 	
 	public function fetchColumn(array $parameters = array(), int $column = null, array $options = array()) {

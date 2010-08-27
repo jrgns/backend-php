@@ -42,7 +42,11 @@ class API extends AreaCtl {
 					$parameters[$name] = self::checkParam($name, $data[$name], $options, $errors);
 				} else {
 					//New way to do it
-					$value = filter_input($from, $name);
+					if ($value = filter_input($from, $name)) {
+					} else if (filter_has_var($from, $name)) {
+						//Check for an array
+						$value = filter_input($from, $name, FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);
+					}
 					if (is_null($value)) {
 						$errors[] = 'Missing required parameter: ' . $name;
 						continue;
