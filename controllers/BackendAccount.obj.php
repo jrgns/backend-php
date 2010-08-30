@@ -288,6 +288,7 @@ class BackendAccount extends TableCtl {
 		if (!$user && Value::get('CheckHTTPAuth', false)) {
 			$user = self::processHTTPAuth();
 			if ($user) {
+				session_regenerate_id();
 				$_SESSION['user']   = $user;
 				self::$current_user = $user;
 			}
@@ -334,9 +335,6 @@ class BackendAccount extends TableCtl {
 			$params = array(':username' => $username);
 			$User->read(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
 			if ($User->object) {
-				session_regenerate_id();
-				$_SESSION['user']   = $User->object;
-				self::$current_user = $User->object;
 				return $User->object;
 			}
 		}
