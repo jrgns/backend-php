@@ -38,9 +38,9 @@ class DigestAuthentication {
 
 	public function challenge() {
 		$nonce = uniqid();
+		header('HTTP/1.1 401 Unauthorized');
 		header('WWW-Authenticate: Digest realm="' . $this->realm . '",qop="auth",nonce="' . $nonce . '",opauq="' . md5($this->realm) . '"');
-		header('HTTP/1.0 401 Unauthorized');
-		die($this->message);
+		die($this->message . "\n");
 	}
 	
 	/**
@@ -50,13 +50,16 @@ class DigestAuthentication {
 	 */
 	public function process() {
 		if (empty($_SERVER['PHP_AUTH_DIGEST'])) {
+			debug_header('Empty PHP_AUTH_DIGEST');
 			return false;
 		}
 		if (!($data = $this->parseHTTPDigest($_SERVER['PHP_AUTH_DIGEST']))) {
+			debug_header('Invalid PHP_AUTH_DIGEST');
 			return false;
 		}
 		$password = call_user_func_array($this->callback, array(array($data['username'])));
 		if (!$password) {
+			debug_header('No password');
 			return false;
 		}
 
@@ -66,6 +69,7 @@ class DigestAuthentication {
 		$valid_response = md5($A1.':'.$data['nonce'].':'.$data['nc'].':'.$data['cnonce'].':'.$data['qop'].':'.$A2);
 		
 		if ($data['response'] != $valid_response) {
+			debug_header('Invalid response');
 			return false;
 		}
 		
