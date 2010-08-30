@@ -275,10 +275,10 @@ class BackendAccount extends TableCtl {
 		Controller::redirect('?q=');
 	}
 	
-	public static function hook_init() {
+	public static function hook_post_init() {
 		$user = self::checkUser();
 		//Check if HTTP Digest Auth headers have been passed down
-		if (!$user && Value::get('CheckHTTPAuth', false)) {
+		if (!$user && Value::get('CheckHTTPAuth', false) && Value::get('CheckHTTPAuthIn:' . Controller::$view->mode, true)) {
 			$user = self::processHTTPAuth();
 			if ($user) {
 				$_SESSION['user']   = $user;
@@ -320,7 +320,10 @@ class BackendAccount extends TableCtl {
 	
 	public static function processHTTPAuth() {
 		$auth = BackendAccount::getHTTPAuth();
-		if ($username = $auth->process()) {
+
+		if (empty($_SERVER['PHP_AUTH_DIGEST'])) {
+			$auth->challenge();
+		} else if ($username = $auth->process()) {
 			$query = BackendAccount::getQuery();
 			$query->filter('`username` = :username');
 			$User = TableCtl::getObject(BackendAccount::getName());
@@ -469,7 +472,7 @@ Site Admin
 		$options['install_model'] = array_key_exists('install_model', $options) ? $options['install_model'] : true;
 		$toret = parent::install($options);
 
-		$toret = Hook::add('init', 'pre', self::getName(), array('global' => true, 'sequence' => -10)) && $toret;
+		$toret = Hook::add('init', 'post', self::getName(), array('global' => true, 'sequence' => 0)) && $toret;
 		$toret = Hook::add('start', 'pre', self::getName(), array('global' => true)) && $toret;
 		$toret = Hook::add('finish', 'post', self::getName(), array('global' => true)) && $toret;
 		
