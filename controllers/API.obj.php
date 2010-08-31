@@ -26,76 +26,55 @@ class API extends AreaCtl {
 		}
 		return $value;
 	}
-
+	
+	private static function extractDefinition($type, $definition, $data, &$errors) {
+		$parameters = array();
+		foreach($definition as $name => $options) {
+			if (array_key_exists($name, $data)) {
+				if (is_array($data[$name])) {
+					$value = filter_var($data[$name], FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);
+				} else {
+					$value = filter_var($data[$name]);
+				}
+				if ($value === false) {
+					$errors[] = 'Missing required parameter: ' . $name;
+					continue;
+				}
+			} else if ($type == 'required') {
+				$errors[] = 'Invalid required parameter: ' . $name;
+				continue;
+			} else if (array_key_exists('default', $options)) {
+				$value = $options['default'];
+			} else {
+				continue;
+			}
+			$parameters[$name] = self::checkParam($name, $value, $options, $errors);
+		}
+		return $parameters;
+	}
+	
 	public static function extract($definition, $data = self::INPUT_REQUEST) {
 		$parameters = array();
 		$errors     = array();
-		if (is_string($data) && $data == self::INPUT_REQUEST) {
-			$from = INPUT_GET | INPUT_POST;
-		} else if (is_string($data) && defined('INPUT_' . strtoupper($data))) {
-			$from = constant('INPUT_' . strtoupper($data));
+		if (is_array($data)) {
 		} else {
-			$from = INPUT_GET;
+			switch ($data) {
+			case self::INPUT_GET:
+				$data = $_GET;
+				break;
+			case self::INPUT_POST:
+				$data = $_POST;
+				break;
+			case self::INPUT_REQUEST:
+				$data = $_REQUEST;
+				break;
+			}
 		}
 		if (!empty($definition['required'])) {
-			foreach($definition['required'] as $name => $options) {
-				if (is_array($data)) {
-					//Old way to do it.
-					if (!array_key_exists($name, $data)) {
-						$errors[] = 'Missing required parameter: ' . $name;
-						continue;
-					}
-					$parameters[$name] = self::checkParam($name, $data[$name], $options, $errors);
-				} else {
-					//New way to do it
-					if ($value = filter_input($from, $name)) {
-					} else if (filter_has_var($from, $name)) {
-						//Check for an array
-						$value = filter_input($from, $name, FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);
-					}
-					if (is_null($value)) {
-						$errors[] = 'Missing required parameter: ' . $name;
-						continue;
-					} else if ($value === false) {
-						$errors[] = 'Invalid required parameter: ' . $name;
-						continue;
-					}
-					$parameters[$name] = self::checkParam($name, $value, $options, $errors);
-				}
-			}
+			$parameters = array_merge($parameters, self::extractDefinition('required', $definition['required'], $data, $errors));
 		}
 		if (!count($errors) && !empty($definition['optional'])) {
-			foreach($definition['optional'] as $name => $options) {
-				if (is_array($data)) {
-					//Old way to do it.
-					if (array_key_exists($name, $data)) {
-						$parameters[$name] = self::checkParam($name, $data[$name], $options, $errors);
-					} else {
-						if (!array_key_exists('default', $options)) {
-							continue;
-						}
-						$parameters[$name] = $options['default'];
-					}
-				} else {
-					//New way to do it
-					if ($value = filter_input($from, $name)) {
-					} else if (filter_has_var($from, $name)) {
-						//Check for an array
-						$value = filter_input($from, $name, FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);
-					}
-					if (is_null($value)) {
-						if (!array_key_exists('default', $options)) {
-							continue;
-						}
-						$parameters[$name] = $options['default'];
-					} else if ($value === false) {
-						$errors[] = 'Invalid required parameter: ' . $name;
-						continue;
-					} else {
-						$parameters[$name] = self::checkParam($name, $value, $options, $errors);
-					}
-				}
-			}
+			$parameters = array_merge($parameters, self::extractDefinition('optional', $definition['optional'], $data, $errors));
 		}
 
 		if (!count($errors)) {
