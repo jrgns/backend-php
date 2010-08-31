@@ -1,5 +1,9 @@
 <?php
 class API extends AreaCtl {
+	const INPUT_GET     = 'GET';
+	const INPUT_POST    = 'POST';
+	const INPUT_REQUEST = 'REQUEST';
+
 	private static function checkParam($name, $value, $options, &$errors) {
 		$type  = array_key_exists('type', $options)  ? $options['type']  : 'string';
 		$range = array_key_exists('range', $options) ? $options['range'] : false;
@@ -23,11 +27,13 @@ class API extends AreaCtl {
 		return $value;
 	}
 
-	public static function extract($definition, $data = 'get') {
+	public static function extract($definition, $data = self::INPUT_REQUEST) {
 		$parameters = array();
 		$errors     = array();
 		if (is_string($data) && defined('INPUT_' . strtoupper($data))) {
 			$from = constant('INPUT_' . strtoupper($data));
+		} else if (is_string($data) && $data = self::INPUT_REQUEST) {
+			$from = INPUT_GET | INPUT_POST;
 		} else {
 			$from = INPUT_GET;
 		}
