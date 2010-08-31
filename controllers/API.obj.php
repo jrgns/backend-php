@@ -30,7 +30,7 @@ class API extends AreaCtl {
 	public static function extract($definition, $data = self::INPUT_REQUEST) {
 		$parameters = array();
 		$errors     = array();
-		if (is_string($data) && $data = self::INPUT_REQUEST) {
+		if (is_string($data) && $data == self::INPUT_REQUEST) {
 			$from = INPUT_GET | INPUT_POST;
 		} else if (is_string($data) && defined('INPUT_' . strtoupper($data))) {
 			$from = constant('INPUT_' . strtoupper($data));
