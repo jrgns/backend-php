@@ -4,29 +4,6 @@ class API extends AreaCtl {
 	const INPUT_POST    = 'POST';
 	const INPUT_REQUEST = 'REQUEST';
 
-	private static function checkParam($name, $value, $options, &$errors) {
-		$type  = array_key_exists('type', $options)  ? $options['type']  : 'string';
-		$range = array_key_exists('range', $options) ? $options['range'] : false;
-
-		//Add other filters / validators here
-		switch($type) {
-		case 'mixed':
-			break;
-		case 'numeric':
-			settype($value, 'int');
-			break;
-		default:
-			settype($value, $type);
-			break;
-		}
-
-		if ($range && !in_array($value, $range)) {
-			$errors[] = 'Incorrect value for parameter: ' . $name . '. ' . $value . ' given.';
-			unset($data[$name]);
-		}
-		return $value;
-	}
-	
 	private static function extractDefinition($type, $definition, $data, &$errors) {
 		$parameters = array();
 		foreach($definition as $name => $options) {
@@ -48,7 +25,28 @@ class API extends AreaCtl {
 			} else {
 				continue;
 			}
-			$parameters[$name] = self::checkParam($name, $value, $options, $errors);
+			
+			//Check the Parameter
+			$type  = array_key_exists('type', $options)  ? $options['type']  : 'string';
+			$range = array_key_exists('range', $options) ? $options['range'] : false;
+
+			//Add other filters / validators here
+			switch($type) {
+			case 'mixed':
+				break;
+			case 'numeric':
+				settype($value, 'int');
+				break;
+			default:
+				settype($value, $type);
+				break;
+			}
+
+			if ($range && !in_array($value, $range)) {
+				$errors[] = 'Incorrect value for parameter: ' . $name . '. ' . $value . ' given.';
+				continue;
+			}
+			$parameters[$name] = $value;
 		}
 		return $parameters;
 	}
