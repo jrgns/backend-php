@@ -29,11 +29,6 @@ class AreaCtl {
 		if (Controller::$debug) {
 			var_dump('Checking Method ' . $method . ' for ' . get_class($this));
 		}
-		if (empty($_SERVER['PHP_AUTH_DIGEST']) && !$this->checkPermissions() && Value::get('CheckHTTPAuth', false) && Value::get('CheckHTTPAuthIn:' . Controller::$view->mode, true)) {
-			//If the client is denied, challenge them for HTTP Digest Auth credentials
-			$auth = BackendAccount::getHTTPAuth();
-			$auth->challenge();
-		}
 		if ($this->checkPermissions()) {
 			if (method_exists($this, $method)) {
 				$toret = call_user_func_array(array($this, $method), Controller::$parameters);
