@@ -1,4 +1,4 @@
-<div class="description"><?php echo $definition['description'] ?></div>
+<div class="description"><?php echo markdown($definition['description']) ?></div>
 <dl>
 	<?php if (!empty($definition['example'])): ?>
 		<dt>Example</dt>

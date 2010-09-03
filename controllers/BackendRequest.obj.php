@@ -18,7 +18,7 @@
  * This is the controller for the table backend_requests.
  */
 class BackendRequest extends TableCtl {
-	public static function hook_post_init() {
+	public static function hook_start() {
 		$data = array(
 			'mode' => Controller::$view->mode,
 		);
@@ -47,7 +47,7 @@ class BackendRequest extends TableCtl {
 	public static function install(array $options = array()) {
 		$toret = parent::install($options);
 		
-		$toret = Hook::add('init', 'post', __CLASS__, array('global' => true)) && $toret;
+		$toret = Hook::add('start', 'pre', __CLASS__, array('global' => true, 'sequence' => 1000)) && $toret;
 		return $toret;
 	}
 }

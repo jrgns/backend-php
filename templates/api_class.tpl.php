@@ -4,7 +4,7 @@
 			<?php echo substr($name, 7) ?>
 		</a>
 	</h4>
-	<p class="prepend-1"><?php echo $one_def['description'] ?></p>
+	<div class="prepend-1"><?php echo markdown($one_def['description']) ?></div>
 <?php endforeach; ?>
 <p>
 	<a href="?q=<?php echo Controller::$area ?>">Top</a>

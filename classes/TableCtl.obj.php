@@ -73,6 +73,7 @@ class TableCtl extends AreaCtl {
 	 *
 	 * TODO: There's a duplication of code between rest_create and action_create... Any ideas on
 	 * how to work around this?
+	 * jrgns: maybe have functions post_create and get_create to diff between the verbs...
 	 */
 	public function action_create() {
 		$object = self::getObject(get_class($this));

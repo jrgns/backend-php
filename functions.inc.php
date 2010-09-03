@@ -576,3 +576,8 @@ function bzr_get_file_revision($filename) {
 function ifnull($var, $value) {
 	return is_null($var) ? $value : $var;
 }
+
+function debug_header($message) {
+	static $count = 0;
+	header('X-Debug-' . $count++ . ': ' . $message);
+}

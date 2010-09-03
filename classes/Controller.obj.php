@@ -48,10 +48,12 @@ class Controller {
 			session_start();
 
 			date_default_timezone_set('Africa/Johannesburg');
+			
 
 			self::check_quotes();
 			self::$salt = Backend::getConfig('application.salt', 'Change this to something random!');
 
+			//TODO jrgns: Don't know if I like this here...
 			$user = BackendAccount::checkUser();
 			//Debugging
 			self::$debug = false;
@@ -75,7 +77,7 @@ class Controller {
 			$query = Request::getQuery();
 			$query = Hook::run('init', 'pre', array($query));
 			self::parseQuery($query);
-
+			
 			//View
 			self::$view = self::getView();
 			if (!self::$view instanceof View) {
@@ -162,7 +164,8 @@ class Controller {
 		$_SESSION['error']   = Backend::getError();
 		$_SESSION['notice']  = Backend::getNotice();
 		$_SESSION['success'] = Backend::getSuccess();
-		if (!self::$whoopsed) {
+		//jrgns: Just add this back in if needed. It breaks the redirect after a login
+		//if (!self::$whoopsed) {
 			if (empty($_SESSION['previous_url']) || !is_array($_SESSION['previous_url'])) {
 				$_SESSION['previous_url'] = array();
 			}
@@ -182,7 +185,7 @@ class Controller {
 				$_SESSION['previous_parameters'] = array();
 			}
 			$_SESSION['previous_parameters'][self::$view->mode] = self::$parameters;
-		}
+		//}
 		Hook::run('finish', 'post');
 	}
 	

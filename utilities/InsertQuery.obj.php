@@ -21,11 +21,15 @@ class InsertQuery extends Query {
 	}
 
 	protected function buildTable() {
-		$query  = 'INSERT INTO ' . $this->table;
+		$query  = 'INSERT INTO ' . $this->table . PHP_EOL;
 		$fields = array_map(array('Query', 'enclose'), array_keys($this->data));
 		$this->parameters = array_merge($this->parameters, array_values($this->data));
-		$query .= PHP_EOL . '(' . implode(', ', $fields) . ')';
-		$query .= PHP_EOL . 'VALUES (' . implode(', ', array_fill(0, count($this->parameters), '?')) . ')';
+		if (count($fields)) {
+			$query .= PHP_EOL . '(' . implode(', ', $fields) . ')';
+		}
+		if (count($this->parameters)) {
+			$query .= PHP_EOL . 'VALUES (' . implode(', ', array_fill(0, count($this->parameters), '?')) . ')';
+		}
 		return $query;
 	}
 

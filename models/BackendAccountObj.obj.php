@@ -47,6 +47,29 @@ class BackendAccountObj extends DBObject {
 		}
 		return parent::__construct($meta, $options);
 	}
+
+	public function read($options = array()) {
+		$result = parent::read($options);
+		if ($result) {
+			$query = new SelectQuery('Assignment');
+			$query
+				->distinct()
+				->field('`roles`.`name`')
+				->leftJoin('Role', '`roles`.`id` = `assignments`.`role_id`')
+				->filter("`assignments`.`access_type` = 'users'")
+				->filter('`assignments`.`access_id` = :user_id OR `assignments`.`access_id` = 0')
+				->order('`roles`.`name`');
+			$roles = $query->fetchAll(array(':user_id' => $this->getMeta('id')), array('column' => 0));
+			$roles = empty($roles) ? array() : $roles;
+			if ($this->object) {
+				$this->object->roles = $roles;
+			}
+			if ($this->array) {
+				$this->array['roles'] = $roles;
+			}
+		}
+		return $result;
+	}
 	
 	function validate($data, $action, $options = array()) {
 		$toret = false;
