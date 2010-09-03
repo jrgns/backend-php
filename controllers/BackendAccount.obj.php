@@ -276,9 +276,11 @@ class BackendAccount extends TableCtl {
 	}
 	
 	public static function hook_post_init() {
-		$user = self::checkUser();
-		//Check if HTTP Digest Auth headers have been passed down
-		if (!$user && Value::get('CheckHTTPAuth', false) && Value::get('CheckHTTPAuthIn:' . Controller::$view->mode, true)) {
+		//Check if the current user has permission to execute this action
+		$id = count(Controller::$parameters) ? reset(Controller::$parameters) : 0;
+		$permission = Permission::check(Controller::$action, Controller::$area, $id);
+		//If not, and CheckHTTPAuth is true, send the HTTP headers
+		if (!$permission && Value::get('CheckHTTPAuth', false) && Value::get('CheckHTTPAuthIn:' . Controller::$view->mode, true)) {
 			$user = self::processHTTPAuth();
 			if ($user) {
 				$_SESSION['user']   = $user;
