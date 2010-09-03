@@ -2,9 +2,9 @@
 			<strong><?php echo $name ?></strong> (<code><?php echo $parameter['type'] ?></code>)
 			<?php if (!empty($parameter['optional'])): ?> - Optional<?php endif; ?><br>
 		</p>
-		<p><?php echo $parameter['description'] ?>
+		<div><?php echo markdown($parameter['description']) ?>
 			<?php if(!empty($parameter['range'])): ?>
 				<br><strong>Range:</strong>
 				<ul><li><?php echo implode('</li><li>', $parameter['range']) ?></li></ul>
 			<?php endif; ?>
-		</p>
+		</div>
