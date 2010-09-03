@@ -68,6 +68,7 @@ class SelectQuery extends Query {
 	}
 
 	function join($type, $table, $conditions, array $options = array()) {
+		$this->query = false;
 		$type = strtoupper($type);
 		if (!in_array($type, array('RIGHT', 'LEFT', 'INNER', 'OUTER'))) {
 			throw new Exception('Unsupported Join Type');

@@ -66,6 +66,7 @@ class Query {
 		$toret = false;
 		$this->error_msg = false;
 		if (empty($this->query)) {
+			$this->last_stmt = false;
 			$this->query = $this->buildQuery();
 		}
 		if ($this->checkConnection() && !empty($this->query)) {
