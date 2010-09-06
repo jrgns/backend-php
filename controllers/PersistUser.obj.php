@@ -36,8 +36,6 @@ class PersistUser extends TableCtl {
 				Backend::addError('Could not remember login');
 			}
 		} else {
-			print_stacktrace();
-			var_dump($user); die;
 			Backend::addError('Invalid user to remember');
 		}
 		return false;
@@ -51,16 +49,15 @@ class PersistUser extends TableCtl {
 				->fetchAssoc(array(':hash' => $_COOKIE['remembered']));
 			if ($persist) {
 				//Get User
-				$class = BackendAccount::getName() . 'Obj';
+				$User = self::getObject(BackendAccount::getName());
+
 				$query = BackendAccount::getQuery();
 				$query->filter('`users`.`id` = :id');
 				$params = array(':id' => $persist['user_id']);
 
-				$User = new $class();
 				$User->read(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
 				
-				if ($User) {
-					$User->object->roles = empty($User->object->roles) ? array() : explode(',', $User->object->roles);
+				if ($User->object) {
 					$_SESSION['user'] = $User->object;
 					//Remove, and reremember
 					if (self::remember($User->object)) {
