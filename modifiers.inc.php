@@ -276,10 +276,14 @@ function time_elapsed($time) {
 	return $toret;
 }
 
+function proper_case($string) {
+	return ucwords(strtolower($string));
+}
+
 function proper_case_keys($array) {
 	$toret = array();
 	foreach($array as $key => $value) {
-		$toret[ucwords(strtolower($key))] = $value;
+		$toret[proper_case($key)] = $value;
 	}
 	return $toret;
 }
