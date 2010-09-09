@@ -493,7 +493,7 @@ class TableCtl extends AreaCtl {
 		return $toret;
 	}
 	
-	public static function retrieve($parameter = false, $return = 'array') {
+	public static function retrieve($parameter = false, $return = 'array', array $options = array()) {
 		if (is_null($parameter)) {
 			return null;
 		}
@@ -509,7 +509,13 @@ class TableCtl extends AreaCtl {
 			if ($parameter !== false) {
 				$query = $object->getRetrieveSQL();
 				if ($query) {
-					$object->read(array('query' => $query, 'parameters' => array(':parameter' => $parameter), 'mode' => ($return == 'dbobject' ? 'object' : $return)));
+					$object->read(
+						array(
+							'query'      => $query,
+							'parameters' => array(':parameter' => $parameter),
+							'mode'       => ($return == 'dbobject' ? 'object' : $return)
+						)
+					);
 				} else {
 					$object = null;
 				}
