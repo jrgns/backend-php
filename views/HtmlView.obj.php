@@ -34,17 +34,6 @@ class HtmlView extends View {
 				Backend::addContent(Render::renderFile($template_file, is_null($results) ? array() : $results));
 			}
 		}
-		//TODO Add site_link, and other vars, as JS vars
-		Backend::addScriptContent('var site_link = \'' . SITE_LINK . '\';');
-		//TODO if someone can land a script file in the correct place, he can insert JS at will...
-		$comp_script = '/scripts/' . Controller::$area . '.component.js';
-		$comp_style  = '/styles/' . Controller::$area . '.component.css';
-		if (file_exists(WEB_FOLDER . $comp_script)) {
-			Backend::addScript(SITE_LINK . $comp_script);
-		}
-		if (file_exists(WEB_FOLDER . $comp_style)) {
-			Backend::addStyle(SITE_LINK . $comp_style);
-		}
 		return $results;
 	}
 	
@@ -96,6 +85,18 @@ class HtmlView extends View {
 	 */
 	public static function hook_post_display($data, $controller) {
 		Backend::addScript(SITE_LINK . 'scripts/backend.js');
+		//TODO Add site_link, and other vars, as JS vars
+		Backend::addScriptContent('var site_link = \'' . SITE_LINK . '\';');
+		//TODO if someone can land a script file in the correct place, he can insert JS at will...
+		$comp_script = '/scripts/' . Controller::$area . '.component.js';
+		$comp_style  = '/styles/' . Controller::$area . '.component.css';
+		if (file_exists(WEB_FOLDER . $comp_script)) {
+			Backend::addScript(SITE_LINK . $comp_script);
+		}
+		if (file_exists(WEB_FOLDER . $comp_style)) {
+			Backend::addStyle(SITE_LINK . $comp_style);
+		}
+
 		Backend::add('Styles', array_unique(array_filter(Backend::getStyles())));
 		Backend::add('Scripts', array_unique(array_filter(Backend::getScripts())));
 		Backend::add('ScriptContent', array_unique(array_filter(Backend::getScriptContent())));
