@@ -299,12 +299,8 @@ class BackendAccount extends TableCtl {
 	
 	public static function hook_start() {
 		$user = self::checkUser();
-		if (!$user && empty($_SESSION['user'])) {
-			call_user_func(array(self::getName(), 'setupAnonymous'));
-		} else {
-			if ($user && in_array('superadmin', $user->roles)) {
-				Backend::addNotice('You are the super user. Be carefull, careless clicking costs lives...');
-			}
+		if ($user && in_array('superadmin', $user->roles)) {
+			Backend::addNotice('You are the super user. Be carefull, careless clicking costs lives...');
 		}
 		self::$current_user = $user;
 		Backend::add('BackendAccount', $user);
@@ -377,6 +373,7 @@ END;
 		$_SESSION['user']->modified = null;
 		$_SESSION['user']->added = null;
 		$_SESSION['user']->roles = array('anonymous');
+		return $_SESSION['user'];
 	}
 	
 	public static function checkUser($user = false) {
@@ -386,6 +383,8 @@ END;
 		if (!empty($_SESSION['user']) && is_object($_SESSION['user']) && $_SESSION['user']->id > 0) {
 			return $_SESSION['user'];
 		}
+		call_user_func(array(self::getName(), 'setupAnonymous'));
+		//Return false as the user is obviously anonymous
 		return false;
 	}
 	
