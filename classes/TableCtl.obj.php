@@ -140,30 +140,32 @@ class TableCtl extends AreaCtl {
 	public function action_update($id) {
 		$toret = false;
 		$object = self::getObject(get_class($this), $id);
-		if ($object) {
-			if ($object->array) {
-				$toret = true;
-				//We need to check if the post data is valid in some way?
-				if (is_post()) {
-					$data = $object->fromPost();
-					$data = Hook::run('update', 'pre', array($data, $object), array('toret' => $data));
-					if ($object->update($data)) {
-						$toret = $object;
-						Backend::addSuccess($object->getMeta('name') . ' Modified');
-					} else {
-						Backend::addError('Could not update ' . $object->getMeta('name'));
-					}
-				} else {
-					$data = $object->array;
-				}
-				Backend::add('obj_values', $data);
+		if (!$object) {
+			Controller::whoops();
+			return false;
+		}
+		if (!$object->array) {
+			Backend::addError('The ' . $object->getMeta('name') . ' does not exist');
+			return false;
+		}
+
+		$result = true;
+		//We need to check if the post data is valid in some way?
+		if (is_post()) {
+			$data = $object->fromPost();
+			$data = Hook::run('update', 'pre', array($data, $object), array('toret' => $data));
+			if ($object->update($data) !== false) {
+				$result = $object;
+				Backend::addSuccess($object->getMeta('name') . ' Modified');
 			} else {
-				Backend::addError('The ' . $object->getMeta('name') . ' does not exist');
+				Backend::addError('Could not update ' . $object->getMeta('name'));
+				$result = false;
 			}
 		} else {
-			Controller::whoops();
+			$data = $object->array;
 		}
-		return $toret;
+		Backend::add('obj_values', $data);
+		return $result;
 	}
 	
 	public function action_delete($id) {

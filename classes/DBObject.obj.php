@@ -80,78 +80,79 @@ class DBObject {
 	
 	private function loadRelation($class, $options, $load_mode) {
 		$class_name = array_key_exists('model', $options) ? $options['model'] . 'Obj' : $class . 'Obj';
-		if (Component::isActive($class_name)) {
-			$conds = array();
-			$params = array();
-			$relation = new $class_name();
-			$conditions = array_key_exists('conditions', $options) ? $options['conditions'] : false;
-			$type       = array_key_exists('type', $options)       ? $options['type']       : 'single';
-			$order      = array_key_exists('order', $options)      ? $options['order']      : false;
-			if ($conditions) {
-				foreach($conditions as $field => $name) {
-					if (is_array($name)) {
-						$operator = key($name);
-						$name     = current($name);
-					} else {
-						$operator = '=';
-					}
-
-					if ($load_mode == 'array') {
-						$value = array_key_exists($name, $this->array) ? $this->array[$name] : $name;
-					} else if ($load_mode == 'object') {
-						$value = array_key_exists($name, $this->object) ? $this->object->$name : $name;
-					}
-					switch ($operator) {
-					case '=':
-						$conds[] = '`' . $field . '` = :' . $name;
-						break;
-					case 'FIND_IN_SET':
-					case 'in_set':
-						$conds[] = 'FIND_IN_SET(:' . $name . ', `' . $field . '`)';
-						break;
-					case 'IN':
-						$conds[] = '`' . $field . '` IN (' . $value . ')';
-						break;
-					}
-					$params[':' . $name] = $value;
-				}
-			}
-			if ($type == 'multiple') {
-				$mode = 'list';
-			} else {
-				$mode = $load_mode;
-			}
-			if (Controller::$debug >= 2) {
-				var_dump(get_class($relation), $mode, $conds, $params, $order);
-			}
-			$relation->read(array('mode' => $mode, 'conditions' => $conds, 'parameters' => $params, 'order' => $order));
-			$relation->loadDeep($mode);
-			return $relation;
+		if (!Component::isActive($class_name)) {
+			return null;
 		}
-		return null;
+		$conds = array();
+		$params = array();
+		$relation = new $class_name();
+		$conditions = array_key_exists('conditions', $options) ? $options['conditions'] : false;
+		$type       = array_key_exists('type', $options)       ? $options['type']       : 'single';
+		$order      = array_key_exists('order', $options)      ? $options['order']      : false;
+		if ($conditions) {
+			foreach($conditions as $field => $name) {
+				if (is_array($name)) {
+					$operator = key($name);
+					$name     = current($name);
+				} else {
+					$operator = '=';
+				}
+
+				if ($load_mode == 'array') {
+					$value = array_key_exists($name, $this->array) ? $this->array[$name] : $name;
+				} else if ($load_mode == 'object') {
+					$value = array_key_exists($name, $this->object) ? $this->object->$name : $name;
+				}
+				switch ($operator) {
+				case '=':
+					$conds[] = '`' . $field . '` = :' . $name;
+					break;
+				case 'FIND_IN_SET':
+				case 'in_set':
+					$conds[] = 'FIND_IN_SET(:' . $name . ', `' . $field . '`)';
+					break;
+				case 'IN':
+					$conds[] = '`' . $field . '` IN (' . $value . ')';
+					break;
+				}
+				$params[':' . $name] = $value;
+			}
+		}
+		if ($type == 'multiple') {
+			$mode = 'list';
+		} else {
+			$mode = $load_mode;
+		}
+		if (Controller::$debug >= 2) {
+			var_dump(get_class($relation), $mode, $conds, $params, $order);
+		}
+		$relation->read(array('mode' => $mode, 'conditions' => $conds, 'parameters' => $params, 'order' => $order));
+		$relation->loadDeep($mode);
+		return $relation;
 	}
 	
 	private function loadDeep($mode = 'array') {
 		if (in_array($mode, array('array', 'object')) && $this->$mode) {
 			foreach ($this->meta['relations'] as $class => $options) {
 				$type     = array_key_exists('type', $options) ? $options['type'] : 'single';
-				$relation = $this->loadRelation($class, $options, $mode);
-				switch ($type) {
-				case 'multiple':
-					if ($mode == 'array') {
-						$this->array[$class]  = $relation->list ? $relation->list : array();
-					} else if ($mode == 'object') {
-						$this->object->$class = $relation->list ? $relation->list : array();
+				if ($relation = $this->loadRelation($class, $options, $mode)) {
+					switch ($type) {
+					case 'multiple':
+						if ($mode == 'array') {
+							$this->array[$class]  = $relation->list ? $relation->list : array();
+						} else if ($mode == 'object') {
+							$this->object->$class = $relation->list ? $relation->list : array();
+						}
+						break;
+					default:
+					case 'single':
+						if ($mode == 'array') {
+							$this->array[$class]  = $relation->array  ? $relation->array  : false;
+						} else if ($mode == 'object') {
+							$this->object->$class = $relation->object ? $relation->object : false;
+						}
+						break;
 					}
-					break;
-				default:
-				case 'single':
-					if ($mode == 'array') {
-						$this->array[$class]  = $relation->array  ? $relation->array  : false;
-					} else if ($mode == 'object') {
-						$this->object->$class = $relation->object ? $relation->object : false;
-					}
-					break;
 				}
 			}
 		}
