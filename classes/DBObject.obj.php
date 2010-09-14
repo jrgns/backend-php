@@ -847,12 +847,12 @@ class DBObject {
 
 		$non_parameter_aware = array_key_exists('non_parameter', $options);
 		$non_parameters = array_key_exists('non_parameter', $options) ? $options['non_parameter'] : array();
-		foreach ($fields as $name => $options) {
-			if (!is_array($options)) {
-				$options = array('type' => $options);
+		foreach ($fields as $name => $field_options) {
+			if (!is_array($field_options)) {
+				$field_options = array('type' => $field_options);
 			}
 			if (array_key_exists($name, $data)) {
-				$type = array_key_exists('type', $options) ? $options['type'] : 'string';
+				$type = array_key_exists('type', $field_options) ? $field_options['type'] : 'string';
 				$field_data[] = '`' . $name . '`';
 
 				$do_add = true;
@@ -998,14 +998,14 @@ class DBObject {
 		$query_fields = array();
 		$query_keys = array();
 		$keys = empty($keys) ? array() : $keys;
-		foreach($fields as $field => $options) {
+		foreach($fields as $field => $field_options) {
 			$field_arr = array();
-			if (is_string($options)) {
-				$options = array('type' => $options);
+			if (is_string($field_options)) {
+				$field_options = array('type' => $field_options);
 			}
-			$type    = array_key_exists('type',    $options) ? $options['type']    : 'string';
-			$default = array_key_exists('default', $options) ? $options['default'] : null;
-			$null    = array_key_exists('null',    $options) ? $options['null']    : false;
+			$type    = array_key_exists('type',    $field_options) ? $field_options['type']    : 'string';
+			$default = array_key_exists('default', $field_options) ? $field_options['default'] : null;
+			$null    = array_key_exists('null',    $field_options) ? $field_options['null']    : false;
 			$field_arr[] = '`' . $field . '`';
 			switch($type) {
 			case 'primarykey':
@@ -1026,7 +1026,7 @@ class DBObject {
 				$field_arr[] = 'VARCHAR(1024)';
 				break;
 			case 'password':
-				$string_size = empty($options['string_size']) ? 32 : $options['string_size'];
+				$string_size = empty($field_options['string_size']) ? 32 : $field_options['string_size'];
 				$field_arr[] = 'VARCHAR(' . $string_size .')';
 				break;
 			case 'salt':
@@ -1047,7 +1047,7 @@ class DBObject {
 			case 'title':
 				//No break;
 			case 'string':
-				$string_size = empty($options['string_size']) ? 255 : $options['string_size'];
+				$string_size = empty($field_options['string_size']) ? 255 : $field_options['string_size'];
 				$field_arr[] = 'VARCHAR(' . $string_size .')';
 				break;
 			case 'large_string':
@@ -1079,7 +1079,7 @@ class DBObject {
 			case 'number':
 				//No break;
 			case 'integer':
-				$int_size = empty($options['int_size']) ? 11 : $options['int_size'];
+				$int_size = empty($field_options['int_size']) ? 11 : $field_options['int_size'];
 				$field_arr[] = 'INT(' . $int_size . ')';
 				break;
 			case 'large_integer':
@@ -1126,7 +1126,7 @@ class DBObject {
 				$field_arr[] = 'DATETIME';
 				break;
 			default:
-				var_dump('InstallSQL Failure: ', $field, $options);
+				var_dump('InstallSQL Failure: ', $field, $field_options);
 				break;
 			}
 			if ($null) {
