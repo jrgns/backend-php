@@ -902,7 +902,17 @@ class DBObject {
 				$value_str = implode(', ', $value_data);
 				$query = 'INSERT INTO ' . $this->getSource() . " ($field_str) VALUES ($value_str)";
 				if (!empty($options['on_duplicate'])) {
-					$query .= ' ON DUPLICATE KEY UPDATE ' . $options['on_duplicate'];
+					if (is_array($options['on_duplicate'])) {
+						$temp = array();
+						//This is potentially buggy if name isn't a simple string...
+						foreach($options['on_duplicate'] as $name => $value) {
+							$parameters[':update_' . $name] = $value;
+							$temp[] = Query::enclose($name) . ' = :update_' . $name;
+						}
+						$query .= ' ON DUPLICATE KEY UPDATE ' . implode(', ', $temp);
+					} else {
+						$query .= ' ON DUPLICATE KEY UPDATE ' . $options['on_duplicate'];
+					}
 				} else if (!empty($options['ignore'])) {
 					$query = preg_replace('/^INSERT /', 'INSERT IGNORE ', $query);
 				}
