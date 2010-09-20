@@ -103,17 +103,22 @@ class HtmlView extends View {
 		$app_class = Backend::getConfig('backend.application.class', 'Application');
 		$primary = Links::get('primary');
 		$secondary = Links::get('secondary');
+		$tertiary = Links::get('tertiary');
 		if (class_exists($app_class, true) && method_exists($app_class, 'getLinks')) {
 			$app_pri = call_user_func(array($app_class, 'getLinks'), 'primary');
 			$app_sec = call_user_func(array($app_class, 'getLinks'), 'secondary');
+			$app_tri = call_user_func(array($app_class, 'getLinks'), 'tertiary');
 		} else {
 			$app_pri = false;
 			$app_sec = false;
+			$app_trie = false;
 		}
 		$primary   = array_merge($primary, is_array($app_pri) ? $app_pri : array());
 		$secondary = array_merge($secondary, is_array($app_sec) ? $app_sec : array());
+		$tertiary  = array_merge($tertiary, is_array($app_tri) ? $app_tri : array());
 		Backend::add('primary_links', $primary);
 		Backend::add('secondary_links', $secondary);
+		Backend::add('tertiary_links', $tertiary);
 		return $data;
 	}
 

@@ -100,7 +100,6 @@ class BackendAccount extends TableCtl {
 		} else {
 			return -3;
 		}
-		return true;
 	}
 	
 	function html_login($result) {
