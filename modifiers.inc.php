@@ -198,16 +198,19 @@ function class_name($string) {
 	return $string;
 }
 
-function table_name($string) {
-	if (is_object($string)) {
-		if ($string instanceof DBObject) {
-			return $string->getMeta('table');
+
+if (!function_exists('table_name')) {
+	function table_name($string) {
+		if (is_object($string)) {
+			if ($string instanceof DBObject) {
+				return $string->getMeta('table');
+			}
+			$string = get_class($string);
 		}
-		$string = get_class($string);
+		$string = preg_replace('/Obj$/', '', $string);
+		$string = pluralize(computerize($string));
+		return $string;
 	}
-	$string = preg_replace('/Obj$/', '', $string);
-	$string = pluralize(computerize($string));
-	return $string;
 }
 
 function class_for_url($string) {
