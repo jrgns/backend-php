@@ -39,6 +39,11 @@ class View {
 		
 		$display_method = $this->mode . '_' . Controller::$action;
 		$view_method    = 'output_' . Controller::$action;
+		$mode_method    = $this->mode;
+
+		if (method_exists($controller, $mode_method)) {
+			$controller->$mode_method();
+		}
 		if (method_exists($controller, $display_method) && $controller->checkPermissions()) {
 			$data = $controller->$display_method($data);
 		} else if (method_exists($this, $view_method)) {
