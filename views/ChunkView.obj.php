@@ -26,6 +26,17 @@ class ChunkView extends HtmlView {
 		Backend::setSuccess();
 		Backend::setNotice();
 
+		$content = Backend::getContent();
+		if (empty($content)) {
+			ob_start();
+			var_dump($to_print);
+			$content = ob_get_clean();
+			if (substr($content, 0, 4) != '<pre') {
+				$content = '<pre>' . $content . '</pre>';
+			}
+			Backend::addContent($content);
+		}
+
 		$to_print = Render::renderFile('styles.area.tpl.php');
 		$to_print .= Render::renderFile('maincontent.tpl.php');
 		$to_print .= Render::renderFile('scripts.tpl.php');
@@ -36,7 +47,7 @@ class ChunkView extends HtmlView {
 		$to_print = HtmlView::addLinks($to_print);
 		$to_print = HtmlView::formsAcceptCharset($to_print);
 
-		if (Value::get('admin_installed', false)) {
+		if (Component::isActive('BackendFilter')) {
 			$BEFilter = new BEFilterObj();
 			$BEFilter->read();
 			$filters = $BEFilter->list ? $BEFilter->list : array();
