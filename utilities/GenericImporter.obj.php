@@ -14,11 +14,13 @@ class GenericImporter {
 			self::$error_msg = 'The Object definition is missing';
 			return false;
 		}
-		
-		$Object = new $obj_name();
+
+		$line_c  = 0;
+		$Object  = new $obj_name();
 		$headers = array_key_exists('headers', $options) ? $options['headers'] : true;
 		if ($headers === true) { //First line is the headers
 			$names = array_filter(fgetcsv($fp));
+			$line_c++;
 		} else if (is_array($headers)) { //We were given the headers
 			$names = $headers;
 		} else {
@@ -28,8 +30,10 @@ class GenericImporter {
 			$names = array_merge($names, array_keys($data));
 		}
 		$name_count = count($names);
-		$count = 0;
+		$count  = 0;
+		$errors = array();
 		while(($line = fgetcsv($fp)) !== false) {
+			$line_c++;
 			set_time_limit(30);
 			if (is_array($data)) {
 				$line = array_merge($line, $data);
@@ -45,8 +49,12 @@ class GenericImporter {
 				if (!$n_line) {
 					continue;
 				}
-				$toret = $Object->create($n_line);
-				if (!$toret) {
+				if (!$Object->create($n_line)) {
+					if (empty($Object->error_msg)) {
+						$errors[] = 'Could not import line ' . $line_c;
+					} else {
+						$errors[] = 'Could not import line ' . $line_c . ': ' . $Object->error_msg;
+					}
 					break;
 				}
 				$count++;
@@ -57,13 +65,10 @@ class GenericImporter {
 					}
 				}
 			} else {
-				self::$error_msg = 'Number of imported fields does not match defined fields';
-				if ($count > 0) {
-					return $count;
-				}
-				return false;
+				$errors[] = 'Number of imported fields does not match defined fields';
 			}
 		}
+		self::$error_msg = count($errors) ? $errors : false;
 		return $count;
 	}
 	

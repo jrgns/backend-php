@@ -258,13 +258,18 @@ class Query {
 			if (!empty($options['with_key'])) {
 				//
 				$results = $results->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
-				$results = array_map('reset', $results);
-			} else if (array_key_exists('column', $options)) {
-				//Fetch only one column
-				$results = $results->fetchAll(PDO::FETCH_COLUMN, $options['column']);
+				if ($results) {
+					$results = array_map('reset', $results);
+				}
 			} else if (!empty($options['group'])) {
 				//Groups values by the first column
 				$results = $results->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_GROUP);
+				if ($results) {
+					$results = array_map('reset', $results);
+				}
+			} else if (array_key_exists('column', $options)) {
+				//Fetch only one column
+				$results = $results->fetchAll(PDO::FETCH_COLUMN, $options['column']);
 			} else {
 				$results = $results->fetchAll(PDO::FETCH_ASSOC);
 			}
