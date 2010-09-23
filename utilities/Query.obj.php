@@ -277,7 +277,7 @@ class Query {
 		return $results;
 	}
 	
-	public function fetchColumn(array $parameters = array(), int $column = null, array $options = array()) {
+	public function fetchColumn(array $parameters = array(), $column = null, array $options = array()) {
 		$column = is_null($column) ? 0 : $column;
 		$toret = $this->execute($parameters);
 		if ($toret) {
