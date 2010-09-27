@@ -22,9 +22,12 @@ class CsvView extends View {
 	}
 	
 	public static function hook_output($to_print) {
-		$filename = class_name(Controller::$area) . class_name(Controller::$action);
-		if (Controller::$action == 'read' && !empty(Controller::$parameters[0])) {
-			$filename .= Controller::$parameters[0];
+		$filename = Backend::get('CsvFilename', false);
+		if (!$filename) {
+			$filename = class_name(Controller::$area) . class_name(Controller::$action);
+			if (Controller::$action == 'read' && !empty(Controller::$parameters[0])) {
+				$filename .= Controller::$parameters[0];
+			}
 		}
 		if (!Controller::$debug) {
 			header('Content-disposition: attachment; filename="' . $filename . '.csv"');
