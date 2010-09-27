@@ -170,6 +170,15 @@ function build_url(array $url) {
 	return $toret;
 }
 
+function random_number($min = false, $max = false) {
+	reseed();
+	if ($min !== false && $max !== false) {
+		return mt_rand($min, $max);
+	} else {
+		return mt_rand();
+	}
+}
+
 function get_random($options = array()) {
 	$toret = false;
 	if (is_string($options)) {
