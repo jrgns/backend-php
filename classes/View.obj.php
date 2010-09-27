@@ -62,7 +62,7 @@ class View {
 	 * Actually output the information
 	 */
 	function output($to_print = null) {
-		if (!headers_sent()) {
+		if (!headers_sent() && !Controller::$debug) {
 			$content_type = $this->mime_type;
 			if ($this->charset) {
 				$content_type .= '; charset=' . $this->charset;

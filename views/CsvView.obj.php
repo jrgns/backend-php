@@ -26,10 +26,43 @@ class CsvView extends View {
 		if (Controller::$action == 'read' && !empty(Controller::$parameters[0])) {
 			$filename .= Controller::$parameters[0];
 		}
-		header('Content-disposition: attachment; filename="' . $filename . '.csv"');
-		header('Pragma: no-cache');
-		header('Expires: 0');
-		return $to_print;
+		if (!Controller::$debug) {
+			header('Content-disposition: attachment; filename="' . $filename . '.csv"');
+			header('Pragma: no-cache');
+			header('Expires: 0');
+		}
+		
+		switch (true) {
+		case $to_print instanceof SelectQuery:
+			return self::output_query($to_print);
+			break;
+		case is_string($to_print):
+		default:
+			return $to_print;
+			break;
+		}
+	}
+	
+	private static function output_query($query) {
+		if (!$fp = fopen('php://temp', 'r+')) {
+			Backend::addError('Could not open temporary file for CSV output');
+			return '';
+		}
+		$first = false;
+		while($row = $query->fetchAssoc()) {
+			set_time_limit(30);
+			if (!$first) {
+				fputcsv($fp, array_keys($row));
+				$first = true;
+			}
+			fputcsv($fp, $row);
+		}
+		//Get the file contents
+		rewind($fp);
+		ob_start();
+		fpassthru($fp);
+		fclose($fp);
+		return ob_get_clean();
 	}
 
 	public function output_list($data) {
