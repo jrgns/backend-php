@@ -31,7 +31,8 @@ class HtmlView extends View {
 		if (Permission::check(Controller::$action, Controller::$area) && !method_exists($controller, $display_method)) {
 			$template_file = Controller::$area . '.' . Controller::$action . '.tpl.php';
 			if (Render::checkTemplateFile($template_file)) {
-				Backend::addContent(Render::renderFile($template_file, is_null($results) ? array() : $results));
+				$results = is_array($results) ? $results : array();
+				Backend::addContent(Render::renderFile($template_file, $results));
 			}
 		}
 		return $results;
