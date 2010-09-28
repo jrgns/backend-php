@@ -4,8 +4,8 @@
 		<div>
 			<?php foreach($methods as $name => $definition): ?>
 				<h4>
-					<a href="?q=a_p_i/define/<?php echo $component ?>/<?php echo substr($name, 7) ?>">
-						<?php echo substr($name, 7) ?>
+					<a href="?q=a_p_i/define/<?php echo $component ?>/<?php echo $name ?>">
+						<?php echo $name ?>
 					</a>
 				</h4>
 				<p class="prepend-1"><?php echo $definition['description'] ?></p>

@@ -1,11 +1,13 @@
 <div class="description"><?php echo markdown($definition['description']) ?></div>
 <dl>
-	<?php if (!empty($definition['example'])): ?>
-		<dt>Example</dt>
-		<dd>
+	<dt>Example</dt>
+	<dd>
+		<?php if (!empty($definition['example'])): ?>
 			<?php echo $definition['example'] ?>
-		</dd>
-	<?php endif; ?>
+		<?php else: ?>
+			<code>#SITE_LINK#?q=<?php echo class_for_url($class) . '/' . $function ?></code> (Generated)
+		<?php endif; ?>
+	</dd>
 	<dt>Return: <span class="large bottom"><code><strong><?php echo $definition['return']['type'] ?></strong></code></span></dt>
 	<dd>
 		<?php echo $definition['return']['description'] ?>

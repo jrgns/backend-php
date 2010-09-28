@@ -105,15 +105,27 @@ class API extends AreaCtl {
 			}
 			$results[$component['name']] = array();
 			foreach($methods as $method) {
-				if (substr($method, 0, 7) == 'action_' && Permission::check(substr($method, 7), $component['name'])) {
-					$define_method = preg_replace('/^action_/', 'define_', $method);
-					if (in_array($define_method, $methods)) {
-						$results[$component['name']][$method] = call_user_func(array($component['name'], $define_method));
-					} else if (array_key_exists('show_undocumented', $_REQUEST)) {
-						$results[$component['name']][$method] = array(
-							'description' => 'Undocumented',
-						);
-					}
+				$temp = explode('_', $method, 2);
+				if (count($temp) !== 2) {
+					continue;
+				}
+				list($sub, $action) = $temp;
+				if (!in_array($sub, array('post', 'get', 'put', 'delete', 'action'))) {
+					continue;
+				}
+				if (array_key_exists($action, $results[$component['name']])) {
+					continue;
+				}
+				if (!Permission::check($action, $component['name'])) {
+					continue;
+				}
+				$define_method = 'define_' . $action;
+				if (in_array($define_method, $methods)) {
+					$results[$component['name']][$action] = call_user_func(array($component['name'], $define_method));
+				} else if (array_key_exists('show_undocumented', $_REQUEST)) {
+					$results[$component['name']][$action] = array(
+						'description' => 'Undocumented',
+					);
 				}
 			}
 			if (count($results[$component['name']])) {
