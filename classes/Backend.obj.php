@@ -401,7 +401,13 @@ class Backend {
 	}
 	
 	static public function getError() {
-		$counts = array_count_values(self::$error);
+		if (is_string(self::$error)) {
+			self::$error = array(self::$error);
+		}
+		if (!is_array(self::$error)) {
+			return array();
+		}
+		$counts = array_count_values(array_filter(self::$error));
 		$result = array();
 		foreach($counts as $value => $count) {
 			if ($count > 1) {
@@ -421,7 +427,13 @@ class Backend {
 	}
 	
 	static public function getNotice() {
-		$counts = array_count_values(self::$notice);
+		if (is_string(self::$notice)) {
+			self::$notice = array(self::$notice);
+		}
+		if (!is_array(self::$notice)) {
+			return array();
+		}
+		$counts = array_count_values(array_filter(self::$notice));
 		$result = array();
 		foreach($counts as $value => $count) {
 			if ($count > 1) {
@@ -441,7 +453,13 @@ class Backend {
 	}
 	
 	static public function getSuccess() {
-		$counts = array_count_values(self::$success);
+		if (is_string(self::$success)) {
+			self::$success = array(self::$success);
+		}
+		if (!is_array(self::$success)) {
+			return array();
+		}
+		$counts = array_count_values(array_filter(self::$success));
 		$result = array();
 		foreach($counts as $value => $count) {
 			if ($count > 1) {
