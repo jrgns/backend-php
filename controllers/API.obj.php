@@ -3,48 +3,60 @@ class API extends AreaCtl {
 	const INPUT_GET     = 'GET';
 	const INPUT_POST    = 'POST';
 	const INPUT_REQUEST = 'REQUEST';
+	
+	private static function extractParameter($value, $options) {
+		$original = $value;
+		//TODO Add more filter options...
+		if (is_array($value)) {
+			$value = filter_var($value, FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);
+		} else {
+			$value = filter_var($value);
+		}
+		if ($value === false && $original !== false) {
+			return null;
+		}
+		if ($value === '' && $options['type'] != 'string') {
+			return null;
+		}
+
+		switch($options['type']) {
+		case 'mixed':
+			break;
+		case 'numeric':
+			settype($value, 'int');
+			break;
+		default:
+			settype($value, $options['type']);
+			break;
+		}
+		if (array_key_exists('range', $options) && !in_array($value, $options['range'])) {
+			return null;
+		}
+
+		return $value;
+	}
 
 	private static function extractDefinition($type, $definition, $data, &$errors) {
 		$parameters = array();
 		foreach($definition as $name => $options) {
-			if (array_key_exists($name, $data)) {
-				if (is_array($data[$name])) {
-					$value = filter_var($data[$name], FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);
-				} else {
-					$value = filter_var($data[$name]);
-				}
-				if ($value === false) {
-					$errors[] = 'Missing required parameter: ' . $name;
+			$options['type'] = array_key_exists('type', $options) ? $options['type'] : 'string';
+			$value = array_key_exists($name, $data) ? $data[$name] : null;
+			if (is_null($value) && $type == 'required') {
+				$errors[] = 'Missing required parameter: ' . $name;
+				continue;
+			} else {
+				$value = self::extractParameter($value, $options);
+			}
+			if (is_null($value)) {
+				if (array_key_exists('default', $options)) {
+					$value = $options['default'];
+				} else if (array_key_exists('range', $options)) {
+					$errors[] = 'Incorrect value for parameter: ' . $name . '.';
+					continue;
+				} else if ($type == 'required') {
+					$errors[] = 'Invalid required parameter: ' . $name;
 					continue;
 				}
-			} else if ($type == 'required') {
-				$errors[] = 'Invalid required parameter: ' . $name;
-				continue;
-			} else if (array_key_exists('default', $options)) {
-				$value = $options['default'];
-			} else {
-				continue;
-			}
-			
-			//Check the Parameter
-			$type  = array_key_exists('type', $options)  ? $options['type']  : 'string';
-			$range = array_key_exists('range', $options) ? $options['range'] : false;
-
-			//Add other filters / validators here
-			switch($type) {
-			case 'mixed':
-				break;
-			case 'numeric':
-				settype($value, 'int');
-				break;
-			default:
-				settype($value, $type);
-				break;
-			}
-
-			if ($range && !in_array($value, $range)) {
-				$errors[] = 'Incorrect value for parameter: ' . $name . '. ' . $value . ' given.';
-				continue;
 			}
 			$parameters[$name] = $value;
 		}
@@ -69,10 +81,12 @@ class API extends AreaCtl {
 			}
 		}
 		if (!empty($definition['required'])) {
-			$parameters = array_merge($parameters, self::extractDefinition('required', $definition['required'], $data, $errors));
+			$required   = self::extractDefinition('required', $definition['required'], $data, $errors);
+			$parameters = array_merge($parameters, $required);
 		}
 		if (!count($errors) && !empty($definition['optional'])) {
-			$parameters = array_merge($parameters, self::extractDefinition('optional', $definition['optional'], $data, $errors));
+			$optional   = self::extractDefinition('optional', $definition['optional'], $data, $errors);
+			$parameters = array_merge($parameters, $optional);
 		}
 
 		if (!count($errors)) {
