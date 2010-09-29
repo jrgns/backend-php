@@ -351,6 +351,13 @@ class Query {
 		} else if ($table instanceof Query) {
 			//Dont enclose
 			return $table->table;
+		} else if (is_array($table)) {
+			$tables = array();
+			foreach($table as $one_table) {
+				$tables[] = self::getTable($one_table);
+			}
+			//Dont enclose
+			return implode(', ', $tables);
 		} else if ($components = Component::getActive()) {
 			if (substr($table, -3) == 'Obj') {
 				$table = substr($table, 0, strlen($table) - 3);
@@ -368,6 +375,9 @@ class Query {
 	public static function getConnection($table) {
 		if ($table instanceof DBObject) {
 			return $table->getConnection();
+		} else if (is_array($table)) {
+			$table = current($table);
+			return self::getConnection($table);
 		} else if ($components = Component::getActive()) {
 			if (substr($table, -3) == 'Obj') {
 				$table = substr($table, 0, strlen($table) - 3);
