@@ -24,18 +24,15 @@ class File extends TableCtl {
 		return $toret;
 	}
 
-	public function action_read($id) {
+	public function action_read($id, $mode = 'dbobject') {
 		$toret = false;
-		$obj_name = (class_name(Controller::$area) . 'Obj');
-		if (class_exists($obj_name, true)) {
-			$toret = new $obj_name($id);
-			if ($toret->array) {
-				$mime_type = array_key_exists('mime_type', $toret->array) ? $toret->array['mime_type'] : false;
-				if (!empty($mime_type)) {
-					Controller::$view->mime_type = $mime_type;
-				} else {
-					Controller::$view->mime_type = self::$default_type;
-				}
+		$toret    = parent::action_read($id, $mode);
+		if ($toret->array) {
+			$mime_type = array_key_exists('mime_type', $toret->array) ? $toret->array['mime_type'] : false;
+			if (!empty($mime_type)) {
+				Controller::$view->mime_type = $mime_type;
+			} else {
+				Controller::$view->mime_type = self::$default_type;
 			}
 		} else {
 			Controller::whoops();
