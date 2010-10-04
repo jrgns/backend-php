@@ -682,6 +682,10 @@ class DBObject {
 					} else {
 						$ret_data[$name] = $value;
 					}
+				} else if ($action == 'create' && !empty($options['required'])) {
+					Backend::addError('Missing ' . $name);
+					$toret = false;
+					break;
 				}
 			}
 		}
