@@ -17,7 +17,6 @@ class Content extends TableCtl {
 	}
 
 	function html_display($content) {
-		$toret = false;
 		if ($content instanceof DBObject) {
 			Backend::add('Sub Title', $content->array['title']);
 			if ($content->array['from_file']) {
@@ -25,19 +24,15 @@ class Content extends TableCtl {
 				$template = 'content/' . $content->array['name'] . '.tpl.php';
 				if (Render::checkTemplateFile($template)) {
 					Backend::addContent(Render::renderFile($template));
-					$toret = $content;
 				} else if (file_exists(APP_FOLDER . '/' . $filename)) {
 					Backend::addContent(file_get_contents(APP_FOLDER . '/' . $filename));
-					$toret = $content;
 				} else if (file_exists(BACKEND_FOLDER . '/' . $filename)) {
 					Backend::addContent(file_get_contents(BACKEND_FOLDER . '/' . $filename));
-					$toret = $content;
 				//SITE FOLDER too?
 				}
 			} else {
 				Backend::add('Content', $content);
 				Backend::addContent(Render::renderFile('content.display.tpl.php'));
-				$toret = $content;
 			}
 		}
 		/**
@@ -51,7 +46,7 @@ class Content extends TableCtl {
 			}
 		}
 		 */
-		return $toret;
+		return $content instanceof DBObject ? $content : false;
 	}
 	
 	function html_update($result) {

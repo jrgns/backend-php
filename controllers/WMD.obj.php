@@ -14,16 +14,21 @@ class WMD extends AreaCtl {
 	/**
 	 * Add the scripts and styles needed for the WMD editor
 	 *
-	 * @todo Check for which controllers WMD should be enabled.
+	 * This hook automatically enables the WMD editor for the Content module. To enable it for any other module,
+	 * just call WMD::enable on the appropriate html_ function.
 	 */
 	public static function hook_post_display($data, $controller) {
-		if (in_array(get_class($controller), array('Content')) && in_array(Controller::$action, array('create', 'update'))) { 
-			Backend::addScript(SITE_LINK . 'scripts/jquery.js');
-			Backend::addScript(SITE_LINK . 'scripts/wmd.component.js');
-			Backend::addScript(SITE_LINK . 'scripts/wmd/wmd.js');
-			Backend::addStyle(SITE_LINK . 'styles/wmd.css');
+		if (in_array(get_class($controller), array('Content')) && in_array(Controller::$action, array('create', 'update'))) {
+			self::enable();
 		}
 		return $data;
+	}
+	
+	public static function enable() {
+		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
+		Backend::addScript(SITE_LINK . 'scripts/wmd.component.js');
+		Backend::addScript(SITE_LINK . 'scripts/wmd/wmd.js');
+		Backend::addStyle(SITE_LINK . 'styles/wmd.css');
 	}
 
 	public static function install(array $options = array()) {
