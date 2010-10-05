@@ -5,7 +5,9 @@
 		<?php if (!empty($definition['example'])): ?>
 			<?php echo $definition['example'] ?>
 		<?php else: ?>
-			<code>#SITE_LINK#?q=<?php echo class_for_url($class) . '/' . $function ?></code> (Generated)
+			<code>
+				#SITE_LINK#?q=<?php echo class_for_url($class) . '/' . $function ?><?php if (!empty($definition['parameters'])): ?><?php echo '/$' . implode('/$', array_keys($definition['parameters'])) ?><?php endif; ?>
+			</code>(Generated)
 		<?php endif; ?>
 	</dd>
 	<dt>Return: <span class="large bottom"><code><strong><?php echo $definition['return']['type'] ?></strong></code></span></dt>
