@@ -361,8 +361,15 @@ if (!function_exists('get_called_class')) {
 			}
 		}
 	}
-} 
+}
 
+/**
+ * Send an HTTP request using CURL
+ *
+ * @param string the URL at which the request should be directed
+ * @param array An associative array with the data to include. It will be converted to GET or POST as needed
+ * @param array An associative array with which to alter the behaviour of curl_request
+ */
 function curl_request($url, array $parameters = array(), array $options = array()) {
 	if (!empty($options['cache']) && $options['cache'] > 0) {
 		$cache = $options['cache'];
@@ -388,7 +395,10 @@ function curl_request($url, array $parameters = array(), array $options = array(
 	curl_setopt($ch, CURLOPT_USERAGENT, 'Backend / PHP');
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
     curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    if (!empty($options['bypass_ssl'])) {
+	    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+    	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    }
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 
 	if (array_key_exists('output', $options) && $options['output']) {
