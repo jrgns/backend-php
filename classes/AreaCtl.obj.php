@@ -102,20 +102,18 @@ class AreaCtl {
 		
 		if (Value::get('admin_installed', false)) {
 			$roles = GateKeeper::permittedRoles($action, $subject, $subject_id);
-			if (!empty($_SESSION['user'])) {
+			if ($user = BackendAccount::checkUser()) {
+				if (!property_exists($user, 'roles') || !is_array($user->roles)) {
+					$user->roles = array();
+				}
 				if (Controller::$debug) {
-					if (is_object($_SESSION['user']) && property_exists($_SESSION['user'], 'roles')) {
-						Backend::addNotice('Current user roles: ' . serialize($_SESSION['user']->roles));
-					} else {
-						Backend::addError('No user roles');
-						$_SESSION['user']->roles = array();
-					}
+					Backend::addNotice('Current user roles: ' . serialize($user->roles));
 				}
 				if ($roles) {
-					$intersect = array_intersect($_SESSION['user']->roles, $roles);
+					$intersect = array_intersect($user->roles, $roles);
 					$toret = count($intersect) ? true : false;
 				} else {
-					$toret = $_SESSION['user']->roles;
+					$toret = $user->roles;
 				}
 			} else if (!in_array('anonymous', $roles)) {
 				$toret = false;
