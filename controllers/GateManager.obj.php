@@ -109,8 +109,10 @@ class GateManager extends AreaCtl {
 		$toret = new stdClass();
 		$query = new SelectQuery('Permission');
 		$query
+			->distinct()
+			->field(array('action', 'subject'))
 			->filter('`active` = 1')
-			->filter("`role` = 'nobody'")
+			//->filter("`role` = 'nobody'")
 			->filter('`subject_id` = 0')
 			->group('`subject`, `action` WITH ROLLUP');
 		$toret->base_perms = $query->fetchAll();
