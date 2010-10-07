@@ -32,39 +32,41 @@ class View {
 	 * This function takes data, and translates it into information.
 	 */
 	function display($data, $controller) {
-		$data = Hook::run('display', 'pre', array($data, $controller), array('toret' => $data));
-		if (method_exists($this, 'hook_display')) {
-			$data = $this->hook_display($data, $controller);
-		}
+		if ($controller->checkPermissions()) {
+			$data = Hook::run('display', 'pre', array($data, $controller), array('toret' => $data));
+			if (method_exists($this, 'hook_display')) {
+				$data = $this->hook_display($data, $controller);
+			}
 		
-		$display_method = $this->mode . '_' . Controller::$action;
-		$view_method    = 'output_' . Controller::$action;
-		$mode_method    = $this->mode;
+			$display_method = $this->mode . '_' . Controller::$action;
+			$view_method    = 'output_' . Controller::$action;
+			$mode_method    = $this->mode;
 
-		if (method_exists($controller, $mode_method)) {
-			if (Controller::$debug) {
-				Backend::addNotice('Running ' . get_class($controller) . '::' . $mode_method);
+			if (method_exists($controller, $mode_method)) {
+				if (Controller::$debug) {
+					Backend::addNotice('Running ' . get_class($controller) . '::' . $mode_method);
+				}
+				$controller->$mode_method();
 			}
-			$controller->$mode_method();
-		}
-		if (Controller::$debug) {
-			var_dump('Checking ' . get_class($controller) . '::' . $display_method . ' and then ' . get_class($this) . '::' . $view_method);
-		}
-		if (method_exists($controller, $display_method) && $controller->checkPermissions()) {
 			if (Controller::$debug) {
-				Backend::addNotice('Running ' . get_class($controller) . '::' . $display_method);
+				var_dump('Checking ' . get_class($controller) . '::' . $display_method . ' and then ' . get_class($this) . '::' . $view_method);
 			}
-			$data = $controller->$display_method($data);
-		} else if (method_exists($this, $view_method)) {
-			if (Controller::$debug) {
-				Backend::addNotice('Running ' . get_class($controller) . '::' . $view_method);
+			if (method_exists($controller, $display_method)) {
+				if (Controller::$debug) {
+					Backend::addNotice('Running ' . get_class($controller) . '::' . $display_method);
+				}
+				$data = $controller->$display_method($data);
+			} else if (method_exists($this, $view_method)) {
+				if (Controller::$debug) {
+					Backend::addNotice('Running ' . get_class($controller) . '::' . $view_method);
+				}
+				$data = $this->$view_method($data);
 			}
-			$data = $this->$view_method($data);
-		}
 		
-		$data = Hook::run('display', 'post', array($data, $controller), array('toret' => $data));
-		if (method_exists($this, 'hook_post_display')) {
-			$data = $this->hook_post_display($data, $controller);
+			$data = Hook::run('display', 'post', array($data, $controller), array('toret' => $data));
+			if (method_exists($this, 'hook_post_display')) {
+				$data = $this->hook_post_display($data, $controller);
+			}
 		}
 
 		$this->output($data);
