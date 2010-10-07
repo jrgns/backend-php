@@ -42,11 +42,23 @@ class View {
 		$mode_method    = $this->mode;
 
 		if (method_exists($controller, $mode_method)) {
+			if (Controller::$debug) {
+				Backend::addNotice('Running ' . get_class($controller) . '::' . $mode_method);
+			}
 			$controller->$mode_method();
 		}
+		if (Controller::$debug) {
+			var_dump('Checking ' . get_class($controller) . '::' . $display_method . ' and then ' . get_class($this) . '::' . $view_method);
+		}
 		if (method_exists($controller, $display_method) && $controller->checkPermissions()) {
+			if (Controller::$debug) {
+				Backend::addNotice('Running ' . get_class($controller) . '::' . $display_method);
+			}
 			$data = $controller->$display_method($data);
 		} else if (method_exists($this, $view_method)) {
+			if (Controller::$debug) {
+				Backend::addNotice('Running ' . get_class($controller) . '::' . $view_method);
+			}
 			$data = $this->$view_method($data);
 		}
 		

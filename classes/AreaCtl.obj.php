@@ -35,8 +35,14 @@ class AreaCtl {
 			$action_method  = 'action_' . Controller::$action;
 			$view_method    = Controller::$view->mode . '_' . Controller::$action;
 			if (method_exists($this, $request_method)) {
+				if (Controller::$debug) {
+					Backend::addNotice('Running ' . get_class($this) . '::' . $request_method);
+				}
 				$toret = call_user_func_array(array($this, $request_method), Controller::$parameters);
 			} else if (method_exists($this, $action_method)) {
+				if (Controller::$debug) {
+					Backend::addNotice('Running ' . get_class($this) . '::' . $action_method);
+				}
 				$toret = call_user_func_array(array($this, $action_method), Controller::$parameters);
 			} else if (!method_exists($this, $view_method)) {
 				Controller::whoops(array('title' => 'Unknown Method', 'message' => 'Method ' . Controller::$area . '::' . Controller::$action . ' does not exist'));
