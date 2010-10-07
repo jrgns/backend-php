@@ -57,10 +57,7 @@ class BackendAccount extends TableCtl {
 		return $query;
 	}
 
-	function action_login($username = false, $password = false) {
-		if (!is_post()) {
-			return false;
-		}
+	function post_login($username = false, $password = false) {
 		if (self::checkUser()) {
 			return true;
 		}
