@@ -118,8 +118,9 @@ function singularize($string) {
 					array( '/([ti])a$/i'               , "$1um" ),
 					array( '/(n)ews$/i'                , "$1ews" ),
 					array( '/(h|bl)ouses$/i'           , "$1ouse" ),
-					array( '/(corpse)(s)?$/i'             , "$1" ),
-					array( '/(us)(es)?$/i'                , "$1" ),
+					array( '/(corpse)(s)?$/i'          , "$1" ),
+					array( '/(us)(es)?$/i'             , "$1" ),
+					array( '/(dns)$/i'                 , "$1" ),
 					array( '/s$/i'                     , "" )
 				);
 
