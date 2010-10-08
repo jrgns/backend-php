@@ -48,7 +48,7 @@ class Permission extends TableCtl {
 		static $cache = array();
 		$key = serialize(array($action, $subject, $subject_id));
 		if (array_key_exists($key, $cache)) {
-			return $cache[$key];
+			//return $cache[$key];
 		}
 		
 		$roles = GateKeeper::permittedRoles($action, class_for_url($subject), $subject_id);
