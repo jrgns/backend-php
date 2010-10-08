@@ -80,6 +80,13 @@ class AreaCtl {
 	}
 	
 	/**
+	 * Return the human friendly name for the controller
+	 */
+	public function getHumanName() {
+		return get_class($this);
+	}
+	
+	/**
 	 * Check permissions for this area
 	 *
 	 * Override this function if you want to customize the permissions for an area. BUT preferably use the DB...

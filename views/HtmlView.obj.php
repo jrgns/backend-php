@@ -43,6 +43,10 @@ class HtmlView extends View {
 				Backend::addContent(Render::renderFile($template_file, $results));
 			}
 		}
+		$sub_title = Backend::get('Sub Title');
+		if (empty($sub_title)) {
+			Backend::add('Sub Title', $controller->getHumanName());
+		}
 		return $results;
 	}
 	
