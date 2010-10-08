@@ -27,7 +27,7 @@ class AreaCtl {
 		}
 
 		if (Controller::$debug) {
-			var_dump('Checking Method ' . Controller::$action . ' for ' . get_class($this));
+			Backend::addNotice('Checking Method ' . Controller::$action . ' for ' . get_class($this));
 		}
 
 		if ($this->checkPermissions()) {

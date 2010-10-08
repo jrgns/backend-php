@@ -120,7 +120,7 @@ class Controller {
 	public static function action() {
 		$control_name = class_name(self::$area);
 		if (Controller::$debug) {
-			var_dump('Trying Controller ' . $control_name);
+			Backend::addNotice('Trying Controller ' . $control_name);
 		}
 		if (!Component::isActive($control_name, true)) {
 			Controller::whoops('Component is Inactive');

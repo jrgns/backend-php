@@ -49,15 +49,27 @@ class Permission extends TableCtl {
 		$user  = BackendAccount::checkUser();
 		$user  = (!$user && !empty($_SESSION['user'])) ? $_SESSION['user'] : $user;
 		if (!$user && !in_array('anonymous', $roles)) {
+			if (Controller::$debug) {
+				Backend::addNotice('Anonymous User');
+			}
 			return true;
 		}
 		if ($subject != '*' && !Component::isActive(class_name($subject))) {
+			if (Controller::$debug) {
+				Backend::addNotice('Invalid Component: ' . class_name($subject));
+			}
 			return false;
 		}
 		if (empty($user->roles)) {
+			if (Controller::$debug) {
+				Backend::addNotice('No User Roles');
+			}
 			return false;
 		}
 		$intersect = is_array($roles) ? array_intersect($user->roles, $roles) : $user->roles;
+		if (Controller::$debug) {
+			Backend::addNotice('Valid roles found: ' . json_encode($intersect));
+		}
 		return count($intersect) ? true : false;
 	}
 

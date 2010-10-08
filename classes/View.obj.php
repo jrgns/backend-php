@@ -49,7 +49,7 @@ class View {
 				$controller->$mode_method();
 			}
 			if (Controller::$debug) {
-				var_dump('Checking ' . get_class($controller) . '::' . $display_method . ' and then ' . get_class($this) . '::' . $view_method);
+				Backend::addNotice('Checking ' . get_class($controller) . '::' . $display_method . ' and then ' . get_class($this) . '::' . $view_method);
 			}
 			if (method_exists($controller, $display_method)) {
 				if (Controller::$debug) {
