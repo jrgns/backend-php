@@ -183,7 +183,7 @@ class TableCtl extends AreaCtl {
 		} else {
 			Controller::whoops();
 		}
-		return $true;
+		return true;
 	}
 	
 	public function action_toggle($id, $field, $should_redirect = true) {
