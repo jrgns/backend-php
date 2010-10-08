@@ -32,7 +32,7 @@ class View {
 	 * This function takes data, and translates it into information.
 	 */
 	function display($data, $controller) {
-		if ($controller->checkPermissions()) {
+		if ($controller instanceof AreaCtl && $controller->checkPermissions()) {
 			$data = Hook::run('display', 'pre', array($data, $controller), array('toret' => $data));
 			if (method_exists($this, 'hook_display')) {
 				$data = $this->hook_display($data, $controller);

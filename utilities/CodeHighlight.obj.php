@@ -10,7 +10,7 @@
  * Contributors:
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
-class CodeHighlight extends AreaCtl {
+class CodeHighlight {
 	public static function execute($content) {
 		if (preg_match_all('/<code>(.*?)<\/code>/s', $content, $matches)) {
 			foreach($matches[1] as $key => $match) {

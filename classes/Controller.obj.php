@@ -152,7 +152,7 @@ class Controller {
 		return array($controller, $result);
 	}
 	
-	public static function display($controller, $result) {
+	public static function display(AreaCtl $controller, $result) {
 		Hook::run('action_display', 'pre', array($result));
 		self::$view->display($result, $controller);
 		Hook::run('action_display', 'post', array($result));
