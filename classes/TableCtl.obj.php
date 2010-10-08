@@ -51,20 +51,69 @@ class TableCtl extends AreaCtl {
 	 */
 	public function action_list($start, $count, array $options = array()) {
 		$object = self::getObject(get_class($this));
-		if ($object) {
-			$toret = true;
-			if ($start === 'all') {
-				$limit = 'all';
-			} else if ($start || $count) {
-				$limit = "$start, $count";
-			} else {
-				$limit = false;
-			}
-			$object->read(array_merge(array('limit' => $limit), $options));
-			return $object;
-		} else {
+		if (!$object) {
 			Controller::whoops();
 			return false;
+		}
+		$toret = true;
+		if ($start === 'all') {
+			$limit = 'all';
+		} else if ($start || $count) {
+			$limit = "$start, $count";
+		} else {
+			$limit = false;
+		}
+		$object->read(array_merge(array('limit' => $limit), $options));
+		return $object;
+	}
+	
+	/**
+	 * Action for searching an area's records
+	 */
+	public function action_search($start, $count, $term, array $options = array()) {
+		$object = self::getObject(get_class($this));
+		if (!$object) {
+			Controller::whoops();
+			return false;
+		}
+		$fields = $object->getSearchFields();
+		if (!$fields || !is_array($fields)) {
+			return false;
+		}
+		$term = is_null($term) ? filter_input(INPUT_POST | INPUT_GET, 'term') : $term;
+		if (empty($term)) {
+			return false;
+		}
+		$filter = array();
+		foreach($fields as $field) {
+			$filter[] = Query::enclose($field) . " LIKE CONCAT('%', :term, '%')";
+		}
+		$options['filters']    = implode(' OR ', $filter);
+		$options['parameters'] = array(':term' => $term);
+		return self::action_list($start, $count, $options);
+	}
+	
+	public function html_search($object) {
+		if (!$object) {
+			return $object;
+		}
+		if (!($object instanceof DBObject)) {
+			Controller::whoops(array('title' => 'Invalid Object returned'));
+			return $object;
+		}
+		
+		Backend::add('Object', $object);
+		Backend::add('TabLinks', $this->getTabLinks('list'));
+		Backend::add('Sub Title', 'Searching ' . $object->getMeta('name'));
+		Backend::add('term', Controller::$parameters[2]);
+
+		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
+		Backend::addScript(SITE_LINK . 'scripts/table_list.js');
+		$template_file = $object->getArea() . '.search_results.tpl.php';
+		if (Render::checkTemplateFile($template_file)) {
+			Backend::addContent(Render::renderFile($template_file));
+		} else {
+			Backend::addContent(Render::renderFile('std_search_results.tpl.php'));
 		}
 	}
 	
@@ -333,32 +382,33 @@ class TableCtl extends AreaCtl {
 	 * You can also just create a template named $areaname.list.tpl.php to customize the HTML.
 	 */
 	public function html_list($object) {
-		if ($object) {
-			if ($object instanceof DBObject) {
-				Backend::add('Object', $object);
-				Backend::add('TabLinks', $this->getTabLinks('list'));
-				Backend::add('Sub Title', $object->getMeta('name'));
-
-				Backend::addScript(SITE_LINK . 'scripts/jquery.js');
-				Backend::addScript(SITE_LINK . 'scripts/table_list.js');
-				$template_file = $object->getArea() . '.list.tpl.php';
-				if (Render::checkTemplateFile($template_file)) {
-					Backend::addContent(Render::renderFile($template_file));
-				} else {
-					//TODO It's a bit of a hack to redirect just because we can't generate the template
-					//if (Render::createTemplate($template_file, 'std_list.tpl.php')) {
-						//Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' list');
-						//Controller::redirect();
-					//} else {
-						//Controller::whoops(array('message' => 'Could not create template file for ' . $object->getMeta('name') . '::list'));
-					//}
-					Backend::addContent(Render::renderFile('std_list.tpl.php'));
-				}
-			} else {
-				Controller::whoops(array('title' => 'Invalid Object returned'));
-			}
+		if (!$object) {
+			return $object;
 		}
-		return $object;
+		if (!($object instanceof DBObject)) {
+			Controller::whoops(array('title' => 'Invalid Object returned'));
+			return $object;
+		}
+		
+		Backend::add('Object', $object);
+		Backend::add('TabLinks', $this->getTabLinks('list'));
+		Backend::add('Sub Title', $object->getMeta('name'));
+
+		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
+		Backend::addScript(SITE_LINK . 'scripts/table_list.js');
+		$template_file = $object->getArea() . '.list.tpl.php';
+		if (Render::checkTemplateFile($template_file)) {
+			Backend::addContent(Render::renderFile($template_file));
+		} else {
+			//TODO It's a bit of a hack to redirect just because we can't generate the template
+			//if (Render::createTemplate($template_file, 'std_list.tpl.php')) {
+				//Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' list');
+				//Controller::redirect();
+			//} else {
+				//Controller::whoops(array('message' => 'Could not create template file for ' . $object->getMeta('name') . '::list'));
+			//}
+			Backend::addContent(Render::renderFile('std_list.tpl.php'));
+		}
 	}
 	
 	public function json_list($result) {
@@ -548,9 +598,13 @@ class TableCtl extends AreaCtl {
 	}
 	
 	/**
+	 * Use this function to set default parameters for specific actions
+	 *
+	 * It's also a good way to transform request variables to proper parameters
 	 */
 	public static function checkParameters($parameters) {
-		 if (is_numeric(Controller::$action)) {
+		//If there's no action, only a ID, use the request verb to determine the action
+		if (is_numeric(Controller::$action)) {
 			$parameters[0] = Controller::$action;
 			switch (strtoupper($_SERVER['REQUEST_METHOD'])) {
 			case 'DELETE':
@@ -568,17 +622,24 @@ class TableCtl extends AreaCtl {
 				break;
 			}
 		}
+		//List instead of index
 		if (Controller::$action == 'index') {
 			Controller::setAction('list');
 		}
-		if (Controller::$action == 'list' && !isset(Controller::$parameters[0])) {
+		//Defaults for Search and List
+		if (in_array(Controller::$action, array('search', 'list')) && !isset(Controller::$parameters[0])) {
 			$parameters[0] = 0;
 		}
-		if (Controller::$action == 'list' && !isset(Controller::$parameters[1])) {
+		if (in_array(Controller::$action, array('search', 'list')) && !isset(Controller::$parameters[1])) {
 			$parameters[1] = Value::get('list_length', 5);
 		}
-		if (Controller::$action == 'delete' && empty($parameters[0]) && !empty($_POST['delete_id'])) {
-			$parameters[0] = $_POST['delete_id'];
+		//Get the search term from the request variable
+		if (Controller::$action == 'search' && !array_key_exists(2, $parameters)) {
+			$parameters[2] = filter_input(INPUT_POST | INPUT_GET, 'term');
+		}
+		//Get the delete_id from the request variable
+		if (Controller::$action == 'delete' && empty($parameters[0]) && ($delete_id = filter_input(INPUT_POST, 'delete_id'))) {
+			$parameters[0] = $delete_id;
 		}
 		return $parameters;
 	}

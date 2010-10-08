@@ -141,9 +141,8 @@ class Content extends TableCtl {
 		}
 	}
 	
-	function action_search($term = false) {
+	function action_search($start, $count, $term, array $options = array()) {
 		if (Component::isActive('BackendSearch')) {
-			$term = (!$term && array_key_exists('term', $_REQUEST)) ? $_REQUEST['term'] : $term;
 			$result = array('term' => $term);
 			if ($term) {
 				$result['results'] = BackendSearch::search($this, $term, array('`contents`.`active` = 1'));

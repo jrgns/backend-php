@@ -30,22 +30,24 @@
 			</tr>
 		</thead>
 		<tbody>
-		<?php foreach($list as $row):
-			$odd = !$odd;
-			?>
-			<tr class="<?php echo $odd ? '' : 'even' ?>">
-				<td><?php echo implode('</td><td>', $row) ?></td>
-				<?php if (Permission::check('display', class_for_url($Object))): ?>
-					<td><a href="?q=<?php echo class_for_url($Object) ?>/display/<?php echo $row[$id_field] ?>"><img src="#SITE_LINK#images/icons/magnifier.png"></a></td>
-				<?php endif; ?>
-				<?php if (Permission::check('update', class_for_url($Object))): ?>
-					<td><a href="?q=<?php echo class_for_url($Object) ?>/update/<?php echo $row[$id_field] ?>"><img src="#SITE_LINK#images/icons/pencil.png"></a></td>
-				<?php endif; ?>
-				<?php if (Permission::check('delete', class_for_url($Object))): ?>
-					<td><a href="#" class="delete_link" id="delete_<?php echo $row[$id_field] ?>"><img src="#SITE_LINK#images/icons/cross.png"></a></td>
-				<?php endif; ?>
-			</tr>
-		<?php endforeach; ?>
+			<?php if ($list): ?>
+				<?php foreach($list as $row):
+					$odd = !$odd;
+					?>
+					<tr class="<?php echo $odd ? '' : 'even' ?>">
+						<td><?php echo implode('</td><td>', $row) ?></td>
+						<?php if (Permission::check('display', class_for_url($Object))): ?>
+							<td><a href="?q=<?php echo class_for_url($Object) ?>/display/<?php echo $row[$id_field] ?>"><img src="#SITE_LINK#images/icons/magnifier.png"></a></td>
+						<?php endif; ?>
+						<?php if (Permission::check('update', class_for_url($Object))): ?>
+							<td><a href="?q=<?php echo class_for_url($Object) ?>/update/<?php echo $row[$id_field] ?>"><img src="#SITE_LINK#images/icons/pencil.png"></a></td>
+						<?php endif; ?>
+						<?php if (Permission::check('delete', class_for_url($Object))): ?>
+							<td><a href="#" class="delete_link" id="delete_<?php echo $row[$id_field] ?>"><img src="#SITE_LINK#images/icons/cross.png"></a></td>
+						<?php endif; ?>
+					</tr>
+				<?php endforeach; ?>
+			<?php endif; ?>
 		</tbody>
 	</table>
 	{tpl:list_paging.tpl.php}

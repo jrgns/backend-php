@@ -819,6 +819,9 @@ class DBObject {
 				$parameters = array_merge($parameters, $options['parameters']);
 			}
 		}
+		if (array_key_exists('filters', $options)) {
+			$query->filter($options['filters']);
+		}
 		if (array_key_exists('order', $options)) {
 			$query->order($options['order']);
 		}
@@ -1199,6 +1202,10 @@ class DBObject {
 	
 	public function getObjectName() {
 		return $this->getMeta('name');
+	}
+	
+	public function getSearchFields() {
+		return array_keys($this->getMeta('fields'));
 	}
 	
 	public function getArea() {
