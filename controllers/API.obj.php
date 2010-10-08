@@ -4,6 +4,20 @@ class API extends AreaCtl {
 	const INPUT_POST    = 'POST';
 	const INPUT_REQUEST = 'REQUEST';
 	
+	public function action_check_defines() {
+		if (!Component::isActive('BackendError')) {
+			return false;
+		}
+		$query = new SelectQuery('BackendError');
+		$query
+			->distinct()
+			->field('query')
+			->filter("`string` LIKE 'Undefined index: %'")
+			->filter("`file` LIKE '%\\\Render.obj.php(%) : eval()\'d code'")
+			->filter("`query` LIKE 'a_p_i/define/%'");
+		return $query->fetchAll(array(), array('column' => 0));
+	}
+	
 	private static function extractParameter($value, $options) {
 		$original = $value;
 		//TODO Add more filter options...
