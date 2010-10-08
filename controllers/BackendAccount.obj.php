@@ -389,7 +389,7 @@ END;
 	}
 	
 	public function checkPermissions(array $options = array()) {
-		$toret = parent::checkPermissions();
+		$toret = parent::checkPermissions($options);
 		if (!$toret && in_array(Controller::$action, array('update', 'display'))) {
 			$toret = Controller::$parameters[0] == $_SESSION['user']->id || Controller::$parameters[0] == 0;
 		}
