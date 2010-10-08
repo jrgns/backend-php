@@ -45,17 +45,19 @@ class Permission extends TableCtl {
 	}
 	
 	public static function check($action = '*', $subject = '*', $subject_id = 0) {
-		$user = BackendAccount::checkUser();
-		$user = (!$user && !empty($_SESSION['user'])) ? $_SESSION['user'] : $user;
+		$roles = GateKeeper::permittedRoles($action, class_for_url($subject), $subject_id);
+		$user  = BackendAccount::checkUser();
+		$user  = (!$user && !empty($_SESSION['user'])) ? $_SESSION['user'] : $user;
+		if (!$user && !in_array('anonymous', $roles)) {
+			return true;
+		}
 		if ($subject != '*' && !Component::isActive(class_name($subject))) {
 			return false;
 		}
 		if (empty($user->roles)) {
 			return false;
 		}
-		$user_roles = $user->roles;
-		$roles = GateKeeper::permittedRoles($action, class_for_url($subject), $subject_id);
-		$intersect = is_array($roles) ? array_intersect($user_roles, $roles) : $user_roles;
+		$intersect = is_array($roles) ? array_intersect($user->roles, $roles) : $user->roles;
 		return count($intersect) ? true : false;
 	}
 

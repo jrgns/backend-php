@@ -101,23 +101,7 @@ class AreaCtl {
 		}
 		
 		if (Value::get('admin_installed', false)) {
-			$roles = GateKeeper::permittedRoles($action, $subject, $subject_id);
-			if ($user = BackendAccount::checkUser()) {
-				if (!property_exists($user, 'roles') || !is_array($user->roles)) {
-					$user->roles = array();
-				}
-				if (Controller::$debug) {
-					Backend::addNotice('Current user roles: ' . serialize($user->roles));
-				}
-				if ($roles) {
-					$intersect = array_intersect($user->roles, $roles);
-					$toret = count($intersect) ? true : false;
-				} else {
-					$toret = $user->roles;
-				}
-			} else if (!in_array('anonymous', $roles)) {
-				$toret = false;
-			}
+			$toret = Permission::check(Controller::$action, Controller::$area);
 		} else if (!($subject == 'admin' && in_array($action, array('install', 'pre_install', 'post_install')))) {
 			$toret = false;
 		}

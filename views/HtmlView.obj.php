@@ -32,10 +32,11 @@ class HtmlView extends View {
 	 * This only happens when:
 	 * 1. The user has permission to access this query
 	 * 2. There is not display method present in the controller
+	 * 3. The correct template file is present
 	 */
 	public static function hook_display($results, $controller) {
 		$display_method = Controller::$view->mode . '_' . Controller::$action;
-		if (Permission::check(Controller::$action, Controller::$area) && !method_exists($controller, $display_method)) {
+		if ($controller->checkPermissions() && !method_exists($controller, $display_method)) {
 			$template_file = Controller::$area . '.' . Controller::$action . '.tpl.php';
 			if (Render::checkTemplateFile($template_file)) {
 				$results = is_array($results) ? $results : array('results' => $results);
