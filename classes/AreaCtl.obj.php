@@ -30,26 +30,25 @@ class AreaCtl {
 			Backend::addNotice('Checking Method ' . Controller::$action . ' for ' . get_class($this));
 		}
 
-		if ($this->checkPermissions()) {
-			$request_method = strtolower(array_key_exists('REQUEST_METHOD', $_SERVER) ? $_SERVER['REQUEST_METHOD'] : 'GET') . '_' . Controller::$action;
-			$action_method  = 'action_' . Controller::$action;
-			$view_method    = Controller::$view->mode . '_' . Controller::$action;
-			if (method_exists($this, $request_method)) {
-				if (Controller::$debug) {
-					Backend::addNotice('Running ' . get_class($this) . '::' . $request_method);
-				}
-				$toret = call_user_func_array(array($this, $request_method), Controller::$parameters);
-			} else if (method_exists($this, $action_method)) {
-				if (Controller::$debug) {
-					Backend::addNotice('Running ' . get_class($this) . '::' . $action_method);
-				}
-				$toret = call_user_func_array(array($this, $action_method), Controller::$parameters);
-			} else if (!method_exists($this, $view_method)) {
-				Controller::whoops(array('title' => 'Unknown Method', 'message' => 'Method ' . Controller::$area . '::' . Controller::$action . ' does not exist'));
-			}
-		} else {
+		if (!$this->checkPermissions()) {
 			Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to ' . Controller::$action . ' ' . get_class($this)));
-			$toret = false;
+			return false;
+		}
+		$request_method = strtolower(array_key_exists('REQUEST_METHOD', $_SERVER) ? $_SERVER['REQUEST_METHOD'] : 'GET') . '_' . Controller::$action;
+		$action_method  = 'action_' . Controller::$action;
+		$view_method    = Controller::$view->mode . '_' . Controller::$action;
+		if (method_exists($this, $request_method)) {
+			if (Controller::$debug) {
+				Backend::addNotice('Running ' . get_class($this) . '::' . $request_method);
+			}
+			$toret = call_user_func_array(array($this, $request_method), Controller::$parameters);
+		} else if (method_exists($this, $action_method)) {
+			if (Controller::$debug) {
+				Backend::addNotice('Running ' . get_class($this) . '::' . $action_method);
+			}
+			$toret = call_user_func_array(array($this, $action_method), Controller::$parameters);
+		} else if (!method_exists($this, $view_method)) {
+			Controller::whoops(array('title' => 'Unknown Method', 'message' => 'Method ' . Controller::$area . '::' . Controller::$action . ' does not exist'));
 		}
 		return $toret;
 	}
