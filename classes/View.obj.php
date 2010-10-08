@@ -32,12 +32,12 @@ class View {
 	 * This function takes data, and translates it into information.
 	 */
 	function display($data, $controller) {
+		$data = Hook::run('display', 'pre', array($data, $controller), array('toret' => $data));
+		if (method_exists($this, 'hook_display')) {
+			$data = $this->hook_display($data, $controller);
+		}
+
 		if ($controller instanceof AreaCtl && $controller->checkPermissions()) {
-			$data = Hook::run('display', 'pre', array($data, $controller), array('toret' => $data));
-			if (method_exists($this, 'hook_display')) {
-				$data = $this->hook_display($data, $controller);
-			}
-		
 			$display_method = $this->mode . '_' . Controller::$action;
 			$view_method    = 'output_' . Controller::$action;
 			$mode_method    = $this->mode;
@@ -63,10 +63,10 @@ class View {
 				$data = $this->$view_method($data);
 			}
 		
-			$data = Hook::run('display', 'post', array($data, $controller), array('toret' => $data));
-			if (method_exists($this, 'hook_post_display')) {
-				$data = $this->hook_post_display($data, $controller);
-			}
+		}
+		$data = Hook::run('display', 'post', array($data, $controller), array('toret' => $data));
+		if (method_exists($this, 'hook_post_display')) {
+			$data = $this->hook_post_display($data, $controller);
 		}
 
 		$this->output($data);
