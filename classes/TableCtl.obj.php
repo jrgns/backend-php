@@ -86,11 +86,19 @@ class TableCtl extends AreaCtl {
 		}
 		$filter = array();
 		foreach($fields as $field) {
-			$filter[] = Query::enclose($field) . " LIKE CONCAT('%', :term, '%')";
+			$filter[] = $field . " LIKE CONCAT('%', :term, '%')";
 		}
-		$options['filters']    = implode(' OR ', $filter);
-		$options['parameters'] = array(':term' => $term);
-		return self::action_list($start, $count, $options);
+		$filter = implode(' OR ', $filter);
+		if (!array_key_exists('filters', $options)) {
+			$options['filters'] = array();
+		}
+		$options['filters'][] = $filter;
+
+		if (!array_key_exists('parameters', $options)) {
+			$options['parameters'] = array();
+		}
+		$options['parameters'][':term'] = $term;
+		return $this->action_list($start, $count, $options);
 	}
 	
 	public function html_search($object) {

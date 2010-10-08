@@ -1205,7 +1205,7 @@ class DBObject {
 	}
 	
 	public function getSearchFields() {
-		return array_keys($this->getMeta('fields'));
+		return array_map(array('Query', 'enclose'), array_keys($this->getMeta('fields')));
 	}
 	
 	public function getArea() {
