@@ -101,19 +101,25 @@ class HtmlView extends View {
 		//TODO Add site_link, and other vars, as JS vars
 		Backend::addScriptContent('var site_link = \'' . SITE_LINK . '\';');
 		//TODO if someone can land a script file in the correct place, he can insert JS at will...
-		$comp_script = '/scripts/' . Controller::$area . '.component.js';
-		$comp_style  = '/styles/' . Controller::$area . '.component.css';
+		$comp_script = 'scripts/' . Controller::$area . '.component.js';
+		$comp_style  = 'styles/' . Controller::$area . '.component.css';
 		if (file_exists(WEB_FOLDER . $comp_script)) {
 			Backend::addScript(SITE_LINK . $comp_script);
 		}
 		if (file_exists(WEB_FOLDER . $comp_style)) {
 			Backend::addStyle(SITE_LINK . $comp_style);
 		}
+		$app_class = Backend::getConfig('backend.application.class', 'Application');
+		if (is_callable(array($app_class, 'getScripts')) && $app_scripts = call_user_func(array($app_class, 'getScripts'))) {
+			Backend::addScript($app_scripts);
+		}
+		if (is_callable(array($app_class, 'getStyles')) && $app_styles = call_user_func(array($app_class, 'getStyles'))) {
+			Backend::addStyle($app_styles);
+		}
 
 		Backend::add('Styles', array_unique(array_filter(Backend::getStyles())));
 		Backend::add('Scripts', array_unique(array_filter(Backend::getScripts())));
 		Backend::add('ScriptContent', array_unique(array_filter(Backend::getScriptContent())));
-		$app_class = Backend::getConfig('backend.application.class', 'Application');
 		$primary = Links::get('primary');
 		$secondary = Links::get('secondary');
 		$tertiary = Links::get('tertiary');
