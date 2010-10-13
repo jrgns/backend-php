@@ -49,6 +49,14 @@ class ContentObj extends DBObject {
 		if (empty($options['order'])) {
 			$options['order'] = '`added` DESC';
 		}
+		if (!Permission::check('manage', 'content')) {
+			//$user = BackendAccount::checkUser();
+			//$filter = $user ? '`active` = 1 OR `user_id` = :user_id' : '`active` = 1';
+			$filter = '`active` = 1';
+			if (array_key_exists($options['filter'])) {
+				$options['filter'] = is_array($options['filter']) ? array_push($options['filter'], $filter) : array($options['filter'], $filter);
+			}
+		}
 		return parent::getSelectSQL($options);
 	}
 
