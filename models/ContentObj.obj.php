@@ -42,20 +42,14 @@ class ContentObj extends DBObject {
 			'added' => 'dateadded',
 		);
 		$meta['relations'] = array();
-		//@jrgns 2009-10-25: Don't know if this is the right place to add these. Shouldn't this component be unaware of other components impacting it?
-		//if (Component::isActive('Comment')) {
-			/*
-			 * Conditions should be: array(child_field => should be what)
-			 */
-			//$meta['relations']['Comment'] = array('conditions' => array('foreign_id' => 'id', 'foreign_table' => 'contents'), 'relation' => 'multiple');
-		//}
-		//if (Component::isActive('Tag')) {
-			/*
-			 * Conditions should be: array(parent_field => should be what)
-			 */
-			//$meta['relations']['Tag'] = array('conditions' => array('id' => array('IN' => 'tags')), 'relation' => 'multiple');
-		//}
 		return parent::__construct($meta, $options);
+	}
+
+	public function getSelectSQL($options = array()) {
+		if (empty($options['order'])) {
+			$options['order'] = '`added` DESC';
+		}
+		return parent::getSelectSQL($options);
 	}
 
 	function validate($data, $action, $options = array()) {
