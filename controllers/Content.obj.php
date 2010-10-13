@@ -17,36 +17,35 @@ class Content extends TableCtl {
 	}
 
 	function html_display($content) {
-		if ($content instanceof DBObject) {
-			Backend::add('Sub Title', $content->array['title']);
-			if ($content->array['from_file']) {
-				$filename = 'content/static/' . $content->array['name'] . '.html';
-				$template = 'content/' . $content->array['name'] . '.tpl.php';
-				if (Render::checkTemplateFile($template)) {
-					Backend::addContent(Render::renderFile($template));
-				} else if (file_exists(APP_FOLDER . '/' . $filename)) {
-					Backend::addContent(file_get_contents(APP_FOLDER . '/' . $filename));
-				} else if (file_exists(BACKEND_FOLDER . '/' . $filename)) {
-					Backend::addContent(file_get_contents(BACKEND_FOLDER . '/' . $filename));
-				//SITE FOLDER too?
-				}
-			} else {
-				Backend::add('Content', $content);
-				Backend::addContent(Render::renderFile('content.display.tpl.php'));
-			}
-		}
-		/**
-		 * Is this necessary?
-		if (!$toret) {
+		if (!($content instanceof DBObject)) {
+			/**
+			 * Is this necessary?
 			if (Controller::$debug) {
 				$filename = 'content/' . Controller::$id . '.tpl.php';
 				if (Render::checkTemplateFile($filename)) {
 					Backend::addNotice('File available for content');
 				}
 			}
+			*/
+			return $content;
 		}
-		 */
-		return $content instanceof DBObject ? $content : false;
+		Backend::add('Sub Title', $content->array['title']);
+		if ($content->array['from_file']) {
+			$filename = 'content/static/' . $content->array['name'] . '.html';
+			$template = 'content/' . $content->array['name'] . '.tpl.php';
+			if (Render::checkTemplateFile($template)) {
+				Backend::addContent(Render::renderFile($template));
+			} else if (file_exists(APP_FOLDER . '/' . $filename)) {
+				Backend::addContent(file_get_contents(APP_FOLDER . '/' . $filename));
+			} else if (file_exists(BACKEND_FOLDER . '/' . $filename)) {
+				Backend::addContent(file_get_contents(BACKEND_FOLDER . '/' . $filename));
+			//SITE FOLDER too?
+			}
+		} else {
+			Backend::add('Content', $content);
+			Backend::addContent(Render::renderFile('content.display.tpl.php'));
+		}
+		return $content;
 	}
 	
 	function html_update($result) {
@@ -95,14 +94,14 @@ class Content extends TableCtl {
 			$_POST['obj']['name'] = $id;
 			$_POST['obj']['title'] = humanize($id);
 		}
-		$toret = parent::action_create();
-		if ($toret instanceof DBObject) {
+		$result = parent::action_create();
+		if ($result instanceof ContentObj) {
 			/* TODO This can easily "overwrite" existing urls */
 			if (Component::isActive('BackendQuery')) {
-				BackendQuery::add($toret->array['name'], 'content/display/' . $toret->array['id']);
+				BackendQuery::add($result->array['name'], 'content/display/' . $result->array['id']);
 			}
 		}
-		return $toret;
+		return $result;
 	}
 
 	function action_display($id) {
@@ -141,7 +140,7 @@ class Content extends TableCtl {
 		}
 	}
 	
-	function action_search($start, $count, $term, array $options = array()) {
+	public function action_search($start, $count, $term, array $options = array()) {
 		if (Component::isActive('BackendSearch')) {
 			$result = array('term' => $term);
 			if ($term) {

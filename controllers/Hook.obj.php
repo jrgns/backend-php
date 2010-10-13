@@ -83,7 +83,9 @@ class Hook extends TableCtl {
 		if ($hooks = self::get($hook_name, $type)) {
 			foreach($hooks as $hook) {
 				if (Component::isActive($hook['class']) && is_callable(array($hook['class'], $hook['method']))) {
-					//var_dump('Running ' . $hook['class'] . '::' . $hook['method'] . ' for hook ' . $hook_name . '-' . $type);
+					if (Controller::$debug) {
+						Backend::addNotice('Running ' . $hook['class'] . '::' . $hook['method'] . ' for hook ' . $hook_name . '-' . $type);
+					}
 					$toret = call_user_func_array(array($hook['class'], $hook['method']), $parameters);
 					//var_dump($toret);
 					if (!is_null($toret)) {

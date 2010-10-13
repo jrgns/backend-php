@@ -52,29 +52,36 @@ class Tag extends TableCtl {
 		return $query->fetchAll(array(':table' => $table, ':id' => $table_id));*/
 	}
 	
-	public static function addTags($tags, $foreign_table, $foreign_id) {
-		$tags = is_array($tags) ? $tags : explode(',', $tags);
-		$tags = array_map('plain', array_map('trim', $tags));
-		$toret = true;
-		foreach($tags as $tag) {
-			if (!empty($tag)) {
-				$toret = Tag::add($tag, $foreign_table, $foreign_id) && $toret;
+	/**
+	 * Tag a data record with one or multiple tags
+	 *
+	 * @param mixed An array of string tags, or a string tag
+	 * @param DBObject The data object to tag
+	 */
+	public static function add($tags, DBObject $object) {
+		$result = true;
+		if (is_array($tags)) {
+			$tags = array_filter(array_map('plain', array_map('trim', $tags)));
+			foreach($tags as $tag) {
+				if ($tag_info = Tag::check($tag, $object)) {
+					$result = TagLink::add($tag_info['id'], $object) && $result;
+				} else {
+					$result = false;
+				}
 			}
+		} else {
+			$tags   = explode(',', $tags);
+			$result = self::add($tags, $object);
 		}
-		return $toret;
+		return $result;
 	}
 	
-	public static function add($tag, $foreign_table, $foreign_id) {
-		$tag_info = Tag::check($tag, $foreign_table);
-		if ($tag_info) {
-			return TagLink::add($tag_info['id'], $foreign_id);
-		}
-		return false;
-	}
-	
+	/**
+	 * Check if a tag exists for a specified Area, add it if it doesn't
+	 */
 	public static function check($name, $area) {
-		if (is_object($area)) {
-			$area = table_name($area);
+		if ($area instanceof DBObject) {
+			$area = $area->getMeta('table');
 		}
 		
 		//Check if tag exists
@@ -82,8 +89,8 @@ class Tag extends TableCtl {
 		$query
 			->filter('`foreign_table` = :table')
 			->filter('`name` = :tag');
-		if ($row = $query->fetchAssoc(array(':tag' => $name, ':table' => $area))) {
-			return $row;
+		if ($tag = $query->fetchAssoc(array(':tag' => $name, ':table' => $area))) {
+			return $tag;
 		}
 		
 		//Tag doesn't already exist
@@ -202,12 +209,15 @@ class Tag extends TableCtl {
 		}
 		return $object;
 	}
+	*/
 
 	public static function hook_post_create($data, $object) {
-		$tags = array_key_exists('tags', $_POST) ? $_POST['tags'] : false;
-		if (!empty($tags) && $object instanceof ContentObj) {
-			$tags = array_filter(array_map('trim', explode(',', $tags)));
-			self::addTags($object->array['id'], $tags);
+		if (!($object instanceof DBObject) || !is_post()) {
+			return true;
+		}
+		if ($tags = filter_input(INPUT_POST, 'tags')) {
+			self::add($tags, $object);
+			var_dump('Adding tags: ' . $tags);
 		}
 		return true;
 	}
@@ -216,11 +226,11 @@ class Tag extends TableCtl {
 		$tags = array_key_exists('tags', $_POST) ? $_POST['tags'] : false;
 		if (!empty($tags) && $object instanceof ContentObj) {
 			$tags = array_filter(array_map('trim', explode(',', $tags)));
-			self::addTags($object->array['id'], $tags);
+			self::add($tags, $object);
 		}
 		return true;
 	}
-	*/
+
 	public static function checkParameters($parameters) {
 		$parameters = parent::checkParameters($parameters);
 		if (Controller::$action == 'display') {
@@ -238,10 +248,10 @@ class Tag extends TableCtl {
 		$toret = Permission::add('anonymous', 'list', __CLASS__) && $toret;
 		$toret = Permission::add('authenticated', 'list', __CLASS__) && $toret;
 		
-		$toret = Hook::add('form',    'pre',  __CLASS__) && $toret;
-		$toret = Hook::add('display', 'post', __CLASS__) && $toret;
-		$toret = Hook::add('update',  'post', __CLASS__) && $toret;
-		$toret = Hook::add('create',  'post', __CLASS__) && $toret;
+		$toret = Hook::add('form',    'pre',  __CLASS__, array('global' => 1)) && $toret;
+		$toret = Hook::add('display', 'post', __CLASS__, array('global' => 1)) && $toret;
+		$toret = Hook::add('update',  'post', __CLASS__, array('global' => 1)) && $toret;
+		$toret = Hook::add('create',  'post', __CLASS__, array('global' => 1)) && $toret;
 
 		return $toret;
 	}
