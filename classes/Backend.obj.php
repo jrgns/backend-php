@@ -528,13 +528,16 @@ class Backend {
 			if (SITE_STATE == 'production') {
 				return true;
 			}
-			return false;
 			break;
 		case E_DEPRECATED:
 			if (SITE_STATE == 'production') {
 				return true;
 			}
-			return false;
+			break;
+		case E_RECOVERABLE_ERROR:
+			if (SITE_STATE == 'production') {
+				return true;
+			}
 			break;
 		}
 		return false;

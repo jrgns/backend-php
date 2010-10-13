@@ -37,7 +37,9 @@ class Controller {
 		self::init();
 		self::start();
 		list ($controller, $result) = self::action();
-		self::display($controller, $result);
+		if ($controller instanceof AreaCtl) {
+			self::display($controller, $result);
+		}
 		self::finish();
 	}
 
