@@ -33,10 +33,11 @@ class Tag extends TableCtl {
 			->filter('`tags`.`foreign_table` = :table')
 			->filter('`tag_links`.`foreign_id` = :id');
 		$result = $query->fetchAll(array(':table' => $table, ':id' => $table_id), array('with_key' => true));
-		if ($result) {
-			foreach($result as $key => $value) {
-				$result[$key] = current($value);
-			}
+		if (!$result) {
+			return $result;
+		}
+		foreach($result as $key => $value) {
+			$result[$key] = current($value);
 		}
 		return $result;
 	}
@@ -100,70 +101,76 @@ class Tag extends TableCtl {
 	
 	public function action_display($id, $start = 0, $count = false) {
 		$result = parent::action_display($id);
-		if ($result instanceof DBObject) {
-			$tag_link = new SelectQuery('TagLink');
-			$tag_link
-				->field('`foreign_id`')
-				->filter('`tag_id` = :tag_id');
-
-			$foreign = self::getObject($result->array['foreign_table']);
-			list($query, $params) = $foreign->getSelectSQL();
-			$query
-				->field(':tag_id AS `tag_id`')
-				->filter('`' . $foreign->getMeta('id_field') . '` IN (' . $tag_link . ')')
-				->limit("$start, $count");
-
-			$params = array(
-				':tag_id' => $result->array['id']
-			);
-			$result->array['list'] = $query->fetchAll($params);
-
-			$count_query = new CustomQuery(preg_replace(REGEX_MAKE_COUNT_QUERY, '$1 COUNT(*) $3', $query));
-			/*var_dump($params);
-			die("<pre>$query\n\n$count_query");*/
-			$result->array['list_count'] = $count_query->fetchColumn($params);
+		if (!($result instanceof DBObject)) {
+			return $result;
 		}
+		$tag_link = new SelectQuery('TagLink');
+		$tag_link
+			->field('`foreign_id`')
+			->filter('`tag_id` = :tag_id');
+
+		$foreign = self::getObject($result->array['foreign_table']);
+		list($query, $params) = $foreign->getSelectSQL();
+		if (!($query instanceof SelectQuery)) {
+			return false;
+		}
+		$query
+			->field(':tag_id AS `tag_id`')
+			->filter('`' . $foreign->getMeta('id_field') . '` IN (' . $tag_link . ')')
+			->limit("$start, $count");
+
+		$params = array(
+			':tag_id' => $result->array['id']
+		);
+		$result->array['list'] = $query->fetchAll($params);
+
+		$count_query = new CustomQuery(preg_replace(REGEX_MAKE_COUNT_QUERY, '$1 COUNT(*) $3', $query));
+		/*var_dump($params);
+		die("<pre>$query\n\n$count_query");*/
+		$result->array['list_count'] = $count_query->fetchColumn($params);
 		return $result;
 	}
 	
 	public function html_display($result) {
-		$toret = parent::html_display($result);
-		if ($result instanceof DBObject) {
-			Backend::add('Sub Title', $result->array['name']);
-			if (Render::checkTemplateFile('tag.' . $result->array['foreign_table'] . '.list.tpl.php')) {
-				Backend::addContent(Render::renderFile('tag.' . $result->array['foreign_table'] . '.list.tpl.php'));
-			} else {
-				Backend::addContent(Render::renderFile('tag.display.list.tpl.php'));
-			}
+		$result = parent::html_display($result);
+		if (!($result instanceof DBObject)) {
+			return $result;
+		}
+		Backend::add('Sub Title', $result->array['name']);
+		if (Render::checkTemplateFile('tag.' . $result->array['foreign_table'] . '.list.tpl.php')) {
+			Backend::addContent(Render::renderFile('tag.' . $result->array['foreign_table'] . '.list.tpl.php'));
+		} else {
+			Backend::addContent(Render::renderFile('tag.display.list.tpl.php'));
 		}
 		return $toret;
 	}
 	
 	private function feed_display($result, $mode) {
-		if ($result instanceof DBObject) {
-			Backend::add('title', $result->array['name']);
-			Backend::add('link', SITE_LINK . '?q=tag/' . $result->array['id']);
-			Backend::add('description', $result->array['description']);
-			if (!empty($result->array['list']) && is_array($result->array['list'])) {
-				$list = array();
-				foreach($result->array['list'] as $item) {
-					$link = SITE_LINK;
-					if (Value::get('clean_urls', false)) {
-						$link .= $result->array['foreign_table'] . '/' . $item['id'];
-					} else {
-						$link .= '?q=' . $result->array['foreign_table'] . '/' . $item['id'];
-					}
-					$item['link'] = $link;
-					if ($result->array['foreign_table'] == 'contents') {
-						$item['body'] = Content::createPreview($item['body']);
-					}
-					$list[] = $item;
-				}
-			} else {
-				$list = false;
-			}
-			Backend::add('list', $list);
+		if (!($result instanceof DBObject)) {
+			return $result;
 		}
+		Backend::add('title', $result->array['name']);
+		Backend::add('link', SITE_LINK . '?q=tag/' . $result->array['id']);
+		Backend::add('description', $result->array['description']);
+		if (!empty($result->array['list']) && is_array($result->array['list'])) {
+			$list = array();
+			foreach($result->array['list'] as $item) {
+				$link = SITE_LINK;
+				if (Value::get('clean_urls', false)) {
+					$link .= $result->array['foreign_table'] . '/' . $item['id'];
+				} else {
+					$link .= '?q=' . $result->array['foreign_table'] . '/' . $item['id'];
+				}
+				$item['link'] = $link;
+				if ($result->array['foreign_table'] == 'contents') {
+					$item['body'] = Content::createPreview($item['body']);
+				}
+				$list[] = $item;
+			}
+		} else {
+			$list = false;
+		}
+		Backend::add('list', $list);
 		return $result;
 	}
 
