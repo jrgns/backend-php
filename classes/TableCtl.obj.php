@@ -43,7 +43,56 @@ class TableCtl extends AreaCtl {
 	 * Display does nothing but display (hahaha) the content fetched by action_read
 	 */
 	public function action_display($id) {
-		return self::action_read($id, 'dbobject');
+		$object = self::action_read($id, 'dbobject');
+		return $object;
+	}
+	
+	/**
+	 * Output an object in HTML
+	 *
+	 * Override this function if you want to customize the way a record is displayed.
+	 * You can also just create a template named $areaname.display.tpl.php to customize the HTML.
+	 */
+	public function html_display($object) {
+		if ($object) {
+			if ($object instanceof DBObject) {
+				Backend::add('Object', $object);
+				Backend::add('TabLinks', $this->getTabLinks('display'));
+				Backend::add('Sub Title', $object->getMeta('name'));
+				$template_file = $object->getArea() . '.display.tpl.php';
+				if (Render::checkTemplateFile($template_file)) {
+					Backend::addContent(Render::renderFile($template_file));
+				} else {
+					//TODO It's a bit of a hack to redirect just because we can't generate the template
+					if (Render::createTemplate($template_file, 'std_display.tpl.php')) {
+						Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' display');
+						Controller::redirect();
+					} else {
+						Controller::whoops(array('message' => 'Could not create template file for ' . $object->getMeta('name') . '::display'));
+					}
+				}
+			} else {
+				Controller::whoops(array('title' => 'Invalid Object returned'));
+			}
+		}
+		return $object;
+	}
+	
+	public function json_display($result) {
+		if ($result instanceof DBObject) {
+			switch (true) {
+			case !empty($result->array):
+				$result = $result->array;
+				break;
+			case !empty($result->object):
+				$result = $result->object;
+				break;
+			default:
+				$result = false;
+				break;
+			}
+		}
+		return $result;
 	}
 	
 	/**
@@ -65,6 +114,50 @@ class TableCtl extends AreaCtl {
 		}
 		$object->read(array_merge(array('limit' => $limit), $options));
 		return $object;
+	}
+	
+	/**
+	 * Output a list of records in HTML
+	 *
+	 * Override this function if you want to customize the way the list of records are displayed.
+	 * You can also just create a template named $areaname.list.tpl.php to customize the HTML.
+	 */
+	public function html_list($object) {
+		if (!$object) {
+			return $object;
+		}
+		if (!($object instanceof DBObject)) {
+			Controller::whoops(array('title' => 'Invalid Object returned'));
+			return $object;
+		}
+		
+		Backend::add('Object', $object);
+		Backend::add('TabLinks', $this->getTabLinks('list'));
+		Backend::add('Sub Title', $object->getMeta('name'));
+
+		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
+		Backend::addScript(SITE_LINK . 'scripts/table_list.js');
+		$template_file = $object->getArea() . '.list.tpl.php';
+		if (Render::checkTemplateFile($template_file)) {
+			Backend::addContent(Render::renderFile($template_file));
+		} else {
+			//TODO It's a bit of a hack to redirect just because we can't generate the template
+			//if (Render::createTemplate($template_file, 'std_list.tpl.php')) {
+				//Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' list');
+				//Controller::redirect();
+			//} else {
+				//Controller::whoops(array('message' => 'Could not create template file for ' . $object->getMeta('name') . '::list'));
+			//}
+			Backend::addContent(Render::renderFile('std_list.tpl.php'));
+		}
+	}
+	
+	public function json_list($result) {
+		if ($result instanceof DBObject) {
+			Backend::addContent(array('list_count' => $result->list_count), array('as_is' => 1));
+			$result = $result->list;
+		}
+		return $result;
 	}
 	
 	/**
@@ -127,10 +220,6 @@ class TableCtl extends AreaCtl {
 	
 	/**
 	 * Action for creating a record in an area
-	 *
-	 * TODO: There's a duplication of code between rest_create and action_create... Any ideas on
-	 * how to work around this?
-	 * jrgns: maybe have functions post_create and get_create to diff between the verbs...
 	 */
 	public function action_create() {
 		$object = self::getObject(get_class($this));
@@ -159,6 +248,42 @@ class TableCtl extends AreaCtl {
 		return $result;
 	}
 	
+	/**
+	 * Output a form to create a record in HTML
+	 *
+	 * Override this function if you want to customize the way the creation of a record is displayed.
+	 * You can also just create a template named $areaname.form.tpl.php to customize the HTML.
+	 */
+	public function html_create($result) {
+		switch (true) {
+		case $result instanceof DBObject:
+			Controller::redirect('?q=' . $result->getArea() . '/' . $result->getMeta('id'));
+			break;
+		default:
+		case $result:
+			$object = self::getObject(get_class($this));
+			if ($object) {
+				Backend::add('Object', $object);
+				Backend::add('TabLinks', $this->getTabLinks('create'));
+				Backend::add('Sub Title', 'Add ' . $object->getMeta('name'));
+				$template_file = $object->getArea() . '.form.tpl.php';
+				if (Render::checkTemplateFile($template_file)) {
+					Backend::addContent(Render::renderFile($template_file));
+				} else {
+					//TODO It's a bit of a hack to redirect just because we can't generate the template
+					if (Render::createTemplate($template_file, 'std_form.tpl.php')) {
+						Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
+						Controller::redirect();
+					} else {
+						Controller::whoops(array('message' => 'Could not create template file for ' . $object->getMeta('name') . '::create'));
+					}
+				}
+			}
+			break;
+		}
+		return $result;
+	}
+	
 	public function action_replace() {
 		$toret = false;
 		$object = self::getObject(get_class($this));
@@ -183,6 +308,9 @@ class TableCtl extends AreaCtl {
 		}
 	}
 	
+	public function html_replace($result) {
+		return $this->html_create($result);
+	}
 	
 	/**
 	 * Action for reading a record in an area
@@ -225,6 +353,40 @@ class TableCtl extends AreaCtl {
 		return $result;
 	}
 	
+	/**
+	 * Output a form to update a record in HTML
+	 *
+	 * Override this function if you want to customize the way the creation of a record is displayed.
+	 * You can also just create a template named $areaname.form.tpl.php to customize the HTML.
+	 */
+	public function html_update($result) {
+		switch (true) {
+		case $result instanceof DBObject:
+			Controller::redirect('?q=' . $result->getArea() . '/display/' . $result->getMeta('id'));
+			break;
+		case $result:
+			$object = self::getObject(get_class($this));
+			if ($object) {
+				Backend::add('Object', $object);
+				Backend::add('TabLinks', $this->getTabLinks('update'));
+				Backend::add('Sub Title', 'Update ' . $object->getMeta('name'));
+				$template_file = $object->getArea() . '.form.tpl.php';
+				if (Render::checkTemplateFile($template_file)) {
+					Backend::addContent(Render::renderFile($template_file));
+				} else {
+					//TODO It's a bit of a hack to redirect just because we can't generate the template
+					Render::createTemplate($template_file, 'std_form.tpl.php');
+					Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
+					Controller::redirect();
+				}
+			}
+			break;
+		default:
+			break;
+		}
+		return $result;
+	}
+
 	public function action_delete($id) {
 		$toret = false;
 		$object = self::getObject(get_class($this), $id);
@@ -241,6 +403,10 @@ class TableCtl extends AreaCtl {
 			Controller::whoops();
 		}
 		return true;
+	}
+	
+	public function html_delete($result) {
+		Controller::redirect('?q=' . Controller::$area . '/list');
 	}
 	
 	public function action_toggle($id, $field, $should_redirect = true) {
@@ -335,176 +501,6 @@ class TableCtl extends AreaCtl {
 		return false;
 	}
 	
-	/**
-	 * Output an object in HTML
-	 *
-	 * Override this function if you want to customize the way a record is displayed.
-	 * You can also just create a template named $areaname.display.tpl.php to customize the HTML.
-	 */
-	public function html_display($object) {
-		if ($object) {
-			if ($object instanceof DBObject) {
-				Backend::add('Object', $object);
-				Backend::add('TabLinks', $this->getTabLinks('display'));
-				Backend::add('Sub Title', $object->getMeta('name'));
-				$template_file = $object->getArea() . '.display.tpl.php';
-				if (Render::checkTemplateFile($template_file)) {
-					Backend::addContent(Render::renderFile($template_file));
-				} else {
-					//TODO It's a bit of a hack to redirect just because we can't generate the template
-					if (Render::createTemplate($template_file, 'std_display.tpl.php')) {
-						Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' display');
-						Controller::redirect();
-					} else {
-						Controller::whoops(array('message' => 'Could not create template file for ' . $object->getMeta('name') . '::display'));
-					}
-				}
-			} else {
-				Controller::whoops(array('title' => 'Invalid Object returned'));
-			}
-		}
-		return $object;
-	}
-	
-	public function json_display($result) {
-		if ($result instanceof DBObject) {
-			switch (true) {
-			case !empty($result->array):
-				$result = $result->array;
-				break;
-			case !empty($result->object):
-				$result = $result->object;
-				break;
-			default:
-				$result = false;
-				break;
-			}
-		}
-		return $result;
-	}
-	
-	/**
-	 * Output a list of records in HTML
-	 *
-	 * Override this function if you want to customize the way the list of records are displayed.
-	 * You can also just create a template named $areaname.list.tpl.php to customize the HTML.
-	 */
-	public function html_list($object) {
-		if (!$object) {
-			return $object;
-		}
-		if (!($object instanceof DBObject)) {
-			Controller::whoops(array('title' => 'Invalid Object returned'));
-			return $object;
-		}
-		
-		Backend::add('Object', $object);
-		Backend::add('TabLinks', $this->getTabLinks('list'));
-		Backend::add('Sub Title', $object->getMeta('name'));
-
-		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
-		Backend::addScript(SITE_LINK . 'scripts/table_list.js');
-		$template_file = $object->getArea() . '.list.tpl.php';
-		if (Render::checkTemplateFile($template_file)) {
-			Backend::addContent(Render::renderFile($template_file));
-		} else {
-			//TODO It's a bit of a hack to redirect just because we can't generate the template
-			//if (Render::createTemplate($template_file, 'std_list.tpl.php')) {
-				//Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' list');
-				//Controller::redirect();
-			//} else {
-				//Controller::whoops(array('message' => 'Could not create template file for ' . $object->getMeta('name') . '::list'));
-			//}
-			Backend::addContent(Render::renderFile('std_list.tpl.php'));
-		}
-	}
-	
-	public function json_list($result) {
-		if ($result instanceof DBObject) {
-			Backend::addContent(array('list_count' => $result->list_count), array('as_is' => 1));
-			$result = $result->list;
-		}
-		return $result;
-	}
-	
-	/**
-	 * Output a form to create a record in HTML
-	 *
-	 * Override this function if you want to customize the way the creation of a record is displayed.
-	 * You can also just create a template named $areaname.form.tpl.php to customize the HTML.
-	 */
-	public function html_create($result) {
-		switch (true) {
-		case $result instanceof DBObject:
-			Controller::redirect('?q=' . $result->getArea() . '/' . $result->getMeta('id'));
-			break;
-		default:
-		case $result:
-			$object = self::getObject(get_class($this));
-			if ($object) {
-				Backend::add('Object', $object);
-				Backend::add('TabLinks', $this->getTabLinks('create'));
-				Backend::add('Sub Title', 'Add ' . $object->getMeta('name'));
-				$template_file = $object->getArea() . '.form.tpl.php';
-				if (Render::checkTemplateFile($template_file)) {
-					Backend::addContent(Render::renderFile($template_file));
-				} else {
-					//TODO It's a bit of a hack to redirect just because we can't generate the template
-					if (Render::createTemplate($template_file, 'std_form.tpl.php')) {
-						Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
-						Controller::redirect();
-					} else {
-						Controller::whoops(array('message' => 'Could not create template file for ' . $object->getMeta('name') . '::create'));
-					}
-				}
-			}
-			break;
-		}
-		return $result;
-	}
-	
-	public function html_replace($result) {
-		return $this->html_create($result);
-	}
-	
-	/**
-	 * Output a form to update a record in HTML
-	 *
-	 * Override this function if you want to customize the way the creation of a record is displayed.
-	 * You can also just create a template named $areaname.form.tpl.php to customize the HTML.
-	 */
-	public function html_update($result) {
-		switch (true) {
-		case $result instanceof DBObject:
-			Controller::redirect('?q=' . $result->getArea() . '/display/' . $result->getMeta('id'));
-			break;
-		case $result:
-			$object = self::getObject(get_class($this));
-			if ($object) {
-				Backend::add('Object', $object);
-				Backend::add('TabLinks', $this->getTabLinks('update'));
-				Backend::add('Sub Title', 'Update ' . $object->getMeta('name'));
-				$template_file = $object->getArea() . '.form.tpl.php';
-				if (Render::checkTemplateFile($template_file)) {
-					Backend::addContent(Render::renderFile($template_file));
-				} else {
-					//TODO It's a bit of a hack to redirect just because we can't generate the template
-					Render::createTemplate($template_file, 'std_form.tpl.php');
-					Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
-					Controller::redirect();
-				}
-			}
-			break;
-		default:
-			break;
-		}
-		return $result;
-	}
-	
-	public function html_delete($result) {
-		Controller::redirect('?q=' . Controller::$area . '/list');
-	}
-
 	public function html_import($result) {
 		switch (true) {
 		case $result instanceof DBObject:
@@ -525,32 +521,6 @@ class TableCtl extends AreaCtl {
 			Controller::redirect();
 			break;
 		}
-	}
-	
-	/**
-	 * RESTful action for creating a record in an area
-	 *
-	 * This function should be called when the create action is called in a RESTful app.
-	 * TODO: There's a duplication of code between rest_create and action_create... Any ideas on
-	 * how to work around this?
-	 */
-	public function rest_create() {
-		$object = self::getObject(get_class($this));
-		if ($object) {
-			$toret = true;
-			//We need to check if the post data is valid in some way?
-			$data = $object->fromPost();
-			$data = Hook::run('create', 'pre', array($data, $object), array('toret' => $data));
-			if ($object->create($data)) {
-				Hook::run('create', 'post', array($data, $object));
-				Backend::addSuccess($object->getMeta('name') . ' Added');
-				$toret = $object;
-			} else {
-				$toret = false;
-				Backend::addError('Could not add ' . $object->getMeta('name'));
-			}
-		}
-		return $toret;
 	}
 	
 	public static function retrieve($parameter = false, $return = 'array', array $options = array()) {
