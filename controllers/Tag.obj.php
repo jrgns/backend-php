@@ -16,7 +16,14 @@ class Tag extends TableCtl {
 		return $links;
 	}
 	
-	public static function getTags($table, $table_id) {
+	public static function getTags($table, $table_id = null) {
+		if (is_null($table_id)) {
+			if (!$table instanceof DBObject) {
+				return false;
+			}
+			$table_id = $table->getMeta('id');
+			$table    = $table->getMeta('table');
+		}
 		$query = new SelectQuery('Tag');
 		$query
 			->leftJoin('TagLink', array('`tags`.`id` = `tag_links`.`tag_id`'))
@@ -199,17 +206,20 @@ class Tag extends TableCtl {
 		}
 		return $object;
 	}
+	*/
 
-	public static function hook_post_display($object) {
+	public static function hook_post_table_display($object) {
+		if (!($object instanceof DBObject)) {
+			return $object;
+		}
 		if ($object instanceof DBObject && Controller::$area == 'content' && in_array(Controller::$action, array('display'))) {
-			$tags = self::getTags($object->array['id']);
+			$tags = self::getTags($object);
 			//Don't add Content, only render it.
 			Backend::add('obj_tags', $tags);
 			Backend::addContent(Render::renderFile('tags.tpl.php'));
 		}
 		return $object;
 	}
-	*/
 
 	public static function hook_post_create($data, $object) {
 		if (!($object instanceof DBObject) || !is_post()) {
@@ -223,6 +233,9 @@ class Tag extends TableCtl {
 	}
 
 	public static function hook_post_update($data, $object) {
+		if (!($object instanceof DBObject) || !is_post()) {
+			return true;
+		}
 		$tags = array_key_exists('tags', $_POST) ? $_POST['tags'] : false;
 		if (!empty($tags) && $object instanceof ContentObj) {
 			$tags = array_filter(array_map('trim', explode(',', $tags)));
@@ -249,7 +262,7 @@ class Tag extends TableCtl {
 		$toret = Permission::add('authenticated', 'list', __CLASS__) && $toret;
 		
 		$toret = Hook::add('form',    'pre',  __CLASS__, array('global' => 1)) && $toret;
-		$toret = Hook::add('display', 'post', __CLASS__, array('global' => 1)) && $toret;
+		$toret = Hook::add('table_display', 'post', __CLASS__, array('global' => 1)) && $toret;
 		$toret = Hook::add('update',  'post', __CLASS__, array('global' => 1)) && $toret;
 		$toret = Hook::add('create',  'post', __CLASS__, array('global' => 1)) && $toret;
 

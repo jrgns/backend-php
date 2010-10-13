@@ -105,8 +105,9 @@ class Content extends TableCtl {
 	}
 
 	function action_display($id) {
-		$toret = Content::retrieve($id, 'dbobject');
+		$id = Hook::run('table_display', 'pre', array($id), array('toret' => $id));
 
+		$toret = Content::retrieve($id, 'dbobject');
 		if ($toret instanceof DBObject && !empty($toret->object)) {
 			if (!$this->checkPermissions(array('subject_id' => $toret->object->id, 'subject' => 'content'))) {
 				Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to display ' . $toret->object->title));
@@ -128,6 +129,8 @@ class Content extends TableCtl {
 		if ($toret && Controller::$debug) {
 			var_dump('Content ID: ' . $toret->object->id);
 		}
+
+		$object = Hook::run('table_display', 'post', array($toret), array('toret' => $toret));
 		return $toret;
 	}
 	
@@ -198,6 +201,13 @@ class Content extends TableCtl {
 		}
 	}
 	
+	public static function hook_table_display($id) {
+		return $id;
+	}
+	
+	/**
+	 * We check if there's any content of the name ?q=:name
+	 */
 	public static function hook_init() {
 		if (empty($_REQUEST['q'])) {
 			return;
@@ -218,6 +228,7 @@ class Content extends TableCtl {
 		$toret = parent::install($options);
 
 		$toret = Hook::add('init', 'pre', __CLASS__, array('global' => true)) && $toret;
+		$toret = Hook::add('table_display', 'pre', __CLASS__) && $toret;
 
 		$toret = Permission::add('anonymous', 'display', 'content') && $toret;
 		$toret = Permission::add('anonymous', 'list', 'content') && $toret;
