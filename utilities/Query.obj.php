@@ -39,7 +39,7 @@ class Query {
 	 */
 	function __construct($action, $table, array $options = array()) {
 		$action = strtoupper($action);
-		if (!in_array($action, array('SELECT', 'INSERT', 'DELETE', 'UPDATE', 'SHOW'))) {
+		if (!in_array($action, array('SELECT', 'INSERT', 'REPLACE', 'DELETE', 'UPDATE', 'SHOW'))) {
 			trigger_error('Unknown Query Action', E_USER_ERROR);
 			return false;
 		}
