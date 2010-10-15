@@ -541,6 +541,16 @@ class TableCtl extends AreaCtl {
 			if ($parameter !== false) {
 				$query = $object->getRetrieveSQL();
 				if ($query) {
+					if ($parameter == 'random') {
+						if ($query instanceof Query) {
+							$query
+								->setFilter(array())
+								->setOrder(array('RAND()'))
+								->limit(1);
+						} else {
+							$query .= ' ORDER BY RAND() LIMIT 1';
+						}
+					}
 					$object->read(
 						array(
 							'query'      => $query,
