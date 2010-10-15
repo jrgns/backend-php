@@ -44,11 +44,5 @@ class ValueObj extends DBObject {
 		}
 		return $toret ? $data : false;
 	}
-
-	public function getRetrieveSQL() {
-		$query = new SelectQuery(__CLASS__);
-		$query->filter('`id` = :parameter OR `name` = :parameter');
-		return $query;
-	}
 }
 

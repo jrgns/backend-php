@@ -832,15 +832,15 @@ class DBObject {
 	}
 	
 	public function getRetrieveSQL() {
-		extract($this->meta);
-
-		$query = 'SELECT * FROM ' . $this->getSource() . ' WHERE `' . $id_field . '` = :parameter';
-		if (array_key_exists('name', $fields)) {
-			$query .= ' OR `name` = :parameter';
+		$query  = new SelectQuery($this);
+		$filter = '`id` = :parameter';
+		if (array_key_exists('name', $this->meta['fields'])) {
+			$filter .= ' OR `name` = :parameter';
 		}
-		if (array_key_exists('title', $fields)) {
-			$query .= ' OR `title` = :parameter';
+		if (array_key_exists('title', $this->meta['fields'])) {
+			$filter .= ' OR `title` = :parameter';
 		}
+		$query->filter($filter);
 		return $query;
 	}
 
