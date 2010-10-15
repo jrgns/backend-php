@@ -101,8 +101,8 @@ class HtmlView extends View {
 		//TODO Add site_link, and other vars, as JS vars
 		Backend::addScriptContent('var site_link = \'' . SITE_LINK . '\';');
 		//TODO if someone can land a script file in the correct place, he can insert JS at will...
-		$comp_script = 'scripts/' . Controller::$area . '.component.js';
-		$comp_style  = 'styles/' . Controller::$area . '.component.css';
+		$comp_script = '/scripts/' . Controller::$area . '.component.js';
+		$comp_style  = '/styles/' . Controller::$area . '.component.css';
 		if (file_exists(WEB_FOLDER . $comp_script)) {
 			Backend::addScript(SITE_LINK . $comp_script);
 		}
