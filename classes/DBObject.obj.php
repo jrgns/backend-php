@@ -833,7 +833,7 @@ class DBObject {
 	
 	public function getRetrieveSQL() {
 		$query  = new SelectQuery($this);
-		$filter = '`id` = :parameter';
+		$filter = '`' . $this->getMeta('id_field') . '` = :parameter';
 		if (array_key_exists('name', $this->meta['fields'])) {
 			$filter .= ' OR `name` = :parameter';
 		}
