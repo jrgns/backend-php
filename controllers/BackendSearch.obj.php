@@ -58,7 +58,7 @@ class BackendSearch extends TableCtl {
 								if ($b_search->create($data)) {
 									$result++;
 									$total++;
-								} else {
+								} else if ($b_search->error_msg != 'Error executing statement(1062)') {
 									Backend::addError('Could not add ' . $word . ' to ' . get_class($controller) . '::' . $field . ' index');
 								}
 							}
