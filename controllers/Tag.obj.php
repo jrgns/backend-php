@@ -114,35 +114,35 @@ class Tag extends TableCtl {
 	}
 	
 	public function action_display($id, $start = 0, $count = false) {
-		$result = parent::action_display($id);
-		if (!($result instanceof DBObject)) {
-			return $result;
+		$count = $count === false ? Value::get('list_length', 5) : $count;
+		$tag = self::getObject($this, $id);
+		if (!($tag instanceof TagObj)) {
+			return $tag;
 		}
-		$tag_link = new SelectQuery('TagLink');
-		$tag_link
-			->field('`foreign_id`')
-			->filter('`tag_id` = :tag_id');
 
-		$foreign = self::getObject($result->array['foreign_table']);
-		list($query, $params) = $foreign->getSelectSQL();
+		$links = self::getObject($tag->array['foreign_table']);
+		list($query, $params) = $links->getSelectSQL();
 		if (!($query instanceof SelectQuery)) {
 			return false;
 		}
+		$query_links = new SelectQuery('TagLink');
+		$query_links
+			->field('`foreign_id`')
+			->filter('`tag_id` = :tag_id');
+
 		$query
 			->field(':tag_id AS `tag_id`')
-			->filter('`' . $foreign->getMeta('id_field') . '` IN (' . $tag_link . ')')
+			->filter('`' . $links->getMeta('id_field') . '` IN (' . $query_links . ')')
 			->limit("$start, $count");
 
 		$params = array(
-			':tag_id' => $result->array['id']
+			':tag_id' => $tag->array['id']
 		);
-		$result->array['list'] = $query->fetchAll($params);
+		$links->load(array('mode' => 'list', 'query' => $query, 'parameters' => $params));
 
-		$count_query = new CustomQuery(preg_replace(REGEX_MAKE_COUNT_QUERY, '$1 COUNT(*) $3', $query));
-		/*var_dump($params);
-		die("<pre>$query\n\n$count_query");*/
-		$result->array['list_count'] = $count_query->fetchColumn($params);
-		return $result;
+		$tag->array['list'] = $links->list;
+		$tag->array['list_count'] = $links->list_count;
+		return $tag;
 	}
 	
 	public function html_display($result) {
@@ -156,7 +156,7 @@ class Tag extends TableCtl {
 		} else {
 			Backend::addContent(Render::renderFile('tag.display.list.tpl.php'));
 		}
-		return $toret;
+		return $result;
 	}
 	
 	private function feed_display($result, $mode) {
@@ -249,6 +249,13 @@ class Tag extends TableCtl {
 		if (Controller::$action == 'display') {
 			$parameters[1] = array_key_exists(1, $parameters) ? $parameters[1] : 0;
 			$parameters[2] = array_key_exists(2, $parameters) ? $parameters[2] : Value::get('TagContentListLength', 10);
+		} else if (in_array(Controller::$action, array('display'))) {
+			if (!isset(Controller::$parameters[0])) {
+				$parameters[1] = 0;
+			}
+			if (!isset(Controller::$parameters[2])) {
+				$parameters[2] = Value::get('list_length', 5);
+			}
 		}
 		return $parameters;
 	}
