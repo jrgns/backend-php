@@ -28,12 +28,7 @@ class File extends TableCtl {
 		$toret = false;
 		$toret    = parent::action_read($id, $mode);
 		if ($toret->array) {
-			$mime_type = array_key_exists('mime_type', $toret->array) ? $toret->array['mime_type'] : false;
-			if (!empty($mime_type)) {
-				Controller::$view->mime_type = $mime_type;
-			} else {
-				Controller::$view->mime_type = self::$default_type;
-			}
+			Controller::$view->mime_type = $toret->getMimeType();
 		} else {
 			Controller::whoops();
 		}

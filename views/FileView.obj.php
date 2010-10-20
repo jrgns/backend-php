@@ -22,10 +22,7 @@ class FileView extends View {
 	
 	public static function hook_output($to_print) {
 		if ($to_print instanceof FileObject && $to_print->array && !headers_sent()) {
-			$mime_type = array_key_exists('mime_type', $to_print->array) ? $to_print->array['mime_type'] : false;
-			if (empty($mime_type)) {
-				$mime_type = $to_print->default_type;
-			}
+			$mime_type = $to_print->getMimeType();
 			if ($to_print->array['from_db']) {
 				$content = $to_print->array['content'];
 			} else {
@@ -36,15 +33,14 @@ class FileView extends View {
 				var_dump($content); die(get_called_class() . '::hook_output');
 			} else {
 				$headers = apache_request_headers();
-				header('Content-Type: ' . $mime_type);
-				//header('Content-disposition: attachment; filename=' . $file->array['name']);
 				header('Last-Modified: ' . gmdate('D, d M Y H:i:s', strtotime($to_print->array['modified'])));
 				header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 60 * 60 * 24 * 7).'GMT');
 				header('Cache-Control: max-age: ' . 60 * 60 * 24 * 7);
 				header('Pragma: cache');
-				die($content);
+				return $content;
 			}
 		}
+		return null;
 	}
 	
 	public static function hook_post_start() {

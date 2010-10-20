@@ -17,7 +17,12 @@
 		<tbody>
 			<tr class="<?php echo $odd ? '' : 'even' ?>">
 			<?php foreach($list as $image): 
-				$extension = explode('/', $image['mime_type']);
+				$image['meta_info'] = unserialize(base64_decode($image['meta_info']));
+				if (!empty($image['meta_info']['mime'])) {
+					$extension = explode('/', $image['meta_info']['mime']);
+				} else {
+					$extension = explode('/', $image['mime_type']);
+				}
 				$extension = end($extension);
 				if (!($count % $row_width)): ?>
 			</tr>

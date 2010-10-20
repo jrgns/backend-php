@@ -36,6 +36,13 @@ class FileObject extends DBObject {
 	function getMetaInfo($filename) {
 		return null;
 	}
+	
+	function getMimeType() {
+		if (!empty($this->data['mime_type'])) {
+			return $this->data['mime_type'];
+		}
+		return $this->default_type;
+	}
 
 	function fromPost() {
 		$data = parent::fromPost();

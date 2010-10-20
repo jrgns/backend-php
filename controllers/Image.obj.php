@@ -16,7 +16,7 @@ class Image extends File {
 	}
 	
 	function html_display($image) {
-		$extension = explode('/', $image->array['mime_type']);
+		$extension = explode('/', $image->getMimeType());
 		$extension = end($extension);
 		Backend::add('TabLinks', $this->getTabLinks(Controller::$action));
 		Backend::add('Sub Title', $image->array['name']);
