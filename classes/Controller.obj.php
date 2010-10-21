@@ -124,7 +124,7 @@ class Controller {
 		if (Controller::$debug) {
 			Backend::addNotice('Trying Controller ' . $control_name);
 		}
-		if (!Component::isActive($control_name, true)) {
+		if (!Component::isActive($control_name) || !class_exists($control_name, true)) {
 			Controller::whoops('Component is Inactive');
 			return null;
 		}
