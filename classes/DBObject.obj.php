@@ -1157,19 +1157,29 @@ class DBObject {
 			$query_fields[] = implode(' ', array_map('trim', $field_arr));
 		}
 		
-		foreach($keys as $field => $type) {
-			$fields = array_map('trim', explode(',', $field));
-			$name = str_replace(' ', '', ucwords(implode(' ', $fields)));
-			$fields = '`' . implode('`, `', $fields) . '`';
-			switch ($type) {
+		foreach($keys as $key => $key_options) {
+			//Legacy
+			if (is_string($key_options)) {
+				$fields = array_map('trim', explode(',', $key));
+				$key    = ucwords($key_options) . str_replace(' ', '', ucwords(implode(' ', $fields)));
+				$key_options = array(
+					'fields' => $fields,
+					'type'   => $key_options
+				);
+			}
+			if (empty($key_options['type']) || empty($key_options['fields'])) {
+				continue;
+			}
+			$fields = '`' . implode('`, `', $key_options['fields']) . '`';
+			switch ($key_options['type']) {
 			case 'primary':
 				$query_keys[] = 'PRIMARY KEY(' . $fields . ')';
 				break;
 			case 'unique':
-				$query_keys[] = 'UNIQUE KEY `Unique' . $name . '` (' . $fields . ')';
+				$query_keys[] = 'UNIQUE KEY `' . $key . '` (' . $fields . ')';
 				break;
 			case 'index':
-				$query_keys[] = 'KEY `Index' . $name . '` (' . $fields . ')';
+				$query_keys[] = 'KEY `' . $key . '` (' . $fields . ')';
 				break;
 			}
 		}
