@@ -54,8 +54,16 @@ class Component extends TableCtl {
 		$toret  = preg_replace($search, '/', $toret);
 
 		$toret  = array_unique(array_merge(array_values($base_c), $toret));
+		$toret  = array_filter($toret, array('Component', 'checkFile'));
 		
 		return $toret;
+	}
+	
+	private static function checkFile($file) {
+		if (substr($file, -4) != '.php') {
+			return false;
+		}
+		return true;
 	}
 
 	private static function getBaseComponents() {
