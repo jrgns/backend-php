@@ -39,6 +39,31 @@ class CsvView extends View {
 		case $to_print instanceof SelectQuery:
 			return self::output_query($to_print);
 			break;
+		case is_array($to_print):
+			if (!$fp = fopen('php://temp', 'r+')) {
+				Backend::addError('Could not open output file for CSV output');
+				return '';
+			}
+			$tmp = reset($to_print);
+			$first = false;
+			foreach($to_print as $row) {
+				if (!is_array($row)) {
+					$row = array($row);
+				}
+				set_time_limit(30);
+				if (!$first) {
+					//fputcsv($fp, array_keys($row));
+					$first = true;
+				}
+				fputcsv($fp, $row);
+			}
+			//Get the file contents
+			rewind($fp);
+			ob_start();
+			fpassthru($fp);
+			fclose($fp);
+			return ob_get_clean();
+			break;
 		case is_string($to_print):
 		default:
 			return $to_print;
