@@ -177,7 +177,7 @@ class TableCtl extends AreaCtl {
 		}
 		$term = is_null($term) ? filter_input(INPUT_POST | INPUT_GET, 'term') : $term;
 		if (empty($term)) {
-			return false;
+			return $object;
 		}
 		$filter = array();
 		foreach($fields as $field) {
