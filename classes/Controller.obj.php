@@ -45,12 +45,19 @@ class Controller {
 
 	public static function init() {
 		if (!self::$init) {
-			session_set_cookie_params(0, WEB_SUB_FOLDER, null, null, true);
+			if ($_SERVER['SERVER_PORT'] == 443 || (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on')) {
+				$secure = true;
+			} else {
+				$secure = false;
+			}
+			if (WEB_SUB_FOLDER == '/') {
+				print_stacktrace(); die;
+			}
+			session_set_cookie_params(0, WEB_SUB_FOLDER, null, $secure, true);
 			session_name('Controller');
 			session_start();
 
-			date_default_timezone_set('Africa/Johannesburg');
-			
+			date_default_timezone_set(Backend::getConfig('application.timezone', 'Africa/Johannesburg'));
 
 			self::check_quotes();
 			self::$salt = Backend::getConfig('application.salt', 'Change this to something random!');
@@ -352,9 +359,6 @@ class Controller {
 	 */	
 	public static function redirect($location = false) {
 		switch ($location) {
-		case false:
-			$location = $_SERVER['REQUEST_URI'];
-			break;
 		case 'previous':
 			if (!empty($_SESSION['previous_url'])) {
 				if (is_array($_SESSION['previous_url'])) {
@@ -367,7 +371,9 @@ class Controller {
 			}
 			break;
 		}
-		
+		if (!$location) {
+			$location = $_SERVER['REQUEST_URI'];
+		}
 
 		//This should fix most redirects, but it may happen that location == '?debug=true&q=something/or/another' or something similiar
 		if (Value::get('clean_urls', false) && substr($location, 0, 3) == '?q=') {

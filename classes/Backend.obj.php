@@ -88,7 +88,10 @@ class Backend {
 
 		//Some constants
 		$url = parse_url(get_current_url());
-		$folder = !empty($url['path']) ? dirname($url['path']) : '/';
+		$folder = !empty($url['path']) ? $url['path'] : '/';
+		if (substr($folder, -1) != '/' && substr($folder, -1) != '\\') {
+			$folder = dirname($folder);
+		}
 		if ($folder != '.') {
 			if (substr($folder, strlen($folder) - 1) != '/') {
 				$folder .= '/';
