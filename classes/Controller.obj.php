@@ -353,7 +353,7 @@ class Controller {
 	public static function redirect($location = false) {
 		switch ($location) {
 		case false:
-			$location = get_current_url();
+			$location = $_SERVER['REQUEST_URI'];
 			break;
 		case 'previous':
 			if (!empty($_SESSION['previous_url'])) {
@@ -368,9 +368,6 @@ class Controller {
 			break;
 		}
 		
-		if (!$location) {
-			$location = $_SERVER['REQUEST_URI'];
-		}
 
 		//This should fix most redirects, but it may happen that location == '?debug=true&q=something/or/another' or something similiar
 		if (Value::get('clean_urls', false) && substr($location, 0, 3) == '?q=') {
