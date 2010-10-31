@@ -42,12 +42,22 @@ class View {
 			$view_method    = 'output_' . Controller::$action;
 			$mode_method    = $this->mode;
 
+			//Controller->view
 			if (method_exists($controller, $mode_method)) {
 				if (Controller::$debug) {
 					Backend::addNotice('Running ' . get_class($controller) . '::' . $mode_method);
 				}
 				$controller->$mode_method();
 			}
+			//Application->view
+			$app_class = Backend::getConfig('backend.application.class', 'Application');
+			if (is_callable(array($app_class, $mode_method))) {
+				if (Controller::$debug) {
+					Backend::addNotice('Running ' . $app_class . '::' . $mode_method);
+				}
+				call_user_func(array($app_class, $mode_method));
+			}
+			
 			if (Controller::$debug) {
 				Backend::addNotice('Checking ' . get_class($controller) . '::' . $display_method . ' and then ' . get_class($this) . '::' . $view_method);
 			}
