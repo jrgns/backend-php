@@ -130,7 +130,7 @@ class HtmlView extends View {
 		} else {
 			$app_pri = false;
 			$app_sec = false;
-			$app_trie = false;
+			$app_tri = false;
 		}
 		$primary   = array_merge($primary, is_array($app_pri) ? $app_pri : array());
 		$secondary = array_merge($secondary, is_array($app_sec) ? $app_sec : array());

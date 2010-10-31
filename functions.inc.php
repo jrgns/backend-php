@@ -144,7 +144,10 @@ function get_current_url() {
 	}
 	$host    = $_SERVER['HTTP_HOST'];
 	$port    = $_SERVER['SERVER_PORT'];
-	$request = $_SERVER['REQUEST_URI'];
+	$request = $_SERVER['PHP_SELF'];
+	if (!empty($_SERVER['QUERY_STRING'])) {
+		$request .= '?' . $_SERVER['QUERY_STRING'];
+	}
 	return $protocol . '://' . $host . ($port == $protocol_port ? '' : ':' . $port) . $request;
 }
 
