@@ -51,7 +51,8 @@ class Controller {
 				$secure = false;
 			}
 			if (WEB_SUB_FOLDER == '/') {
-				print_stacktrace(); die;
+				//WTF?
+				//print_stacktrace(); die;
 			}
 			session_set_cookie_params(0, WEB_SUB_FOLDER, null, $secure, true);
 			session_name('Controller');
