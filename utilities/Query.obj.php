@@ -253,6 +253,14 @@ class Query {
 		return $toret;
 	}
 	
+	/**
+	 * Return all the matching records
+	 *
+	 * Options:
+	 * with_key - ??
+	 * group - Groups values by the first column
+	 * column - Fetch only one column
+	 */
 	public function fetchAll(array $parameters = array(), array $options = array()) {
 		if ($results = $this->execute($parameters)) {
 			if (!empty($options['with_key'])) {
