@@ -400,7 +400,11 @@ function curl_request($url, array $parameters = array(), array $options = array(
 	    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
     	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     }
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    if (empty($options['dont_follow'])) {
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+	} else {
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+	}
 
 	if (array_key_exists('output', $options) && $options['output']) {
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
