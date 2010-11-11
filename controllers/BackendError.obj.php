@@ -1,24 +1,33 @@
 <?php
+
 /**
  * The class file for BackendRequest
- */
-/**
- * Copyright (c) 2009 JadeIT cc.
+ *
+ * @copyright (c) 2009 JadeIT cc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * @license http://www.eclipse.org/legal/epl-v10.html
- * @package Controllers
- *
+ * @package ControllerFiles
  * Contributors:
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
 
 /**
- * This is the controller for the table backend_requests.
+ * This is the controller for the table `backend_requests`.
+ *
+ * @package Controllers
  */
 class BackendError extends TableCtl {
 	private static $adding = false;
+	/**
+	 * Add an error.
+	 *
+	 * This function is used by both builtin PHP functions and Coders.
+	 * Only the first two parameters is needed if adding an error through code.
+	 * @param string Error
+	 * @param string Description
+	 */
 	public static function add($one, $two = false, $three = false, $four = false, $five = false) {
 		//Some low level utilities only checks if the class exists, not if it is active
 		if (Component::isActive('BackendError')) {
