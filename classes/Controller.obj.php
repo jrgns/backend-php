@@ -318,7 +318,11 @@ class Controller {
 		//$terms = array_filter($terms);
 		
 		self::$area   = count($terms) ? array_shift($terms) : Value::get('default_controller', 'home');
-		self::$action = count($terms) ? array_shift($terms) : Value::get('default_action', 'index');
+		if ($action = Value::get('default_' . class_name(self::$area) . '_action', false)) {
+			self::$action = $action;
+		} else {
+			self::$action = count($terms) ? array_shift($terms) : Value::get('default_action', 'index');
+		}
 		
 		self::$parameters = !empty($terms) ? $terms : array();
 		if (Component::isActive(class_name(self::$area)) && method_exists(class_name(self::$area), 'checkParameters')) {
