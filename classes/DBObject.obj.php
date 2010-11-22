@@ -701,6 +701,7 @@ class DBObject {
 			$type           = array_key_exists('type', $options) ? $options['type'] : 'string';
 			$filter         = array_key_exists('filter', $options) ? $options['filter'] : FILTER_DEFAULT;
 			$filter_options = array_key_exists('filter_options', $options) ? $options['filter_options'] : array();
+			//Files
 			if (in_array($type, array('tiny_blob', 'blob', 'medium_blob', 'long_blob'))) {
 				if (!empty($_FILES['obj'])) {
 					if ($_FILES['obj']['error'][$name]) {
@@ -741,8 +742,15 @@ class DBObject {
 				} else {
 					$toret[$name] = null;
 				}
-			} else if (array_key_exists($name, $data)) {
+			//Other Types
+			} else if ($data && array_key_exists($name, $data)) {
 				$toret[$name] = filter_var($data[$name], $filter, $filter_options);
+				if ($toret[$name] === false) {
+					$toret[$name] = null;
+					Backend::addError('Invalid input');
+				}
+			} else if ($value = Controller::getVar($name)) {
+				$toret[$name] = filter_var($value, $filter, $filter_options);
 				if ($toret[$name] === false) {
 					$toret[$name] = null;
 					Backend::addError('Invalid input');
