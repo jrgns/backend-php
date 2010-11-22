@@ -175,7 +175,7 @@ class TableCtl extends AreaCtl {
 		if (!$fields || !is_array($fields)) {
 			return false;
 		}
-		$term = is_null($term) ? filter_input(INPUT_POST | INPUT_GET, 'term') : $term;
+		$term = Controller::getVar('term');
 		if (empty($term)) {
 			return $object;
 		}
@@ -625,10 +625,10 @@ class TableCtl extends AreaCtl {
 		}
 		//Get the search term from the request variable
 		if (Controller::$action == 'search' && !array_key_exists(2, $parameters)) {
-			$parameters[2] = filter_input(INPUT_POST | INPUT_GET, 'term');
+			$parameters[2] = Controller::getVar('term');;
 		}
 		//Get the delete_id from the request variable
-		if (Controller::$action == 'delete' && empty($parameters[0]) && ($delete_id = filter_input(INPUT_POST, 'delete_id'))) {
+		if (Controller::$action == 'delete' && empty($parameters[0]) && ($delete_id = Controller::getVar('delete_id'))) {
 			$parameters[0] = $delete_id;
 		}
 		return $parameters;

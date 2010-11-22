@@ -694,7 +694,7 @@ class DBObject {
 	
 	function fromPost() {
 		$toret = array();
-		$data = array_key_exists('obj', $_POST) && is_array($_POST['obj']) ? $_POST['obj'] : $_POST;
+		$data  = Controller::getVar('obj');
 		foreach($this->meta['fields'] as $name => $options) {
 			$options = is_array($options) ? $options : array('type' => $options);
 

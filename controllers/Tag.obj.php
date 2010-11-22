@@ -225,7 +225,7 @@ class Tag extends TableCtl {
 		if (!($object instanceof DBObject) || !is_post()) {
 			return true;
 		}
-		if ($tags = filter_input(INPUT_POST, 'tags')) {
+		if ($tags = Controller::getVar('tags')) {
 			self::add($tags, $object);
 			var_dump('Adding tags: ' . $tags);
 		}
@@ -236,7 +236,7 @@ class Tag extends TableCtl {
 		if (!($object instanceof DBObject) || !is_post()) {
 			return true;
 		}
-		$tags = array_key_exists('tags', $_POST) ? $_POST['tags'] : false;
+		$tags = Controller::getVar('tags');
 		if (!empty($tags) && $object instanceof ContentObj) {
 			$tags = array_filter(array_map('trim', explode(',', $tags)));
 			self::add($tags, $object);

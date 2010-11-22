@@ -16,11 +16,7 @@ class Request {
 			$query = substr($query, 0, strlen($query) - 1);
 		}
 
-		$extension = str_replace(dirname($_SERVER['SCRIPT_NAME']), '', $_SERVER['REQUEST_URI']);
-		if (substr($extension, -1) == '/') {
-			$extension = substr($extension, 0, strlen($extension) - 1);
-		}
-		$extension = explode('.', $extension);
+		$extension = explode('.', $query);
 		if (count($extension) > 1) {
 			$extension = current(explode('?', end($extension)));
 			$mode = false;

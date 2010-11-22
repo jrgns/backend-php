@@ -62,10 +62,10 @@ class BackendAccount extends TableCtl {
 			return true;
 		}
 		if (!$username) {
-			$username = filter_input(INPUT_POST, 'username');
+			$username = Controller::getVar('username');
 		}
 		if (!$password) {
-			$password = filter_input(INPUT_POST, 'password');
+			$password = Controller::getVar('password');
 		}
 		if ($username && $password) {
 			$User = self::getObject(self::getName());
@@ -84,7 +84,7 @@ class BackendAccount extends TableCtl {
 			if ($User->object) {
 				session_regenerate_id();
 				$toret = $User->object;
-				$_SESSION['user'] = $User->object;
+				$_SESSION['BackendUser'] = $User->object;
 				if (Component::isActive('PersistUser')) {
 					PersistUser::remember($User->object);
 				}
@@ -129,7 +129,7 @@ class BackendAccount extends TableCtl {
 			self::$current_user = false;
 			if (array_key_exists('user', $_SESSION)) {
 				if (Component::isActive('PersistUser')) {
-					PersistUser::forget($_SESSION['user']);
+					PersistUser::forget($_SESSION['BackendUser']);
 				}
 				$_SESSION = array();
 				if (isset($_COOKIE[session_name()])) {
@@ -145,13 +145,13 @@ class BackendAccount extends TableCtl {
 	public function action_update_old($id) {
 		$toret = false;
 		if (self::checkUser()) {
-			$User = self::getObject(get_class($this), $_SESSION['user']->id);
+			$User = self::getObject(get_class($this), $_SESSION['BackendUser']->id);
 			$data = $User->fromPost();
 			if (is_post()) {
 				if ($User->update($data)) {
 					Backend::addSuccess('Your account details have been updated');
 					$User->read(array('mode' => 'full_object'));
-					$_SESSION['user'] = $User->object;
+					$_SESSION['BackendUser'] = $User->object;
 					self::$current_user = $User->object;
 				} else {
 					Backend::addError('We could not update your account details');
@@ -174,7 +174,7 @@ class BackendAccount extends TableCtl {
 	public function html_display($result) {
 		parent::html_display($result);
 		if ($result instanceof DBObject) {
-			if ($_SESSION['user']->id == $result->array['id']) {
+			if ($_SESSION['BackendUser']->id == $result->array['id']) {
 				Backend::add('Sub Title', 'My Account');
 				Backend::addContent(Render::renderFile('loginout.tpl.php'));
 			} else {
@@ -186,7 +186,7 @@ class BackendAccount extends TableCtl {
 	public function html_update($result) {
 		parent::html_update($result);
 		if ($result instanceof DBObject) {
-			if ($_SESSION['user']->id == $result->array['id']) {
+			if ($_SESSION['BackendUser']->id == $result->array['id']) {
 				Backend::add('Sub Title', 'Manage my Account');
 			} else {
 				Backend::add('Sub Title', 'Update User ' . $result->array['username']);
@@ -279,16 +279,23 @@ class BackendAccount extends TableCtl {
 	}
 	
 	public static function hook_post_init() {
-		//Check if the current user has permission to execute this action
-		$id = count(Controller::$parameters) ? reset(Controller::$parameters) : 0;
-		$permission = Permission::check(Controller::$action, Controller::$area, $id);
-		//If not, and CheckHTTPAuth is true, send the HTTP headers
-		if (!$permission && Value::get('CheckHTTPAuth', false) && Value::get('CheckHTTPAuthIn:' . Controller::$view->mode, true)) {
-			$user = self::processHTTPAuth();
-			if ($user) {
+		if (Controller::$mode == Controller::MODE_EXECUTE) {
+			if ($user = self::checkExecuteUser()) {
 				session_regenerate_id();
-				$_SESSION['user']   = $user;
+				$_SESSION['BackendUser']   = $user;
 				self::$current_user = $user;
+			}
+		} else {
+			//Check if the current user has permission to execute this action
+			$id = count(Controller::$parameters) ? reset(Controller::$parameters) : 0;
+			$permission = Permission::check(Controller::$action, Controller::$area, $id);
+			//If not, and CheckHTTPAuth is true, send the HTTP headers
+			if (!$permission && Value::get('CheckHTTPAuth', false) && Value::get('CheckHTTPAuthIn:' . Controller::$view->mode, true)) {
+				if ($user = self::processHTTPAuth()) {
+					session_regenerate_id();
+					$_SESSION['BackendUser']   = $user;
+					self::$current_user = $user;
+				}
 			}
 		}
 	}
@@ -338,6 +345,18 @@ class BackendAccount extends TableCtl {
 		return false;
 	}
 	
+	public static function checkExecuteUser() {
+		$username = Backend::get('ExecuteUser');
+		$query = BackendAccount::getQuery();
+		$query->filter('`username` = :username');
+		$User = TableCtl::getObject(BackendAccount::getName());
+		$params = array(':username' => $username);
+		$User->read(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
+		if ($User->object) {
+			return $User->object;
+		}
+	}
+	
 	protected function confirmUser($object) {
 		$url = SITE_LINK . '?q=account/confirm/' . $object->array['salt'];
 		$app_name = Backend::getConfig('application.Title');
@@ -357,27 +376,27 @@ END;
 	}
 
 	public static function setupAnonymous() {
-		$_SESSION['user'] = new stdClass();
-		$_SESSION['user']->id = 0;
-		$_SESSION['user']->name = 'Anon';
-		$_SESSION['user']->surname = 'Ymous';
-		$_SESSION['user']->email = null;
-		$_SESSION['user']->mobile = null;
-		$_SESSION['user']->username = null;
-		$_SESSION['user']->password = null;
-		$_SESSION['user']->active = null;
-		$_SESSION['user']->modified = null;
-		$_SESSION['user']->added = null;
-		$_SESSION['user']->roles = array('anonymous');
-		return $_SESSION['user'];
+		$_SESSION['BackendUser'] = new stdClass();
+		$_SESSION['BackendUser']->id = 0;
+		$_SESSION['BackendUser']->name = 'Anon';
+		$_SESSION['BackendUser']->surname = 'Ymous';
+		$_SESSION['BackendUser']->email = null;
+		$_SESSION['BackendUser']->mobile = null;
+		$_SESSION['BackendUser']->username = null;
+		$_SESSION['BackendUser']->password = null;
+		$_SESSION['BackendUser']->active = null;
+		$_SESSION['BackendUser']->modified = null;
+		$_SESSION['BackendUser']->added = null;
+		$_SESSION['BackendUser']->roles = array('anonymous');
+		return $_SESSION['BackendUser'];
 	}
 	
 	public static function checkUser($user = false) {
 		if (!empty(self::$current_user)) {
 			return self::$current_user;
 		}
-		if (!empty($_SESSION['user']) && is_object($_SESSION['user']) && $_SESSION['user']->id > 0) {
-			return $_SESSION['user'];
+		if (!empty($_SESSION['BackendUser']) && is_object($_SESSION['BackendUser']) && $_SESSION['BackendUser']->id > 0) {
+			return $_SESSION['BackendUser'];
 		}
 		call_user_func(array(self::getName(), 'setupAnonymous'));
 		//Return false as the user is obviously anonymous
@@ -391,7 +410,7 @@ END;
 	public function checkPermissions(array $options = array()) {
 		$toret = parent::checkPermissions($options);
 		if (!$toret && in_array(Controller::$action, array('update', 'display'))) {
-			$toret = Controller::$parameters[0] == $_SESSION['user']->id || Controller::$parameters[0] == 0;
+			$toret = Controller::$parameters[0] == $_SESSION['BackendUser']->id || Controller::$parameters[0] == 0;
 		}
 		return $toret;
 	}
@@ -399,12 +418,12 @@ END;
 	public static function checkParameters($parameters) {
 		$parameters = parent::checkParameters($parameters);
 		if (!Permission::check('manage', 'account')) {
-			if (array_key_exists('user', $_SESSION) && $_SESSION['user']->id > 0) {
+			if (array_key_exists('user', $_SESSION) && $_SESSION['BackendUser']->id > 0) {
 				if (Controller::$action == 'signup') {
 					Controller::setAction('display');
 				}
-				if (in_array(Controller::$action, array('update', 'display')) && (empty($parameters['0']) || $parameters[0] != $_SESSION['user']->id)) {
-					$parameters[0] = $_SESSION['user']->id;
+				if (in_array(Controller::$action, array('update', 'display')) && (empty($parameters['0']) || $parameters[0] != $_SESSION['BackendUser']->id)) {
+					$parameters[0] = $_SESSION['BackendUser']->id;
 				}
 			}
 		}
@@ -471,7 +490,6 @@ Site Admin
 
 	public static function install(array $options = array()) {
 		$options['install_model'] = array_key_exists('install_model', $options) ? $options['install_model'] : true;
-		//TODO It's using the BackendAccount model, not the extended model...
 		$toret = parent::install($options);
 
 		$toret = Hook::add('init', 'post', self::getName(), array('global' => true, 'sequence' => 0)) && $toret;

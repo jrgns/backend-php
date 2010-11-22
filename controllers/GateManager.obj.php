@@ -78,7 +78,7 @@ class GateManager extends AreaCtl {
 			$query = new DeleteQuery('Permission');
 			if ($query->filter("`role` != 'nobody'")->filter("`role` != 'superadmin'")->execute()) {
 				$permission = new PermissionObj();
-				foreach($_POST as $key => $roles) {
+				foreach(Controller::getPayload() as $key => $roles) {
 					list($subject, $action) = explode('::', $key, 2);
 					foreach($roles as $role => $value) {
 						$data = array(

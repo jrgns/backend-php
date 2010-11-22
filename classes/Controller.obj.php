@@ -16,10 +16,17 @@
  *
  */
 class Controller {
+	const MODE_REQUEST = 'request';
+	const MODE_EXECUTE = 'execute';
+
 	public static $debug;
 	
-	protected static $query_string;
-	protected static $query_vars = array();
+	public static $mode = self::MODE_REQUEST;
+	
+	protected static $query_string = false;
+	protected static $query_vars   = array();
+	protected static $method       = null;
+	protected static $payload      = false;
 
 	public static $area = 'home';
 	public static $action = 'index';
@@ -36,11 +43,27 @@ class Controller {
 	
 	private static $whoopsed  = false;
 	
-	public static function serve($query_string = false) {
+	public static function serve($query_string = false, $method = null, $payload = null) {
 		if ($query_string) {
+			self::$mode         = self::MODE_EXECUTE;
 			self::$query_string = $query_string;
 		} else {
+			self::$mode         = self::MODE_REQUEST;
 			self::$query_string = $_SERVER['QUERY_STRING'];
+		}
+	
+		self::$method = is_null($method) ? request_method() : $method;
+		if (is_null($payload)) {
+			switch(self::$method) {
+			case 'GET':
+				self::$payload = array_map('stripslashes_deep', $_GET);
+				break;
+			case 'POST':
+				self::$payload = array_map('stripslashes_deep', $_POST);
+				break;
+			}
+		} else {
+			self::$payload = $payload;
 		}
 		parse_str(self::$query_string, self::$query_vars);
 
@@ -203,10 +226,56 @@ class Controller {
 			}
 			$_SESSION['previous_parameters'][self::$view->mode] = self::$parameters;
 		//}
+		
+		//Clean up
+		self::$query_string = false;
+		self::$query_vars   = array();
+		self::$method       = null;
+		self::$payload      = false;
+
+		self::$area = 'home';
+		self::$action = 'index';
+
+		self::$parameters = array();
+	
+		self::$salt = false;
+		self::$view = false;
+		
 		self::$started = false;
-		self::$init = false;
+		self::$init    = false;
+	
+		self::$firephp    = false;
+	
+		self::$whoopsed  = false;
 
 		Hook::run('finish', 'post');
+	}
+	
+	public static function getPayload() {
+		return self::$payload();
+	}
+	
+	public static function getQueryVars() {
+		return self::$query_vars();
+	}
+	
+	public static function getQueryString() {
+		return self::$query_string();
+	}
+	
+	public static function getVar($name, $filter = FILTER_DEFAULT, $options = null) {
+		if (!array_key_exists($name, self::$payload)) {
+			return null;
+		}
+		if (is_array(self::$payload[$name])) {
+			return filter_var(self::$payload[$name], (int)$filter, FILTER_REQUIRE_ARRAY);
+		} else {
+			return filter_var(self::$payload[$name], (int)$filter, $options);
+		}
+	}
+	
+	public static function setVar($name, $value) {
+		self::$payload[$name] = $value;
 	}
 	
 	/**
@@ -284,15 +353,7 @@ class Controller {
 
 	private static function check_quotes() {
 		if (get_magic_quotes_gpc()) {
-			function stripslashes_deep($value) {
-				$value = is_array($value) ?
-				            array_map('stripslashes_deep', $value) :
-				            stripslashes($value);
-
-				return $value;
-			}
-			$_POST = array_map('stripslashes_deep', $_POST);
-			$_GET = array_map('stripslashes_deep', $_GET);
+			//POST and GET should be checked when setting Controller::$payload
 			$_COOKIE = array_map('stripslashes_deep', $_COOKIE);
 			$_REQUEST = array_map('stripslashes_deep', $_REQUEST);
 		}

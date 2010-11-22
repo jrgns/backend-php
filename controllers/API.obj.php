@@ -84,13 +84,13 @@ class API extends AreaCtl {
 		} else {
 			switch ($data) {
 			case self::INPUT_GET:
-				$data = $_GET;
+				$data = Controller::getQueryVars();
 				break;
 			case self::INPUT_POST:
-				$data = $_POST;
+				$data = Controller::getPayload();
 				break;
 			case self::INPUT_REQUEST:
-				$data = $_REQUEST;
+				$data = array_merge(Controller::$query_vars, Controller::$payload);
 				break;
 			}
 		}

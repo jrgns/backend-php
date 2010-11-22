@@ -40,15 +40,18 @@ class Comment extends TableCtl {
 	}
 	
 	public function action_create() {
-		if (is_post() && !empty($_POST['obj'])) {
+		$object = Controller::getVar('obj');
+		if (is_post() && !empty($object)) {
 			$parameters = get_previous_parameters();
-			$_POST['obj']['foreign_id']    = empty($_POST['obj']['foreign_id'])    ? reset($parameters)              : $_POST['obj']['foreign_id'];
-			$_POST['obj']['foreign_table'] = empty($_POST['obj']['foreign_table']) ? table_name(get_previous_area()) : $_POST['obj']['foreign_table'];
+			$object['foreign_id']    = empty($object['foreign_id'])    ? reset($parameters)              : $object['foreign_id'];
+			$object['foreign_table'] = empty($object['foreign_table']) ? table_name(get_previous_area()) : $object['foreign_table'];
 			//If we don't have a logged in user, create a dummy account
 			if (!BackendAccount::checkUser()) {
 				$query = new SelectQuery('users');
 				$query->filter('`email` = :email');
-				$old_user = $query->fetchAssoc(array(':email' => $_POST['user']['email']));
+				if ($old_user = Controller::getVar('user')) {
+					$old_user = $query->fetchAssoc(array(':email' => $old_user['email']));
+				}
 				switch (true) {
 				case $old_user && $old_user['confirmed'] && $old_user['active']:
 					//Attribute quote to user? Seems risque, actually, if I know a user's email address, I can just attribute to him. Auth first
@@ -57,24 +60,25 @@ class Comment extends TableCtl {
 					break;
 				case $old_user && !$old_user['confirmed'] && $old_user['active']:
 					//Unregistered user commented before
-					$_POST['obj']['user_id'] = $old_user['id'];
+					$object['user_id'] = $old_user['id'];
 					break;
 				default:
 				case !$old_user:
+					$old_user = Controller::getVar('user');
 					$user_data = array(
-						'name'      => $_POST['user']['name'],
+						'name'      => $old_user['name'],
 						'surname'   => '',
-						'email'     => $_POST['user']['email'],
-						'website'   => $_POST['user']['website'],
+						'email'     => $old_user['email'],
+						'website'   => $old_user['website'],
 						//TODO username will be email address for a beginning, user can then change it. ONLY if username == email address
-						'username'  => $_POST['user']['email'],
+						'username'  => $old_user['email'],
 						'password'  => get_random(),
 						'confirmed' => 0,
 						'active'    => 1,
 					);
 					$user = new BackendAccountObj();
 					if ($user->create($user_data)) {
-						$_POST['obj']['user_id'] = $user->array['id'];
+						$object['user_id'] = $user->array['id'];
 
 						$url = SITE_LINK . '?q=account/confirm/' . $user->array['salt'];
 						$app_name = Backend::getConfig('application.Title');
@@ -94,6 +98,7 @@ END;
 					break;
 				}
 			}
+			Controller::setVar('obj', $object);
 		}
 		return parent::action_create();
 	}

@@ -44,9 +44,9 @@ class FileView extends View {
 	}
 	
 	public static function hook_post_start() {
-		if (Controller::$area == $this->mode && Controller::$action == 'read' && !array_key_exists('mode', $_REQUEST)) {
+		/*if (Controller::$area == $this->mode && Controller::$action == 'read' && !array_key_exists('mode', $_REQUEST)) {
 			$_REQUEST['mode'] = $this->mode;
-		}
+		}*/
 	}
 
 	public static function install() {

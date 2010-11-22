@@ -34,20 +34,28 @@ function print_stacktrace($return = false) {
 	}
 }
 
+function request_method() {
+	if (empty(Controller::$method)) {
+		return strtoupper(array_key_exists('REQUEST_METHOD', $_SERVER) ? $_SERVER['REQUEST_METHOD'] : 'GET');
+	} else {
+		return strtoupper(Controller::$method);
+	}
+}
+
 function is_post() {
-	return strtoupper(array_key_exists('REQUEST_METHOD', $_SERVER) ? $_SERVER['REQUEST_METHOD'] : 'GET') == 'POST';
+	return request_method() == 'POST';
 }
 
 function is_get() {
-	return strtoupper(array_key_exists('REQUEST_METHOD', $_SERVER) ? $_SERVER['REQUEST_METHOD'] : 'GET') == 'GET';
+	return request_method() == 'GET';
 }
 
 function is_put() {
-	return strtoupper(array_key_exists('REQUEST_METHOD', $_SERVER) ? $_SERVER['REQUEST_METHOD'] : 'GET') == 'PUT';
+	return request_method() == 'PUT';
 }
 
 function is_delete() {
-	return strtoupper(array_key_exists('REQUEST_METHOD', $_SERVER) ? $_SERVER['REQUEST_METHOD'] : 'GET') == 'DELETE';
+	return request_method() == 'DELETE';
 }
 
 function update_links($content, $new_vars) {
@@ -604,4 +612,12 @@ function ifnull($var, $value) {
 function debug_header($message) {
 	static $count = 0;
 	header('X-Debug-' . $count++ . ': ' . $message);
+}
+
+function stripslashes_deep($value) {
+	$value = is_array($value) ?
+	            array_map('stripslashes_deep', $value) :
+	            stripslashes($value);
+
+	return $value;
 }
