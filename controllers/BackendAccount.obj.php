@@ -281,9 +281,8 @@ class BackendAccount extends TableCtl {
 	public static function hook_post_init() {
 		if (Controller::$mode == Controller::MODE_EXECUTE) {
 			if ($user = self::checkExecuteUser()) {
-				session_regenerate_id();
-				$_SESSION['BackendUser']   = $user;
-				self::$current_user = $user;
+				$_SESSION['BackendUser'] = $user;
+				self::$current_user      = $user;
 			}
 		} else {
 			//Check if the current user has permission to execute this action

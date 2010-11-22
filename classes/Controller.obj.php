@@ -26,7 +26,7 @@ class Controller {
 	protected static $query_string = false;
 	protected static $query_vars   = array();
 	protected static $method       = null;
-	protected static $payload      = false;
+	protected static $payload      = null;
 
 	public static $area = 'home';
 	public static $action = 'index';
@@ -47,13 +47,14 @@ class Controller {
 		if ($query_string) {
 			self::$mode         = self::MODE_EXECUTE;
 			self::$query_string = $query_string;
+			self::$method       = is_null($method) ? request_method() : $method;
+			//The payload must be specified, either through the query string or in the payload itself...
+			self::$payload      = $payload;
 		} else {
 			self::$mode         = self::MODE_REQUEST;
 			self::$query_string = $_SERVER['QUERY_STRING'];
-		}
-	
-		self::$method = is_null($method) ? request_method() : $method;
-		if (is_null($payload)) {
+			self::$method       = is_null($method) ? request_method() : $method;
+			///Payload is always set with _GET / _POST with requests
 			switch(self::$method) {
 			case 'GET':
 				self::$payload = array_map('stripslashes_deep', $_GET);
@@ -62,10 +63,16 @@ class Controller {
 				self::$payload = array_map('stripslashes_deep', $_POST);
 				break;
 			}
-		} else {
-			self::$payload = $payload;
 		}
+	
 		parse_str(self::$query_string, self::$query_vars);
+		if (empty(self::$payload) && !is_array(self::$payload)) {
+			self::$payload = array();
+		}
+		//Make sure that all of query string vars is in the payload.
+		if (self::$mode == self::MODE_EXECUTE && self::$method == 'GET') {
+			self::$payload = array_merge(self::$query_vars, self::$payload);
+		}
 
 		self::init();
 		self::start();
@@ -252,15 +259,15 @@ class Controller {
 	}
 	
 	public static function getPayload() {
-		return self::$payload();
+		return self::$payload;
 	}
 	
 	public static function getQueryVars() {
-		return self::$query_vars();
+		return self::$query_vars;
 	}
 	
 	public static function getQueryString() {
-		return self::$query_string();
+		return self::$query_string;
 	}
 	
 	public static function getVar($name, $filter = FILTER_DEFAULT, $options = null) {

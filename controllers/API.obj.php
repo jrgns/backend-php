@@ -82,17 +82,7 @@ class API extends AreaCtl {
 		$errors     = array();
 		if (is_array($data)) {
 		} else {
-			switch ($data) {
-			case self::INPUT_GET:
-				$data = Controller::getQueryVars();
-				break;
-			case self::INPUT_POST:
-				$data = Controller::getPayload();
-				break;
-			case self::INPUT_REQUEST:
-				$data = array_merge(Controller::$query_vars, Controller::$payload);
-				break;
-			}
+			$data = Controller::getPayload();
 		}
 		if (!empty($definition['required'])) {
 			$required   = self::extractDefinition('required', $definition['required'], $data, $errors);
