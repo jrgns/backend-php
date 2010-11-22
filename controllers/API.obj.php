@@ -77,13 +77,10 @@ class API extends AreaCtl {
 		return $parameters;
 	}
 	
-	public static function extract($definition, $data = self::INPUT_REQUEST) {
+	public static function extract($definition, array $data = null) {
 		$parameters = array();
 		$errors     = array();
-		if (is_array($data)) {
-		} else {
-			$data = Controller::getPayload();
-		}
+		$data       = is_null($data) ? Controller::getPayload() : $data;
 		if (!empty($definition['required'])) {
 			$required   = self::extractDefinition('required', $definition['required'], $data, $errors);
 			$parameters = array_merge($parameters, $required);
