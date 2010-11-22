@@ -1,7 +1,6 @@
 <?php
-
 /**
- * The class file for BackendRequest
+ * The class file for BackendError
  *
  * @copyright (c) 2009 JadeIT cc.
  * All rights reserved. This program and the accompanying materials
@@ -14,7 +13,7 @@
  */
 
 /**
- * This is the controller for the table `backend_requests`.
+ * This is the controller for the table `backend_errors`.
  *
  * @package Controllers
  */

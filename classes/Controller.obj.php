@@ -17,6 +17,9 @@
  */
 class Controller {
 	public static $debug;
+	
+	protected static $query_string;
+	protected static $query_vars = array();
 
 	public static $area = 'home';
 	public static $action = 'index';
@@ -33,7 +36,14 @@ class Controller {
 	
 	private static $whoopsed  = false;
 	
-	public static function serve(array $info = array()) {
+	public static function serve($query_string = false) {
+		if ($query_string) {
+			self::$query_string = $query_string;
+		} else {
+			self::$query_string = $_SERVER['QUERY_STRING'];
+		}
+		parse_str(self::$query_string, self::$query_vars);
+
 		self::init();
 		self::start();
 		list ($controller, $result) = self::action();
@@ -56,7 +66,7 @@ class Controller {
 			}
 			session_set_cookie_params(0, WEB_SUB_FOLDER, null, $secure, true);
 			session_name('Controller');
-			session_start();
+			@session_start();
 
 			date_default_timezone_set(Backend::getConfig('application.timezone', 'Africa/Johannesburg'));
 
@@ -84,7 +94,7 @@ class Controller {
 				ini_set('display_errors', 0);
 			}
 
-			$query = Request::getQuery();
+			$query = Request::getQuery(array_key_exists('q', self::$query_vars) ? self::$query_vars['q'] : '');
 			$query = Hook::run('init', 'pre', array($query));
 			self::parseQuery($query);
 			
@@ -116,15 +126,12 @@ class Controller {
 	 * @todo Maybe prepend something to the variables tht get added
 	 */	
 	public static function start() {
-		$toret = false;
-		if (!self::$init) {
-			self::init();
-		}
 		if (!self::$started) {
 			Hook::run('start', 'pre');
-			$toret = true;
+
+			Hook::run('start', 'post');
+			self::$started = true;
 		}
-		return $toret;
 	}
 	
 	public static function action() {
@@ -196,6 +203,9 @@ class Controller {
 			}
 			$_SESSION['previous_parameters'][self::$view->mode] = self::$parameters;
 		//}
+		self::$started = false;
+		self::$init = false;
+
 		Hook::run('finish', 'post');
 	}
 	
@@ -213,8 +223,8 @@ class Controller {
 	 */
 	private static function getView() {
 		$view_name = false;
-		if (array_key_exists('mode', $_REQUEST)) {
-			$view_name = ucwords($_REQUEST['mode']) . 'View';
+		if (array_key_exists('mode', self::$query_vars)) {
+			$view_name = ucwords(self::$query_vars['mode']) . 'View';
 		}
 		if (!$view_name) {
 			$default_precedence = array(

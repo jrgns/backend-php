@@ -471,6 +471,7 @@ Site Admin
 
 	public static function install(array $options = array()) {
 		$options['install_model'] = array_key_exists('install_model', $options) ? $options['install_model'] : true;
+		//TODO It's using the BackendAccount model, not the extended model...
 		$toret = parent::install($options);
 
 		$toret = Hook::add('init', 'post', self::getName(), array('global' => true, 'sequence' => 0)) && $toret;
