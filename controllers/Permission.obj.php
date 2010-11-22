@@ -53,7 +53,7 @@ class Permission extends TableCtl {
 		
 		$roles = GateKeeper::permittedRoles($action, class_for_url($subject), $subject_id);
 		$user  = BackendAccount::checkUser();
-		$user  = (!$user && !empty($_SESSION['user'])) ? $_SESSION['user'] : $user;
+		$user  = (!$user && !empty($_SESSION['BackendUser'])) ? $_SESSION['BackendUser'] : $user;
 		if (!$user && !in_array('anonymous', $roles)) {
 			if (Controller::$debug) {
 				Backend::addNotice('Anonymous User');

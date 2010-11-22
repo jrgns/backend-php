@@ -47,8 +47,8 @@ class ContentRevisionObj extends DBObject {
 		$toret = false;
 		$data = parent::validate($data, $action, $options);
 		if ($data) {
-			if (empty($data['user_id']) && !empty($_SESSION['user']->id)) {
-				$data['user_id'] = $_SESSION['user']->id;
+			if (empty($data['user_id']) && !empty($_SESSION['BackendUser']->id)) {
+				$data['user_id'] = $_SESSION['BackendUser']->id;
 			}
 			if (!isset($data['active'])) {
 				$data['active'] = 1;

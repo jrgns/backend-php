@@ -8,7 +8,7 @@
 		</div>
 	</form>
 <?php else: ?>
-	You are logged in as <?php echo $_SESSION['user']->username ?>
+	You are logged in as <?php echo $_SESSION['BackendUser']->username ?>
 	<form method="post" action="#S_SITE_LINK#?q=<?php echo class_for_url(BackendAccount::getName()) ?>/logout">
 		<div>
 			<input type="submit" value="Logout" name="do_logout">

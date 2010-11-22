@@ -58,7 +58,7 @@ class PersistUser extends TableCtl {
 				$User->read(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
 				
 				if ($User->object) {
-					$_SESSION['user'] = $User->object;
+					$_SESSION['BackendUser'] = $User->object;
 					//Remove, and reremember
 					if (self::remember($User->object)) {
 						$query = new DeleteQuery('PersistUser');

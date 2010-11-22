@@ -107,9 +107,9 @@ class API extends AreaCtl {
 		}
 		$results = array();
 
-		if (!empty($_SESSION['user'])) {
-			if (is_object($_SESSION['user']) && property_exists($_SESSION['user'], 'roles')) {
-				$user_roles = $_SESSION['user']->roles;
+		if (!empty($_SESSION['BackendUser'])) {
+			if (is_object($_SESSION['BackendUser']) && property_exists($_SESSION['BackendUser'], 'roles')) {
+				$user_roles = $_SESSION['BackendUser']->roles;
 			} else {
 				$user_roles = array();
 			}
