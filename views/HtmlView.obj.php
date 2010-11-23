@@ -15,11 +15,14 @@
  * Default class to handle HtmlView specific functions
  */
 class HtmlView extends View {
+	private static $ob_level = 0;
+
 	function __construct() {
 		parent::__construct();
 		$this->mode      = 'html';
 		$this->mime_type = 'text/html';
 		$this->charset   = 'utf-8';
+		self::$ob_level = ob_get_level();
 	}
 	
 	public static function hook_init() {
@@ -172,9 +175,9 @@ class HtmlView extends View {
 	}
 	
 	public static function addLastContent($to_print) {
-		//Checking for ob_level > 1, as we're using ob_gzhandler
+		//Checking for ob_level > $this->ob_level, so we'll exit on the same number we started on
 		$last = '';
-		while (ob_get_level() > 1) {
+		while (ob_get_level() > self::$ob_level) {
 			//Ending the ob_start from HtmlView::hook_init
 			$last .= ob_get_clean();
 		}

@@ -15,9 +15,12 @@
  * Default class to handle JsonView specific functions
  */
 class JsonView extends TextView {
+	private static $ob_level = 0;
+
 	function __construct() {
 		parent::__construct();
 		$this->mode = 'json';
+		self::$ob_level = ob_get_level();
 	}
 	
 	public static function hook_init() {
@@ -32,7 +35,7 @@ class JsonView extends TextView {
 		$object->success = Backend::getSuccess();
 		$object->content = Backend::getContent();
 		$last = '';
-		while (ob_get_level() > 1) {
+		while (ob_get_level() > self::$ob_level) {
 			//Ending the ob_start from HtmlView::hook_init
 			$last .= ob_get_clean();
 		}
