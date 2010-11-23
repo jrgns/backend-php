@@ -441,70 +441,74 @@ class Controller {
 	 * If the location is omitted, go to the current URL. If $location == 'previous', go the previous URL for the current mode.
 	 */	
 	public static function redirect($location = false) {
-		switch ($location) {
-		case 'previous':
-			if (!empty($_SESSION['previous_url'])) {
-				if (is_array($_SESSION['previous_url'])) {
-					$location = !empty($_SESSION['previous_url'][self::$view->mode]) ? $_SESSION['previous_url'][self::$view->mode] : reset($_SESSION['previous_url']);
+		if (self::$mode == self::MODE_REQUEST) {
+			switch ($location) {
+			case 'previous':
+				if (!empty($_SESSION['previous_url'])) {
+					if (is_array($_SESSION['previous_url'])) {
+						$location = !empty($_SESSION['previous_url'][self::$view->mode]) ? $_SESSION['previous_url'][self::$view->mode] : reset($_SESSION['previous_url']);
+					} else {
+						$location = $_SESSION['previous_url'];
+					}
 				} else {
-					$location = $_SESSION['previous_url'];
+					$location = false;
 				}
-			} else {
-				$location = false;
+				break;
 			}
-			break;
-		}
-		if (!$location) {
-			$location = $_SERVER['REQUEST_URI'];
-		}
-
-		//This should fix most redirects, but it may happen that location == '?debug=true&q=something/or/another' or something similiar
-		if (Value::get('clean_urls', false) && substr($location, 0, 3) == '?q=') {
-			$location = SITE_LINK . substr($location, 3);
-		}
-		//Add some meta variables
-		if (!empty($_SERVER['QUERY_STRING'])) {
-			parse_str($_SERVER['QUERY_STRING'], $vars);
-			$new_vars = array();
-			if (array_key_exists('debug', $vars)) {
-				$new_vars['debug'] = $vars['debug'];
-			}
-			if (array_key_exists('nocache', $vars)) {
-				$new_vars['nocache'] = $vars['nocache'];
-			}
-			if (array_key_exists('recache', $vars)) {
-				$new_vars['recache'] = $vars['recache'];
-			}
-			if (array_key_exists('mode', $vars)) {
-				$new_vars['mode'] = $vars['mode'];
+			if (!$location) {
+				$location = $_SERVER['REQUEST_URI'];
 			}
 
-			$url = parse_url($location);
-			if (!empty($url['query'])) {
-				parse_str($url['query'], $old_vars);
-			} else {
-				$old_vars = array();
+			//This should fix most redirects, but it may happen that location == '?debug=true&q=something/or/another' or something similiar
+			if (Value::get('clean_urls', false) && substr($location, 0, 3) == '?q=') {
+				$location = SITE_LINK . substr($location, 3);
 			}
-			//Allow the redirect to overwrite these vars
-			$new_vars = array_merge($new_vars, $old_vars);
+			//Add some meta variables
+			if (!empty($_SERVER['QUERY_STRING'])) {
+				parse_str($_SERVER['QUERY_STRING'], $vars);
+				$new_vars = array();
+				if (array_key_exists('debug', $vars)) {
+					$new_vars['debug'] = $vars['debug'];
+				}
+				if (array_key_exists('nocache', $vars)) {
+					$new_vars['nocache'] = $vars['nocache'];
+				}
+				if (array_key_exists('recache', $vars)) {
+					$new_vars['recache'] = $vars['recache'];
+				}
+				if (array_key_exists('mode', $vars)) {
+					$new_vars['mode'] = $vars['mode'];
+				}
 
-			$old_url = parse_url(get_current_url());
-			$url['query'] = http_build_query($new_vars);
-			$url = array_merge($old_url, $url);
-			$location = build_url($url);
-		}
+				$url = parse_url($location);
+				if (!empty($url['query'])) {
+					parse_str($url['query'], $old_vars);
+				} else {
+					$old_vars = array();
+				}
+				//Allow the redirect to overwrite these vars
+				$new_vars = array_merge($new_vars, $old_vars);
+
+				$old_url = parse_url(get_current_url());
+				$url['query'] = http_build_query($new_vars);
+				$url = array_merge($old_url, $url);
+				$location = build_url($url);
+			}
 			
-		try {
-			if (self::$debug) {
-				Backend::addSuccess('The script should now redirect to <a href="' . $location . '">here</a>');
-			} else {
-				//Redirect
-				self::finish();
-				header('Location: ' . $location);
-				die('redirecting to <a href="' . $location . '">');
+			try {
+				if (self::$debug) {
+					Backend::addSuccess('The script should now redirect to <a href="' . $location . '">here</a>');
+				} else {
+					//Redirect
+					self::finish();
+					header('Location: ' . $location);
+					die('redirecting to <a href="' . $location . '">');
+				}
+			} catch (Exception $e) {
+				Backend::addError('Could not redirect');
 			}
-		} catch (Exception $e) {
-			Backend::addError('Could not redirect');
+		} else {
+			self::finish();
 		}
 		return true;
 	}
