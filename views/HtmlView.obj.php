@@ -22,10 +22,10 @@ class HtmlView extends View {
 		$this->mode      = 'html';
 		$this->mime_type = 'text/html';
 		$this->charset   = 'utf-8';
-		self::$ob_level = ob_get_level();
 	}
 	
 	public static function hook_init() {
+		self::$ob_level = ob_get_level();
 		ob_start();
 	}
 	
