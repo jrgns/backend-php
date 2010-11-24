@@ -19,17 +19,18 @@
  */
 class Component extends TableCtl {
 
-	public function action_toggle($id, $field, $should_redirect = true) {
-		$toret = parent::action_toggle($id, $field, false);
-		if ($toret) {
-			if ($toret->array['active']) {
-				if (call_user_func(array($toret->array['name'], 'install'))) {
-				} else {
-					Backend::addError('Could not install component');
-				}
+	/**
+	 * @todo Make this a POST only
+	 */
+	public function action_toggle($id, $field) {
+		$result = parent::action_toggle($id, $field, false);
+		if ($result && $result->array['active']) {
+			if (call_user_func(array($result->array['name'], 'install'))) {
+			} else {
+				Backend::addError('Could not install component');
 			}
 		}
-		return $toret;
+		return $result;
 	}
 	
 	public function json_toggle($result) {

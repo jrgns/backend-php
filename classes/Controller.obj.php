@@ -125,13 +125,16 @@ class Controller {
 			}
 
 			$query = Request::getQuery(array_key_exists('q', self::$query_vars) ? self::$query_vars['q'] : '');
+			$query = self::checkQuery($query);
+
 			$query = Hook::run('init', 'pre', array($query));
 			self::parseQuery($query);
 			
 			//View
 			self::$view = self::getView();
 			if (!self::$view instanceof View) {
-				die('Unrecognized Request');
+				self::$view = new View();
+				self::whoops('Unrecognized Request', array('message' => 'Could not find a View for the Request', 'code_hint' => 406));
 			}
 
 			//Sessions
@@ -169,37 +172,41 @@ class Controller {
 		if (Controller::$debug) {
 			Backend::addNotice('Trying Controller ' . $control_name);
 		}
-		if (!Component::isActive($control_name) || !class_exists($control_name, true)) {
-			Controller::whoops('Component is Inactive');
-			return null;
+		$controller = class_exists($control_name, true) ? new $control_name() : false;
+		if (!($controller instanceof AreaCtl && Component::isActive($control_name))) {
+			Controller::whoops('Component is Inactive or Invalid', array('message' => 'The requested component doesn\'t exist or is inactive.', 'code_hint' => 404));
+			self::$area   = Value::get('default_error_controller', 'home');
+			self::$action = Value::get('default_error_action', 'error');
+			$control_name = class_name(self::$area);
 		}
 
-		$controller = new $control_name();
-		if (!($controller instanceof AreaCtl)) {
-			Controller::whoops('Invalid Area Controller');
+		$controller = class_exists($control_name, true) ? new $control_name() : false;
+		if (!($controller instanceof AreaCtl && Component::isActive($control_name))) {
+			Controller::whoops('Invalid Error Area Controller', 'The default_error_controller isn\'t a invalid or inactive.');
 			return null;
 		}
-
-		if (!(self::$view instanceof View)) {
-			Controller::whoops('Invalid View');
-			return null;
-		}
-
+		
 		Backend::add('Area', self::$area);
 		Backend::add('Action', self::$action);
+		if (Controller::$debug) {
+			Backend::addNotice('Code for this page is in the ' . get_class($controller) . ' Controller');
+		}
+
 		$result = null;
 		$run_action = Hook::run('action', 'pre', array(), array('toret' => true));
 		if ($run_action) {
 			$result = $controller->action();
-			if (Controller::$debug) {
-				Backend::addNotice('Code for this page is in the ' . get_class($controller) . ' Controller');
-			}
 		}
 		Hook::run('action', 'post');
 		return array($controller, $result);
 	}
 	
 	public static function display(AreaCtl $controller, $result) {
+		if (!(self::$view instanceof View)) {
+			Controller::whoops('Invalid View', array('message' => 'The requested mode doesn\'t have a valid associated View.', 'code_hint' => 406));
+			return null;
+		}
+
 		Hook::run('action_display', 'pre', array($result));
 		self::$view->display($result, $controller);
 		Hook::run('action_display', 'post', array($result));
@@ -213,25 +220,27 @@ class Controller {
 		$_SESSION['success'] = Backend::getSuccess();
 		//jrgns: Just add this back in if needed. It breaks the redirect after a login
 		//if (!self::$whoopsed) {
-			if (empty($_SESSION['previous_url']) || !is_array($_SESSION['previous_url'])) {
-				$_SESSION['previous_url'] = array();
-			}
-			$_SESSION['previous_url'][self::$view->mode] = $_SERVER['REQUEST_URI'];
+			if (self::$view instanceof View) {
+				if (empty($_SESSION['previous_url']) || !is_array($_SESSION['previous_url'])) {
+					$_SESSION['previous_url'] = array();
+				}
+				$_SESSION['previous_url'][self::$view->mode] = $_SERVER['REQUEST_URI'];
 
-			if (empty($_SESSION['previous_area']) || !is_array($_SESSION['previous_area'])) {
-				$_SESSION['previous_area'] = array();
-			}
-			$_SESSION['previous_area'][self::$view->mode] = self::$area;
+				if (empty($_SESSION['previous_area']) || !is_array($_SESSION['previous_area'])) {
+					$_SESSION['previous_area'] = array();
+				}
+				$_SESSION['previous_area'][self::$view->mode] = self::$area;
 
-			if (empty($_SESSION['previous_action']) || !is_array($_SESSION['previous_action'])) {
-				$_SESSION['previous_action'] = array();
-			}
-			$_SESSION['previous_action'][self::$view->mode] = self::$action;
+				if (empty($_SESSION['previous_action']) || !is_array($_SESSION['previous_action'])) {
+					$_SESSION['previous_action'] = array();
+				}
+				$_SESSION['previous_action'][self::$view->mode] = self::$action;
 		
-			if (empty($_SESSION['previous_parameters']) || !is_array($_SESSION['previous_parameters'])) {
-				$_SESSION['previous_parameters'] = array();
+				if (empty($_SESSION['previous_parameters']) || !is_array($_SESSION['previous_parameters'])) {
+					$_SESSION['previous_parameters'] = array();
+				}
+				$_SESSION['previous_parameters'][self::$view->mode] = self::$parameters;
 			}
-			$_SESSION['previous_parameters'][self::$view->mode] = self::$parameters;
 		//}
 		
 		//Clean up
@@ -301,6 +310,9 @@ class Controller {
 		$view_name = false;
 		if (array_key_exists('mode', self::$query_vars)) {
 			$view_name = ucwords(self::$query_vars['mode']) . 'View';
+			if (!Component::isActive($view_name)) {
+				return false;
+			}
 		}
 		if (!$view_name) {
 			$default_precedence = array(
@@ -346,12 +358,12 @@ class Controller {
 				$view_name = Backend::getConfig('backend.default.view', 'HtmlView');
 			}
 		}
+		if ($view_name == 'View') {
+			//Unrecognized Request, abort
+			return false;
+		}
+		//We have an active view, or an HTML Request on an uninstalled installation
 		if (Component::isActive($view_name) || (!BACKEND_INSTALLED && $view_name == 'HtmlView')) {
-			//TODO Perhaps we should abort the requests if we don't know how to handle it? This generates duplicate requests
-			//BUT we'll need something for the initial installation.
-			if ($view_name == 'View') {
-				$view_name = Backend::getConfig('backend.default.view', 'HtmlView');
-			}
 			$view = new $view_name();
 			return $view;
 		}
@@ -380,6 +392,49 @@ class Controller {
 		} else {
 			trigger_error('Application already started, can\'t set action', E_USER_ERROR);
 		}
+	}
+	
+	protected static function checkQuery($query) {
+		$extension = explode('.', $query);
+		if (count($extension) > 1) {
+			$extension = current(explode('?', end($extension)));
+			$mode = false;
+			switch (true) {
+			case $extension == 'css':
+				$mode = 'css';
+				break;
+			case $extension == 'json':
+				$mode = 'json';
+				break;
+			case $extension == 'txt':
+				$mode = 'text';
+				break;
+			//Extend the image array!
+			case in_array($extension, array('png', 'jpg', 'jpeg', 'gif', 'bmp')):
+				$mode = 'image';
+				break;
+			case in_array($extension, array('html', 'htm', 'php')):
+				$mode = 'html';
+				break;
+			case $extension == 'atom':
+				$mode = 'atom';
+				break;
+			case $extension == 'rss':
+				$mode = 'rss';
+				break;
+			default:
+				break;
+			}
+			if ($mode) {
+				if (!array_key_exists('mode', $_REQUEST)) {
+					self::$query_vars['mode'] = $mode;
+				}
+				if (substr($query, 0 - strlen($extension) - 1) == '.' . $extension) {
+					$query = substr($query, 0, strlen($query) - strlen($extension) - 1);
+				}
+			}
+		}
+		return $query;
 	}
 	
 	protected static function parseQuery($query) {
@@ -526,24 +581,31 @@ class Controller {
 		return true;
 	}
 	
-	public static function whoops($options = array()) {
+	public static function whoops($title = 'Whoops!', $extra = 'Looks like something went wrong...') {
 		self::$whoopsed = true;
-		if (!is_array($options)) {
-			$options = array('message' => $options);
+		
+		
+		if (is_array($extra)) {
+			$code_hint = array_key_exists('code_hint', $extra) ? $extra['code_hint'] : false;
+			$message   = array_key_exists('message', $extra)   ? $extra['message']   : false;
+		} else if (is_numeric($extra)) {
+			$code_hint = $extra;
+			$message   = 'Looks like something went wrong...';
+		} else {
+			$code_hint = false;
+			$message   = $extra;
 		}
-		$title = array_key_exists('title', $options) ? $options['title'] : 'Whoops!';
-		$msg = array_key_exists('message', $options) ? $options['message'] : 'Looks like something went wrong...';
 
 		if (Component::isActive('BackendError')) {
-			BackendError::add(0, $title . ': ' . $msg, '', 0, '');
+			BackendError::add(0, $title . ': ' . $message, '', 0, '');
 		}
 
 		if (is_callable(array(self::$view, 'whoops'))) {
-			call_user_func_array(array(self::$view, 'whoops'), array($title, $msg));
+			call_user_func_array(array(self::$view, 'whoops'), array($title, $message, $code_hint));
 		} else {
 		}
 		if (array_key_exists('debug', $_REQUEST)) {
-			var_dump($title, $msg);
+			var_dump($title, $message);
 			print_stacktrace();
 		}
 	}

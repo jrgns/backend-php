@@ -53,7 +53,7 @@ class ContentObj extends DBObject {
 			//$user = BackendAccount::checkUser();
 			//$filter = $user ? '`active` = 1 OR `user_id` = :user_id' : '`active` = 1';
 			$filter = '`active` = 1';
-			if (array_key_exists($options['filter'])) {
+			if (array_key_exists('filter', $options)) {
 				$options['filter'] = is_array($options['filter']) ? array_push($options['filter'], $filter) : array($options['filter'], $filter);
 			}
 		}

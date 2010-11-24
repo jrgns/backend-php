@@ -271,13 +271,10 @@ class HtmlView extends View {
 		return str_replace('<form ', '<form accept-charset="' . $charset . '" ', $content);
 	}
 	
-	public function whoops($title, $msg) {
-		if ($msg == 'Component is Inactive') {
-			parent::whoops($title, $msg);
-		} else {
-			Backend::add('Sub Title', $title);
-			Backend::addContent($msg);
-		}
+	public function whoops($title, $message, $code_hint = false) {
+		Backend::add('Sub Title', $title);
+		Backend::addContent($message . '<hr>');
+		parent::whoops($title, $message, $code_hint);
 	}
 
 	public static function install() {

@@ -56,25 +56,23 @@ class TableCtl extends AreaCtl {
 	 * You can also just create a template named $areaname.display.tpl.php to customize the HTML.
 	 */
 	public function html_display($object) {
-		if ($object) {
-			if ($object instanceof DBObject) {
-				Backend::add('Object', $object);
-				Backend::add('TabLinks', $this->getTabLinks('display'));
-				Backend::add('Sub Title', $object->getMeta('name'));
-				$template_file = $object->getArea() . '.display.tpl.php';
-				if (Render::checkTemplateFile($template_file)) {
-					Backend::addContent(Render::renderFile($template_file));
-				} else {
-					//TODO It's a bit of a hack to redirect just because we can't generate the template
-					if (Render::createTemplate($template_file, 'std_display.tpl.php')) {
-						Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' display');
-						Controller::redirect();
-					} else {
-						Controller::whoops(array('message' => 'Could not create template file for ' . $object->getMeta('name') . '::display'));
-					}
-				}
+		if (!($object instanceof DBObject)) {
+			Controller::whoops('Invalid Object Returned');
+			return $object;
+		}
+		Backend::add('Object', $object);
+		Backend::add('TabLinks', $this->getTabLinks('display'));
+		Backend::add('Sub Title', $object->getMeta('name'));
+		$template_file = $object->getArea() . '.display.tpl.php';
+		if (Render::checkTemplateFile($template_file)) {
+			Backend::addContent(Render::renderFile($template_file));
+		} else {
+			//TODO It's a bit of a hack to redirect just because we can't generate the template
+			if (Render::createTemplate($template_file, 'std_display.tpl.php')) {
+				Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' display');
+				Controller::redirect();
 			} else {
-				Controller::whoops(array('title' => 'Invalid Object returned'));
+				Backend::addError('Could not create template file for ' . $object->getMeta('name') . '::display');
 			}
 		}
 		return $object;
@@ -102,8 +100,8 @@ class TableCtl extends AreaCtl {
 	 */
 	public function action_list($start, $count, array $options = array()) {
 		$object = self::getObject(get_class($this));
-		if (!$object) {
-			Controller::whoops();
+		if (!($object instanceof DBObject)) {
+			Controller::whoops('Invalid Object Returned');
 			return false;
 		}
 		$toret = true;
@@ -125,11 +123,8 @@ class TableCtl extends AreaCtl {
 	 * You can also just create a template named $areaname.list.tpl.php to customize the HTML.
 	 */
 	public function html_list($object) {
-		if (!$object) {
-			return $object;
-		}
 		if (!($object instanceof DBObject)) {
-			Controller::whoops(array('title' => 'Invalid Object returned'));
+			Controller::whoops('Invalid Object Returned');
 			return $object;
 		}
 		
@@ -148,7 +143,7 @@ class TableCtl extends AreaCtl {
 				//Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' list');
 				//Controller::redirect();
 			//} else {
-				//Controller::whoops(array('message' => 'Could not create template file for ' . $object->getMeta('name') . '::list'));
+				//Backend::addError('Could not create template file for ' . $object->getMeta('name') . '::list');
 			//}
 			Backend::addContent(Render::renderFile('std_list.tpl.php'));
 		}
@@ -167,8 +162,8 @@ class TableCtl extends AreaCtl {
 	 */
 	public function action_search($start, $count, $term, array $options = array()) {
 		$object = self::getObject(get_class($this));
-		if (!$object) {
-			Controller::whoops();
+		if (!$object instanceof DBObject) {
+			Controller::whoops('Invalid Object Returned');
 			return false;
 		}
 		$fields = $object->getSearchFields();
@@ -197,11 +192,8 @@ class TableCtl extends AreaCtl {
 	}
 	
 	public function html_search($object) {
-		if (!$object) {
-			return $object;
-		}
 		if (!($object instanceof DBObject)) {
-			Controller::whoops(array('title' => 'Invalid Object returned'));
+			Controller::whoops('Invalid Object Returned');
 			return $object;
 		}
 		
@@ -225,9 +217,9 @@ class TableCtl extends AreaCtl {
 	 */
 	public function action_create() {
 		$object = self::getObject(get_class($this));
-		if (!$object) {
-			Controller::whoops();
-			return false;
+		if (!$object instanceof DBObject) {
+			Controller::whoops('Invalid Object Returned');
+			return $object;
 		}
 		$result = true;
 		//We need to check if the post data is valid in some way?
@@ -277,7 +269,7 @@ class TableCtl extends AreaCtl {
 						Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
 						Controller::redirect();
 					} else {
-						Controller::whoops(array('message' => 'Could not create template file for ' . $object->getMeta('name') . '::create'));
+						Backend::addError('Could not create template file for ' . $object->getMeta('name') . '::create');
 					}
 				}
 			}
@@ -289,25 +281,25 @@ class TableCtl extends AreaCtl {
 	public function action_replace() {
 		$toret = false;
 		$object = self::getObject(get_class($this));
-		if ($object) {
-			$toret = true;
-			//We need to check if the post data is valid in some way?
-			$data = $object->fromPost();
-			if (is_post()) {
-				$data = Hook::run('replace', 'pre', array($data, $object), array('toret' => $data));
-				if ($object->replace($data)) {
-					Hook::run('replace', 'post', array($data, $object));
-					Backend::addSuccess($object->getMeta('name') . ' Added');
-					$toret = $object;
-				} else {
-					$toret = false;
-					Backend::addError('Could not replace ' . $object->getMeta('name'));
-				}
-			}
-			Backend::add('obj_values', $data);
-		} else {
-			Controller::whoops();
+		if (!($object instanceof DBObject)) {
+			Controller::whoops('Invalid Object Returned');
+			return $object;
 		}
+		$toret = true;
+		//We need to check if the post data is valid in some way?
+		$data = $object->fromPost();
+		if (is_post()) {
+			$data = Hook::run('replace', 'pre', array($data, $object), array('toret' => $data));
+			if ($object->replace($data)) {
+				Hook::run('replace', 'post', array($data, $object));
+				Backend::addSuccess($object->getMeta('name') . ' Added');
+				$toret = $object;
+			} else {
+				$toret = false;
+				Backend::addError('Could not replace ' . $object->getMeta('name'));
+			}
+		}
+		Backend::add('obj_values', $data);
 	}
 	
 	public function html_replace($result) {
@@ -327,9 +319,9 @@ class TableCtl extends AreaCtl {
 	public function action_update($id) {
 		$toret = false;
 		$object = self::getObject(get_class($this), $id);
-		if (!$object) {
-			Controller::whoops();
-			return false;
+		if (!($object instanceof DBObject)) {
+			Controller::whoops('Invalid Object Returned');
+			return $object;
 		}
 		if (!$object->array) {
 			Backend::addError('The ' . $object->getMeta('name') . ' does not exist');
@@ -388,53 +380,57 @@ class TableCtl extends AreaCtl {
 		}
 		return $result;
 	}
-
-	public function action_delete($id) {
-		$toret = false;
+	
+	public function post_delete($id) {
 		$object = self::getObject(get_class($this), $id);
-		if ($object && is_post()) {
-			if ($object->array) {
-				if ($object->delete()) {
-					Backend::addSuccess('Record has been removed');
-					$toret = true;
-				}
-			} else {
-				Backend::addError('The ' . $object->getMeta('name') . ' does not exist');
+		if (!($object instanceof DBObject)) {
+			Controller::whoops('Invalid Object Returned');
+			return $object;
+		}
+		if ($object->array) {
+			if ($object->delete()) {
+				return true;
 			}
 		} else {
-			Controller::whoops();
+			Backend::addError('The ' . $object->getMeta('name') . ' does not exist');
 		}
-		return true;
+		return false;
 	}
-	
+
 	public function html_delete($result) {
+		if ($result === true) {
+			Backend::addSuccess('Record has been removed');
+		}
 		Controller::redirect('?q=' . Controller::$area . '/list');
 	}
 	
-	public function action_toggle($id, $field, $should_redirect = true) {
-		$toret = null;
-		$obj_name = (class_name(Controller::$area) . 'Obj');
-		if (class_exists($obj_name, true)) {
-			$toret = new $obj_name($id);
-			$fields = $toret->getMeta('fields');
-			if (array_key_exists($field, $fields) && $fields[$field] == 'boolean') {
-				$data = array(
-					$field => !$toret->array[$field],
-				);
-				if ($toret->update($data)) {
-					if ($should_redirect) {
-						Controller::redirect('?q=' . Controller::$area . '/' . $id);
-					}
-				} else {
-					$toret = false;
-				}
-			} else {
-				Controller::whoops('Invalid Toggle field');
-			}
-		} else {
-			Controller::whoops();
+	/**
+	 * @todo Make this a POST only
+	 */
+	public function action_toggle($id, $field) {
+		$object = self::getObject(get_class($this), $id);
+		if (!($object instanceof DBObject)) {
+			Controller::whoops('Invalid Object Returned');
+			return $object;
 		}
-		return $toret;
+		$fields = $object->getMeta('fields');
+		if (!array_key_exists($field, $fields) && $fields[$field] == 'boolean') {
+			Controller::whoops('Invalid Toggle Field', 400);
+			return false;
+		}
+		$data = array(
+			$field => !$object->array[$field],
+		);
+		if ($object->update($data)) {
+			return $object;
+		}
+		return false;
+	}
+	
+	public function html_toggle($result) {
+		if ($result) {
+			Controller::redirect('?q=' . Controller::$area . '/' . $id);
+		}
 	}
 	
 	/**

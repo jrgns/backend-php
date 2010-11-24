@@ -16,45 +16,6 @@ class Request {
 			$query = substr($query, 0, strlen($query) - 1);
 		}
 
-		$extension = explode('.', $query);
-		if (count($extension) > 1) {
-			$extension = current(explode('?', end($extension)));
-			$mode = false;
-			switch (true) {
-			case $extension == 'css':
-				$mode = 'css';
-				break;
-			case $extension == 'json':
-				$mode = 'json';
-				break;
-			case $extension == 'txt':
-				$mode = 'text';
-				break;
-			//Extend the image array!
-			case in_array($extension, array('png', 'jpg', 'jpeg', 'gif', 'bmp')):
-				$mode = 'image';
-				break;
-			case in_array($extension, array('html', 'htm', 'php')):
-				$mode = 'html';
-				break;
-			case $extension == 'atom':
-				$mode = 'atom';
-				break;
-			case $extension == 'rss':
-				$mode = 'rss';
-				break;
-			default:
-				break;
-			}
-			if ($mode) {
-				if (!array_key_exists('mode', $_REQUEST)) {
-					$_REQUEST['mode'] = $mode;
-				}
-				if (substr($query, 0 - strlen($extension) - 1) == '.' . $extension) {
-					$query = substr($query, 0, strlen($query) - strlen($extension) - 1);
-				}
-			}
-		}
 		$query = self::checkAliases($query);
 		return $query;
 	}

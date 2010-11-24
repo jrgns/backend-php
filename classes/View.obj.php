@@ -108,24 +108,23 @@ class View {
 		}
 	}
 	
-	public function whoops($title, $msg) {
+	public function whoops($title, $message, $code_hint = false) {
 		$version = '1.1';
+		$header  = $message;
 		switch ($title) {
 		case 'Permission Denied':
 			$code = 401;
-			$header = $msg;
 			break;
-		case 'Unknown Method':
+		case 'Invalid Object Returned':
+			$code = 500;
+			break;
 		case 'Whoops!':
 		default:
-			if ($msg == 'Component is Inactive') {
-				$code = 404;
-			} else {
-				$code = 400;
-			}
-			$header = $msg;
+			$code = $code_hint;
 			break;
 		}
-		header('HTTP/' . $version . ' ' . $code . ' ' . $header, true, $code);
+		if ($code) {
+			header('HTTP/' . $version . ' ' . $code . ' ' . $header, true, $code);
+		}
 	}
 }

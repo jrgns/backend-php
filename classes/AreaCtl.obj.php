@@ -29,9 +29,9 @@ class AreaCtl {
 		if (Controller::$debug) {
 			Backend::addNotice('Checking Method ' . Controller::$action . ' for ' . get_class($this));
 		}
-
+		
 		if (!$this->checkPermissions()) {
-			Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to ' . Controller::$action . ' ' . get_class($this)));
+			Controller::whoops('Permission Denied', 'You do not have permission to execute ' . get_class($this) . '/' . Controller::$action);
 			return false;
 		}
 		$request_method = strtolower(array_key_exists('REQUEST_METHOD', $_SERVER) ? $_SERVER['REQUEST_METHOD'] : 'GET') . '_' . Controller::$action;
@@ -48,7 +48,7 @@ class AreaCtl {
 			}
 			$toret = call_user_func_array(array($this, $action_method), Controller::$parameters);
 		} else if (!method_exists($this, $view_method)) {
-			Controller::whoops(array('title' => 'Unknown Method', 'message' => 'Method ' . Controller::$area . '::' . Controller::$action . ' does not exist'));
+			Controller::whoops('Unknown Method', array('message' => 'Method ' . Controller::$area . '::' . Controller::$action . ' does not exist', 'code_hint' => 501));
 		}
 		return $toret;
 	}

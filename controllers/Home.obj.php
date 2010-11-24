@@ -10,10 +10,15 @@ class Home extends AreaCtl {
 		return true;
 	}
 	
+	public function html_error() {
+		var_dump(Controller::$whoopsed); die;
+	}
+	
 	public static function install(array $options = array()) {
 		$toret = parent::install($options);
 		
 		$toret = Permission::add('anonymous', 'index', 'home') && $toret;
+		$toret = Permission::add('anonymous', 'error', 'home') && $toret;
 		return $toret;
 	}
 }
