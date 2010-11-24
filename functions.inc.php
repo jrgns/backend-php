@@ -611,7 +611,7 @@ function ifnull($var, $value) {
 
 function debug_header($message) {
 	static $count = 0;
-	header('X-Debug-' . $count++ . ': ' . $message);
+	header('X-Debug-' . str_pad($count++, 3, '0', STR_PAD_LEFT) . ': ' . $message);
 }
 
 function stripslashes_deep($value) {

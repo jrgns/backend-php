@@ -24,7 +24,7 @@ class HtmlView extends View {
 		$this->charset   = 'utf-8';
 	}
 	
-	public static function hook_init() {
+	public static function hook_post_init() {
 		self::$ob_level = ob_get_level();
 		ob_start();
 	}
@@ -178,7 +178,7 @@ class HtmlView extends View {
 		//Checking for ob_level > $this->ob_level, so we'll exit on the same number we started on
 		$last = '';
 		while (ob_get_level() > self::$ob_level) {
-			//Ending the ob_start from HtmlView::hook_init
+			//Ending the ob_start from HtmlView::hook_post_init
 			$last .= ob_get_clean();
 		}
 		$start = Backend::get('start');
@@ -282,7 +282,7 @@ class HtmlView extends View {
 
 	public static function install() {
 		$toret = true;
-		Hook::add('init', 'pre', __CLASS__, array('global' => 1, 'mode' => 'html')) && $toret;
+		Hook::add('init', 'post', __CLASS__, array('global' => 1, 'mode' => 'html')) && $toret;
 		return $toret;
 	}
 }

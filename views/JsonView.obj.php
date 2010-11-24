@@ -22,7 +22,7 @@ class JsonView extends TextView {
 		$this->mode = 'json';
 	}
 	
-	public static function hook_init() {
+	public static function hook_post_init() {
 		self::$ob_level = ob_get_level();
 		ob_start();
 	}
@@ -36,7 +36,7 @@ class JsonView extends TextView {
 		$object->content = Backend::getContent();
 		$last = '';
 		while (ob_get_level() > self::$ob_level) {
-			//Ending the ob_start from JsonView::hook_init
+			//Ending the ob_start from JsonView::hook_post_init
 			$last .= ob_get_clean();
 		}
 		$object->output  = $last;
@@ -48,7 +48,7 @@ class JsonView extends TextView {
 
 	public static function install() {
 		$toret = true;
-		Hook::add('init', 'pre', __CLASS__, array('global' => 1, 'mode' => 'json')) && $toret;
+		Hook::add('init', 'post', __CLASS__, array('global' => 1, 'mode' => 'json')) && $toret;
 		return $toret;
 	}
 }
