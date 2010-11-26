@@ -15,6 +15,17 @@
  * Default class to handle the specific functions for Areas that are linked to Tables
  */
 class TableCtl extends AreaCtl {
+	//Array Constants
+	public static $P_READONLY = array(
+		'read', 'display', 'list', 'search'
+	);
+	public static $P_USAGE = array(
+		'read', 'display', 'list', 'search', 'create', 'replace', 'import', 'update', 'toggle'
+	);
+	public static $P_FULL = array(
+		'read', 'display', 'list', 'search', 'create', 'replace', 'import', 'update', 'toggle', 'delete'
+	);
+	
 	/**
 	 * Return Tab Links for this area
 	 *
@@ -648,9 +659,28 @@ class TableCtl extends AreaCtl {
 		return $toret;
 	}
 	
+	public static function define_install() {
+		return array(
+			'description' => 'Install the component',
+			'return'      => array(
+				'type'        => 'boolean',
+				'description' => 'Whether or not the installation was successful',
+			),
+			'optional'  => array(
+				'install_model' => array(
+					'type'        => 'boolean',
+					'description' => 'If the model should be installed. This will create the DB Table or Data Source if it doesn\'t exist.',
+				),
+				'drop_table' => array(
+					'type'        => 'boolean',
+					'description' => 'If the Data Source should be destroyed if it exists.',
+				),
+			),
+		);
+	}
+	
 	public function action_install() {
-		self::install();
-		return true;
+		return call_user_func(array(get_class($this), 'install'));
 	}
 	
 	public static function install(array $options = array()) {
