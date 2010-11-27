@@ -797,7 +797,7 @@ class DBObject {
 			}
 		}
 
-		$parameters = array();
+		$q_params = array();
 
 		if (!empty($options['conditions'])) {
 			$query->filter($options['conditions']);
@@ -810,7 +810,7 @@ class DBObject {
 			case 'full_object':
 				if ($id) {
 					$query->filter("`$table`.`$id_field` = :{$table}_id");
-					$parameters[":{$table}_id"] = $id;
+					$q_params[":{$table}_id"] = $id;
 				} else {
 					$query->limit(empty($limit) ? 1 : $limit);
 				}
@@ -824,19 +824,34 @@ class DBObject {
 
 		if (array_key_exists('parameters', $options)) {
 			if (is_array($options['parameters'])) {
-				$parameters = array_merge($parameters, $options['parameters']);
+				$q_params = array_merge($q_params, $options['parameters']);
+			} else {
+				$q_params[] = $options['parameters'];
+			}
+		} else if (!empty($parameters)) {
+			if (is_array($parameters)) {
+				$q_params = array_merge($q_params, $parameters);
+			} else {
+				$q_params[] = $parameters;
 			}
 		}
+		
 		if (array_key_exists('filters', $options)) {
 			$query->filter($options['filters']);
+		} else if (!empty($filters)) {
+			$query->filter($filters);
 		}
 		if (array_key_exists('order', $options)) {
 			$query->order($options['order']);
+		} else if (!empty($order)) {
+			$query->order($order);
 		}
 		if (array_key_exists('group', $options)) {
 			$query->group($options['group']);
+		} else if (!empty($group)) {
+			$query->group($group);
 		}
-		return array($query, $parameters);
+		return array($query, $q_params);
 	}
 	
 	public function getRetrieveSQL() {
