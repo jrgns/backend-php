@@ -7,8 +7,13 @@
 	$action       = empty($action)      ? Controller::$action        : $action;
 	$list_start   = empty($list_start)  ? Controller::$parameters[0] : $list_start;
 	$list_length  = empty($list_length) ? Controller::$parameters[1] : $list_length;
-	$pages        = ceil($list_count / $list_length);
-	$current_page = floor($list_start / $list_length) + 1;
+	if ($list_length > 0) {
+		$pages        = ceil($list_count / $list_length);
+		$current_page = floor($list_start / $list_length) + 1;
+	} else {
+		$pages        = 0;
+		$current_page = 0;
+	}
 	//var_dump(count($list), $list_count, $area, $action, $list_start, $list_length, $pages, $current_page);
 	$odd = false;
 ?>

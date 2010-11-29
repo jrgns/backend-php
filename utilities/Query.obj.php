@@ -238,8 +238,10 @@ class Query {
 			}
 			if (isset($tmp) && count($tmp) == 2) {
 				$this->limit = $tmp;
-			} else {
+			} else if ($one) {
 				$this->limit = array(0, $one);
+			} else {
+				$this->limit = false;
 			}
 		}
 		return $this;
