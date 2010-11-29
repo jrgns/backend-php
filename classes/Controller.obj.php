@@ -396,10 +396,10 @@ class Controller {
 		//$terms = array_filter($terms);
 		
 		self::$area   = count($terms) ? array_shift($terms) : Value::get('default_controller', 'home');
-		if ($action = Value::get('default_' . class_name(self::$area) . '_action', false)) {
-			self::$action = $action;
+		if (count($terms)) {
+			self::$action = array_shift($terms);
 		} else {
-			self::$action = count($terms) ? array_shift($terms) : Value::get('default_action', 'index');
+			Value::get('default_' . class_name(self::$area) . '_action', Value::get('default_action', 'index'));
 		}
 		
 		self::$parameters = !empty($terms) ? $terms : array();
