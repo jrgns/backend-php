@@ -1,8 +1,13 @@
 <?php if (!empty($Object)):
-	$fields       = $Object->getMeta('fields');
 	$id_field     = $Object->getMeta('id_field');
 	$list         = $Object->list;
 	$list_count   = $Object->list_count;
+	if ($list_count) {
+		$fields   = reset($list);
+	} else {
+		$fields   = $Object->getMeta('fields');
+	}
+	$fields       = array_keys($fields);
 	$area         = empty($area)         ? Controller::$area          : $area;
 	$action       = empty($action)       ? Controller::$action        : $action;
 	$list_start   = !isset($list_start)  ? Controller::$parameters[0] : $list_start;
@@ -20,7 +25,7 @@
 	<table>
 		<thead>
 			<tr>
-				<?php foreach($fields as $name => $field): ?>
+				<?php foreach($fields as $name): ?>
 					<th><?php echo humanize($name) ?></th>
 				<?php endforeach; ?>
 				<?php if (Permission::check('display', class_for_url($Object))): ?>
