@@ -118,6 +118,10 @@ class AreaCtl {
 		return $parameters;
 	}
 	
+	public function action_install() {
+		return call_user_func(array(get_class($this), 'install'));
+	}
+	
 	public static function install(array $options = array()) {
 		$toret = false;
 		$class = get_called_class();

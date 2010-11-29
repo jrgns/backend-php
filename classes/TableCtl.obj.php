@@ -692,10 +692,6 @@ class TableCtl extends AreaCtl {
 		);
 	}
 	
-	public function action_install() {
-		return call_user_func(array(get_class($this), 'install'));
-	}
-	
 	public static function install(array $options = array()) {
 		$install_model = array_key_exists('install_model', $options) ? $options['install_model'] : true;
 
