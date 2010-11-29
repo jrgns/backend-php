@@ -641,6 +641,8 @@ class TableCtl extends AreaCtl {
 			//Get the search term from the request variable. It's always the first parameter
 			if ($term = Controller::getVar('term')) {
 				array_unshift($parameters, $term);
+			} else if (!count($parameters)) {
+				$parameters[0] = '';
 			}
 			if (!isset(Controller::$parameters[1])) {
 				$start = Controller::getVar('start', FILTER_VALIDATE_INT);

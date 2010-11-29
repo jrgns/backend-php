@@ -127,7 +127,8 @@ class BackendAccount extends TableCtl {
 	function action_logout() {
 		if (is_post()) {
 			self::$current_user = false;
-			if (array_key_exists('user', $_SESSION)) {
+			if (array_key_exists('BackendUser', $_SESSION)) {
+				
 				if (Component::isActive('PersistUser')) {
 					PersistUser::forget($_SESSION['BackendUser']);
 				}
