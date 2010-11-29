@@ -121,7 +121,7 @@ class TableCtl extends AreaCtl {
 		if ($start === 'all') {
 			$limit = 'all';
 		} else if ($start || $count) {
-			$limit = "$start, $count";
+			$limit = (int)$start . ', ' . (int)$count;
 		} else {
 			$limit = false;
 		}
@@ -176,7 +176,7 @@ class TableCtl extends AreaCtl {
 	/**
 	 * Action for searching an area's records
 	 */
-	public function action_search($start, $count, $term, array $options = array()) {
+	public function action_search($term, $start, $count, array $options = array()) {
 		$object = self::getObject(get_class($this));
 		if (!$object) {
 			Controller::whoops();
@@ -219,16 +219,17 @@ class TableCtl extends AreaCtl {
 		Backend::add('Object', $object);
 		Backend::add('TabLinks', $this->getTabLinks('list'));
 		Backend::add('Sub Title', 'Searching ' . $object->getMeta('name'));
-		Backend::add('term', Controller::$parameters[2]);
+		Backend::add('term', Controller::$parameters[0]);
 
 		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
 		Backend::addScript(SITE_LINK . 'scripts/table_list.js');
+
 		$template_file = $object->getArea() . '.search_results.tpl.php';
-		if (Render::checkTemplateFile($template_file)) {
-			Backend::addContent(Render::renderFile($template_file));
-		} else {
-			Backend::addContent(Render::renderFile('std_search_results.tpl.php'));
+		if (!Render::checkTemplateFile($template_file)) {
+			$template_file = 'std_search_results.tpl.php';
 		}
+		Backend::addContent(Render::renderFile($template_file));
+		return true;
 	}
 	
 	/**
@@ -627,16 +628,29 @@ class TableCtl extends AreaCtl {
 		if (Controller::$action == 'index') {
 			Controller::setAction('list');
 		}
-		//Defaults for Search and List
-		if (in_array(Controller::$action, array('search', 'list')) && !isset(Controller::$parameters[0])) {
-			$parameters[0] = 0;
+		//Defaults for List
+		if (Controller::$action == 'list') {
+			if (!isset(Controller::$parameters[0])) {
+				$parameters[0] = 0;
+			}
+			if (!isset(Controller::$parameters[1])) {
+				$parameters[1] = Value::get('list_length', 5);
+			}
 		}
-		if (in_array(Controller::$action, array('search', 'list')) && !isset(Controller::$parameters[1])) {
-			$parameters[1] = Value::get('list_length', 5);
-		}
-		//Get the search term from the request variable
-		if (Controller::$action == 'search' && !array_key_exists(2, $parameters)) {
-			$parameters[2] = Controller::getVar('term');;
+		//Defaults for Search
+		if (Controller::$action == 'search') {
+			//Get the search term from the request variable
+			if (!array_key_exists(0, $parameters)) {
+				$parameters[0] = Controller::getVar('term');
+			}
+			if (!isset(Controller::$parameters[1])) {
+				$start = Controller::getVar('start');
+				$parameters[1] = is_null($start) ? 0 : $start;
+			}
+			if (!isset(Controller::$parameters[2])) {
+				$count = Controller::getVar('count');
+				$parameters[2] = is_null($count) ? Value::get('list_length', 5) : $count;
+			}
 		}
 		//Get the delete_id from the request variable
 		if (Controller::$action == 'delete' && empty($parameters[0]) && ($delete_id = Controller::getVar('delete_id'))) {
