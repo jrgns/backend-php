@@ -638,9 +638,9 @@ class TableCtl extends AreaCtl {
 		}
 		//Defaults for Search
 		if (Controller::$action == 'search') {
-			//Get the search term from the request variable
-			if (!array_key_exists(0, $parameters)) {
-				$parameters[0] = Controller::getVar('term');
+			//Get the search term from the request variable. It's always the first parameter
+			if ($term = Controller::getVar('term')) {
+				array_unshift($parameters, $term);
 			}
 			if (!isset(Controller::$parameters[1])) {
 				$start = Controller::getVar('start', FILTER_VALIDATE_INT);
