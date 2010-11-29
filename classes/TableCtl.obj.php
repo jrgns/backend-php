@@ -186,7 +186,6 @@ class TableCtl extends AreaCtl {
 		if (!$fields || !is_array($fields)) {
 			return false;
 		}
-		$term = Controller::getVar('term');
 		if (empty($term)) {
 			return $object;
 		}
@@ -644,16 +643,16 @@ class TableCtl extends AreaCtl {
 				$parameters[0] = Controller::getVar('term');
 			}
 			if (!isset(Controller::$parameters[1])) {
-				$start = Controller::getVar('start');
+				$start = Controller::getVar('start', FILTER_VALIDATE_INT);
 				$parameters[1] = is_null($start) ? 0 : $start;
 			}
 			if (!isset(Controller::$parameters[2])) {
-				$count = Controller::getVar('count');
+				$count = Controller::getVar('count', FILTER_VALIDATE_INT);
 				$parameters[2] = is_null($count) ? Value::get('list_length', 5) : $count;
 			}
 		}
 		//Get the delete_id from the request variable
-		if (Controller::$action == 'delete' && empty($parameters[0]) && ($delete_id = Controller::getVar('delete_id'))) {
+		if (Controller::$action == 'delete' && empty($parameters[0]) && ($delete_id = Controller::getVar('delete_id', FILTER_VALIDATE_INT))) {
 			$parameters[0] = $delete_id;
 		}
 		return $parameters;

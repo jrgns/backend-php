@@ -352,6 +352,7 @@ class DBObject {
 				$this->error_msg = $query->error_msg;
 			}
 		}
+		$this->error_msg = 'Could not validate data for creation';
 		return false;
 	}
 	

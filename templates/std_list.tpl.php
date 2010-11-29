@@ -3,10 +3,10 @@
 	$id_field     = $Object->getMeta('id_field');
 	$list         = $Object->list;
 	$list_count   = $Object->list_count;
-	$area         = empty($area)        ? Controller::$area          : $area;
-	$action       = empty($action)      ? Controller::$action        : $action;
-	$list_start   = empty($list_start)  ? Controller::$parameters[0] : $list_start;
-	$list_length  = empty($list_length) ? Controller::$parameters[1] : $list_length;
+	$area         = empty($area)         ? Controller::$area          : $area;
+	$action       = empty($action)       ? Controller::$action        : $action;
+	$list_start   = !isset($list_start)  ? Controller::$parameters[0] : $list_start;
+	$list_length  = !isset($list_length) ? Controller::$parameters[1] : $list_length;
 	if ($list_length > 0) {
 		$pages        = ceil($list_count / $list_length);
 		$current_page = floor($list_start / $list_length) + 1;
@@ -14,7 +14,7 @@
 		$pages        = 0;
 		$current_page = 0;
 	}
-	//var_dump(count($list), $list_count, $area, $action, $list_start, $list_length, $pages, $current_page);
+	//var_dump(count($list), $list_count, $area, $action, $list_start, $list_length, $pages, $current_page); die;
 	$odd = false;
 ?>
 	<table>
