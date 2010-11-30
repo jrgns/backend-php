@@ -126,10 +126,16 @@ class AreaCtl {
 		$toret = false;
 		$class = get_called_class();
 		if ($class && class_exists($class, true)) {
+			//Purge permissions first
+			$query = new DeleteQuery('Permission');
+			$query
+				->filter('`subject` = :subject')
+				->filter('`system` = 0');
+			$query->execute(array(':subject' => class_for_url($class)));
 			$toret = true;
 			$methods = get_class_methods($class);
-			$methods = array_filter($methods, create_function('$var', 'return substr($var, 0, strlen(\'action_\')) == \'action_\';'));
-			$methods = array_map(create_function('$var', 'return substr($var, strlen(\'action_\'));'), $methods);
+			$methods = array_filter($methods, create_function('$var', '$temp = explode(\'_\', $var, 2); return count($temp) == 2 && in_array(strtolower($temp[0]), array(\'action\', \'get\', \'post\', \'put\', \'delete\'));'));
+			$methods = array_map(create_function('$var', 'return preg_replace(\'/^(action|get|post|put|delete)_/\', \'\', $var);'), $methods);
 			foreach($methods as $action) {
 				Permission::add('nobody', $action, class_for_url($class));
 			}
