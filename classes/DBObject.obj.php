@@ -244,12 +244,11 @@ class DBObject {
 					default:
 						$this->list = $result->fetchAll(PDO::FETCH_ASSOC);
 						if ($query instanceof Query) {
-							$query->setOrder(array());
-							$query->setGroup(array());
+							$this->list_count = $query->getCount($params);
+						} else {
+							$count_query = new CustomQuery(preg_replace(REGEX_MAKE_COUNT_QUERY, '$1 COUNT(*) $3', $query));
+							$this->list_count = $count_query->fetchColumn($params);
 						}
-						$count_query = new CustomQuery(preg_replace(REGEX_MAKE_COUNT_QUERY, '$1 COUNT(*) $3', $query));
-						
-						$this->list_count = $count_query->fetchColumn($params);
 						break;
 					}
 					if ($this->object) {
