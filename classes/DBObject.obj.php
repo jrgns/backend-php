@@ -348,8 +348,13 @@ class DBObject {
 				return $result;
 			}
 			if (!empty($query->error_msg)) {
-				$this->error_msg = $query->error_msg;
+				if ($query->error_code == 1062) {
+					$this->error_msg = 'The record or a duplicate of it already exists';
+				} else {
+					$this->error_msg = $query->error_msg;
+				}
 			}
+			return false;
 		}
 		$this->error_msg = 'Could not validate data for creation';
 		return false;
@@ -448,7 +453,11 @@ class DBObject {
 			return $result;
 		}
 		if (!empty($query->error_msg)) {
-			$this->error_msg = $query->error_msg;
+			if ($query->error_code == 1062) {
+				$this->error_msg = 'The record or a duplicate of it already exists';
+			} else {
+				$this->error_msg = $query->error_msg;
+			}
 		}
 		return false;
 	}
