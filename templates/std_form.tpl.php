@@ -14,57 +14,64 @@ $action_name = empty($action_name) ? ucwords(Controller::$action) : $action_name
 		<form method="post" action="?q=<?php echo '<?php echo $action_url ?>' ?>" enctype="multipart/form-data">
 <?php 
 		foreach($fields as $name => $field):
-			if (is_array($field)) {
-				$field = array_key_exists('type', $field) ? $field['type'] : 'string';
+			if (!is_array($field)) {
+				$field = array('type' => $field);
 			}
-			if (in_array($field, array('primarykey', 'lastmodified', 'dateadded', 'hidden', 'serialized', 'current_user'))) {
+			if (in_array($field['type'], array('primarykey', 'lastmodified', 'dateadded', 'hidden', 'serialized', 'current_user'))) {
 				continue;
 			}
 			$odd = $odd ? false : true;
-			if ($field != 'text') {
-				$value = array_key_exists($name, $obj_values) ? plain($obj_values[$name]) : '';
+			$input_id    = 'obj_' . $name;
+			$input_name  = 'obj[' . $name . ']';
+			$raw_value = '$obj_values[\'' . $name . '\']';
+			if (array_key_exists('default', $field)) {
+				$value = 'empty(' . $raw_value . ') ? \'' . $field['default'] . '\' : ' . $raw_value;
 			} else {
-				$value = array_key_exists($name, $obj_values) ? $obj_values[$name] : '';
+				$value = $raw_value;
 			}
-			$input_id = 'obj_' . $name;
-			$input_name = 'obj[' . $name . ']';
+			$plain_value = '<?php echo plain(' . $value . ') ?>';
 			switch (true) {
-				case $field == 'integer':
-				case $field == 'number':
-				case $field == 'string':
-				case $field == 'large_string':
-				case $field == 'small_string':
-				case $field == 'email':
-				case $field == 'website':
-				case $field == 'telnumber':
-					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="text" class="text" value="<?php echo plain($obj_values[\'' . $name . '\']) ?>">';
+				case $field['type'] == 'integer':
+				case $field['type'] == 'number':
+				case $field['type'] == 'string':
+				case $field['type'] == 'large_string':
+				case $field['type'] == 'small_string':
+				case $field['type']['type'] == 'email':
+				case $field['type'] == 'website':
+				case $field['type'] == 'telnumber':
+					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="text" class="text" value="' . $plain_value . '">';
 					break;
-				case $field == 'date':
-					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="text" class="text" value="<?php echo plain($obj_values[\'' . $name . '\']) ?>">';
+				case $field['type'] == 'date':
+					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="text" class="text" value="' . $plain_value . '">';
 					break;
-				case $field == 'title':
-					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="text" class="text title" value="<?php echo plain($obj_values[\'' . $name . '\']) ?>">';
+				case $field['type'] == 'title':
+					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="text" class="text title" value="' . $plain_value . '">';
 					break;
-				case $field == 'text':
-					$field_str = '<textarea id="' . $input_id . '" name="' . $input_name . '" class="textarea"><?php echo $obj_values[\'' . $name . '\'] ?></textarea>';
+				case $field['type'] == 'text':
+					$field_str = '<textarea id="' . $input_id . '" name="' . $input_name . '" class="textarea"><?php echo ' . $value . ' ?></textarea>';
 					break;
-				case $field == 'long_blob':
-				case $field == 'medium_blob':
-				case $field == 'blob':
-				case $field == 'tiny_blob':
-					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="file" class="text" value="<?php echo plain($obj_values[\'' . $name . '\']) ?>">';
+				case $field['type'] == 'long_blob':
+				case $field['type'] == 'medium_blob':
+				case $field['type'] == 'blob':
+				case $field['type'] == 'tiny_blob':
+					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="file" class="text" value="' . $plain_value . '">';
 					break;
-				case $field == 'boolean':
+				case $field['type'] == 'boolean':
 					$field_str = '<select id="' . $input_id . '" name="' . $input_name . '" class="">' . PHP_EOL;
-					$field_str .= "\t\t\t\t\t" . '<option value="0"<?php if (empty($obj_values[\'' . $name . '\'])): ?> selected="selected"<?php endif; ?>>No</option>' . PHP_EOL;
-					$field_str .= "\t\t\t\t\t" . '<option value="1"<?php if ($obj_values[\'' . $name . '\']): ?> selected="selected"<?php endif; ?>>Yes</option>' . PHP_EOL;
+					if (array_key_exists('default', $field)) {
+						$field_str .= "\t\t\t\t\t" . '<option value="0"<?php if ((is_null(' . $raw_value . ') && '0' == \'' . $field['default'] . '\') || (!is_null(' . $raw_value . ') && empty(' . $raw_value . '))): ?> selected="selected"<?php endif; ?>>No</option>' . PHP_EOL;
+						$field_str .= "\t\t\t\t\t" . '<option value="1"<?php if ((is_null(' . $raw_value . ') && '1' == \'' . $field['default'] . '\') || ' . $raw_value . '): ?> selected="selected"<?php endif; ?>>Yes</option>' . PHP_EOL;
+					} else {
+						$field_str .= "\t\t\t\t\t" . '<option value="0"<?php if (!is_null(' . $raw_value . ') && empty(' . $raw_value . ')): ?> selected="selected"<?php endif; ?>>No</option>' . PHP_EOL;
+						$field_str .= "\t\t\t\t\t" . '<option value="1"<?php if (' . $raw_value . '): ?> selected="selected"<?php endif; ?>>Yes</option>' . PHP_EOL;
+					}
 					$field_str .= "\t\t\t\t" . '</select>';
 					break;
-				case $field == 'date':
-				case $field == 'time':
-				case $field == 'datetime':
+				case $field['type'] == 'date':
+				case $field['type'] == 'time':
+				case $field['type'] == 'datetime':
 					//TODO Maybe add some jquery stuph to this later
-					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="text" class="text" value="<?php echo plain($obj_values[\'' . $name . '\']) ?>">';
+					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="text" class="text" value="' . $plain_value . '">';
 					break;
 				default:
 					$field_str = '';
