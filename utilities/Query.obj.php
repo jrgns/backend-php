@@ -31,7 +31,8 @@ class Query {
 	protected $last_stmt   = false;
 	protected $last_params = array();
 	
-	public $error_msg = false;
+	public $error_msg  = false;
+	public $error_code = 0;
 	
 	/**
 	 * @param The type of query this is. Must be one of SELECT, INSERT, DELETE, UPDATE or SHOW.
@@ -64,7 +65,8 @@ class Query {
 	
 	public function execute(array $parameters = array(), array $options = array()) {
 		$toret = false;
-		$this->error_msg = false;
+		$this->error_msg  = false;
+		$this->error_code = 0;
 		if (empty($this->query)) {
 			$this->last_stmt = false;
 			$this->query = $this->buildQuery();
@@ -114,6 +116,7 @@ class Query {
 								$this->error_msg .=  '(' . $error_info[1] . ')';
 							}
 						}
+						$this->error_code = $error_info[1];
 					}
 				} else {
 					$this->error_msg = 'Could not prepare statement';
