@@ -94,9 +94,11 @@ class Controller {
 				//WTF?
 				//print_stacktrace(); die;
 			}
-			session_set_cookie_params(0, WEB_SUB_FOLDER, null, $secure, true);
-			session_name('Controller');
-			@session_start();
+			if (session_id() == '') {
+				session_set_cookie_params(0, WEB_SUB_FOLDER, null, $secure, true);
+				session_name('Controller');
+				@session_start();
+			}
 
 			date_default_timezone_set(Backend::getConfig('application.timezone', 'Africa/Johannesburg'));
 
