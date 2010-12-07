@@ -31,6 +31,7 @@ class AreaCtl {
 		}
 
 		if (!$this->checkPermissions()) {
+			//TODO Add a permission denied hook to give the controller a chance to handle the permission denied
 			Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to ' . Controller::$action . ' ' . get_class($this)));
 			return false;
 		}
@@ -107,7 +108,7 @@ class AreaCtl {
 		}
 		
 		if (Value::get('admin_installed', false)) {
-			$toret = Permission::check(Controller::$action, Controller::$area);
+			$toret = Permission::check(Controller::$action, Controller::$area, $subject_id);
 		} else if (!($subject == 'admin' && in_array($action, array('install', 'pre_install', 'post_install')))) {
 			$toret = false;
 		}
