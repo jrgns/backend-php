@@ -1112,6 +1112,8 @@ class DBObject {
 				break;
 			case 'number':
 				//No break;
+			case 'numeric':
+				//No break;
 			case 'integer':
 				$int_size = empty($field_options['int_size']) ? 11 : $field_options['int_size'];
 				$field_arr[] = 'INT(' . $int_size . ')';
