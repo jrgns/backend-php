@@ -57,8 +57,8 @@ class AreaCtl {
 		}
 		
 		if ($method === true) {
-			//View method, return true;
-			return true;
+			//View method, return null;
+			return null;
 		}
 
 		if (Controller::$debug) {
