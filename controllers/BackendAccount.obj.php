@@ -121,7 +121,6 @@ class BackendAccount extends TableCtl {
 			break;
 		}
 		Backend::addContent(Render::renderFile('loginout.tpl.php'));
-		
 	}
 	
 	function action_logout() {
@@ -409,6 +408,10 @@ END;
 		$toret = parent::checkPermissions($options);
 		if (!$toret && in_array(Controller::$action, array('update', 'display'))) {
 			$toret = Controller::$parameters[0] == $_SESSION['BackendUser']->id || Controller::$parameters[0] == 0;
+			//TODO This should go into a permission denied hook
+			if (!$toret) {
+				Controller::redirect('?q=' . class_for_url(self::getName()) . '/' . Controller::$action . '/' . $_SESSION['BackendUser']->id);
+			}
 		}
 		return $toret;
 	}
@@ -496,7 +499,8 @@ Site Admin
 		
 		$toret = Permission::add('anonymous', 'signup', self::getName()) && $toret;
 		$toret = Permission::add('anonymous', 'confirm', self::getName()) && $toret;
-		$toret = Permission::add('anonymous', 'login', self::getName()) && $toret;
+
+		$toret = Permission::add('authenticated', 'login', self::getName()) && $toret;
 		$toret = Permission::add('authenticated', 'logout', self::getName()) && $toret;
 		return $toret;
 	}
