@@ -500,6 +500,7 @@ Site Admin
 		$toret = Permission::add('anonymous', 'signup', self::getName()) && $toret;
 		$toret = Permission::add('anonymous', 'confirm', self::getName()) && $toret;
 
+		$toret = Permission::add('anonymous', 'login', self::getName()) && $toret;
 		$toret = Permission::add('authenticated', 'login', self::getName()) && $toret;
 		$toret = Permission::add('authenticated', 'logout', self::getName()) && $toret;
 		return $toret;
