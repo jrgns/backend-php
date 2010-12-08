@@ -29,29 +29,42 @@ class AreaCtl {
 		if (Controller::$debug) {
 			Backend::addNotice('Checking Method ' . Controller::$action . ' for ' . get_class($this));
 		}
-
-		if (!$this->checkPermissions()) {
-			//TODO Add a permission denied hook to give the controller a chance to handle the permission denied
-			Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to ' . Controller::$action . ' ' . get_class($this)));
-			return false;
-		}
+		
 		$request_method = strtolower(array_key_exists('REQUEST_METHOD', $_SERVER) ? $_SERVER['REQUEST_METHOD'] : 'GET') . '_' . Controller::$action;
 		$action_method  = 'action_' . Controller::$action;
 		$view_method    = Controller::$view->mode . '_' . Controller::$action;
+		
+		//Determine / check method
+		$method = false;
 		if (method_exists($this, $request_method)) {
-			if (Controller::$debug) {
-				Backend::addNotice('Running ' . get_class($this) . '::' . $request_method);
-			}
-			$toret = call_user_func_array(array($this, $request_method), Controller::$parameters);
+			$method = $request_method;
 		} else if (method_exists($this, $action_method)) {
-			if (Controller::$debug) {
-				Backend::addNotice('Running ' . get_class($this) . '::' . $action_method);
-			}
-			$toret = call_user_func_array(array($this, $action_method), Controller::$parameters);
-		} else if (!method_exists($this, $view_method)) {
-			Controller::whoops(array('title' => 'Unknown Method', 'message' => 'Method ' . Controller::$area . '::' . Controller::$action . ' does not exist'));
+			$method = $action_method;
+		} else if (method_exists($this, $view_method)) {
+			$method = true;
 		}
-		return $toret;
+
+		if (!$method) {
+			Controller::whoops(array('title' => 'Unknown Method', 'message' => 'Method ' . Controller::$area . '::' . Controller::$action . ' does not exist'));
+			return null;
+		}
+
+		//Check permissions on existing method
+		if (!$this->checkPermissions()) {
+			//TODO Add a permission denied hook to give the controller a chance to handle the permission denied
+			Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to ' . Controller::$action . ' ' . get_class($this)));
+			return null;
+		}
+		
+		if ($method === true) {
+			//View method, return true;
+			return true;
+		}
+
+		if (Controller::$debug) {
+			Backend::addNotice('Running ' . get_class($this) . '::' . $method);
+		}
+		return call_user_func_array(array($this, $method), Controller::$parameters);
 	}
 	
 	/**
