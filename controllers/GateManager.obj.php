@@ -72,41 +72,44 @@ class GateManager extends AreaCtl {
 		}
 	}
 	
-	public function action_update_permissions() {
-		$toret = true;
-		if (is_post()) {
-			$query = new DeleteQuery('Permission');
-			if ($query->filter("`role` != 'nobody'")->filter("`role` != 'superadmin'")->execute()) {
-				$permission = new PermissionObj();
-				foreach(Controller::getPayload() as $key => $roles) {
-					list($subject, $action) = explode('::', $key, 2);
-					foreach($roles as $role => $value) {
-						$data = array(
-							'subject' => $subject,
-							'action'  => $action,
-							'role'    => $role,
-						);
-						$toret = $permission->replace($data) && $toret;
-					}
+	public function post_permissions($component = false) {
+		$parameters = array();
+		$query = new DeleteQuery('Permission');
+		$query
+			->filter("`role` != 'nobody'")
+			->filter("`role` != 'superadmin'");
+		if ($component) {
+			$query->filter('`subject` = :component');
+			$parameters[':component'] = class_for_url($component);
+		}
+		if (!$query->execute($parameters)) {
+			Backend::addError('Could not empty permissions table');
+			return false;
+		}
+
+		$permission = new PermissionObj();
+		$count = 0;
+		foreach(Controller::getPayload() as $key => $roles) {
+			list($subject, $action) = explode('::', $key, 2);
+			foreach($roles as $role => $value) {
+				$data = array(
+					'subject' => $subject,
+					'action'  => $action,
+					'role'    => $role,
+				);
+				if ($permission->replace($data)) {
+					$count ++;
 				}
-			} else {
-				Backend::addError('Could not empty permissions table');
 			}
 		}
-		return $toret;
+		return $count;
 	}
 	
-	public function html_update_permissions($result) {
-		if ($result) {
-			Backend::addSuccess('Permissions updated');
-		} else {
-			Backend::addError('Could not update Permissions');
-		}
-		Controller::redirect('?q=gate_manager/permissions');
-	}
-	
-	public function action_permissions() {
+	public function get_permissions($component = false) {
 		$toret = new stdClass();
+
+		//Base Permissions
+		$parameters = array();
 		$query = new SelectQuery('Permission');
 		$query
 			->distinct()
@@ -115,19 +118,30 @@ class GateManager extends AreaCtl {
 			//->filter("`role` = 'nobody'")
 			->filter('`subject_id` = 0')
 			->group('`subject`, `action` WITH ROLLUP');
-		$toret->base_perms = $query->fetchAll();
+		if ($component) {
+			$query->filter('`subject` = :component');
+			$parameters[':component'] = class_for_url($component);
+		}
+		$toret->base_perms = $query->fetchAll($parameters);
 		
+		//Roles
 		$query = new SelectQuery('Role');
 		$query->filter('`active` = 1');
 		$toret->roles = $query->fetchAll();
 
+		//Activated Permissions
+		$parameters = array();
 		$query = new SelectQuery('Permission', array('fields' => "CONCAT(`subject`, '::', `action`), GROUP_CONCAT(DISTINCT `role` ORDER BY `role`) AS `roles`"));
 		$query
 			->filter('`active` = 1')
 			->filter('`subject_id` = 0')
 			->filter("`role` != 'nobody'")
 			->group('`subject`, `action`');
-		$permissions = $query->fetchAll(array(), array('with_key' => 1));
+		if ($component) {
+			$query->filter('`subject` = :component');
+			$parameters[':component'] = class_for_url($component);
+		}
+		$permissions = $query->fetchAll($parameters, array('with_key' => 1));
 		$toret->permissions = array();
 		foreach($permissions as $key => $value) {
 			$toret->permissions[$key] = explode(',', current($value));
@@ -136,7 +150,23 @@ class GateManager extends AreaCtl {
 	}
 	
 	public function html_permissions($result) {
-		Backend::addContent(Render::renderFile('permission_list.tpl.php', (array)$result));
+		if (is_post()) {
+			if ($result === false) {
+				Backend::addError('Could not update Permissions');
+			} else {
+				Backend::addSuccess($count . ' Permissions Updated');
+			}
+			Controller::redirect('previous');
+		}
+		//GET
+		if (!empty(Controller::$parameters[0])) {
+			Backend::add('Sub Title', class_name(Controller::$parameters[0]) . ' Permissions');
+			Links::add('All Permissions', '?q=gate_manager/permissions', 'secondary');
+
+		} else {
+			Backend::add('Sub Title', Backend::getConfig('application.Title') . ' Permissions');
+		}
+		Backend::addContent(Render::renderFile('gate_manager.permissions.tpl.php', (array)$result));
 	}
 	
 	public static function admin_links() {

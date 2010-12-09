@@ -1,4 +1,5 @@
-<form method="post" action="?q=gate_manager/update_permissions">
+<form method="post"
+	action="?q=gate_manager/permissions<?php if (!empty(Controller::$parameters[0])): echo '/' . Controller::$parameters[0]; endif; ?>">
 	<table>
 	<?php
 		$last = false;
