@@ -189,12 +189,34 @@ class Component extends TableCtl {
 	}
 	
 	public function html_check() {
-		Controller::redirect('?q=admin/components');
+		Controller::redirect('?q=component/manage');
 	}
 
+	function action_manage() {
+		$toret = array();
+		
+		$component = new ComponentObj();
+		$component->read(array('order' => '`filename`'));
+		$toret = $component->list;
+		if (Controller::$debug) {
+			var_dump('Component List:', $toret);
+		}
+		return $toret;
+	}
+	
+	function html_manage($result) {
+		Backend::add('Sub Title', 'Manage Components');
+		Backend::add('result', $result);
+		Links::add('Admin', '?q=admin/index', 'secondary');
+		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
+		Backend::addScript(SITE_LINK . 'scripts/component.manage.js');
+		Backend::addContent(Render::renderFile('component.manage.tpl.php'));
+	}
+	
 	public static function admin_links() {
 		return array(
-			array('text' => 'Check Components'  , 'href' => '?q=component/check'),
+			array('text' => 'Manage Components', 'href' => '?q=component/manage'),
+			array('text' => 'Check Components' , 'href' => '?q=component/check'),
 		);
 	}
 }

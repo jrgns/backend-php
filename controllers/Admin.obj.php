@@ -77,18 +77,6 @@ class Admin extends AreaCtl {
 	function action_check() {
 	}
 	
-	function action_components() {
-		$toret = array();
-		
-		$component = new ComponentObj();
-		$component->read(array('order' => '`filename`'));
-		$toret = $component->list;
-		if (Controller::$debug) {
-			var_dump('Component List:', $toret);
-		}
-		return $toret;
-	}
-	
 	function action_daily(array $options = array()) {
 		$components = Component::getActive();
 		$result = true;
@@ -166,15 +154,7 @@ class Admin extends AreaCtl {
 			}
 		}
 		Backend::add('admin_links', $admin_links);
-		Backend::addContent(Render::renderFile('admin_interface.tpl.php'));
-	}
-	
-	function html_components($result) {
-		Backend::add('Sub Title', 'Manage Components');
-		Backend::add('result', $result);
-		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
-		Backend::addScript(SITE_LINK . 'scripts/admin_components.js');
-		Backend::addContent(Render::renderFile('admin_components.tpl.php'));
+		Backend::addContent(Render::renderFile('admin.index.tpl.php'));
 	}
 	
 	public static function hook_post_display($data, $controller) {
