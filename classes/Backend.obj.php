@@ -81,7 +81,8 @@ class Backend {
 		include(BACKEND_FOLDER . '/libraries/Markdown/markdown.php');
 		spl_autoload_register(array('Backend', '__autoload'));
 		set_error_handler    (array('Backend', '__error_handler'));
-		set_exception_handler(array('Backend', '__exception_handler'));		
+		set_exception_handler(array('Backend', '__exception_handler'));
+		register_shutdown_function(array('Controller', 'finish'));
 		
 		//Configs
 		self::initConfigs();
@@ -161,6 +162,14 @@ class Backend {
 			Backend::addError($e->getMessage());
 		}
 		define('BACKEND_INSTALLED', $installed);
+	}
+	
+	public static function shutdown() {
+		foreach(self::$DB as $connection) {
+			if (is_object($connection['connection']) && $connection['connection'] instanceof PDO) {
+				$connection['connection'] = null;
+			}
+		}
 	}
 	
 	static public function add($name, $value) {

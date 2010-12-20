@@ -212,56 +212,60 @@ class Controller {
 	}
 	
 	public static function finish() {
-		Hook::run('finish', 'pre');
+		if (self::$init) {
+			Hook::run('finish', 'pre');
 
-		$_SESSION['error']   = Backend::getError();
-		$_SESSION['notice']  = Backend::getNotice();
-		$_SESSION['success'] = Backend::getSuccess();
-		//jrgns: Just add this back in if needed. It breaks the redirect after a login
-		//if (!self::$whoopsed) {
-			if (empty($_SESSION['previous_url']) || !is_array($_SESSION['previous_url'])) {
-				$_SESSION['previous_url'] = array();
-			}
-			$_SESSION['previous_url'][self::$view->mode] = $_SERVER['REQUEST_URI'];
+			$_SESSION['error']   = Backend::getError();
+			$_SESSION['notice']  = Backend::getNotice();
+			$_SESSION['success'] = Backend::getSuccess();
+			if (!empty(self::$view)) {
+				if (empty($_SESSION['previous_url']) || !is_array($_SESSION['previous_url'])) {
+					$_SESSION['previous_url'] = array();
+				}
+				$_SESSION['previous_url'][self::$view->mode] = $_SERVER['REQUEST_URI'];
 
-			if (empty($_SESSION['previous_area']) || !is_array($_SESSION['previous_area'])) {
-				$_SESSION['previous_area'] = array();
-			}
-			$_SESSION['previous_area'][self::$view->mode] = self::$area;
+				if (empty($_SESSION['previous_area']) || !is_array($_SESSION['previous_area'])) {
+					$_SESSION['previous_area'] = array();
+				}
+				$_SESSION['previous_area'][self::$view->mode] = self::$area;
 
-			if (empty($_SESSION['previous_action']) || !is_array($_SESSION['previous_action'])) {
-				$_SESSION['previous_action'] = array();
-			}
-			$_SESSION['previous_action'][self::$view->mode] = self::$action;
+				if (empty($_SESSION['previous_action']) || !is_array($_SESSION['previous_action'])) {
+					$_SESSION['previous_action'] = array();
+				}
+				$_SESSION['previous_action'][self::$view->mode] = self::$action;
 		
-			if (empty($_SESSION['previous_parameters']) || !is_array($_SESSION['previous_parameters'])) {
-				$_SESSION['previous_parameters'] = array();
+				if (empty($_SESSION['previous_parameters']) || !is_array($_SESSION['previous_parameters'])) {
+					$_SESSION['previous_parameters'] = array();
+				}
+				$_SESSION['previous_parameters'][self::$view->mode] = self::$parameters;
 			}
-			$_SESSION['previous_parameters'][self::$view->mode] = self::$parameters;
-		//}
 		
-		//Clean up
-		self::$query_string = false;
-		self::$query_vars   = array();
-		self::$method       = null;
-		self::$payload      = false;
+			//Clean up
+			self::$query_string = false;
+			self::$query_vars   = array();
+			self::$method       = null;
+			self::$payload      = false;
 
-		self::$area = 'home';
-		self::$action = 'index';
+			self::$area = 'home';
+			self::$action = 'index';
 
-		self::$parameters = array();
+			self::$parameters = array();
 	
-		self::$salt = false;
-		self::$view = false;
+			self::$salt = false;
+			self::$view = false;
 		
-		self::$started = false;
-		self::$init    = false;
+			self::$started = false;
+			self::$init    = false;
 	
-		self::$firephp    = false;
+			self::$firephp    = false;
 	
-		self::$whoopsed  = false;
+			self::$whoopsed  = false;
 
-		Hook::run('finish', 'post');
+			Backend::shutdown();
+
+			Hook::run('finish', 'post');
+		}
+		self::$init = false;
 	}
 	
 	public static function getPayload() {
