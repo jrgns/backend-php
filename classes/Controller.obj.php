@@ -133,8 +133,8 @@ class Controller {
 			//View
 			self::$view = self::getView();
 			if (!self::$view instanceof View) {
-				print_stacktrace();
 				if (array_key_exists('debug', $_REQUEST)) {
+					print_stacktrace();
 					var_dump(self::$query_vars, $query, $_REQUEST, $_SERVER);
 				}
 				die('Unrecognized Request');
