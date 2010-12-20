@@ -13,8 +13,6 @@
 
 /**
  * The Backend class
- *
- * @todo Defer connecting to DB's until connection is needed
  */
 class Backend {
 	private static $initialized = false;
@@ -144,19 +142,23 @@ class Backend {
 		
 		//Dont use Value::get, because it might not be installed yet
 		$installed = false;
-		$db = self::getDB();
-		if ($db instanceof PDO) {
-			$stmt = $db->prepare('SELECT * FROM `values` WHERE `name` = \'admin_installed\'');
-			if ($stmt) {
-				if ($stmt->execute()) {
-					$row = $stmt->fetch(PDO::FETCH_ASSOC);
-					if ($row) {
-						$installed = $row['value'];
+		try {
+			$db = self::getDB();
+			if ($db instanceof PDO) {
+				$stmt = $db->prepare('SELECT * FROM `values` WHERE `name` = \'admin_installed\'');
+				if ($stmt) {
+					if ($stmt->execute()) {
+						$row = $stmt->fetch(PDO::FETCH_ASSOC);
+						if ($row) {
+							$installed = $row['value'];
+						}
+					} else if (array_key_exists('debug', $_REQUEST)) {
+						Backend::addError('Could not determine if backend was installed');
 					}
-				} else if (array_key_exists('debug', $_REQUEST)) {
-					Backend::addError('Could not determine if backend was installed');
 				}
 			}
+		} catch (Exception $e) {
+			Backend::addError($e->getMessage());
 		}
 		define('BACKEND_INSTALLED', $installed);
 	}
@@ -215,11 +217,7 @@ class Backend {
 	static private function initDBs($dbs) {
 		if (is_array($dbs)) {
 			foreach($dbs as $name => $db) {
-				try {
-					self::addDB($name, $db);
-				} catch (Exception $e) {
-					Backend::addError($e->getMessage());
-				}
+				self::addDB($name, $db);
 			}
 		}
 	}

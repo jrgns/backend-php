@@ -66,7 +66,11 @@ class DBObject {
 	private function checkConnection() {
 		$this->error_msg = false;
 		if (!$this->db instanceof PDO) {
-			$this->db = Backend::getDB($this->meta['database']);
+			try {
+				$this->db = Backend::getDB($this->meta['database']);
+			} catch (Exception $e) {
+				Backend::addError($e->getMessage());
+			}
 			if (!$this->db instanceof PDO) {
 				$this->error_msg = 'No Database setup';
 				if (class_exists('BackendError', false)) {
