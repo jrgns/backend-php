@@ -133,6 +133,9 @@ class Controller {
 			//View
 			self::$view = self::getView();
 			if (!self::$view instanceof View) {
+				if (array_key_exists('debug', $_REQUEST)) {
+					var_dump($_REQUEST, $_SERVER);
+				}
 				die('Unrecognized Request');
 			}
 

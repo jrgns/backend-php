@@ -13,6 +13,8 @@
 
 /**
  * The Backend class
+ *
+ * @todo Defer connecting to DB's until connection is needed
  */
 class Backend {
 	private static $initialized = false;
