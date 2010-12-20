@@ -1140,6 +1140,8 @@ class DBObject {
 				break;
 			case 'active':
 				//No break;
+			case 'bool':
+				//No break;
 			case 'boolean':
 				$field_arr[] = 'TINYINT(1)';
 				break;
