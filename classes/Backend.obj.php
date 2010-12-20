@@ -239,6 +239,12 @@ class Backend {
 		if (self::checkSelf()) {
 			$dsn = array_key_exists('dsn', $options) ? $options['dsn'] : false;
 			if (!$dsn) {
+				$options['host']     = empty($options['host'])     ? self::getConfig('backend.db.default_host')     : $options['host'];
+				$options['username'] = empty($options['username']) ? self::getConfig('backend.db.default_username') : $options['username'];
+				$options['password'] = empty($options['password']) ? self::getConfig('backend.db.default_password') : $options['password'];
+				$options['database'] = empty($options['database']) ? self::getConfig('backend.db.default_database') : $options['database'];
+				$options['driver']   = empty($options['driver'])   ? self::getConfig('backend.db.default_driver')   : $options['driver'];
+
 				$dsn = array();
 				$driver = array_key_exists('driver', $options)   ? $options['driver'] : 'mysql';
 				if (!empty($options['database'])) {
