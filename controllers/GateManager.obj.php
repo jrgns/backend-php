@@ -82,7 +82,8 @@ class GateManager extends AreaCtl {
 			$query->filter('`subject` = :component');
 			$parameters[':component'] = class_for_url($component);
 		}
-		if (!$query->execute($parameters)) {
+		$result = $query->execute($parameters);
+		if ($result === false) {
 			Backend::addError('Could not empty permissions table');
 			return false;
 		}
