@@ -120,8 +120,19 @@ class HtmlView extends View {
 			Backend::addStyle($app_styles);
 		}
 
+		//Make sure that jquery and backend is right at the top
+		$scripts = array_unique(array_filter(Backend::getScripts()));
+		$against = array();
+		if (in_array(SITE_LINK . 'scripts/jquery.js', $scripts)) {
+			$against[] = SITE_LINK . 'scripts/jquery.js';
+		}
+		if (in_array(SITE_LINK . 'scripts/backend.js', $scripts)) {
+			$against[] = SITE_LINK . 'scripts/backend.js';
+		}
+		$scripts = array_unique(array_merge($against, $scripts));
+		
 		Backend::add('Styles', array_unique(array_filter(Backend::getStyles())));
-		Backend::add('Scripts', array_unique(array_filter(Backend::getScripts())));
+		Backend::add('Scripts', $scripts);
 		Backend::add('ScriptContent', array_unique(array_filter(Backend::getScriptContent())));
 		$primary = Links::get('primary');
 		$secondary = Links::get('secondary');

@@ -94,9 +94,11 @@ class Controller {
 				//WTF?
 				//print_stacktrace(); die;
 			}
-			session_set_cookie_params(0, WEB_SUB_FOLDER, null, $secure, true);
-			session_name('Controller');
-			@session_start();
+			if (session_id() == '') {
+				session_set_cookie_params(0, WEB_SUB_FOLDER, null, $secure, true);
+				session_name('Controller');
+				@session_start();
+			}
 
 			date_default_timezone_set(Backend::getConfig('application.timezone', 'Africa/Johannesburg'));
 
@@ -135,6 +137,10 @@ class Controller {
 			if (!self::$view instanceof View) {
 				self::$view = new View();
 				self::whoops('Unrecognized Request', array('message' => 'Could not find a View for the Request', 'code_hint' => 406));
+				if (self::$debug) {
+					print_stacktrace();
+					var_dump(self::$query_vars, $query, $_REQUEST, $_SERVER);
+				}
 			}
 
 			//Sessions
@@ -213,14 +219,26 @@ class Controller {
 	}
 	
 	public static function finish() {
+<<<<<<< TREE
 		Hook::run('finish', 'pre');
+=======
+		if (self::$init) {
+			Hook::run('finish', 'pre');
+>>>>>>> MERGE-SOURCE
 
+<<<<<<< TREE
 		$_SESSION['error']   = Backend::getError();
 		$_SESSION['notice']  = Backend::getNotice();
 		$_SESSION['success'] = Backend::getSuccess();
 		//jrgns: Just add this back in if needed. It breaks the redirect after a login
 		//if (!self::$whoopsed) {
 			if (self::$view instanceof View) {
+=======
+			$_SESSION['error']   = Backend::getError();
+			$_SESSION['notice']  = Backend::getNotice();
+			$_SESSION['success'] = Backend::getSuccess();
+			if (!empty(self::$view)) {
+>>>>>>> MERGE-SOURCE
 				if (empty($_SESSION['previous_url']) || !is_array($_SESSION['previous_url'])) {
 					$_SESSION['previous_url'] = array();
 				}
@@ -241,6 +259,7 @@ class Controller {
 				}
 				$_SESSION['previous_parameters'][self::$view->mode] = self::$parameters;
 			}
+<<<<<<< TREE
 		//}
 		
 		//Clean up
@@ -265,6 +284,35 @@ class Controller {
 		self::$whoopsed  = false;
 
 		Hook::run('finish', 'post');
+=======
+		
+			//Clean up
+			self::$query_string = false;
+			self::$query_vars   = array();
+			self::$method       = null;
+			self::$payload      = false;
+
+			self::$area = 'home';
+			self::$action = 'index';
+
+			self::$parameters = array();
+	
+			self::$salt = false;
+			self::$view = false;
+		
+			self::$started = false;
+			self::$init    = false;
+	
+			self::$firephp    = false;
+	
+			self::$whoopsed  = false;
+
+			Backend::shutdown();
+
+			Hook::run('finish', 'post');
+		}
+		self::$init = false;
+>>>>>>> MERGE-SOURCE
 	}
 	
 	public static function getPayload() {
@@ -451,10 +499,10 @@ class Controller {
 		//$terms = array_filter($terms);
 		
 		self::$area   = count($terms) ? array_shift($terms) : Value::get('default_controller', 'home');
-		if ($action = Value::get('default_' . class_name(self::$area) . '_action', false)) {
-			self::$action = $action;
+		if (count($terms)) {
+			self::$action = array_shift($terms);
 		} else {
-			self::$action = count($terms) ? array_shift($terms) : Value::get('default_action', 'index');
+			Value::get('default_' . class_name(self::$area) . '_action', Value::get('default_action', 'index'));
 		}
 		
 		self::$parameters = !empty($terms) ? $terms : array();

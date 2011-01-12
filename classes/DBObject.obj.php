@@ -66,7 +66,11 @@ class DBObject {
 	private function checkConnection() {
 		$this->error_msg = false;
 		if (!$this->db instanceof PDO) {
-			$this->db = Backend::getDB($this->meta['database']);
+			try {
+				$this->db = Backend::getDB($this->meta['database']);
+			} catch (Exception $e) {
+				Backend::addError($e->getMessage());
+			}
 			if (!$this->db instanceof PDO) {
 				$this->error_msg = 'No Database setup';
 				if (class_exists('BackendError', false)) {
@@ -244,12 +248,11 @@ class DBObject {
 					default:
 						$this->list = $result->fetchAll(PDO::FETCH_ASSOC);
 						if ($query instanceof Query) {
-							$query->setOrder(array());
-							$query->setGroup(array());
+							$this->list_count = $query->getCount($params);
+						} else {
+							$count_query = new CustomQuery(preg_replace(REGEX_MAKE_COUNT_QUERY, '$1 COUNT(*) $3', $query));
+							$this->list_count = $count_query->fetchColumn($params);
 						}
-						$count_query = new CustomQuery(preg_replace(REGEX_MAKE_COUNT_QUERY, '$1 COUNT(*) $3', $query));
-						
-						$this->list_count = $count_query->fetchColumn($params);
 						break;
 					}
 					if ($this->object) {
@@ -349,9 +352,15 @@ class DBObject {
 				return $result;
 			}
 			if (!empty($query->error_msg)) {
-				$this->error_msg = $query->error_msg;
+				if ($query->error_code == 1062) {
+					$this->error_msg = 'The record or a duplicate of it already exists';
+				} else {
+					$this->error_msg = $query->error_msg;
+				}
 			}
+			return false;
 		}
+		$this->error_msg = 'Could not validate data for creation';
 		return false;
 	}
 	
@@ -448,7 +457,11 @@ class DBObject {
 			return $result;
 		}
 		if (!empty($query->error_msg)) {
-			$this->error_msg = $query->error_msg;
+			if ($query->error_code == 1062) {
+				$this->error_msg = 'The record or a duplicate of it already exists';
+			} else {
+				$this->error_msg = $query->error_msg;
+			}
 		}
 		return false;
 	}
@@ -1118,6 +1131,8 @@ class DBObject {
 				break;
 			case 'number':
 				//No break;
+			case 'numeric':
+				//No break;
 			case 'integer':
 				$int_size = empty($field_options['int_size']) ? 11 : $field_options['int_size'];
 				$field_arr[] = 'INT(' . $int_size . ')';
@@ -1143,6 +1158,8 @@ class DBObject {
 				$field_arr[] = 'TINYBLOB';
 				break;
 			case 'active':
+				//No break;
+			case 'bool':
 				//No break;
 			case 'boolean':
 				$field_arr[] = 'TINYINT(1)';

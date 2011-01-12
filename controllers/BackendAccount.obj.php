@@ -121,13 +121,13 @@ class BackendAccount extends TableCtl {
 			break;
 		}
 		Backend::addContent(Render::renderFile('loginout.tpl.php'));
-		
 	}
 	
 	function action_logout() {
 		if (is_post()) {
 			self::$current_user = false;
-			if (array_key_exists('user', $_SESSION)) {
+			if (array_key_exists('BackendUser', $_SESSION)) {
+				
 				if (Component::isActive('PersistUser')) {
 					PersistUser::forget($_SESSION['BackendUser']);
 				}
@@ -250,7 +250,6 @@ class BackendAccount extends TableCtl {
 			->filter('`active` = 1');
 		$user = $query->fetchAssoc(array(':salt' => $salt));
 		if (!$user) {
-			Backend::addError('Could not confirm your account at the moment. Please try again later');
 			return false;
 		}
 		send_email(
@@ -263,18 +262,17 @@ class BackendAccount extends TableCtl {
 		);
 		$user = self::getObject(get_class($this), $user['id']);
 		if ($user->update($data)) {
-			Backend::addSuccess('Your user account has been confirmed. Please login.');
 			return true;
 		}
-
-		Backend::addError('Could not confirm your account at the moment. Please try again later');
 		return false;
 	}
 	
 	public function html_confirm($result) {
 		if ($result) {
-			Controller::redirect('?q=account/login');
+			Backend::addSuccess('Your user account has been confirmed. Please login.');
+			Controller::redirect('?q=' . class_for_url(self::getName()) . '/login');
 		}
+		Backend::addError('Could not confirm your account at the moment. Please try again later');
 		Controller::redirect('?q=');
 	}
 	
@@ -357,7 +355,7 @@ class BackendAccount extends TableCtl {
 	}
 	
 	protected function confirmUser($object) {
-		$url = SITE_LINK . '?q=account/confirm/' . $object->array['salt'];
+		$url = SITE_LINK . '?q=' . class_for_url(self::getName()) . '/confirm/' . $object->array['salt'];
 		$app_name = Backend::getConfig('application.Title');
 		$message = <<< END
 Hi {$object->array['name']}!
@@ -410,13 +408,17 @@ END;
 		$toret = parent::checkPermissions($options);
 		if (!$toret && in_array(Controller::$action, array('update', 'display'))) {
 			$toret = Controller::$parameters[0] == $_SESSION['BackendUser']->id || Controller::$parameters[0] == 0;
+			//TODO This should go into a permission denied hook
+			if (!$toret) {
+				Controller::redirect('?q=' . class_for_url(self::getName()) . '/' . Controller::$action . '/' . $_SESSION['BackendUser']->id);
+			}
 		}
 		return $toret;
 	}
 
 	public static function checkParameters($parameters) {
 		$parameters = parent::checkParameters($parameters);
-		if (!Permission::check('manage', 'account')) {
+		if (!Permission::check('manage', class_for_url(self::getName()))) {
 			if (array_key_exists('user', $_SESSION) && $_SESSION['BackendUser']->id > 0) {
 				if (Controller::$action == 'signup') {
 					Controller::setAction('display');
@@ -497,9 +499,10 @@ Site Admin
 		
 		$toret = Permission::add('anonymous', 'signup', self::getName()) && $toret;
 		$toret = Permission::add('anonymous', 'confirm', self::getName()) && $toret;
+
 		$toret = Permission::add('anonymous', 'login', self::getName()) && $toret;
+		$toret = Permission::add('authenticated', 'login', self::getName()) && $toret;
 		$toret = Permission::add('authenticated', 'logout', self::getName()) && $toret;
-		$toret = Permission::add('authenticated', 'display', self::getName()) && $toret;
 		return $toret;
 	}
 }

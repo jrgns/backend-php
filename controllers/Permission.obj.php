@@ -16,6 +16,35 @@ class Permission extends TableCtl {
 	 * for all subjects? Eg, display.
 	 */
 	public static function add($role, $action, $subject, $subject_id = 0, array $options = array()) {
+		//Loop through arrays
+		if (is_array($role)) {
+			$result = 0;
+			foreach($role as $one_role) {
+				if (self::add($one_role, $action, $subject, $subject_id, $options)) {
+					$result++;
+				}
+			}
+			return $result;
+		}
+		if (is_array($action)) {
+			$result = 0;
+			foreach($action as $one_action) {
+				if (self::add($role, $one_action, $subject, $subject_id, $options)) {
+					$result++;
+				}
+			}
+			return $result;
+		}
+		if (is_array($subject)) {
+			$result = 0;
+			foreach($subject as $one_subject) {
+				if (self::add($role, $role, $one_subject, $subject_id, $options)) {
+					$result++;
+				}
+			}
+			return $result;
+		}
+
 		if (is_array($subject_id)) {
 			$options    = $subject_id;
 			$subject_id = 0;

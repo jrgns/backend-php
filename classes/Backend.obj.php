@@ -81,7 +81,8 @@ class Backend {
 		include(BACKEND_FOLDER . '/libraries/Markdown/markdown.php');
 		spl_autoload_register(array('Backend', '__autoload'));
 		set_error_handler    (array('Backend', '__error_handler'));
-		set_exception_handler(array('Backend', '__exception_handler'));		
+		set_exception_handler(array('Backend', '__exception_handler'));
+		register_shutdown_function(array('Controller', 'finish'));
 		
 		//Configs
 		self::initConfigs();
@@ -142,21 +143,33 @@ class Backend {
 		
 		//Dont use Value::get, because it might not be installed yet
 		$installed = false;
-		$db = self::getDB();
-		if ($db instanceof PDO) {
-			$stmt = $db->prepare('SELECT * FROM `values` WHERE `name` = \'admin_installed\'');
-			if ($stmt) {
-				if ($stmt->execute()) {
-					$row = $stmt->fetch(PDO::FETCH_ASSOC);
-					if ($row) {
-						$installed = $row['value'];
+		try {
+			$db = self::getDB();
+			if ($db instanceof PDO) {
+				$stmt = $db->prepare('SELECT * FROM `values` WHERE `name` = \'admin_installed\'');
+				if ($stmt) {
+					if ($stmt->execute()) {
+						$row = $stmt->fetch(PDO::FETCH_ASSOC);
+						if ($row) {
+							$installed = $row['value'];
+						}
+					} else if (array_key_exists('debug', $_REQUEST)) {
+						Backend::addError('Could not determine if backend was installed');
 					}
-				} else if (array_key_exists('debug', $_REQUEST)) {
-					Backend::addError('Could not determine if backend was installed');
 				}
 			}
+		} catch (Exception $e) {
+			Backend::addError($e->getMessage());
 		}
 		define('BACKEND_INSTALLED', $installed);
+	}
+	
+	public static function shutdown() {
+		foreach(self::$DB as $connection) {
+			if (is_object($connection['connection']) && $connection['connection'] instanceof PDO) {
+				$connection['connection'] = null;
+			}
+		}
 	}
 	
 	static public function add($name, $value) {
@@ -213,11 +226,7 @@ class Backend {
 	static private function initDBs($dbs) {
 		if (is_array($dbs)) {
 			foreach($dbs as $name => $db) {
-				try {
-					self::addDB($name, $db);
-				} catch (Exception $e) {
-					Backend::addError($e->getMessage());
-				}
+				self::addDB($name, $db);
 			}
 		}
 	}
@@ -237,6 +246,12 @@ class Backend {
 		if (self::checkSelf()) {
 			$dsn = array_key_exists('dsn', $options) ? $options['dsn'] : false;
 			if (!$dsn) {
+				$options['host']     = empty($options['host'])     ? self::getConfig('backend.db.default_host')     : $options['host'];
+				$options['username'] = empty($options['username']) ? self::getConfig('backend.db.default_username') : $options['username'];
+				$options['password'] = empty($options['password']) ? self::getConfig('backend.db.default_password') : $options['password'];
+				$options['database'] = empty($options['database']) ? self::getConfig('backend.db.default_database') : $options['database'];
+				$options['driver']   = empty($options['driver'])   ? self::getConfig('backend.db.default_driver')   : $options['driver'];
+
 				$dsn = array();
 				$driver = array_key_exists('driver', $options)   ? $options['driver'] : 'mysql';
 				if (!empty($options['database'])) {
@@ -245,39 +260,28 @@ class Backend {
 				$dsn[] = 'host=' . (array_key_exists('host', $options) ? $options['host'] : 'localhost');
 				$dsn = strtolower($driver) . ':' . implode(';', $dsn);
 			}
-			$alias    = !empty($options['alias'])              ? $options['alias']    : $name;
-			$username = array_key_exists('username', $options) ? $options['username'] : '';
-			$password = array_key_exists('password', $options) ? $options['password'] : '';
-			if (!empty($options['connection'])) {
-				$connection = $options['connection'];
-			} else {
-				try {
-					//This might be problematic if there shouldn't be a username/password?
-					$connection = new PDO($dsn, $username, $password);
-				} catch (Exception $e) {
-					if (array_key_exists('debug', $_REQUEST)) {
-						throw new ConnectToDBException($e->getMessage());
-					} else {
-						throw new ConnectToDBException('Could not connect to Database ' . $name);
-					}
-				}
+			$username   = array_key_exists('username', $options) ? $options['username'] : '';
+			$password   = array_key_exists('password', $options) ? $options['password'] : '';
+			$alias      = empty($options['alias'])               ? $name                : $options['alias'];
+			$connection = empty($options['connection'])          ? false                : $options['connection'];
+
+			if (array_key_exists($name, self::$DB)) {
+				Backend::addNotice('Overwriting existing DB definition: ' . $name);
 			}
-			if (!empty($connection) && $connection instanceof PDO) {
+			self::$DB[$name] = array(
+				'database' => $options['database'],
+				'dsn'      => $dsn,
+				'username' => $username,
+				'password' => $password,
+				'connection' => $connection
+			);
+			if ($alias != $name) {
 				if (array_key_exists($alias, self::$DB)) {
 					Backend::addNotice('Overwriting existing DB definition: ' . $alias);
 				}
-				self::$DB[$name] = array('database' => $options['database'], 'dsn' => $dsn, 'username' => $username, 'password' => $password, 'connection' => $connection);
-				if ($alias != $name) {
-					self::$DB[$alias] = array('database' => $options['database'], 'dsn' => $dsn, 'username' => $username, 'password' => $password, 'connection' => $connection);
-				}
-				$toret = true;
-			} else {
-				if (array_key_exists('debug', $_REQUEST)) {
-					throw new ConnectToDBException($e->getMessage());
-				} else {
-					throw new ConnectToDBException('Could not connect to Database ' . $alias);
-				}
+				self::$DB[$alias] = self::$DB[$name];
 			}
+			$toret = true;
 		}
 		return $toret;
 	}
@@ -301,7 +305,23 @@ class Backend {
 			return false;
 		}
 		$name = $name ? $name : 'default';
-		if ($name && array_key_exists($name, self::$DB) && array_key_exists('connection', self::$DB[$name]) && self::$DB[$name]['connection'] instanceof PDO) {
+		if ($name && array_key_exists($name, self::$DB)) {
+			if (empty(self::$DB[$name]['connection']) || !(self::$DB[$name]['connection'] instanceof PDO)) {
+				try {
+					//This might be problematic if there shouldn't be a username/password?
+					self::$DB[$name]['connection'] = new PDO(
+						self::$DB[$name]['dsn'],
+						self::$DB[$name]['username'],
+						self::$DB[$name]['password']
+					);
+				} catch (Exception $e) {
+					if (array_key_exists('debug', $_REQUEST)) {
+						throw new ConnectToDBException($e->getMessage());
+					} else {
+						throw new ConnectToDBException('Could not connect to Database ' . $name);
+					}
+				}
+			}
 			return self::$DB[$name];
 		} else if (array_key_exists('default', self::$DB) && array_key_exists('connection', self::$DB['default']) && self::$DB['default']['connection'] instanceof PDO) {
 			return self::$DB['default'];

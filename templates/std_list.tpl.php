@@ -1,21 +1,31 @@
 <?php if (!empty($Object)):
-	$fields       = $Object->getMeta('fields');
 	$id_field     = $Object->getMeta('id_field');
 	$list         = $Object->list;
 	$list_count   = $Object->list_count;
-	$area         = empty($area)        ? Controller::$area          : $area;
-	$action       = empty($action)      ? Controller::$action        : $action;
-	$list_start   = empty($list_start)  ? Controller::$parameters[0] : $list_start;
-	$list_length  = empty($list_length) ? Controller::$parameters[1] : $list_length;
-	$pages        = ceil($list_count / $list_length);
-	$current_page = floor($list_start / $list_length) + 1;
-	//var_dump(count($list), $list_count, $area, $action, $list_start, $list_length, $pages, $current_page);
+	if ($list_count) {
+		$fields   = reset($list);
+	} else {
+		$fields   = $Object->getMeta('fields');
+	}
+	$fields       = array_keys($fields);
+	$area         = empty($area)         ? Controller::$area          : $area;
+	$action       = empty($action)       ? Controller::$action        : $action;
+	$list_start   = !isset($list_start)  ? Controller::$parameters[0] : $list_start;
+	$list_length  = !isset($list_length) ? Controller::$parameters[1] : $list_length;
+	if ($list_length > 0) {
+		$pages        = ceil($list_count / $list_length);
+		$current_page = floor($list_start / $list_length) + 1;
+	} else {
+		$pages        = 0;
+		$current_page = 0;
+	}
+	//var_dump(count($list), $list_count, $area, $action, $list_start, $list_length, $pages, $current_page); die;
 	$odd = false;
 ?>
 	<table>
 		<thead>
 			<tr>
-				<?php foreach($fields as $name => $field): ?>
+				<?php foreach($fields as $name): ?>
 					<th><?php echo humanize($name) ?></th>
 				<?php endforeach; ?>
 				<?php if (Permission::check('display', class_for_url($Object))): ?>

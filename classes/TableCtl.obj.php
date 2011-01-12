@@ -15,6 +15,17 @@
  * Default class to handle the specific functions for Areas that are linked to Tables
  */
 class TableCtl extends AreaCtl {
+	//Array Constants
+	public static $P_READONLY = array(
+		'read', 'display', 'list', 'search'
+	);
+	public static $P_USAGE = array(
+		'read', 'display', 'list', 'search', 'create', 'replace', 'import', 'update', 'toggle'
+	);
+	public static $P_FULL = array(
+		'read', 'display', 'list', 'search', 'create', 'replace', 'import', 'update', 'toggle', 'delete'
+	);
+	
 	/**
 	 * Return Tab Links for this area
 	 *
@@ -108,7 +119,7 @@ class TableCtl extends AreaCtl {
 		if ($start === 'all') {
 			$limit = 'all';
 		} else if ($start || $count) {
-			$limit = "$start, $count";
+			$limit = (int)$start . ', ' . (int)$count;
 		} else {
 			$limit = false;
 		}
@@ -160,7 +171,7 @@ class TableCtl extends AreaCtl {
 	/**
 	 * Action for searching an area's records
 	 */
-	public function action_search($start, $count, $term, array $options = array()) {
+	public function action_search($term, $start, $count, array $options = array()) {
 		$object = self::getObject(get_class($this));
 		if (!$object instanceof DBObject) {
 			Controller::whoops('Invalid Object Returned');
@@ -170,7 +181,6 @@ class TableCtl extends AreaCtl {
 		if (!$fields || !is_array($fields)) {
 			return false;
 		}
-		$term = Controller::getVar('term');
 		if (empty($term)) {
 			return $object;
 		}
@@ -200,16 +210,17 @@ class TableCtl extends AreaCtl {
 		Backend::add('Object', $object);
 		Backend::add('TabLinks', $this->getTabLinks('list'));
 		Backend::add('Sub Title', 'Searching ' . $object->getMeta('name'));
-		Backend::add('term', Controller::$parameters[2]);
+		Backend::add('term', Controller::$parameters[0]);
 
 		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
 		Backend::addScript(SITE_LINK . 'scripts/table_list.js');
+
 		$template_file = $object->getArea() . '.search_results.tpl.php';
-		if (Render::checkTemplateFile($template_file)) {
-			Backend::addContent(Render::renderFile($template_file));
-		} else {
-			Backend::addContent(Render::renderFile('std_search_results.tpl.php'));
+		if (!Render::checkTemplateFile($template_file)) {
+			$template_file = 'std_search_results.tpl.php';
 		}
+		Backend::addContent(Render::renderFile($template_file));
+		return true;
 	}
 	
 	/**
@@ -612,19 +623,34 @@ class TableCtl extends AreaCtl {
 		if (Controller::$action == 'index') {
 			Controller::setAction('list');
 		}
-		//Defaults for Search and List
-		if (in_array(Controller::$action, array('search', 'list')) && !isset(Controller::$parameters[0])) {
-			$parameters[0] = 0;
+		//Defaults for List
+		if (Controller::$action == 'list') {
+			if (!isset(Controller::$parameters[0])) {
+				$parameters[0] = 0;
+			}
+			if (!isset(Controller::$parameters[1])) {
+				$parameters[1] = Value::get('list_length', 5);
+			}
 		}
-		if (in_array(Controller::$action, array('search', 'list')) && !isset(Controller::$parameters[1])) {
-			$parameters[1] = Value::get('list_length', 5);
-		}
-		//Get the search term from the request variable
-		if (Controller::$action == 'search' && !array_key_exists(2, $parameters)) {
-			$parameters[2] = Controller::getVar('term');;
+		//Defaults for Search
+		if (Controller::$action == 'search') {
+			//Get the search term from the request variable. It's always the first parameter
+			if ($term = Controller::getVar('term')) {
+				array_unshift($parameters, $term);
+			} else if (!count($parameters)) {
+				$parameters[0] = '';
+			}
+			if (!isset(Controller::$parameters[1])) {
+				$start = Controller::getVar('start', FILTER_VALIDATE_INT);
+				$parameters[1] = is_null($start) ? 0 : $start;
+			}
+			if (!isset(Controller::$parameters[2])) {
+				$count = Controller::getVar('count', FILTER_VALIDATE_INT);
+				$parameters[2] = is_null($count) ? Value::get('list_length', 5) : $count;
+			}
 		}
 		//Get the delete_id from the request variable
-		if (Controller::$action == 'delete' && empty($parameters[0]) && ($delete_id = Controller::getVar('delete_id'))) {
+		if (Controller::$action == 'delete' && empty($parameters[0]) && ($delete_id = Controller::getVar('delete_id', FILTER_VALIDATE_INT))) {
 			$parameters[0] = $delete_id;
 		}
 		return $parameters;
@@ -644,9 +670,24 @@ class TableCtl extends AreaCtl {
 		return $toret;
 	}
 	
-	public function action_install() {
-		self::install();
-		return true;
+	public static function define_install() {
+		return array(
+			'description' => 'Install the component',
+			'return'      => array(
+				'type'        => 'boolean',
+				'description' => 'Whether or not the installation was successful',
+			),
+			'optional'  => array(
+				'install_model' => array(
+					'type'        => 'boolean',
+					'description' => 'If the model should be installed. This will create the DB Table or Data Source if it doesn\'t exist.',
+				),
+				'drop_table' => array(
+					'type'        => 'boolean',
+					'description' => 'If the Data Source should be destroyed if it exists.',
+				),
+			),
+		);
 	}
 	
 	public static function install(array $options = array()) {

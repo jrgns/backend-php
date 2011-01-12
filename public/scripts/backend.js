@@ -38,3 +38,8 @@ function add_error(error) {
 	}
 	$('#backend_error_container').show();
 }
+
+try {
+	jQuery.fn.exists = function(){return jQuery(this).length>0;}
+} catch (e) {
+}

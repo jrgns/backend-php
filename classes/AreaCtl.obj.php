@@ -30,27 +30,41 @@ class AreaCtl {
 			Backend::addNotice('Checking Method ' . Controller::$action . ' for ' . get_class($this));
 		}
 		
-		if (!$this->checkPermissions()) {
-			Controller::whoops('Permission Denied', 'You do not have permission to execute ' . get_class($this) . '/' . Controller::$action);
-			return false;
-		}
 		$request_method = strtolower(array_key_exists('REQUEST_METHOD', $_SERVER) ? $_SERVER['REQUEST_METHOD'] : 'GET') . '_' . Controller::$action;
 		$action_method  = 'action_' . Controller::$action;
 		$view_method    = Controller::$view->mode . '_' . Controller::$action;
+		
+		//Determine / check method
+		$method = false;
 		if (method_exists($this, $request_method)) {
-			if (Controller::$debug) {
-				Backend::addNotice('Running ' . get_class($this) . '::' . $request_method);
-			}
-			$toret = call_user_func_array(array($this, $request_method), Controller::$parameters);
+			$method = $request_method;
 		} else if (method_exists($this, $action_method)) {
-			if (Controller::$debug) {
-				Backend::addNotice('Running ' . get_class($this) . '::' . $action_method);
-			}
-			$toret = call_user_func_array(array($this, $action_method), Controller::$parameters);
-		} else if (!method_exists($this, $view_method)) {
-			Controller::whoops('Unknown Method', array('message' => 'Method ' . Controller::$area . '::' . Controller::$action . ' does not exist', 'code_hint' => 501));
+			$method = $action_method;
+		} else if (method_exists($this, $view_method)) {
+			$method = true;
 		}
-		return $toret;
+
+		if (!$method) {
+			Controller::whoops(array('title' => 'Unknown Method', 'message' => 'Method ' . Controller::$area . '::' . Controller::$action . ' does not exist'));
+			return null;
+		}
+
+		//Check permissions on existing method
+		if (!$this->checkPermissions()) {
+			//TODO Add a permission denied hook to give the controller a chance to handle the permission denied
+			Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to ' . Controller::$action . ' ' . get_class($this)));
+			return null;
+		}
+		
+		if ($method === true) {
+			//View method, return null;
+			return null;
+		}
+
+		if (Controller::$debug) {
+			Backend::addNotice('Running ' . get_class($this) . '::' . $method);
+		}
+		return call_user_func_array(array($this, $method), Controller::$parameters);
 	}
 	
 	/**
@@ -107,7 +121,7 @@ class AreaCtl {
 		}
 		
 		if (Value::get('admin_installed', false)) {
-			$toret = Permission::check(Controller::$action, Controller::$area);
+			$toret = Permission::check(Controller::$action, Controller::$area, $subject_id);
 		} else if (!($subject == 'admin' && in_array($action, array('install', 'pre_install', 'post_install')))) {
 			$toret = false;
 		}
@@ -118,14 +132,24 @@ class AreaCtl {
 		return $parameters;
 	}
 	
+	public function action_install() {
+		return call_user_func(array(get_class($this), 'install'));
+	}
+	
 	public static function install(array $options = array()) {
 		$toret = false;
 		$class = get_called_class();
 		if ($class && class_exists($class, true)) {
+			//Purge permissions first
+			$query = new DeleteQuery('Permission');
+			$query
+				->filter('`subject` = :subject')
+				->filter('`system` = 0');
+			$query->execute(array(':subject' => class_for_url($class)));
 			$toret = true;
 			$methods = get_class_methods($class);
-			$methods = array_filter($methods, create_function('$var', 'return substr($var, 0, strlen(\'action_\')) == \'action_\';'));
-			$methods = array_map(create_function('$var', 'return substr($var, strlen(\'action_\'));'), $methods);
+			$methods = array_filter($methods, create_function('$var', '$temp = explode(\'_\', $var, 2); return count($temp) == 2 && in_array(strtolower($temp[0]), array(\'action\', \'get\', \'post\', \'put\', \'delete\'));'));
+			$methods = array_map(create_function('$var', 'return preg_replace(\'/^(action|get|post|put|delete)_/\', \'\', $var);'), $methods);
 			foreach($methods as $action) {
 				Permission::add('nobody', $action, class_for_url($class));
 			}

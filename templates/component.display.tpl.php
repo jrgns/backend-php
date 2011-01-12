@@ -34,3 +34,6 @@
 			</div>
 			<span><?php echo empty($Object->array['added']) ? '&nbsp;' : plain($Object->array['added']) ?></span>
 		</div>
+		<p>
+			<a href="?q=gate_manager/permissions/<?php echo class_for_url($Object->array['name']) ?>">Check Permissions</a>
+		</p>

@@ -86,7 +86,9 @@ class PersistUser extends TableCtl {
 
 	public static function hook_start() {
 		if (!BackendAccount::checkUser()) {
-			PersistUser::check();
+			if (PersistUser::check()) {
+				Controller::redirect();
+			}
 		}
 	}
 
