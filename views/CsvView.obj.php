@@ -30,7 +30,7 @@ class CsvView extends View {
 			}
 		}
 		if (!Controller::$debug) {
-			header('Content-disposition: attachment; filename="' . $filename . '.csv"');
+			header('Content-Disposition: attachment; filename="' . $filename . '.csv"');
 			header('Pragma: no-cache');
 			header('Expires: 0');
 		}

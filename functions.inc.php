@@ -401,6 +401,10 @@ function curl_request($url, array $parameters = array(), array $options = array(
 	}
 	$ch = curl_init($url);
 	
+	if (!empty($options['debug'])) {
+		var_dump('cURL Request:', $url);
+	}
+	
 	curl_setopt($ch, CURLOPT_USERAGENT, 'Backend / PHP');
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
     curl_setopt($ch, CURLOPT_TIMEOUT, 30);
@@ -466,18 +470,34 @@ function curl_request($url, array $parameters = array(), array $options = array(
 	}
 	$toret = curl_exec($ch);
 
+	if (!empty($options['debug'])) {
+		var_dump('cURL Response:', $toret);
+	}
+
 	if (!empty($options['callback']) && is_callable($options['callback'])) {
 		$toret = call_user_func_array($options['callback'], array($ch, $toret, $options));
+		if (!empty($options['debug'])) {
+			var_dump('cURL Response After Callback:', $toret);
+		}
 	} else if ($curl_error = curl_errno($ch)) {
+		if (!empty($options['debug'])) {
+			var_dump('cURL Error:', $curl_error);
+		}
 		$toret = false;
 	} else {
 		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		if (!empty($options['debug'])) {
+			var_dump('cURL HTTP Code:', $http_code);
+		}
 		if (!in_array($http_code, array(200))) {
 			$toret = false;
 		}
 	}
 	curl_close($ch);
 
+	if (!empty($options['debug'])) {
+		var_dump('cURL Precache:', $toret, $cache, $cache_file);
+	}
 	if ($toret && $cache) {
 		file_put_contents($cache_file, $toret);
 	}

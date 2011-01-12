@@ -20,7 +20,7 @@ class GChartView extends View {
 	function __construct() {
 		parent::__construct();
 		$this->mode = 'gchart';
-		$this->mime_type = 'image/*';
+		$this->mime_type = 'image/png';
 	}
 	
 	private static function simple_line($output, &$params) {
@@ -73,9 +73,17 @@ class GChartView extends View {
 		if (Controller::$debug) {
 			echo '<img src="' . $url . '">';
 			var_dump($params);
-			var_dump($output); die;
+			var_dump($output);
+			$dont_kill = Controller::getVar('dont_kill');
+			if (empty($dont_kill)) {
+				die;
+			}
 		}
-		$image = curl_request($url, array(), array('cache' => 60 * 60));
+		$recache = Controller::getVar('recache') ? true : false;
+		$image = curl_request($url, array(), array('cache' => $recache ? 1 : 60 * 60, 'bypass_ssl' => 1));
+		if (Controller::$debug) {
+			var_dump('Image:', $image);
+		}
 		if (!$image) {
 			BackendError::add('Google Chart Error', 'Could not get image');
 			return false;
@@ -87,9 +95,10 @@ class GChartView extends View {
 				$filename .= Controller::$parameters[0];
 			}
 		}
-		if (!Controller::$debug) {
-			header('Content-disposition: inline; filename="' . $filename . '.png"');
+		if (Controller::$debug) {
+			var_dump('Filename:', $filename);
 		}
+		header('Content-Disposition: inline; filename="' . $filename . '.png"');
 		return $image;
 	}
 	
