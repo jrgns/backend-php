@@ -49,11 +49,12 @@ class GChartView extends View {
 	}
 	
 	public static function hook_output($output) {
+		//TODO Attach HTTP Error codes and descriptions to these errors
 		if (!is_array($output)) {
 			BackendError::add('Google Chart Error', 'Invalid Output');
 			return false;
 		}
-		$type = Backend::get('ChartType', 'simple_line');
+		$type = array_key_exists('type', $output) ? $output['type'] : Backend::get('ChartType', 'simple_line');
 		if (!method_exists('GChartView', $type)) {
 			BackendError::add('Google Chart Error', 'Invalid Chart Type');
 			return false;
@@ -62,9 +63,14 @@ class GChartView extends View {
 		if (!array_key_exists('data', $output)) {
 			$output = array('data' => $output);
 		}
+		if (!is_array($output['data']) || !count($output['data'])) {
+			BackendError::add('Google Chart Error', 'Invalid Output Data');
+			return false;
+		}
 
 		$params = array();
-		if ($title = Backend::get('ChartTitle', false)) {
+		$title  = array_key_exists('title', $output) ? $output['title'] : Backend::get('ChartTitle', false);
+		if ($title) {
 			$params['chtt'] = $title;
 		}
 
