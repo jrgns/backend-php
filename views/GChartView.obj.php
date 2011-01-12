@@ -50,10 +50,12 @@ class GChartView extends View {
 	
 	public static function hook_output($output) {
 		if (!is_array($output)) {
+			BackendError::add('Google Chart Error', 'Invalid Output');
 			return false;
 		}
 		$type = Backend::get('ChartType', 'simple_line');
 		if (!method_exists('GChartView', $type)) {
+			BackendError::add('Google Chart Error', 'Invalid Chart Type');
 			return false;
 		}
 
@@ -75,6 +77,7 @@ class GChartView extends View {
 		}
 		$image = curl_request($url, array(), array('cache' => 60 * 60));
 		if (!$image) {
+			BackendError::add('Google Chart Error', 'Could not get image');
 			return false;
 		}
 		$filename = Backend::get('ChartFilename', false);
