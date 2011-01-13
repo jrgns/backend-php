@@ -16,6 +16,7 @@
  */
 class GChartView extends View {
 	public static $url = 'https://chart.googleapis.com/chart';
+	public static $colors = array('FF0000', '00FF00', '0000FF');
 
 	function __construct() {
 		parent::__construct();
@@ -25,10 +26,23 @@ class GChartView extends View {
 	
 	private static function simple_line($output, &$params) {
 		$data = $output['data'];
-		$min  = min(array_merge(array(0), $data));
-		$max  = max($data);
-		$params['cht']  = 'lc';
-		$params['chd']  = 't:' . implode(',', $data);
+		if (array_depth($data) == 1) {
+			$min  = min(array_merge(array(0), $data));
+			$max  = max($data);
+		} else {
+			$min  = min(array_merge(array(0), reset($data)));
+			$max  = max(reset($data));
+		}
+		$params['cht'] = 'lc';
+		if (array_depth($data) == 1) {
+			$params['chd'] = 't:' . implode(',', $data);
+		} else {
+			$value = array();
+			foreach($data as $one_data) {
+				$value[] = implode(',', $one_data);
+			}
+			$params['chd'] = 't:' . implode('|', $value);
+		}
 		$params['chds'] = $min . ',' . $max;
 		$params['chxr'] = '1,' . $min . ',' . $max;
 		$params['chxt'] = 'x,y';
@@ -38,11 +52,33 @@ class GChartView extends View {
 			if (is_array($legend)) {
 				$legend = '0:|' . implode('|', $legend);
 			}
+		} else if (array_depth($data) == 1) {
+			//use this instead of array_keys to keep the order
+			$values = array();
+			foreach($data as $key => $value) {
+				$values[] = $key;
+			}
+			$legend = '0:|' . implode('|', $values);
 		} else {
-			$legend = '0:|' . implode('|', array_keys($data));
+			//use this instead of array_keys to keep the order
+			$values = array();
+			foreach(reset($data) as $key => $value) {
+				$values[] = $key;
+			}
+			$legend = '0:|' . implode('|', $values);
 		}
 		if ($legend) {
 			$params['chxl'] = $legend;
+		}
+		if (array_depth($data) > 1) {
+			if (array_key_exists('colors', $output)) {
+				$params['chco'] = implode(',', $output['colors']);
+			} else {
+				$params['chco'] = implode(',', self::$colors);
+			}
+			if (array_key_exists('series', $output)) {
+				$params['chdl'] = implode('|', $output['series']);
+			}
 		}
 		
 		return self::$url . '?' . http_build_query($params);
