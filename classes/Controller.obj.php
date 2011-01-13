@@ -60,7 +60,9 @@ class Controller {
 				self::$payload = array_map('stripslashes_deep', $_GET);
 				break;
 			case 'POST':
-				self::$payload = array_map('stripslashes_deep', $_POST);
+				//Add GET variables as well. Should POST overwrites GET vars
+				self::$payload = array_map('stripslashes_deep', $_GET);
+				self::$payload = array_merge(self::$payload, array_map('stripslashes_deep', $_POST));
 				break;
 			}
 		}
