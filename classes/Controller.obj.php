@@ -219,26 +219,13 @@ class Controller {
 	}
 	
 	public static function finish() {
-<<<<<<< TREE
-		Hook::run('finish', 'pre');
-=======
 		if (self::$init) {
 			Hook::run('finish', 'pre');
->>>>>>> MERGE-SOURCE
 
-<<<<<<< TREE
-		$_SESSION['error']   = Backend::getError();
-		$_SESSION['notice']  = Backend::getNotice();
-		$_SESSION['success'] = Backend::getSuccess();
-		//jrgns: Just add this back in if needed. It breaks the redirect after a login
-		//if (!self::$whoopsed) {
-			if (self::$view instanceof View) {
-=======
 			$_SESSION['error']   = Backend::getError();
 			$_SESSION['notice']  = Backend::getNotice();
 			$_SESSION['success'] = Backend::getSuccess();
 			if (!empty(self::$view)) {
->>>>>>> MERGE-SOURCE
 				if (empty($_SESSION['previous_url']) || !is_array($_SESSION['previous_url'])) {
 					$_SESSION['previous_url'] = array();
 				}
@@ -259,32 +246,6 @@ class Controller {
 				}
 				$_SESSION['previous_parameters'][self::$view->mode] = self::$parameters;
 			}
-<<<<<<< TREE
-		//}
-		
-		//Clean up
-		self::$query_string = false;
-		self::$query_vars   = array();
-		self::$method       = null;
-		self::$payload      = false;
-
-		self::$area = 'home';
-		self::$action = 'index';
-
-		self::$parameters = array();
-	
-		self::$salt = false;
-		self::$view = false;
-		
-		self::$started = false;
-		self::$init    = false;
-	
-		self::$firephp    = false;
-	
-		self::$whoopsed  = false;
-
-		Hook::run('finish', 'post');
-=======
 		
 			//Clean up
 			self::$query_string = false;
@@ -312,7 +273,6 @@ class Controller {
 			Hook::run('finish', 'post');
 		}
 		self::$init = false;
->>>>>>> MERGE-SOURCE
 	}
 	
 	public static function getPayload() {
