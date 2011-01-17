@@ -268,6 +268,13 @@ class Controller {
 			Hook::run('finish', 'post');
 		}
 		self::$init = false;
+		//Check if we encountered a fatal error
+		if ($last_error = error_get_last()) {
+			if ($last_error['type'] === E_ERROR) {
+				print_stacktrace();
+				die('Some error occured');
+			}
+		}
 	}
 	
 	public static function getPayload() {
