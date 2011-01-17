@@ -151,7 +151,7 @@ class Backend {
 					if ($stmt->execute()) {
 						$row = $stmt->fetch(PDO::FETCH_ASSOC);
 						if ($row) {
-							$installed = $row['value'];
+							$installed = unserialize(base64_decode($row['value']));
 						}
 					} else if (array_key_exists('debug', $_REQUEST)) {
 						Backend::addError('Could not determine if backend was installed');
