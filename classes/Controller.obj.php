@@ -272,7 +272,7 @@ class Controller {
 		if ($last_error = error_get_last()) {
 			if ($last_error['type'] === E_ERROR) {
 				print_stacktrace();
-				die('Some error occured');
+				die(__FILE__ . ', ' . __LINE__);
 			}
 		}
 	}
@@ -287,6 +287,10 @@ class Controller {
 	
 	public static function getQueryString() {
 		return self::$query_string;
+	}
+	
+	public static function getInit() {
+		return self::$init;
 	}
 	
 	public static function getVar($name, $filter = FILTER_DEFAULT, $options = null) {
