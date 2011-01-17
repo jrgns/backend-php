@@ -73,6 +73,8 @@ class BackendError extends TableCtl {
 			$context = next($bt);
 			$context = var_export($context['args'], true);
 		}
-		self::addPHP(0, $string, basename($info['file']), $info['line'], $context);
+		$file = array_key_exists('file', $info) ? basename($info['file']) : 'unknown';
+		$line = array_key_exists('line', $info) ? $info['line'] : 0;
+		self::addPHP(0, $string, basename($file), $line, $context);
 	}
 }
