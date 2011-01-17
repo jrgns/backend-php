@@ -667,17 +667,32 @@ function return_bytes($val) {
  * Check if the memory is within a certain range of the memory limit. End the script if it's too high.
  */
 function check_memory_limit($range = 512, $log = false, $die = false) {
-	$usage = memory_get_usage();
+	$usage = memory_get_usage(true);
 	$limit = return_bytes(ini_get('memory_limit'));
 	if ($log) {
-		echo 'Memory Used: ' . memory_get_usage() / 1024 / 1024 . 'MB / ' . ini_get('memory_limit') . '<br>';
+		$message = 'Memory Used: ' . ($usage / 1024 / 1024) . 'MB / ' . ($limit / 1024 / 1024);
+		if (is_callable($log)) {
+			call_user_func($log, $message);
+		} else {
+			echo $message . '<br>';
+		}
 	}
 	if ($limit > 0 && $usage  > $limit - (1024 * $range)) {
 		if ($log) {
-			echo 'Running out of memory.<br>';
+			$message = 'Running out of memory.';
+			if (is_callable($log)) {
+				call_user_func($log, $message);
+			} else {
+				echo $message . '<br>';
+			}
 		}
 		if ($die) {
-			echo 'Aborting Process<br>';
+			$message = 'Aborting Process.';
+			if (is_callable($log)) {
+				call_user_func($log, $message);
+			} else {
+				echo $message . '<br>';
+			}
 			print_stacktrace();
 			die(__FILE__ . ', ' . __LINE__);
 		}
