@@ -631,7 +631,9 @@ function ifnull($var, $value) {
 
 function debug_header($message) {
 	static $count = 0;
-	header('X-Debug-' . str_pad($count++, 3, '0', STR_PAD_LEFT) . ': ' . $message);
+	if (!headers_sent()) {
+		header('X-Debug-' . str_pad($count++, 3, '0', STR_PAD_LEFT) . ': ' . $message);
+	}
 }
 
 function stripslashes_deep($value) {
@@ -666,11 +668,14 @@ function return_bytes($val) {
 /**
  * Check if the memory is within a certain range of the memory limit. End the script if it's too high.
  */
-function check_memory_limit($range = 512, $log = false, $die = false) {
+function check_memory_limit($range = 512, $log = false, $user_message = false, $die = false) {
 	$usage = memory_get_usage(true);
 	$limit = return_bytes(ini_get('memory_limit'));
 	if ($log) {
 		$message = 'Memory Used: ' . ($usage / 1024 / 1024) . 'MB / ' . ($limit / 1024 / 1024);
+		if (!empty($user_message)) {
+			$message .= ' <-> ' . $user_message;
+		}
 		if (is_callable($log)) {
 			call_user_func($log, $message);
 		} else {
