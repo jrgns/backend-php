@@ -394,8 +394,8 @@ END;
 		return false;
 	}
 	
-	public static function getGravatar($email, $size = 120) {
-		return 'http://www.gravatar.com/avatar.php?gravatar_id=' . md5(strtolower($email)) . '&size=' . $size . '&d=identicon';
+	public static function getGravatar($email, $size = 120, $default = 'identicon') {
+		return 'http://www.gravatar.com/avatar.php?gravatar_id=' . md5(strtolower($email)) . '&size=' . $size . '&d=' . $default;
 	}
 	
 	public function checkPermissions(array $options = array()) {
