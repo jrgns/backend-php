@@ -842,12 +842,18 @@ class DBObject {
 		}
 		if (array_key_exists('filters', $options)) {
 			$query->filter($options['filters']);
+		} else if (array_key_exists('filters', $this->meta)) {
+			$query->order($this->meta['filters']);
 		}
 		if (array_key_exists('order', $options)) {
 			$query->order($options['order']);
+		} else if (array_key_exists('order', $this->meta)) {
+			$query->order($this->meta['order']);
 		}
 		if (array_key_exists('group', $options)) {
 			$query->group($options['group']);
+		} else if (array_key_exists('group', $this->meta)) {
+			$query->order($this->meta['group']);
 		}
 		return array($query, $parameters);
 	}
