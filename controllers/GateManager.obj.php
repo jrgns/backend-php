@@ -91,6 +91,9 @@ class GateManager extends AreaCtl {
 		$permission = new PermissionObj();
 		$count = 0;
 		foreach(Controller::getPayload() as $key => $roles) {
+			if (strpos('::', $key) === false) {
+				continue;
+			}
 			list($subject, $action) = explode('::', $key, 2);
 			foreach($roles as $role => $value) {
 				$data = array(
@@ -155,7 +158,7 @@ class GateManager extends AreaCtl {
 			if ($result === false) {
 				Backend::addError('Could not update Permissions');
 			} else {
-				Backend::addSuccess($count . ' Permissions Updated');
+				Backend::addSuccess($result . ' Permissions Updated');
 			}
 			Controller::redirect('previous');
 		}
