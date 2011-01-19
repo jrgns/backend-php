@@ -394,7 +394,8 @@ END;
 		return false;
 	}
 	
-	public static function getGravatar($email, $size = 120, $default = 'identicon') {
+	public static function getGravatar($email, $size = 120, $default = false) {
+		$default = $default ? $default : Value::get('default_gravatar', 'identicon');
 		return 'http://www.gravatar.com/avatar.php?gravatar_id=' . md5(strtolower($email)) . '&size=' . $size . '&d=' . $default;
 	}
 	
