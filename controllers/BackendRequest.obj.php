@@ -50,4 +50,99 @@ class BackendRequest extends TableCtl {
 		$toret = Hook::add('start', 'pre', __CLASS__, array('global' => true, 'sequence' => 1000)) && $toret;
 		return $toret;
 	}
+	
+	public function action_filter ($pageId = 1)
+	{
+		
+		$query = new SelectQuery('BackendRequest');
+		$params = $queryFilter = array();
+		$parameters = Controller::getVar('params');
+		$sort = Controller::getVar('sort');
+		if (!empty($parameters['userId']))
+		{
+			$queryFilter[] = 'user_id = :userId';
+			$params[':userId'] = $parameters['userId'];
+		}
+		if (!empty($parameters['query']))
+		{
+			$queryFilter[] = "query LIKE('%{$parameters['query']}%')";
+		}
+		if (!empty($parameters['ip']))
+		{
+			$queryFilter[] = "ip LIKE('%{$parameters['ip']}%')";
+		}
+		if (!empty($parameters['user_agent']))
+		{
+			$queryFilter[] = "user_agent LIKE('%{$parameters['user_agent']}%')";
+		}
+		$query->filter($queryFilter);
+		
+		$count = 10;
+		
+		if (!empty($sort['field']))
+		{
+			$query->setOrder(array($sort['field'] . '  ' . $sort['order']));
+		}
+		
+		if ($pageId == 1)
+		{
+			$start = 0;
+		} elseif ($pageId == 0)
+		{
+			$start = false;
+			$count = false;
+		} else
+		{
+			$start = floor(($pageId - 1) * $count);
+		}
+		
+		
+		$pager = array();
+		
+		if ($start === 'all') {
+			$limit = 'all';
+		} else if ($start || $count) {
+			$limit = "$start, $count";
+		} else {
+			$limit = false;
+		}
+		
+		$query->limit($limit);
+		
+		
+		$items = $query->fetchAll($params);
+		
+		$totalItems = $query->getCount($params);
+		
+		$pager = '';
+		
+		if ($start || $count) 
+		{
+			$pager = array (
+						'currentPage'	=> $pageId,
+						'itemCount'		=> count($items),
+						'itemTotal'		=> $totalItems,
+						'totalPages'	=> round(($totalItems - 1) / $count, 0)
+						);
+		}
+		
+		$retArray['pager'] = $pager;
+		$retArray['data'] = $items;
+		$retArray['params'] = $parameters;
+		$retArray['sort'] = $sort;
+		
+
+		return $retArray;
+	}
+	
+	public function html_filter ($resultArray)
+	{
+		//backend_error.filter.tpl.php
+		Backend::addContent(Render::renderFile('backend_request.filter.tpl.php', array(
+																					'data' => $resultArray['data'], 
+																					'params' => $resultArray['params'], 
+																					'pager' => $resultArray['pager'],
+																					'sort' => $resultArray['sort'],
+																					)));
+	}
 }

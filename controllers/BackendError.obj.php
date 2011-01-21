@@ -103,7 +103,7 @@ class BackendError extends TableCtl {
 		
 		$count = 10;
 		
-		if (!empty($sort))
+		if (!empty($sort['field']))
 		{
 			$query->setOrder(array($sort['field'] . '  ' . $sort['order']));
 		}
