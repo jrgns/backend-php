@@ -59,8 +59,8 @@ $action_name = empty($action_name) ? ucwords(Controller::$action) : $action_name
 				case $field['type'] == 'boolean':
 					$field_str = '<select id="' . $input_id . '" name="' . $input_name . '" class="">' . PHP_EOL;
 					if (array_key_exists('default', $field)) {
-						$field_str .= "\t\t\t\t\t" . '<option value="0"<?php if ((is_null(' . $raw_value . ') && '0' == \'' . $field['default'] . '\') || (!is_null(' . $raw_value . ') && empty(' . $raw_value . '))): ?> selected="selected"<?php endif; ?>>No</option>' . PHP_EOL;
-						$field_str .= "\t\t\t\t\t" . '<option value="1"<?php if ((is_null(' . $raw_value . ') && '1' == \'' . $field['default'] . '\') || ' . $raw_value . '): ?> selected="selected"<?php endif; ?>>Yes</option>' . PHP_EOL;
+						$field_str .= "\t\t\t\t\t" . '<option value="0"<?php if ((is_null(' . $raw_value . ') && \'0\' == \'' . $field['default'] . '\') || (!is_null(' . $raw_value . ') && empty(' . $raw_value . '))): ?> selected="selected"<?php endif; ?>>No</option>' . PHP_EOL;
+						$field_str .= "\t\t\t\t\t" . '<option value="1"<?php if ((is_null(' . $raw_value . ') && \'1\' == \'' . $field['default'] . '\') || ' . $raw_value . '): ?> selected="selected"<?php endif; ?>>Yes</option>' . PHP_EOL;
 					} else {
 						$field_str .= "\t\t\t\t\t" . '<option value="0"<?php if (!is_null(' . $raw_value . ') && empty(' . $raw_value . ')): ?> selected="selected"<?php endif; ?>>No</option>' . PHP_EOL;
 						$field_str .= "\t\t\t\t\t" . '<option value="1"<?php if (' . $raw_value . '): ?> selected="selected"<?php endif; ?>>Yes</option>' . PHP_EOL;
