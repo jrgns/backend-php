@@ -45,14 +45,14 @@ class AreaCtl {
 		}
 
 		if (!$method) {
-			Controller::whoops(array('title' => 'Unknown Method', 'message' => 'Method ' . Controller::$area . '::' . Controller::$action . ' does not exist'));
+			Controller::whoops('Unknown Method', array('message' => 'Method ' . Controller::$area . '::' . Controller::$action . ' does not exist'));
 			return null;
 		}
 
 		//Check permissions on existing method
 		if (!$this->checkPermissions()) {
 			//TODO Add a permission denied hook to give the controller a chance to handle the permission denied
-			Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to ' . Controller::$action . ' ' . get_class($this)));
+			Controller::whoops('Permission Denied', array('message' => 'You do not have permission to ' . Controller::$action . ' ' . get_class($this)));
 			return null;
 		}
 		
