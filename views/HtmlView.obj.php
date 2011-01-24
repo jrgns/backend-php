@@ -284,7 +284,7 @@ class HtmlView extends View {
 	
 	public function whoops($title, $message, $code_hint = false) {
 		Backend::add('Sub Title', $title);
-		Backend::addContent($message . '<hr>');
+		Backend::addContent('<ht>' . $message . '<hr>');
 		parent::whoops($title, $message, $code_hint);
 	}
 

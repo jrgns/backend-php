@@ -176,6 +176,9 @@ class Controller {
 	}
 	
 	public static function action() {
+		if (self::$whoopsed) {
+			return array(null, null);
+		}
 		$control_name = class_name(self::$area);
 		if (Controller::$debug) {
 			Backend::addNotice('Trying Controller ' . $control_name);
