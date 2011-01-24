@@ -595,6 +595,29 @@ class DBObject {
 						$value = null;
 					}
 					break;
+				case 'date':
+					if (!is_numeric($value)) {
+						$value = strtotime($value);
+					}
+					$value = date('Y-m-d', $value);
+					break;
+				case 'datetime':
+					if (!is_numeric($value)) {
+						$value = strtotime($value);
+					}
+					$value = date('Y-m-d H:i:s', $value);
+					break;
+				case 'time':
+					if (!is_numeric($value)) {
+						$value = strtotime($value);
+					}
+					$value = date('Y-m-d', $value);
+					break;
+				case 'timestamp':
+					if (!is_numeric($value)) {
+						$value = strtotime($value);
+					}
+					break;
 				case 'email':
 					if ($value !== null) {
 						if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
