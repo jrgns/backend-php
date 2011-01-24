@@ -27,16 +27,26 @@ class Comment extends TableCtl {
 		return $toret;
 	}
 	
-	public static function getComments($table, $table_id) {
+	public static function getComments($table = false, $table_id = false, $limit = false) {
 		$query = new SelectQuery('`comments`');
 		$query
 			->field(array('`comments`.*, `users`.`username`, `users`.`email`'))
 			->leftJoin('`users`', '`comments`.`user_id` = `users`.`id`')
-			->filter('`comments`.`foreign_id` = :id')
-			->filter('`comments`.`foreign_table` = :table')
 			->filter('`comments`.`active` = 1')
 			->order('IF(`comments`.`in_reply_to` = 0, `comments`.`id`, `comments`.`in_reply_to`) DESC');
-		return $query->fetchAll(array(':table' => $table, ':id' => $table_id));
+		$params = array();
+		if ($table) {
+			$query->filter('`comments`.`foreign_table` = :table');
+			$params[':table'] = $table;
+		}
+		if ($table_id) {
+			$query->filter('`comments`.`foreign_id` = :table_id');
+			$params[':table_id'] = $table_id;
+		}
+		if ($limit) {
+			$query->limit($limit);
+		}
+		return $query->fetchAll($params);
 	}
 	
 	public function action_create() {
