@@ -67,12 +67,20 @@ class BackendLock extends TableCtl {
 		}*/
 		if ($lock = BackendLock::get('testing_system', BackendLock::LOCK_SYSTEM)) {
 			Backend::addSuccess('Testing Type is ' . ($lock->check() ? 'Available' : 'Not Available'));
+		} else {
+			Backend::addSuccess('Should not get System lock (no expiry or password)');
 		}
+		if ($lock = BackendLock::get('testing_system', BackendLock::LOCK_SYSTEM, 'now + 1 minutes', 'Abc123')) {
+			Backend::addSuccess('Testing Type is ' . ($lock->check() ? 'Available' : 'Not Available'));
+		} else {
+			Backend::addError('Could not get System lock');
+		}
+		return false;
 	}
 	
-	public static function get($name, $type = self::LOCK_CUSTOM, $expire = null) {
+	public static function get($name, $type = self::LOCK_CUSTOM, $expire = null, $password = null) {
 		$lock = BackendLock::retrieve($name, 'dbobject');
-		return $lock->get($name, $type, $expire);
+		return $lock->get($name, $type, $expire, $password);
 	}
 	
 	public static function release($name) {
@@ -84,9 +92,35 @@ class BackendLock extends TableCtl {
 		$lock = BackendLock::retrieve($name, 'dbobject');
 		return $lock->check();
 	}
+	
+	public static function hook_init() {
+		//Check for any system locks
+		$query = new SelectQuery('BackendLock');
+		$query
+			->field('`name`')
+			->filter('`type` = :type')
+			->filter('`locked` = 1')
+			->filter('`expire` > NOW()');
+		while($lock_name = $query->fetchColumn(array(':type' => self::LOCK_SYSTEM))) {
+			$lock = BackendLock::retrieve($lock_name, 'dbobject');
+			if (!$lock->check()) {
+				//A Lock isn't available, so the request must be aborted.
+				Controller::whoops(
+					'Service Unavailable',
+					array(
+						'message'   => 'System Offline until ' . $lock->array['expire'] . '. Locked under ' . $lock->array['name'],
+						'code_hint' => 503,
+					)
+				);
+				header('X-Backend-Lock: ' . $lock->array['name']);
+				header('X-Backend-Lock-Expire: ' . $lock->array['expire']);
+			}
+		}
+	}
 
 	public static function install(array $options = array()) {
 		$toret = parent::install($options);
+		Hook::add('init', 'pre', get_called_class()) && $toret;
 		return $toret;
 	}
 }

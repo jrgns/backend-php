@@ -621,7 +621,7 @@ class Controller {
 		}
 
 		if (Component::isActive('BackendError')) {
-			BackendError::add(0, $title . ': ' . $message, '', 0, '');
+			BackendError::add($title, $message);
 		}
 
 		if (is_callable(array(self::$view, 'whoops'))) {

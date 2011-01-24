@@ -17,4 +17,28 @@ class BackendSystemLockObj extends BackendLockObj {
 		}
 		return $toret ? $data : false;
 	}
+
+	public function get($name = false, $type = BackendLock::LOCK_CUSTOM, $expire = null, $password = null) {
+		if (empty($password)) {
+			if (Component::isActive('BackendError')) {
+				BackendError::add('Missing BackendSystemLock Password', 'No password was supplied for the system lock named ' . $name);
+			}
+			return null;
+		}
+		$result = parent::get($name, $type, $expire);
+		if ($result) {
+			Value::set('lock_password_' . $this->array['name'], $password);
+		}
+		
+	}
+
+	public function check() {
+		$result = parent::check();
+		if ($result === false && $password = Controller::getVar('lock_password_' . $this->array['name'])) {
+			if ($password == Value::get('lock_password_' . $this->array['name'], false)) {
+				return true;
+			}
+		}
+		return $result;
+	}
 }
