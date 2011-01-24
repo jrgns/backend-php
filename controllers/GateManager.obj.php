@@ -91,7 +91,7 @@ class GateManager extends AreaCtl {
 		$permission = new PermissionObj();
 		$count = 0;
 		foreach(Controller::getPayload() as $key => $roles) {
-			if (strpos('::', $key) === false) {
+			if (strpos($key, '::') === false) {
 				continue;
 			}
 			list($subject, $action) = explode('::', $key, 2);
