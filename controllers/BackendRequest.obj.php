@@ -55,6 +55,10 @@ class BackendRequest extends TableCtl {
 	{
 		
 		$query = new SelectQuery('BackendRequest');
+		
+		$query->setFields(array('user_id', 'ip', 'user_agent', 'mode', 'request', 'query', 'COUNT(id) AS `occured`', 'MAX(`added`) AS `last_occured`'));
+		$query->setGroup(array('user_id', 'ip', 'user_agent', 'mode', 'request', 'query'));
+		
 		$params = $queryFilter = array();
 		$parameters = Controller::getVar('params');
 		$sort = Controller::getVar('sort');

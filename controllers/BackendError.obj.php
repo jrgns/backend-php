@@ -82,6 +82,10 @@ class BackendError extends TableCtl {
 	{
 		
 		$query = new SelectQuery('BackendError');
+		
+		$query->setFields(array('string', 'request', 'number', 'file', 'mode', 'query', 'user_id', 'COUNT(id) AS `occured`', 'MAX(`added`) AS `last_occured`'));
+		$query->setGroup(array('string', 'request', 'number', 'file', 'mode', 'query', 'user_id'));
+		
 		$params = $queryFilter = array();
 		$parameters = Controller::getVar('params');
 		$sort = Controller::getVar('sort');
