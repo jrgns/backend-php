@@ -10,7 +10,7 @@ class BackendSystemLockObj extends BackendLockObj {
 		$toret = true;
 		$data = parent::validate($data, $action, $options);
 		if ($data) {
-			if (!empty($data['expire'])) {
+			if (empty($data['expire'])) {
 				Backend::addError('System Locks must expire');
 				$toret = false;
 			}
