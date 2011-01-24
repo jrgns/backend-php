@@ -125,6 +125,9 @@ class View {
 		}
 		if ($code) {
 			header('HTTP/' . $version . ' ' . $code . ' ' . $header, true, $code);
+			if ($code == 406) {
+				echo "<html><head><title>$title</title></head></body><h2>$title ($code)</h2><p>$message</p></body></html>";
+			}
 		}
 	}
 }

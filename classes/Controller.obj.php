@@ -624,6 +624,8 @@ class Controller {
 		if (is_callable(array(self::$view, 'whoops'))) {
 			call_user_func_array(array(self::$view, 'whoops'), array($title, $message, $code_hint));
 		} else {
+			$view = new View();
+			$view->whoops($title, $message, $code_hint);
 		}
 		if (array_key_exists('debug', $_REQUEST)) {
 			var_dump($title, $message);
