@@ -60,7 +60,9 @@ class Controller {
 				self::$payload = array_map('stripslashes_deep', $_GET);
 				break;
 			case 'POST':
-				self::$payload = array_map('stripslashes_deep', $_POST);
+				//Add GET variables as well. Should POST overwrites GET vars
+				self::$payload = array_map('stripslashes_deep', $_GET);
+				self::$payload = array_merge(self::$payload, array_map('stripslashes_deep', $_POST));
 				break;
 			}
 		}
@@ -273,6 +275,13 @@ class Controller {
 			Hook::run('finish', 'post');
 		}
 		self::$init = false;
+		//Check if we encountered a fatal error
+		if ($last_error = error_get_last()) {
+			if ($last_error['type'] === E_ERROR) {
+				print_stacktrace();
+				die(__FILE__ . ', ' . __LINE__);
+			}
+		}
 	}
 	
 	public static function getPayload() {
@@ -285,6 +294,10 @@ class Controller {
 	
 	public static function getQueryString() {
 		return self::$query_string;
+	}
+	
+	public static function getInit() {
+		return self::$init;
 	}
 	
 	public static function getVar($name, $filter = FILTER_DEFAULT, $options = null) {

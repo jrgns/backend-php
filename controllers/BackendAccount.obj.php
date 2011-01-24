@@ -57,15 +57,9 @@ class BackendAccount extends TableCtl {
 		return $query;
 	}
 
-	function post_login($username = false, $password = false) {
+	function post_login($username, $password) {
 		if (self::checkUser()) {
 			return true;
-		}
-		if (!$username) {
-			$username = Controller::getVar('username');
-		}
-		if (!$password) {
-			$password = Controller::getVar('password');
 		}
 		if ($username && $password) {
 			$User = self::getObject(self::getName());
@@ -400,8 +394,9 @@ END;
 		return false;
 	}
 	
-	public static function getGravatar($email, $size = 120) {
-		return 'http://www.gravatar.com/avatar.php?gravatar_id=' . md5(strtolower($email)) . '&size=' . $size . '&d=identicon';
+	public static function getGravatar($email, $size = 120, $default = false) {
+		$default = $default ? $default : Value::get('default_gravatar', 'identicon');
+		return 'http://www.gravatar.com/avatar.php?gravatar_id=' . md5(strtolower($email)) . '&size=' . $size . '&d=' . $default;
 	}
 	
 	public function checkPermissions(array $options = array()) {
@@ -416,21 +411,6 @@ END;
 		return $toret;
 	}
 
-	public static function checkParameters($parameters) {
-		$parameters = parent::checkParameters($parameters);
-		if (!Permission::check('manage', class_for_url(self::getName()))) {
-			if (array_key_exists('user', $_SESSION) && $_SESSION['BackendUser']->id > 0) {
-				if (Controller::$action == 'signup') {
-					Controller::setAction('display');
-				}
-				if (in_array(Controller::$action, array('update', 'display')) && (empty($parameters['0']) || $parameters[0] != $_SESSION['BackendUser']->id)) {
-					$parameters[0] = $_SESSION['BackendUser']->id;
-				}
-			}
-		}
-		return $parameters;
-	}
-	
 	public function daily(array $options = array()) {
 		if (get_class($this) == BackendAccount::getName()) {
 			return self::purgeUnconfirmed();
@@ -487,6 +467,37 @@ Site Admin
 			$msg
 		);
 		return true;
+	}
+
+	public static function checkParameters($parameters) {
+		$parameters = parent::checkParameters($parameters);
+		switch(Controller::$action) {
+		case 'login':
+			if (empty($parameters[0])) {
+				$parameters[0] = Controller::getVar('username');
+			}
+			if (empty($parameters[1])) {
+				$parameters[1] = Controller::getVar('password');
+			}
+			break;
+		case 'signup':
+			if (array_key_exists('user', $_SESSION) && $_SESSION['BackendUser']->id > 0) {
+				Controller::setAction('display');
+			}
+			break;
+		case 'update':
+		case 'display':
+			if (
+					array_key_exists('BackendUser', $_SESSION)
+					&& $_SESSION['BackendUser']->id > 0
+					&& (empty($parameters['0']) || $parameters[0] != $_SESSION['BackendUser']->id)
+					&& !Permission::check('manage', class_for_url(self::getName()))
+			) {
+				$parameters[0] = $_SESSION['BackendUser']->id;
+			}
+			break;
+		}
+		return $parameters;
 	}
 
 	public static function install(array $options = array()) {

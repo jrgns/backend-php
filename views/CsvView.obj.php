@@ -30,7 +30,7 @@ class CsvView extends View {
 			}
 		}
 		if (!Controller::$debug) {
-			header('Content-disposition: attachment; filename="' . $filename . '.csv"');
+			header('Content-Disposition: attachment; filename="' . $filename . '.csv"');
 			header('Pragma: no-cache');
 			header('Expires: 0');
 		}
@@ -65,6 +65,11 @@ class CsvView extends View {
 			return ob_get_clean();
 			break;
 		case is_string($to_print):
+			if (is_readable($to_print)) {
+				$fp = fopen($to_print, 'r');
+				fpassthru($fp);
+				break;
+			}
 		default:
 			return $to_print;
 			break;

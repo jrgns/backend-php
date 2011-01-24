@@ -401,6 +401,10 @@ function curl_request($url, array $parameters = array(), array $options = array(
 	}
 	$ch = curl_init($url);
 	
+	if (!empty($options['debug'])) {
+		var_dump('cURL Request:', $url);
+	}
+	
 	curl_setopt($ch, CURLOPT_USERAGENT, 'Backend / PHP');
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
     curl_setopt($ch, CURLOPT_TIMEOUT, 30);
@@ -466,18 +470,34 @@ function curl_request($url, array $parameters = array(), array $options = array(
 	}
 	$toret = curl_exec($ch);
 
+	if (!empty($options['debug'])) {
+		var_dump('cURL Response:', $toret);
+	}
+
 	if (!empty($options['callback']) && is_callable($options['callback'])) {
 		$toret = call_user_func_array($options['callback'], array($ch, $toret, $options));
+		if (!empty($options['debug'])) {
+			var_dump('cURL Response After Callback:', $toret);
+		}
 	} else if ($curl_error = curl_errno($ch)) {
+		if (!empty($options['debug'])) {
+			var_dump('cURL Error:', $curl_error);
+		}
 		$toret = false;
 	} else {
 		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		if (!empty($options['debug'])) {
+			var_dump('cURL HTTP Code:', $http_code);
+		}
 		if (!in_array($http_code, array(200))) {
 			$toret = false;
 		}
 	}
 	curl_close($ch);
 
+	if (!empty($options['debug'])) {
+		var_dump('cURL Precache:', $toret, $cache, $cache_file);
+	}
 	if ($toret && $cache) {
 		file_put_contents($cache_file, $toret);
 	}
@@ -611,7 +631,9 @@ function ifnull($var, $value) {
 
 function debug_header($message) {
 	static $count = 0;
-	header('X-Debug-' . str_pad($count++, 3, '0', STR_PAD_LEFT) . ': ' . $message);
+	if (!headers_sent()) {
+		header('X-Debug-' . str_pad($count++, 3, '0', STR_PAD_LEFT) . ': ' . $message);
+	}
 }
 
 function stripslashes_deep($value) {
@@ -620,4 +642,66 @@ function stripslashes_deep($value) {
 	            stripslashes($value);
 
 	return $value;
+}
+
+/**
+ * Convert PHP shorthand notation to bytes
+ *
+ * From http://www.php.net/manual/en/function.ini-get.php on 2011-01-17
+ */
+function return_bytes($val) {
+    $val = trim($val);
+    $last = strtolower($val[strlen($val)-1]);
+    switch($last) {
+        // The 'G' modifier is available since PHP 5.1.0
+        case 'g':
+            $val *= 1024;
+        case 'm':
+            $val *= 1024;
+        case 'k':
+            $val *= 1024;
+    }
+
+    return $val;
+}
+
+/**
+ * Check if the memory is within a certain range of the memory limit. End the script if it's too high.
+ */
+function check_memory_limit($range = 512, $log = false, $user_message = false, $die = false) {
+	$usage = memory_get_usage(true);
+	$limit = return_bytes(ini_get('memory_limit'));
+	if ($log) {
+		$message = 'Memory Used: ' . ($usage / 1024 / 1024) . 'MB / ' . ($limit / 1024 / 1024);
+		if (!empty($user_message)) {
+			$message .= ' <-> ' . $user_message;
+		}
+		if (is_callable($log)) {
+			call_user_func($log, $message);
+		} else {
+			echo $message . '<br>';
+		}
+	}
+	if ($limit > 0 && $usage  > $limit - (1024 * $range)) {
+		if ($log) {
+			$message = 'Running out of memory.';
+			if (is_callable($log)) {
+				call_user_func($log, $message);
+			} else {
+				echo $message . '<br>';
+			}
+		}
+		if ($die) {
+			$message = 'Aborting Process.';
+			if (is_callable($log)) {
+				call_user_func($log, $message);
+			} else {
+				echo $message . '<br>';
+			}
+			print_stacktrace();
+			die(__FILE__ . ', ' . __LINE__);
+		}
+		return true;
+	}
+	return false;
 }

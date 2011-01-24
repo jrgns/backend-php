@@ -89,7 +89,7 @@ class BackendAccountObj extends DBObject {
 			} else {
 				//Lower ASCII only
 				$data['username'] = filter_var(trim($data['username']), FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH);
-				if (in_array($data['username'], $banned_usernames)) {
+				if (in_array($data['username'], $banned_usernames) && empty($_SESSION['just_installed'])) {
 					$toret = false;
 					Backend::addError('Please choose a valid username');
 				}
