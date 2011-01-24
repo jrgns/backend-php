@@ -281,8 +281,11 @@ class Controller {
 		//Check if we encountered a fatal error
 		if ($last_error = error_get_last()) {
 			if ($last_error['type'] === E_ERROR) {
-				print_stacktrace();
-				die(__FILE__ . ', ' . __LINE__);
+				$id = send_email(
+					Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)),
+					'Fatal PHP Error in ' . Backend::getConfig('application.Title'),
+					var_export($last_error, true)
+				);
 			}
 		}
 	}
