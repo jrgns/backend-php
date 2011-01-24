@@ -595,6 +595,18 @@ class DBObject {
 						$value = null;
 					}
 					break;
+				case 'date':
+					$value = date('Y-m-d',       is_numeric($value) ? $value : strtotime($value));
+					break;
+				case 'datetime':
+					$value = date('Y-m-d H:i:s', is_numeric($value) ? $value : strtotime($value));
+					break;
+				case 'time':
+					$value = date('H:i:s',       is_numeric($value) ? $value : strtotime($value));
+					break;
+				case 'timestamp':
+					$value = is_numeric($value) ? $value : strtotime($value);
+					break;
 				case 'email':
 					if ($value !== null) {
 						if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
