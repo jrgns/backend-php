@@ -65,6 +65,11 @@ class CsvView extends View {
 			return ob_get_clean();
 			break;
 		case is_string($to_print):
+			if (is_readable($to_print)) {
+				$fp = fopen($to_print, 'r');
+				fpassthru($fp);
+				break;
+			}
 		default:
 			return $to_print;
 			break;
