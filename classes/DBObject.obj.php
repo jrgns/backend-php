@@ -596,16 +596,24 @@ class DBObject {
 					}
 					break;
 				case 'date':
-					$value = date('Y-m-d',       is_numeric($value) ? $value : strtotime($value));
+					if (!is_null($value)) {
+						$value = date('Y-m-d',       is_numeric($value) ? $value : strtotime($value));
+					}
 					break;
 				case 'datetime':
-					$value = date('Y-m-d H:i:s', is_numeric($value) ? $value : strtotime($value));
+					if (!is_null($value)) {
+						$value = date('Y-m-d H:i:s', is_numeric($value) ? $value : strtotime($value));
+					}
 					break;
 				case 'time':
-					$value = date('H:i:s',       is_numeric($value) ? $value : strtotime($value));
+					if (!is_null($value)) {
+						$value = date('H:i:s',       is_numeric($value) ? $value : strtotime($value));
+					}
 					break;
 				case 'timestamp':
-					$value = is_numeric($value) ? $value : strtotime($value);
+					if (!is_null($value)) {
+						$value = is_numeric($value) ? $value : strtotime($value);
+					}
 					break;
 				case 'email':
 					if ($value !== null) {
