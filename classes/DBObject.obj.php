@@ -797,7 +797,7 @@ class DBObject {
 	
 	public function getSource() {
 		$database = Backend::getDBDefinition($this->meta['database']);
-		return '`' . $database['database'] . '`.`' . $this->meta['table'] . '`';
+		return $database ? '`' . $database['database'] . '`.`' . $this->meta['table'] . '`' : false;
 	}
 	
 	public function getConnection() {

@@ -304,33 +304,36 @@ class Backend {
 		if (!self::checkSelf()) {
 			return false;
 		}
-		$name = $name ? $name : 'default';
-		if ($name && array_key_exists($name, self::$DB)) {
-			if (empty(self::$DB[$name]['connection']) || !(self::$DB[$name]['connection'] instanceof PDO)) {
-				try {
-					//This might be problematic if there shouldn't be a username/password?
-					self::$DB[$name]['connection'] = new PDO(
-						self::$DB[$name]['dsn'],
-						self::$DB[$name]['username'],
-						self::$DB[$name]['password']
-					);
-				} catch (Exception $e) {
-					if (array_key_exists('debug', $_REQUEST)) {
-						throw new ConnectToDBException($e->getMessage());
-					} else {
-						throw new ConnectToDBException('Could not connect to Database ' . $name);
-					}
-				}
-			}
-			return self::$DB[$name];
-		} else if (array_key_exists('default', self::$DB) && array_key_exists('connection', self::$DB['default']) && self::$DB['default']['connection'] instanceof PDO) {
-			return self::$DB['default'];
-		} else if (current(self::$DB) instanceof PDO) {
-			return current(self::$DB);
-		} else if (self::$DB instanceof PDO) {
+		//Single connection or no connection
+		if (self::$DB instanceof PDO || empty(self::$DB)) {
 			return self::$DB;
 		}
-		return false;
+		
+		$name = $name ? $name : 'default';
+		if (!array_key_exists($name, self::$DB)) {
+			if ($name == 'default' && current(self::$DB) instanceof PDO) {
+				return current(self::$DB);
+			}
+			return false;
+		}
+
+		if (empty(self::$DB[$name]['connection']) || !(self::$DB[$name]['connection'] instanceof PDO)) {
+			try {
+				//This might be problematic if there shouldn't be a username/password?
+				self::$DB[$name]['connection'] = new PDO(
+					self::$DB[$name]['dsn'],
+					self::$DB[$name]['username'],
+					self::$DB[$name]['password']
+				);
+			} catch (Exception $e) {
+				if (array_key_exists('debug', $_REQUEST)) {
+					throw new ConnectToDBException($e->getMessage());
+				} else {
+					throw new ConnectToDBException('Could not connect to Database ' . $name);
+				}
+			}
+		}
+		return self::$DB[$name];
 	}
 
 	private static function addSomething($what, $string, $options = array()) {
