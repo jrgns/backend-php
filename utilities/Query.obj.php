@@ -166,9 +166,18 @@ class Query {
 		$this->conditions = array_filter(array_unique($filters));
 		return $this;
 	}
+	
+	public function parameter($name, $value) {
+		if (!empty($name)) {
+			$this->parameters[$name] = $value;
+		} else {
+			$this->parameters[] = $value;
+		}
+		return $this;
+	}
 
 	public function setParameters(array $parameters = array()) {
-		$this->parmaeters = $parameters;
+		$this->parameters = $parameters;
 		return $this;
 	}
 	
