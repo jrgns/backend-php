@@ -391,6 +391,9 @@ class Query {
 				$table = $table->getSource();
 			}
 		}
+		if (empty($table)) {
+			trigger_error('Empty Table for Query', E_USER_ERROR);
+		}
 		return self::enclose($table);
 	}
 	
