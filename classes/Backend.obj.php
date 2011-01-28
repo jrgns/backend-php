@@ -313,6 +313,8 @@ class Backend {
 		if (!array_key_exists($name, self::$DB)) {
 			if ($name == 'default' && current(self::$DB) instanceof PDO) {
 				return current(self::$DB);
+			} else if (array_key_exists('default', self::$DB) && self::$DB['default']['database'] == $name) {
+				return self::$DB['default'];
 			}
 			return false;
 		}
