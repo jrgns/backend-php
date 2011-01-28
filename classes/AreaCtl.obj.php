@@ -173,6 +173,9 @@ class AreaCtl {
 		$methods = get_class_methods($class);
 		$methods = array_filter($methods, create_function('$var', '$temp = explode(\'_\', $var, 2); return count($temp) == 2 && in_array(strtolower($temp[0]), array(\'action\', \'get\', \'post\', \'put\', \'delete\'));'));
 		$methods = array_map(create_function('$var', 'return preg_replace(\'/^(action|get|post|put|delete)_/\', \'\', $var);'), $methods);
+		if ($home_key = array_search('home', $methods)) {
+			unset($methods[$home_key]);
+		}
 		$methods = array_filter($methods, create_function('$var', 'return Permission::check($var, "' . $class . '");'));
 		$methods = array_unique($methods);
 		asort($methods);
