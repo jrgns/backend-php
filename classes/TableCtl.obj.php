@@ -50,6 +50,12 @@ class TableCtl extends AreaCtl {
 		return $links;
 	}
 	
+	public function getHomeMethods() {
+		$methods = parent::getHomeMethods();
+		$methods = array_filter($methods, create_function('$var', "return !in_array(\$var, array('display', 'replace', 'read', 'update', 'delete', 'toggle'));"));
+		return $methods;
+	}
+	
 	/**
 	 * Display does nothing but display (hahaha) the content fetched by action_read
 	 */

@@ -156,4 +156,26 @@ class AreaCtl {
 		}
 		return $toret;
 	}
+	
+	public function get_home() {
+		return $this->getHomeMethods();
+	}
+	
+	public function html_home($methods) {
+		Backend::addContent(Render::renderFile('std_home.tpl.php', array('methods' => $methods)));
+	}
+	
+	public function getHomeMethods() {
+		$class = get_called_class();
+		if (!$class || !class_exists($class, true)) {
+			return false;
+		}
+		$methods = get_class_methods($class);
+		$methods = array_filter($methods, create_function('$var', '$temp = explode(\'_\', $var, 2); return count($temp) == 2 && in_array(strtolower($temp[0]), array(\'action\', \'get\', \'post\', \'put\', \'delete\'));'));
+		$methods = array_map(create_function('$var', 'return preg_replace(\'/^(action|get|post|put|delete)_/\', \'\', $var);'), $methods);
+		$methods = array_filter($methods, create_function('$var', 'return Permission::check($var, "' . $class . '");'));
+		$methods = array_unique($methods);
+		asort($methods);
+		return $methods;
+	}
 }
