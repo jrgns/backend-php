@@ -307,6 +307,37 @@ class Query {
 		}
 		return $toret;
 	}
+	
+	public function fetchCSV(array $parameters = array(), array $options = array()) {
+		$result = false;
+		if ($stmt = $this->execute($parameters)) {
+			if (empty($options['filename'])) {
+				if (!$fp = fopen('php://temp', 'r+')) {
+					self::$error_msg = 'Could not open output file for CSV';
+					return false;
+				}
+			} else {
+				if (!$fp = fopen($options['filename'], 'w')) {
+					self::$error_msg = 'Could not open output file for CSV';
+					return false;
+				}
+			}
+			$first = false;
+			while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+				if (!$first) {
+					fputcsv($fp, array_keys($row));
+					$first = true;
+				}
+				fputcsv($fp, $row);
+			}
+			if (empty($options['filename'])) {
+				$result = $fp;
+			} else {
+				$result = $options['filename'];
+			}
+		}
+		return $result;
+	}
 
 	public function setQuery($query, array $options = array()) {
 		if (array_key_exists('connection', $options) && $options['connection'] instanceof PDO) {
