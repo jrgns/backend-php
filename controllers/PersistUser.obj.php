@@ -30,7 +30,7 @@ class PersistUser extends TableCtl {
 					$query
 						->filter('`id` = :id')
 						->limit(1);
-					$query->execute(array(':id' => $id));
+					$query->execute(array(':id' => $persist->array['id']));
 				}
 			} else {
 				Backend::addError('Could not remember login');
