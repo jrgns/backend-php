@@ -620,6 +620,7 @@ class DBObject {
 						if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
 							$value = filter_var($value, FILTER_VALIDATE_EMAIL);
 						} else if (!empty($value)) {
+							$this->error_msg = 'Validation Failed';
 							Backend::addError('Please supply a valid email address');
 							$toret = false;
 						}
@@ -637,6 +638,7 @@ class DBObject {
 							$value = explode('://', $value);
 							$value = end($value);
 						} else if (!empty($value)) {
+							$this->error_msg = 'Validation Failed';
 							Backend::addError('Please supply a valid URL');
 							$toret = false;
 						}
@@ -647,6 +649,7 @@ class DBObject {
 						if (filter_var($value, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED)) {
 							$value = filter_var($value, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED);
 						} else if (!empty($value)) {
+							$this->error_msg = 'Validation Failed';
 							Backend::addError('Please supply a valid URL with a scheme');
 							$toret = false;
 						}
@@ -655,6 +658,7 @@ class DBObject {
 				case 'ip_address':
 					if ($value !== null) {
 						if (!filter_var($value, FILTER_VALIDATE_IP)) {
+							$this->error_msg = 'Validation Failed';
 							Backend::addError('Please supply a valid URL with a scheme');
 							$toret = false;
 						}
@@ -709,6 +713,7 @@ class DBObject {
 				
 				if (!is_null($value)) {
 					if (empty($value) && !empty($options['required'])) {
+						$this->error_msg = 'Validation Failed';
 						Backend::addError('Missing ' . $name);
 						$toret = false;
 						break;
@@ -716,6 +721,7 @@ class DBObject {
 						$ret_data[$name] = $value;
 					}
 				} else if ($action == 'create' && !empty($options['required'])) {
+					$this->error_msg = 'Validation Failed';
 					Backend::addError('Missing ' . $name);
 					$toret = false;
 					break;
