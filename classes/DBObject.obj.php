@@ -547,15 +547,24 @@ class DBObject {
 		//TODO Try to use $this->error_msg here
 		$ret_data = array();
 		$toret = true;
+		
 		if (is_array($data)) {
-			foreach($this->meta['fields'] as $name => $options) {
-				$options = is_array($options) ? $options : array('type' => $options);
-				$type  = array_key_exists('type', $options) ? $options['type'] : 'string';
-				
+			foreach($this->meta['fields'] as $name => $field_options) {
 				$value = array_key_exists($name, $data) ? $data[$name] : null;
+				if (!empty($options['non_parameter'])
+						&& is_array($options['non_parameter'])
+						&& array_search($name, $options['non_parameter']) !== false
+				) {
+					if (!is_null($value)) {
+						$ret_data[$name] = $value;
+					}
+					continue;
+				}
+				$field_options = is_array($field_options) ? $field_options : array('type' => $field_options);
+				$type          = array_key_exists('type', $field_options) ? $field_options['type'] : 'string';
 				switch($type) {
 				case 'primarykey':
-					if (empty($options['non_automatic'])) {
+					if (empty($field_options['non_automatic'])) {
 						$value = null;
 					} else if (is_null($value)) {
 						Backend::addError('Missing ' . $name);
@@ -712,7 +721,7 @@ class DBObject {
 				}
 				
 				if (!is_null($value)) {
-					if (empty($value) && !empty($options['required'])) {
+					if (empty($value) && !empty($field_options['required'])) {
 						$this->error_msg = 'Validation Failed';
 						Backend::addError('Missing ' . $name);
 						$toret = false;
@@ -720,7 +729,7 @@ class DBObject {
 					} else {
 						$ret_data[$name] = $value;
 					}
-				} else if ($action == 'create' && !empty($options['required'])) {
+				} else if ($action == 'create' && !empty($field_options['required'])) {
 					$this->error_msg = 'Validation Failed';
 					Backend::addError('Missing ' . $name);
 					$toret = false;
