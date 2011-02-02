@@ -135,24 +135,16 @@ class API extends AreaCtl {
 				continue;
 			}
 			$results[$component['name']] = array();
+			$methods = array_filter($methods, create_function('$var', '$temp = explode(\'_\', $var, 2); return count($temp) == 2 && in_array(strtolower($temp[0]), array(\'action\', \'get\', \'post\', \'put\', \'delete\'));'));
+			$methods = array_map(create_function('$var', 'return preg_replace(\'/^(action|get|post|put|delete)_/\', \'\', $var);'), $methods);
+			$methods = array_unique($methods);
 			foreach($methods as $method) {
-				$temp = explode('_', $method, 2);
-				if (count($temp) !== 2) {
+				if (!Permission::check($method, $component['name'])) {
 					continue;
 				}
-				list($sub, $action) = $temp;
-				if (!in_array($sub, array('post', 'get', 'put', 'delete', 'action'))) {
-					continue;
-				}
-				if (array_key_exists($action, $results[$component['name']])) {
-					continue;
-				}
-				if (!Permission::check($action, $component['name'])) {
-					continue;
-				}
-				$define_method = 'define_' . $action;
-				if (in_array($define_method, $methods)) {
-					$results[$component['name']][$action] = call_user_func(array($component['name'], $define_method));
+				$define_method = 'define_' . $method;
+				if (is_callable(array($component['name'], $define_method))) {
+					$results[$component['name']][$method] = call_user_func(array($component['name'], $define_method));
 				} else if (array_key_exists('show_undocumented', $_REQUEST)) {
 					$results[$component['name']][$action] = array(
 						'description' => 'Undocumented',
@@ -170,8 +162,7 @@ class API extends AreaCtl {
 	}
 	
 	public function html_index($result) {
-		Backend::add('actions', $result);
-		Backend::addContent(Render::renderFile('api.index.tpl.php'));
+		Backend::addContent(Render::renderFile('api.index.tpl.php', array('actions' => $result)));
 	}
 
 	public function action_define($class, $function = false) {
