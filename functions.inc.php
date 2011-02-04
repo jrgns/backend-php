@@ -440,6 +440,14 @@ function curl_request($url, array $parameters = array(), array $options = array(
 		curl_setopt($ch, CURLOPT_USERPWD, $options['username'] . ':' . $options['password']);
 	}
 
+	if (!empty($options['proxy'])) {
+		if (Controller::$debug) {
+			var_dump('Using proxy: ' . $options['proxy']);
+		}
+		curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+		curl_setopt($ch, CURLOPT_PROXY, $options['proxy']);
+	}
+
 	$method = array_key_exists('method', $options) && in_array(strtolower($options['method']), array('get', 'post', 'put')) ? strtolower($options['method']) : 'get';
 	switch ($method) {
 	case 'put':
