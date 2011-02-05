@@ -20,7 +20,7 @@
 class BackendRequest extends TableCtl {
 	public static function hook_start() {
 		$data = array(
-			'mode' => Controller::$view->mode,
+			'mode' => Controller::$view->mode instanceof View ? Controller::$view->mode : 'unknown',
 		);
 		$BR = new BackendRequestObj();
 		return $BR->create($data);
@@ -55,6 +55,10 @@ class BackendRequest extends TableCtl {
 	{
 		
 		$query = new SelectQuery('BackendRequest');
+		
+		$query->setFields(array('user_id', 'ip', 'user_agent', 'mode', 'request', 'query', 'COUNT(id) AS `occured`', 'MAX(`added`) AS `last_occured`'));
+		$query->setGroup(array('user_id', 'ip', 'user_agent', 'mode', 'request', 'query'));
+		
 		$params = $queryFilter = array();
 		$parameters = Controller::getVar('params');
 		$sort = Controller::getVar('sort');

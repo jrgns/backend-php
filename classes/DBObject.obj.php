@@ -547,15 +547,24 @@ class DBObject {
 		//TODO Try to use $this->error_msg here
 		$ret_data = array();
 		$toret = true;
+		
 		if (is_array($data)) {
-			foreach($this->meta['fields'] as $name => $options) {
-				$options = is_array($options) ? $options : array('type' => $options);
-				$type  = array_key_exists('type', $options) ? $options['type'] : 'string';
-				
+			foreach($this->meta['fields'] as $name => $field_options) {
 				$value = array_key_exists($name, $data) ? $data[$name] : null;
+				if (!empty($options['non_parameter'])
+						&& is_array($options['non_parameter'])
+						&& array_search($name, $options['non_parameter']) !== false
+				) {
+					if (!is_null($value)) {
+						$ret_data[$name] = $value;
+					}
+					continue;
+				}
+				$field_options = is_array($field_options) ? $field_options : array('type' => $field_options);
+				$type          = array_key_exists('type', $field_options) ? $field_options['type'] : 'string';
 				switch($type) {
 				case 'primarykey':
-					if (empty($options['non_automatic'])) {
+					if (empty($field_options['non_automatic'])) {
 						$value = null;
 					} else if (is_null($value)) {
 						Backend::addError('Missing ' . $name);
@@ -596,22 +605,31 @@ class DBObject {
 					}
 					break;
 				case 'date':
-					$value = date('Y-m-d',       is_numeric($value) ? $value : strtotime($value));
+					if (!is_null($value)) {
+						$value = date('Y-m-d',       is_numeric($value) ? $value : strtotime($value));
+					}
 					break;
 				case 'datetime':
-					$value = date('Y-m-d H:i:s', is_numeric($value) ? $value : strtotime($value));
+					if (!is_null($value)) {
+						$value = date('Y-m-d H:i:s', is_numeric($value) ? $value : strtotime($value));
+					}
 					break;
 				case 'time':
-					$value = date('H:i:s',       is_numeric($value) ? $value : strtotime($value));
+					if (!is_null($value)) {
+						$value = date('H:i:s',       is_numeric($value) ? $value : strtotime($value));
+					}
 					break;
 				case 'timestamp':
-					$value = is_numeric($value) ? $value : strtotime($value);
+					if (!is_null($value)) {
+						$value = is_numeric($value) ? $value : strtotime($value);
+					}
 					break;
 				case 'email':
 					if ($value !== null) {
 						if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
 							$value = filter_var($value, FILTER_VALIDATE_EMAIL);
 						} else if (!empty($value)) {
+							$this->error_msg = 'Validation Failed';
 							Backend::addError('Please supply a valid email address');
 							$toret = false;
 						}
@@ -629,6 +647,7 @@ class DBObject {
 							$value = explode('://', $value);
 							$value = end($value);
 						} else if (!empty($value)) {
+							$this->error_msg = 'Validation Failed';
 							Backend::addError('Please supply a valid URL');
 							$toret = false;
 						}
@@ -639,6 +658,7 @@ class DBObject {
 						if (filter_var($value, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED)) {
 							$value = filter_var($value, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED);
 						} else if (!empty($value)) {
+							$this->error_msg = 'Validation Failed';
 							Backend::addError('Please supply a valid URL with a scheme');
 							$toret = false;
 						}
@@ -647,6 +667,7 @@ class DBObject {
 				case 'ip_address':
 					if ($value !== null) {
 						if (!filter_var($value, FILTER_VALIDATE_IP)) {
+							$this->error_msg = 'Validation Failed';
 							Backend::addError('Please supply a valid URL with a scheme');
 							$toret = false;
 						}
@@ -700,14 +721,16 @@ class DBObject {
 				}
 				
 				if (!is_null($value)) {
-					if (empty($value) && !empty($options['required'])) {
+					if (empty($value) && !empty($field_options['required'])) {
+						$this->error_msg = 'Validation Failed';
 						Backend::addError('Missing ' . $name);
 						$toret = false;
 						break;
 					} else {
 						$ret_data[$name] = $value;
 					}
-				} else if ($action == 'create' && !empty($options['required'])) {
+				} else if ($action == 'create' && !empty($field_options['required'])) {
+					$this->error_msg = 'Validation Failed';
 					Backend::addError('Missing ' . $name);
 					$toret = false;
 					break;
@@ -789,7 +812,7 @@ class DBObject {
 	
 	public function getSource() {
 		$database = Backend::getDBDefinition($this->meta['database']);
-		return '`' . $database['database'] . '`.`' . $this->meta['table'] . '`';
+		return $database ? '`' . $database['database'] . '`.`' . $this->meta['table'] . '`' : false;
 	}
 	
 	public function getConnection() {

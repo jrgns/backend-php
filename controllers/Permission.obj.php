@@ -75,6 +75,10 @@ class Permission extends TableCtl {
 	
 	public static function check($action = '*', $subject = '*', $subject_id = 0) {
 		static $cache = array();
+		if (is_object($subject)) {
+			$subject = get_class($subject);
+		}
+		
 		$key = serialize(array($action, $subject, $subject_id));
 		if (array_key_exists($key, $cache)) {
 			//return $cache[$key];

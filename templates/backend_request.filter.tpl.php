@@ -82,7 +82,7 @@ if (is_array($data) && count($data))
 	?>
 	<tr class="<?php echo $odd ? '' : 'even' ?>">
 		<td>
-			<?php echo $row['id']; ?>
+			<?php echo $row['occured']; ?>
 		</td>
 		<td>
 			<?php echo $row['user_id']; ?>
@@ -103,7 +103,7 @@ if (is_array($data) && count($data))
 			<?php echo $row['query']; ?>
 		</td>
 		<td>
-			<?php echo $row['added']; ?>
+			<?php echo $row['last_occured']; ?>
 		</td>
 	</tr>
 		<?php
