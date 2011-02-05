@@ -109,7 +109,7 @@ class Permission extends TableCtl {
 			return false;
 		}
 		$intersect = is_array($roles) ? array_intersect($user->roles, $roles) : $user->roles;
-		if (Controller::$debug) {
+		if (Controller::$debug >= 2) {
 			Backend::addNotice('Valid roles found: ' . json_encode($intersect));
 		}
 		$result = count($intersect) ? true : false;

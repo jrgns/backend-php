@@ -114,12 +114,16 @@ class Tag extends TableCtl {
 	}
 	
 	public function action_display($id, $start = 0, $count = false) {
-		$count = $count === false ? Value::get('list_length', 5) : $count;
-		$tag = self::getObject($this, $id);
-		if (!($tag instanceof TagObj)) {
-			return $tag;
+		$options['start'] = $start;
+		$options['count'] = $count === false ? Value::get('list_length', 5) : $count;
+		return self::get($id, $options);
+	}
+	
+	public static function get($id, array $options = array()) {
+		$tag = Tag::retrieve($id, 'dbobject');
+		if (!$tag || !$tag->array) {
+			return false;
 		}
-
 		$links = self::getObject($tag->array['foreign_table']);
 		list($query, $params) = $links->getSelectSQL();
 		if (!($query instanceof SelectQuery)) {
@@ -130,6 +134,8 @@ class Tag extends TableCtl {
 			->field('`foreign_id`')
 			->filter('`tag_id` = :tag_id');
 
+		$start = array_key_exists('start', $options) ? $options['start'] : 0;
+		$count = array_key_exists('count', $options) ? $options['count'] : Value::get('list_length', 5);
 		$query
 			->field(':tag_id AS `tag_id`')
 			->filter('`' . $links->getMeta('id_field') . '` IN (' . $query_links . ')')
@@ -139,7 +145,6 @@ class Tag extends TableCtl {
 			':tag_id' => $tag->array['id']
 		);
 		$links->load(array('mode' => 'list', 'query' => $query, 'parameters' => $params));
-
 		$tag->array['list'] = $links->list;
 		$tag->array['list_count'] = $links->list_count;
 		return $tag;
@@ -188,11 +193,11 @@ class Tag extends TableCtl {
 		return $result;
 	}
 
-	function rss_display($result) {
+	public function rss_display($result) {
 		return $this->feed_display($result, 'rss');
 	}
 
-	function atom_display($result) {
+	public function atom_display($result) {
 		return $this->feed_display($result, 'atom');
 	}
 
@@ -243,7 +248,7 @@ class Tag extends TableCtl {
 		}
 		return true;
 	}
-
+	
 	public static function checkParameters($parameters) {
 		$parameters = parent::checkParameters($parameters);
 		if (Controller::$action == 'display') {

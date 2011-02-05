@@ -295,20 +295,20 @@ class Render {
 	/**
 	 * @todo get a better way to report warnings and errors in eval code
 	 */
-	private static function evalContent($template_name, $content, array $vars = array()) {
-		$vars = array_merge(Backend::getAll(), $vars);
-		$keys = array_keys($vars);
-		$keys = array_map(create_function('$elm', "return str_replace(' ', '_', \$elm);"), $keys);
+	private static function evalContent($be_template_name, $be_content, array $be_vars = array()) {
+		$be_vars = array_merge(Backend::getAll(), $be_vars);
+		$be_keys = array_keys($be_vars);
+		$be_keys = array_map(create_function('$elm', "return str_replace(' ', '_', \$elm);"), $be_keys);
 
-		extract(array_combine($keys, array_values($vars)));
+		extract(array_combine($be_keys, array_values($be_vars)));
 		ob_start();
 		if (Controller::$debug) {
-			$result = eval('?>' . $content);
+			$be_result = eval('?>' . $be_content);
 		} else {
-			$result = @eval('?>' . $content);
+			$be_result = @eval('?>' . $be_content);
 		}
-		if ($result === false) {
-			Backend::addError('Error evaluating template ' . $template_name);
+		if ($be_result === false) {
+			Backend::addError('Error evaluating template ' . $be_template_name);
 		}
 		return ob_get_clean();
 	}

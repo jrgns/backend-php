@@ -81,15 +81,15 @@ class Content extends TableCtl {
 		return $result;
 	}
 
-	function rss_list($result) {
+	public function rss_list($result) {
 		return $this->feed_list($result, 'rss');
 	}
 
-	function atom_list($result) {
+	public function atom_list($result) {
 		return $this->feed_list($result, 'atom');
 	}
 
-	function action_create($id = false) {
+	public function action_create($id = false) {
 		if (!empty($id)) {
 			$_POST['obj']['name'] = $id;
 			$_POST['obj']['title'] = humanize($id);
@@ -104,7 +104,7 @@ class Content extends TableCtl {
 		return $result;
 	}
 
-	function action_display($id) {
+	public function action_display($id) {
 		$id = Hook::run('table_display', 'pre', array($id), array('toret' => $id));
 
 		$toret = Content::retrieve($id, 'dbobject');
@@ -127,14 +127,14 @@ class Content extends TableCtl {
 			$toret = false;
 		}
 		if ($toret && Controller::$debug) {
-			var_dump('Content ID: ' . $toret->object->id);
+			Backend::addNotice('Content ID: ' . $toret->object->id);
 		}
 
 		$object = Hook::run('table_display', 'post', array($toret), array('toret' => $toret));
 		return $toret;
 	}
 	
-	function action_search_index() {
+	public function action_search_index() {
 		if (Component::isActive('BackendSearch')) {
 			return BackendSearch::doIndex($this, array('title', 'markdown'));
 		} else {
@@ -156,7 +156,7 @@ class Content extends TableCtl {
 		return false;
 	}
 	
-	function html_search($result) {
+	public function html_search($result) {
 		foreach($result as $name => $value) {
 			Backend::add($name, $value);
 		}
@@ -196,7 +196,7 @@ class Content extends TableCtl {
 	public static function show($id) {
 		$content = Content::retrieve($id);
 		if ($content) {
-			$content = array_key_exists('markdown', $content) ? $content['markdown'] : $content['body'];
+			$content = array_key_exists('markdown', $content) ? markdown($content['markdown']) : $content['body'];
 			Backend::addContent($content);
 		}
 	}
@@ -209,10 +209,10 @@ class Content extends TableCtl {
 	 * We check if there's any content of the name ?q=:name
 	 */
 	public static function hook_init() {
-		if (empty($_REQUEST['q'])) {
+		$query = Controller::getVar('q');
+		if (empty($query)) {
 			return;
 		}
-		$query = $_REQUEST['q'];
 		if (substr($query, -1) == '/') {
 			$query = substr($query, 0, strlen($query) - 1);
 		}
@@ -227,8 +227,8 @@ class Content extends TableCtl {
 	public static function install(array $options = array()) {
 		$toret = parent::install($options);
 
-		$toret = Hook::add('init', 'pre', __CLASS__, array('global' => true)) && $toret;
-		$toret = Hook::add('table_display', 'pre', __CLASS__) && $toret;
+		$toret = Hook::add('init', 'pre', get_called_class(), array('global' => true)) && $toret;
+		$toret = Hook::add('table_display', 'pre', get_called_class()) && $toret;
 
 		$toret = Permission::add('anonymous', 'display', 'content') && $toret;
 		$toret = Permission::add('anonymous', 'list', 'content') && $toret;
@@ -241,7 +241,7 @@ class Content extends TableCtl {
 	 */
 	public static function checkParameters($parameters) {
 		$parameters = parent::checkParameters($parameters);
-		if (!method_exists(__CLASS__, 'action_' . Controller::$action)) {
+		if (!method_exists(get_called_class(), 'action_' . Controller::$action)) {
 			$parameters[0] = Controller::$action;
 			Controller::setAction('display');
 		}
