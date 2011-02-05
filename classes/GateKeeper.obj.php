@@ -95,7 +95,7 @@ class GateKeeper {
 	}
   
 	public static function permittedRoles($action = '*', $subject = '*', $subject_id = 0) {
-		if (Controller::$debug) {
+		if (Controller::$debug >= 2) {
 			Backend::addNotice('Checking action ' . $action . ' for ' . $subject . ' with id ' . $subject_id);
 		}
 
