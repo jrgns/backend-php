@@ -169,7 +169,7 @@ class Component extends TableCtl {
 	public static function install(array $options = array()) {
 		$options['install_model'] = array_key_exists('install_model', $options) ? $options['install_model'] : false;
 		$toret = parent::install($options);
-		Hook::add('init', 'pre', get_installed_class()) && $toret;
+		Hook::add('init', 'pre', get_called_class()) && $toret;
 		return $toret;
 	}
 	
