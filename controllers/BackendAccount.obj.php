@@ -108,7 +108,7 @@ class BackendAccount extends TableCtl {
 		case $result === true:
 			Controller::redirect('previous');
 			break;
-		case $result < 0:
+		case is_numeric($result) && $result < 0:
 			Backend::addError(BackendAccount::getError(0 - $result));
 			break;
 		default:
