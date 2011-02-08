@@ -15,7 +15,7 @@ if ($Comment->array):
 		}
 	}
 ?>
-	<div>
+	<div id="comment_<?php echo $comment['id'] ?>">
 		<img src="<?php echo BackendAccount::getGravatar($comment[$account_name]['email'], 30) ?>" style="float: left; margin-right: 5px;" width="30px" height="30px">
 		<p class="quiet">
 			posted by <?php echo $posted_by ?> <span title="<?php echo $comment['added'] ?>"><?php echo time_elapsed($comment['added']) ?></a>
