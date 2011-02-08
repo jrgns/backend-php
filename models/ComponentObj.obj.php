@@ -25,13 +25,15 @@ class ComponentObj extends DBObject {
 		$meta['table'] = 'components';
 		$meta['name'] = 'Component';
 		$meta['fields'] = array(
-			'id' => 'primarykey',
-			'name' => 'string',
-			'filename' => 'string',
-			'options' => 'text',
-			'active' => 'boolean',
+			'id'       => 'primarykey',
+			'name'     => 'string',
+			//TODO: base should say where the file / component resides: Core / Backend / Application
+			//'base'     => array('type' => 'string', 'string_size' => 1024),
+			'filename' => array('type' => 'string', 'string_size' => 1024),
+			'options'  => 'text',
+			'active'   => 'boolean',
 			'modified' => 'lastmodified',
-			'added' => 'dateadded',
+			'added'    => 'dateadded',
 		);
 		return parent::__construct($meta, $options);
 	}
