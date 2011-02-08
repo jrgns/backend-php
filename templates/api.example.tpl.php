@@ -7,10 +7,16 @@ public static function define_example() {
 				'description' => 'This is the first paramater',
 				'type'        => 'string',
 				'default'     => 'The default string. It can be omitted',
-				
 		),
 		'example'     => '<code><?php echo SITE_LINK ?>?q=area/example/Something</code>',
-		//All optional parameters
+		//Extra parameters. Can not be omitted
+		'required' => array(
+			'req_param' => array(
+				'description' => 'A required parameter.',
+				'type'        => 'boolean',
+			),
+		),
+		//All optional parameters. Can be omitted without causing errors
 		'optional' => array(
 			'opt_param' => array(
 				'description' => 'An optional parameter.',
