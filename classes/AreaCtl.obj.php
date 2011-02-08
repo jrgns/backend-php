@@ -132,6 +132,16 @@ class AreaCtl {
 		return $parameters;
 	}
 	
+	public static function define_install() {
+		return array(
+			'description' => 'Install the component',
+			'return'      => array(
+				'description' => 'Whether or not the installation was succesful.',
+				'type'        => 'boolean',
+			),
+		);
+	}
+	
 	public function action_install() {
 		return call_user_func(array(get_class($this), 'install'));
 	}
