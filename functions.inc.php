@@ -73,6 +73,12 @@ function update_links($content, $new_vars) {
 					if (array_key_exists('scheme', $query)) {
 						$query['scheme'] = $query['scheme'] . '://';
 					}
+					if (array_key_exists('fragment', $query)) {
+						$query['fragment'] = '#' . $query['fragment'];
+					}
+					if (array_key_exists('port', $query)) {
+						$query['port'] = ':' . $query['port'];
+					}
 					if (array_key_exists('query', $query)) {
 						parse_str($query['query'], $vars);
 					} else {

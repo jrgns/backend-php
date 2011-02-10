@@ -212,6 +212,47 @@ class API extends AreaCtl {
 		}
 		return true;
 	}
+	
+	public function action_report($name, array $options = array()) {
+		switch($name) {
+		case 'coverage':
+			return self::reportCoverage($options);
+			break;
+		}
+	}
+	
+	public static function reportCoverage(array $options = array()) {
+		$app_only = array_key_exists('app_only', $options) ? $options['app_only'] : true;
+		$components   = array();
+		$documented   = 0;
+		$undocumented = 0;
+		foreach(Component::getActive() as $component) {
+			
+			$methods = get_class_methods($component['name']);
+			if (!$methods) {
+				continue;
+			}
+			$action_methods = array_filter($methods, create_function('$var', '$temp = explode(\'_\', $var, 2); return count($temp) == 2 && in_array(strtolower($temp[0]), array(\'action\', \'get\', \'post\', \'put\', \'delete\'));'));
+			$action_methods = array_map(create_function('$var', 'return preg_replace(\'/^(action|get|post|put|delete)_/\', \'\', $var);'), $action_methods);
+			if (!count($action_methods)) {
+				continue;
+			}
+			$docu_methods   = array_filter($methods, create_function('$var', 'return substr($var, 0, 7) == \'define_\';'));
+			$docu_methods   = array_map(create_function('$var', 'return preg_replace(\'/^(define)_/\', \'\', $var);'), $docu_methods);
+			$components[$component['name']] = array(
+				'documented'   => $docu_methods,
+				'undocumented' => array_diff($action_methods, $docu_methods),
+			);
+			$documented   += count($components[$component['name']]['documented']);
+			$undocumented += count($components[$component['name']]['undocumented']);
+		}
+		ksort($components);
+		return array('documented' => $documented, 'undocumented' => $undocumented, 'components' => $components);
+	}
+	
+	public static function getExample() {
+		return Render::renderFile('api.example.tpl.php');
+	}
 
 	public static function install(array $options = array()) {
 		$toret = parent::install($options);

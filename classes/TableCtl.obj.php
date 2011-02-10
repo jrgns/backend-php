@@ -56,6 +56,22 @@ class TableCtl extends AreaCtl {
 		return $methods;
 	}
 	
+	public static function define_display() {
+		return array(
+			'description' => 'Display a specified record',
+			'parameters'  => array(
+				'id' => array(
+					'description' => 'The id of the record. Can be anything that uniquely defines the record (as long as it\'s defined in the getRetrieveSQL statement).',
+					'type'        => 'mixed',
+				),
+			),
+			'return'      => array(
+				'description' => 'The DB Object to display',
+				'type'        => 'DBObject',
+			),
+		);
+	}
+
 	/**
 	 * Display does nothing but display (hahaha) the content fetched by action_read
 	 */
@@ -112,6 +128,32 @@ class TableCtl extends AreaCtl {
 		return $result;
 	}
 	
+	public static function define_list() {
+		return array(
+			'description' => 'List a number of records',
+			'parameters'  => array(
+				'start' => array(
+					'description' => 'The offset / start of the record list.',
+					'type'        => 'numeric',
+					'default'     => 0,
+				),
+				'count' => array(
+					'description' => 'The number of records to return.',
+					'type'        => 'numeric',
+					'default'     => 5,
+				),
+				'options' => array(
+					'description' => 'Options affecting the records returned.',
+					'type'        => 'array',
+				),
+			),
+			'return'      => array(
+				'description' => 'The DB Object to list',
+				'type'        => 'DBObject',
+			),
+		);
+	}
+
 	/**
 	 * Action for listing an area's records
 	 */
