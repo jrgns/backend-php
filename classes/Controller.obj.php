@@ -136,7 +136,7 @@ class Controller {
 			
 			//View
 			self::$view = self::getView();
-			if (!self::$view instanceof View) {
+			if (!(self::$view instanceof View)) {
 				self::$view = new View();
 				self::whoops('Unrecognized Request', array('message' => 'Could not find a View for the Request', 'code_hint' => 406));
 				if (self::$debug) {
