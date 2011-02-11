@@ -42,6 +42,17 @@ class Role extends TableCtl {
 		return $toret;
 	}
 	
+	public function action_create($id = false) {
+		if (is_get()) {
+			$obj = Controller::getVar('obj');
+			$obj = $obj ? $obj : array();
+			$obj['active'] = 1;
+			Controller::setVar('obj', $obj);
+		}
+		$result = parent::action_create();
+		return $result;
+	}
+
 	public static function getDefaults() {
 		$toret = array(
 			array('id' => 1, 'name' => 'nobody', 'description' => 'No one. No, really, no one.', 'active' => 1),
