@@ -18,6 +18,7 @@ $action_url = empty($action_url) ? Controller::$area . '/' . Controller::$action
 				<label id="obj_body_label" for="obj_body">Body</label><br>
 				<textarea id="obj_body" name="obj[body]" class="textarea"><?php echo $obj_values['body'] ?></textarea>
 			</div>
+			<!-- TODO Implement this
 			<div id="obj_from_file_container">
 				<label id="obj_from_file_label" for="obj_from_file">From File</label><br>
 				<select id="obj_from_file" name="obj[from_file]" class="">
@@ -25,6 +26,7 @@ $action_url = empty($action_url) ? Controller::$area . '/' . Controller::$action
 					<option value="0"<?php if (empty($obj_values['from_file'])): ?> selected="selected"<?php endif; ?>>No</option>
 				</select>
 			</div>
+			-->
 			<div id="obj_active_container">
 				<label id="obj_active_label" for="obj_active">Active</label><br>
 				<select id="obj_active" name="obj[active]" class="">

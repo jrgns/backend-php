@@ -90,14 +90,20 @@ class Content extends TableCtl {
 	}
 
 	public function action_create($id = false) {
-		if (!empty($id)) {
-			$_POST['obj']['name'] = $id;
-			$_POST['obj']['title'] = humanize($id);
+		if (is_get()) {
+			$obj = Controller::getVar('obj');
+			$obj = $obj ? $obj : array();
+			if (!empty($id)) {
+				$obj['name']   = $id;
+				$obj['title']  = humanize($id);
+			}
+			$obj['active'] = 1;
+			Controller::setVar('obj', $obj);
 		}
 		$result = parent::action_create();
 		if ($result instanceof ContentObj) {
 			/* TODO This can easily "overwrite" existing urls */
-			if (Component::isActive('BackendQuery')) {
+			if (is_post() && Component::isActive('BackendQuery')) {
 				BackendQuery::add($result->array['name'], 'content/display/' . $result->array['id']);
 			}
 		}

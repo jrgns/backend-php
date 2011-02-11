@@ -76,6 +76,11 @@ class ContentObj extends DBObject {
 			if (!empty($data['markdown'])) {
 				$data['body'] = Markdown($data['markdown']);
 			}
+			if ($action == 'create') {
+				if (is_null($data['active'])) {
+					$data['active'] = true;
+				}
+			}
 			$toret = true;
 		}
 		return $toret ? $data : false;
