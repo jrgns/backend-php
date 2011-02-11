@@ -20,15 +20,15 @@ class CommentObj extends DBObject {
 		$meta['name'] = 'Comment';
 		$meta['fields'] = array(
 			'id' => 'primarykey',
-			'user_id' => 'current_user',
-			'foreign_table' => 'string',
-			'foreign_id' => 'foreignkey',
-			'in_reply_to' => 'foreignkey',
-			'title' => 'title',
-			'content' => 'text',
-			'active' => 'boolean',
-			'modified' => 'lastmodified',
-			'added' => 'dateadded',
+			'user_id'       => 'current_user',
+			'foreign_table' => array('type' => 'string', 'required' => true),
+			'foreign_id'    => array('type' => 'foreignkey', 'required' => true),
+			'in_reply_to'   => array('type' => 'foreignkey'),
+			'title'         => 'title',
+			'content'       => array('type' => 'text', 'required' => true),
+			'active'        => 'boolean',
+			'modified'      => 'lastmodified',
+			'added'         => 'dateadded',
 		);
 		$meta['relations'] = array(
 			BackendAccount::getName() => array('conditions' => array('id' => 'user_id')),
