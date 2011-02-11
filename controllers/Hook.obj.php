@@ -73,6 +73,8 @@ class Hook extends TableCtl {
 	
 	public static function run($hook_name, $type, array $parameters = array(), array $options = array()) {
 		$result       = array_key_exists('toret', $options) ? $options['toret'] : null;
+		//Specify what should be returned if the result of the hook is NULL
+		//This ensures that hooks return what they should, even if the hook doesn't run
 		$return_index = array_key_exists('return_index', $options) ? $options['return_index'] : null;
 		if (count($parameters)) {
 			if (is_null($return_index)) {
@@ -82,12 +84,13 @@ class Hook extends TableCtl {
 		}
 		if ($hooks = self::get($hook_name, $type)) {
 			foreach($hooks as $hook) {
+				//Check if the hook is active and callable
 				if (Component::isActive($hook['class']) && is_callable(array($hook['class'], $hook['method']))) {
 					if (Controller::$debug) {
 						Backend::addNotice('Running ' . $hook['class'] . '::' . $hook['method'] . ' for hook ' . $hook_name . '-' . $type);
 					}
+					//Run it
 					$toret = call_user_func_array(array($hook['class'], $hook['method']), $parameters);
-					//var_dump($toret);
 					if (!is_null($toret)) {
 						$result = $toret;
 						if (count($parameters)) {
