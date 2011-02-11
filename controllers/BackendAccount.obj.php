@@ -419,8 +419,9 @@ END;
 	
 	public function weekly(array $options = array()) {
 		if (get_class($this) == BackendAccount::getName()) {
-			return self::userStats();
+			$result = self::userStats();
 		}
+		return true;
 	}
 	
 	public static function purgeUnconfirmed() {
