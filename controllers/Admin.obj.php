@@ -104,8 +104,8 @@ class Admin extends AreaCtl {
 		$components = Component::getActive();
 		$result = true;
 		foreach($components as $component) {
-			$object = new $component['name']();
-			if (is_callable(array($object, 'weekly'))) {
+			if (is_callable(array($component['name'], 'weekly'))) {
+				$object = new $component['name']();
 				$result = call_user_func_array(array($object, 'weekly'), $options) && $result;
 			}
 		}
