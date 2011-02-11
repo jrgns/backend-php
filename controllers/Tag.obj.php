@@ -228,13 +228,13 @@ class Tag extends TableCtl {
 
 	public static function hook_post_create($data, $object) {
 		if (!($object instanceof DBObject) || !is_post()) {
-			return true;
+			return $data;
 		}
 		if ($tags = Controller::getVar('tags')) {
 			self::add($tags, $object);
 			var_dump('Adding tags: ' . $tags);
 		}
-		return true;
+		return $data;
 	}
 
 	public static function hook_post_update($data, $object) {
