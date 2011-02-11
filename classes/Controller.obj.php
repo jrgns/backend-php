@@ -136,7 +136,7 @@ class Controller {
 			
 			//View
 			self::$view = self::getView();
-			if (!self::$view instanceof View) {
+			if (!(self::$view instanceof View)) {
 				self::$view = new View();
 				self::whoops('Unrecognized Request', array('message' => 'Could not find a View for the Request', 'code_hint' => 406));
 				if (self::$debug) {
@@ -284,7 +284,9 @@ class Controller {
 				$id = send_email(
 					Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)),
 					'Fatal PHP Error in ' . Backend::getConfig('application.Title'),
-					var_export($last_error, true)
+					'Error: ' . var_export($last_error, true) . PHP_EOL
+					. 'Query: ' . self::$query_string . PHP_EOL
+					. 'Payload: ' . var_export(self::$payload, true)
 				);
 			}
 		}

@@ -216,6 +216,37 @@ class TableCtl extends AreaCtl {
 		return $result;
 	}
 	
+	public static function define_search() {
+		return array(
+			'description' => 'Search and return records',
+			'parameters'  => array(
+				'term' => array(
+					'description' => 'The term to search for.',
+					'type'        => 'numeric',
+					'default'     => 0,
+				),
+				'start' => array(
+					'description' => 'The offset / start of the record list.',
+					'type'        => 'numeric',
+					'default'     => 0,
+				),
+				'count' => array(
+					'description' => 'The number of records to return.',
+					'type'        => 'numeric',
+					'default'     => 5,
+				),
+				'options' => array(
+					'description' => 'Options affecting the records returned.',
+					'type'        => 'array',
+				),
+			),
+			'return'      => array(
+				'description' => 'The DB Object searched',
+				'type'        => 'DBObject',
+			),
+		);
+	}
+
 	/**
 	 * Action for searching an area's records
 	 */
@@ -271,6 +302,37 @@ class TableCtl extends AreaCtl {
 		return true;
 	}
 	
+	public static function define_create() {
+		$result = array(
+			'description' => 'Create a new record. Data for the new record should be passed as POST data.',
+			'parameters'  => array(
+			),
+			'return'      => array(
+				'description' => 'The DB Object searched',
+				'type'        => 'DBObject',
+			),
+		);
+		$class = get_called_class();
+		$model = $class . 'Obj';
+		$model = new $model();
+		foreach($model->getMeta('fields') as $name => $options) {
+			$options = is_array($options) ? $options : array('type' => $options);
+			$type = array_key_exists('type', $options) ? $options['type'] : 'string';
+			if (in_array($type, array('primarykey', 'dateadded', 'lastmodified'))) {
+				continue;
+			}
+			$param_type = empty($options['required']) ? 'optional' : 'required';
+			$result[$param_type][$name] = array('type' => $type);
+			if (!empty($options['description'])) {
+				$result[$param_type][$name]['description'] = $options['description'];
+			}
+			if (!empty($options['default'])) {
+				$result[$param_type][$name]['default'] = $options['default'];
+			}
+		}
+		return $result;
+	}
+
 	/**
 	 * Action for creating a record in an area
 	 */
