@@ -20,7 +20,7 @@
  * DBObject wrapper for the `contents` table
  * @package Models
  */
-class ContentObj extends DBObject {
+class ContentObj extends CommentedObject {
 	function __construct($meta = array(), array $options = array()) {
 		require_once(BACKEND_FOLDER . '/libraries/Markdown/markdown.php');
 		$this->load_mode = 'object';

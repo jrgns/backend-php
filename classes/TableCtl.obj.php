@@ -206,6 +206,7 @@ class TableCtl extends AreaCtl {
 			//}
 			Backend::addContent(Render::renderFile('std_list.tpl.php'));
 		}
+		return $object;
 	}
 	
 	public function json_list($result) {
@@ -268,7 +269,7 @@ class TableCtl extends AreaCtl {
 			$template_file = 'std_search_results.tpl.php';
 		}
 		Backend::addContent(Render::renderFile($template_file));
-		return true;
+		return $object;
 	}
 	
 	/**
@@ -490,6 +491,7 @@ class TableCtl extends AreaCtl {
 		if ($result) {
 			Controller::redirect('?q=' . Controller::$area . '/' . $id);
 		}
+		return $result;
 	}
 	
 	/**
@@ -578,6 +580,7 @@ class TableCtl extends AreaCtl {
 			Controller::redirect();
 			break;
 		}
+		return $result;
 	}
 	
 	public static function retrieve($parameter = false, $return = 'array', array $options = array()) {

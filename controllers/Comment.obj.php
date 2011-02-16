@@ -119,36 +119,12 @@ END;
 			Controller::redirect('?q=' . class_for_url($result->array['foreign_table']) . '/' . $result->array['foreign_id']);
 			break;
 		} 
-		Controller::redirect('previous');
-		return $result;
+		//Controller::redirect('previous');
+		return parent::html_create($result);
 	}
-	
-	public static function hook_form($result) {
-		if (in_array(Controller::$action, array('create', 'update'))) {
-			$comments = self::getComments($result, Controller::$parameters[0]);
-			//Don't add Content, only render it.
-			Backend::add('obj_comments', $comments);
-			echo Render::renderFile('comment_form.tpl.php');
-		}
-		return $object;
-	}
-
-	public static function hook_post_display($object) {
-		if ($object instanceof DBObject && in_array(Controller::$action, array('display'))) {
-			$comments = self::getComments(table_name($object), $object->array['id']);
-			Backend::addContent(Render::renderFile('comments.tpl.php', array('comment_list' => $comments)));
-		}
-		return $object;
-	}
-
 	
 	public static function install(array $options = array()) {
-		$toret = parent::install($options);
-		
-		$toret = Hook::add('form',    'post', __CLASS__, array('global' => true)) && $toret;
-		$toret = Hook::add('display', 'post', __CLASS__, array('global' => true)) && $toret;
-		$toret = Hook::add('update',  'post', __CLASS__, array('global' => true)) && $toret;
-		$toret = Hook::add('create',  'post', __CLASS__, array('global' => true)) && $toret;
+		$toret = parent::install($options);		
 		return $toret;
 	}
 }

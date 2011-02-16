@@ -10,41 +10,30 @@
  * Contributors:
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
-class Content extends TableCtl {
+class Content extends CommentedController {
 	public function html_list($content) {
 		parent::html_list($content);
 		Backend::add('Sub Title', '');
 	}
 
 	function html_display($content) {
-		if (!($content instanceof DBObject)) {
-			/**
-			 * Is this necessary?
-			if (Controller::$debug) {
-				$filename = 'content/' . Controller::$id . '.tpl.php';
-				if (Render::checkTemplateFile($filename)) {
-					Backend::addNotice('File available for content');
+		if ($content instanceof DBObject) {
+			Backend::add('Sub Title', $content->array['title']);
+			if ($content->array['from_file']) {
+				//Move this to the object
+				$filename = 'content/static/' . $content->array['name'] . '.html';
+				$template = 'content/' . $content->array['name'] . '.tpl.php';
+				if (Render::checkTemplateFile($template)) {
+					$content->object->body = Render::renderFile($template);
+				} else if (file_exists(APP_FOLDER . '/' . $filename)) {
+					$content->object->body = file_get_contents(APP_FOLDER . '/' . $filename);
+				} else if (file_exists(BACKEND_FOLDER . '/' . $filename)) {
+					$content->object->body = file_get_contents(BACKEND_FOLDER . '/' . $filename);
+				//SITE FOLDER too?
 				}
 			}
-			*/
-			return $content;
 		}
-		Backend::add('Sub Title', $content->array['title']);
-		if ($content->array['from_file']) {
-			$filename = 'content/static/' . $content->array['name'] . '.html';
-			$template = 'content/' . $content->array['name'] . '.tpl.php';
-			if (Render::checkTemplateFile($template)) {
-				Backend::addContent(Render::renderFile($template));
-			} else if (file_exists(APP_FOLDER . '/' . $filename)) {
-				Backend::addContent(file_get_contents(APP_FOLDER . '/' . $filename));
-			} else if (file_exists(BACKEND_FOLDER . '/' . $filename)) {
-				Backend::addContent(file_get_contents(BACKEND_FOLDER . '/' . $filename));
-			//SITE FOLDER too?
-			}
-		} else {
-			Backend::add('Content', $content);
-			Backend::addContent(Render::renderFile('content.display.tpl.php'));
-		}
+		$content = parent::html_display($content);
 		return $content;
 	}
 	
