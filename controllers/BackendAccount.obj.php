@@ -394,6 +394,23 @@ END;
 		return false;
 	}
 	
+	/**
+	 * Return all users within a specific role
+	 */
+	public static function withRole($role) {
+		$role  = Role::retrieve($role);
+		if (!$role) {
+			return false;
+		}
+		$query = self::getQuery();
+		$query
+			->field('`' . self::getTable() . '`.*')
+			->leftJoin('Assignment', array('`access_type` = "users"', '`access_id` = `' . self::getTable() . '`.`id`'))
+			->filter('`role_id` = :id');
+		;
+		return $query->fetchAll(array(':id' => $role['id']));
+	}
+	
 	public static function getGravatar($email, $size = 120, $default = false) {
 		$default = $default ? $default : Value::get('default_gravatar', 'identicon');
 		return 'http://www.gravatar.com/avatar.php?gravatar_id=' . md5(strtolower($email)) . '&size=' . $size . '&d=' . $default;

@@ -374,8 +374,12 @@ class TableCtl extends AreaCtl {
 		case $result instanceof DBObject:
 			Controller::redirect('?q=' . $result->getArea() . '/' . $result->getMeta('id'));
 			break;
-		default:
+		case $result === false:
+			//This prevents the form from being populated with the failed data
+			//Controller::redirect('previous');
+			//break;
 		case $result:
+		default:
 			$object = self::getObject(get_class($this));
 			if ($object) {
 				Backend::add('Object', $object);
@@ -394,7 +398,7 @@ class TableCtl extends AreaCtl {
 					}
 				}
 			}
-			break;
+			break;		
 		}
 		return $result;
 	}
