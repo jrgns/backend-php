@@ -650,6 +650,7 @@ class TableCtl extends AreaCtl {
 		if (is_null($parameter)) {
 			return null;
 		}
+		//jrgns 2011-02-17 Why is this here? It's Dodgy...
 		if ($parameter === false && $return == 'array') {
 			$return = 'dbobject';
 		}
