@@ -104,7 +104,7 @@ function singularize($string) {
 					array( '/(o)(es)?$/i'              , "$1" ),
 					array( '/(bus)(es)?$/i'            , "$1" ),
 					array( '/([m|l])ice$/i'            , "$1ouse" ),
-					array( '/(x|ch|ss|sh|ms)(es)?$/i'  , "$1" ),
+					array( '/(x|ch|ss|sh|ms|ks)(es)?$/i'  , "$1" ),
 					array( '/^(m)(ovies)?$/i'          , "$1ovie" ),
 					array( '/(s)eries$/i'              , "$1eries" ),
 					array( '/([^aeiouy]|qu)ies$/i'     , "$1y" ),
