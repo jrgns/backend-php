@@ -55,7 +55,7 @@ class BackendSearch extends TableCtl {
 								
 								);
 								$b_search = new BackendSearchObj();
-								if ($b_search->create($data)) {
+								if ($b_search->replace($data)) {
 									$result++;
 									$total++;
 								} else if ($b_search->error_msg != 'Error executing statement(1062)') {
