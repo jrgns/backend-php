@@ -104,7 +104,7 @@ function singularize($string) {
 					array( '/(o)(es)?$/i'              , "$1" ),
 					array( '/(bus)(es)?$/i'            , "$1" ),
 					array( '/([m|l])ice$/i'            , "$1ouse" ),
-					array( '/(x|ch|ss|sh|ms|ks)(es)?$/i'  , "$1" ),
+					array( '/(x|ch|ss|sh|ms)(es)?$/i'  , "$1" ),
 					array( '/^(m)(ovies)?$/i'          , "$1ovie" ),
 					array( '/(s)eries$/i'              , "$1eries" ),
 					array( '/([^aeiouy]|qu)ies$/i'     , "$1y" ),
@@ -189,14 +189,16 @@ function computerize($string, $separator = '_') {
 	return $string;
 }
 
-function class_name($string) {
-	if (is_object($string)) {
-		$string = get_class($string);
+if (!function_exists('class_name')) {
+	function class_name($string) {
+		if (is_object($string)) {
+			$string = get_class($string);
+		}
+		$string = humanize(singularize($string));
+		$string = str_replace(' ', '', $string);
+		$string = preg_replace('/Obj$/', '', $string);
+		return $string;
 	}
-	$string = humanize(singularize($string));
-	$string = str_replace(' ', '', $string);
-	$string = preg_replace('/Obj$/', '', $string);
-	return $string;
 }
 
 
@@ -214,12 +216,15 @@ if (!function_exists('table_name')) {
 	}
 }
 
-function class_for_url($string) {
-	if (is_object($string)) {
-		$string = get_class($string);
+if (!function_exists('class_for_url')) {
+	function class_for_url($string) {
+		if (is_object($string)) {
+			$string = get_class($string);
+		}
+		return computerize(class_name($string));
 	}
-	return computerize(class_name($string));
 }
+
 /**
  * Return the string as a plain text string, no HTML allowed
  */
