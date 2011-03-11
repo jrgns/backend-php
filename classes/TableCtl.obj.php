@@ -314,6 +314,9 @@ class TableCtl extends AreaCtl {
 		);
 		$class = get_called_class();
 		$model = $class . 'Obj';
+		if (!class_exists($model, true)) {
+			return false;
+		}
 		$model = new $model();
 		foreach($model->getMeta('fields') as $name => $options) {
 			$options = is_array($options) ? $options : array('type' => $options);
