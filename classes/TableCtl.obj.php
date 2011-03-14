@@ -320,7 +320,7 @@ class TableCtl extends AreaCtl {
 		$model = new $model();
 		foreach($model->getMeta('fields') as $name => $options) {
 			$options = is_array($options) ? $options : array('type' => $options);
-			$type = array_key_exists('type', $options) ? $options['type'] : 'string';
+			$type    = array_key_exists('type', $options) ? $options['type'] : 'string';
 			if (in_array($type, array('primarykey', 'dateadded', 'lastmodified'))) {
 				continue;
 			}
@@ -406,6 +406,40 @@ class TableCtl extends AreaCtl {
 		return $result;
 	}
 	
+	public static function define_replace() {
+		$result = array(
+			'description' => 'Create a new record or replace it if it already exists. Data for the new record should be passed as POST data.',
+			'parameters'  => array(
+			),
+			'return'      => array(
+				'description' => 'The DB Object searched',
+				'type'        => 'DBObject',
+			),
+		);
+		$class = get_called_class();
+		$model = $class . 'Obj';
+		if (!class_exists($model, true)) {
+			return false;
+		}
+		$model = new $model();
+		foreach($model->getMeta('fields') as $name => $options) {
+			$options = is_array($options) ? $options : array('type' => $options);
+			$type    = array_key_exists('type', $options) ? $options['type'] : 'string';
+			if (in_array($type, array('primarykey', 'dateadded', 'lastmodified'))) {
+				continue;
+			}
+			$param_type = empty($options['required']) ? 'optional' : 'required';
+			$result[$param_type][$name] = array('type' => $type);
+			if (!empty($options['description'])) {
+				$result[$param_type][$name]['description'] = $options['description'];
+			}
+			if (!empty($options['default'])) {
+				$result[$param_type][$name]['default'] = $options['default'];
+			}
+		}
+		return $result;
+	}
+
 	public function action_replace() {
 		$toret = false;
 		$object = self::getObject(get_class($this));
@@ -434,6 +468,29 @@ class TableCtl extends AreaCtl {
 		return $this->html_create($result);
 	}
 	
+	public static function define_read() {
+		return array(
+			'description' => 'Read the specified record.',
+			'parameters'  => array(
+				'id' => array(
+					'description' => 'The id of the record to read.',
+					'type'        => 'numeric',
+					'default'     => 0,
+				),
+				'mode' => array(
+					'description' => 'The format in which the record should be returned.',
+					'type'        => 'string',
+					'default'     => 'array',
+					'range'       => array('array', 'object', 'dbobject'),
+				),
+			),
+			'return' => array(
+				'description' => 'The record in the specified format',
+				'type'        => 'mixed',
+			),
+		);
+	}
+
 	/**
 	 * Action for reading a record in an area
 	 */
@@ -441,6 +498,45 @@ class TableCtl extends AreaCtl {
 		return call_user_func_array(array(class_name(Controller::$area), 'retrieve'), array($id, $mode));
 	}
 	
+	public static function define_update() {
+		$result = array(
+			'description' => 'Update a record. The update data for the record should be passed as POST data.',
+			'parameters'  => array(
+				'id' => array(
+					'description' => 'The id of the record to update.',
+					'type'        => 'numeric',
+					'default'     => 0,
+				),
+			),
+			'return'      => array(
+				'description' => 'The DB Object updated',
+				'type'        => 'DBObject',
+			),
+		);
+		$class = get_called_class();
+		$model = $class . 'Obj';
+		if (!class_exists($model, true)) {
+			return false;
+		}
+		$model = new $model();
+		foreach($model->getMeta('fields') as $name => $options) {
+			$options = is_array($options) ? $options : array('type' => $options);
+			$type    = array_key_exists('type', $options) ? $options['type'] : 'string';
+			if (in_array($type, array('primarykey', 'dateadded', 'lastmodified'))) {
+				continue;
+			}
+			$param_type = empty($options['required']) ? 'optional' : 'required';
+			$result[$param_type][$name] = array('type' => $type);
+			if (!empty($options['description'])) {
+				$result[$param_type][$name]['description'] = $options['description'];
+			}
+			if (!empty($options['default'])) {
+				$result[$param_type][$name]['default'] = $options['default'];
+			}
+		}
+		return $result;
+	}
+
 	/**
 	 * Action for updating a record in an area
 	 */
@@ -509,6 +605,23 @@ class TableCtl extends AreaCtl {
 		return $result;
 	}
 	
+	public static function define_delete() {
+		return array(
+			'description' => 'Delete the specified record.',
+			'parameters'  => array(
+				'id' => array(
+					'description' => 'The id of the record to delete.',
+					'type'        => 'numeric',
+					'default'     => 0,
+				),
+			),
+			'return' => array(
+				'description' => 'If the record was succesfully deleted.',
+				'type'        => 'boolean',
+			),
+		);
+	}
+
 	public function post_delete($id) {
 		$object = self::getObject(get_class($this), $id);
 		if (!($object instanceof DBObject)) {
@@ -532,6 +645,27 @@ class TableCtl extends AreaCtl {
 		Controller::redirect('?q=' . Controller::$area . '/list');
 	}
 	
+	public static function define_toggle() {
+		return array(
+			'description' => 'Toggle a boolean field on the specified record.',
+			'parameters'  => array(
+				'id' => array(
+					'description' => 'The id of the record to toggle.',
+					'type'        => 'numeric',
+					'default'     => 0,
+				),
+				'field' => array(
+					'description' => 'The name of the field to toggle. It must be a boolean field.',
+					'type'        => 'string',
+				),
+			),
+			'return' => array(
+				'description' => 'The DBObject toggled.',
+				'type'        => 'DBObject',
+			),
+		);
+	}
+
 	/**
 	 * @todo Make this a POST only
 	 */

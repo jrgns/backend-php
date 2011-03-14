@@ -121,6 +121,9 @@ class AreaCtl {
 		}
 		
 		if (Value::get('admin_installed', false)) {
+			//TODO This should probable be
+			//$toret = Permission::check($action, $subject, $subject_id);
+			//Change and test
 			$toret = Permission::check(Controller::$action, Controller::$area, $subject_id);
 		} else if (!($subject == 'admin' && in_array($action, array('install', 'pre_install', 'post_install')))) {
 			$toret = false;
