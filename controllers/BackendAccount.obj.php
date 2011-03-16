@@ -431,15 +431,17 @@ END;
 			->filter('`added` < DATE_SUB(DATE(NOW()), INTERVAL 1 WEEK)');
 		$deleted = $query->execute();
 		Backend::addSuccess($deleted . ' unconfirmed users deleted');
-		send_email(
-			Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)),
-			'Unconfirmed Users purged: ' . $deleted,
+		if ($deleted) {
+			send_email(
+				Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)),
+				'Unconfirmed Users purged: ' . $deleted,
 			$deleted . ' users were deleted from the database.
 They were unconfirmed, and more than a week old
 
 Site Admin
 '
-		);
+			);
+		}
 		return true;
 	}
 	
