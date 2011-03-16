@@ -14,6 +14,6 @@
 		<?php endif; ?>
 		<?php if (!empty($meta_values) && is_array($meta_values)): ?>
 			<?php foreach($meta_values as $name => $value): ?>
-				<meta property="<?php echo $name ?>" value="<?php echo $value ?>"/>
+				<meta property="<?php echo $name ?>" content="<?php echo $value ?>"/>
 			<?php endforeach; ?>
 		<?php endif; ?>
