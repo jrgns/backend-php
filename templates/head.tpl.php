@@ -12,3 +12,8 @@
 		<?php if (!empty($keywords)): $keywords = is_array($keywords) ? implode(', ', $keywords) : $keywords; ?>
 			<meta name="keywords" content="<?php echo $keywords ?>">
 		<?php endif; ?>
+		<?php if (!empty($meta_values) && is_array($meta_values)): ?>
+			<?php foreach($meta_values as $name => $value): ?>
+				<meta name="<?php echo $name ?>" value="<?php echo $value ?>">
+			<?php endforeach; ?>
+		<?php endif; ?>
