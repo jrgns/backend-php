@@ -488,8 +488,8 @@ class TableCtl extends AreaCtl {
 	}
 	
 	public function html_toggle($result) {
-		if ($result) {
-			Controller::redirect('?q=' . Controller::$area . '/' . $id);
+		if ($result instanceof DBObject) {
+			Controller::redirect('?q=' . Controller::$area . '/' . $result->getMeta('id'));
 		}
 		return $result;
 	}
