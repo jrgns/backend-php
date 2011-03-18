@@ -327,7 +327,9 @@ class Backend {
 					self::$DB[$name]['username'],
 					self::$DB[$name]['password']
 				);
-				header('X-DB-' . computerize($name) . '-DSN: ' . self::$DB[$name]['dsn']);
+				if (self::getConfig('backend.dsn_header', false)) {
+					header('X-DB-' . computerize($name) . '-DSN: ' . self::$DB[$name]['dsn']);
+				}
 			} catch (Exception $e) {
 				if (array_key_exists('debug', $_REQUEST)) {
 					throw new ConnectToDBException($e->getMessage());
