@@ -36,9 +36,11 @@ class CsvView extends View {
 		}
 		
 		switch (true) {
+		//Output SelectQuery as CSV
 		case $to_print instanceof SelectQuery:
 			return self::output_query($to_print);
 			break;
+		//Output Array of Arrays as CSV
 		case is_array($to_print):
 			if (!$fp = fopen('php://temp', 'r+')) {
 				Backend::addError('Could not open output file for CSV output');
@@ -64,12 +66,14 @@ class CsvView extends View {
 			fclose($fp);
 			return ob_get_clean();
 			break;
+		//Output a specified file as CSV
 		case is_string($to_print):
 			if (is_readable($to_print)) {
 				$fp = fopen($to_print, 'r');
 				fpassthru($fp);
 				break;
 			}
+		//Output a string as CSV
 		default:
 			return $to_print;
 			break;
