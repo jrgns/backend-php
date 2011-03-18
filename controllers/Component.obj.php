@@ -134,7 +134,7 @@ class Component extends TableCtl {
 	}
 	
 	public static function pre_install() {
-		$toret = self::installModel(__CLASS__ . 'Obj', array('drop_table' => true));
+		$toret = self::installModel(get_called_class() . 'Obj', array('drop_table' => true));
 
 		$components = self::fromFolder();
 
