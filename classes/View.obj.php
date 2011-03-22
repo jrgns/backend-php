@@ -95,17 +95,19 @@ class View {
 				header('Content-Type: ' . $content_type);
 			}
 		}
-		$to_print = Hook::run('output', 'pre', array($to_print), array('toret' => $to_print));
+		//Run the View first, so that the other hooks have the output to work on
 		if (method_exists($this, 'hook_output')) {
 			$to_print = $this->hook_output($to_print);
 		}
+		$to_print = Hook::run('output', 'pre', array($to_print), array('toret' => $to_print));
 
 		echo $to_print;
 		
-		$to_print = Hook::run('output', 'post', array($to_print), array('toret' => $to_print));
+		//Run the View first, so that the other hooks have the output to work on
 		if (method_exists($this, 'hook_post_output')) {
 			$to_print = $this->hook_post_output($to_print);
 		}
+		$to_print = Hook::run('output', 'post', array($to_print), array('toret' => $to_print));
 	}
 	
 	public function whoops($title, $message, $code_hint = false) {

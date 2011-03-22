@@ -33,7 +33,7 @@ class WMD extends AreaCtl {
 
 	public static function install(array $options = array()) {
 		$toret = parent::install($options);
-		$toret = Hook::add('display', 'post', __CLASS__, array('global' => 1)) && $toret;
+		$toret = Hook::add('display', 'post', get_called_class(), array('global' => 1)) && $toret;
 		return $toret;
 	}
 }
