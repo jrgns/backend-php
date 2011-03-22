@@ -46,6 +46,9 @@ class OutgoingClick extends TableCtl {
 	public static function install(array $options = array()) {
 		$toret = parent::install($options);
 		$toret = Hook::add('output', 'pre', get_called_class(), array('global' => 1)) && $toret;
+
+		$toret = Permission::add('anonymous', 'add', get_called_class()) && $toret;
+		$toret = Permission::add('authenticated', 'add', get_called_class()) && $toret;
 		return $toret;
 	}
 }
