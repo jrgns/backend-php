@@ -183,7 +183,8 @@ class API extends AreaCtl {
 			$definition = array();
 			foreach($methods as $method) {
 				if (substr($method, 0, 7) == 'define_') {
-					$definition[$method] = call_user_func(array($class, $method));
+					$method_name = substr($method, 7);
+					$definition[$method_name] = call_user_func(array($class, $method));
 				}
 			}
 			if (count($definition)) {
