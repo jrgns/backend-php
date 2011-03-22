@@ -37,6 +37,28 @@ class BackendRequestObj extends DBObject {
 		return parent::__construct($meta, $options);
 	}
 	
+	/*
+	 * TODO Untested uncompleted code. Use with caution.
+	public function create($data, array $options = array()) {
+		//Do this to prevent requests from haning on a read lock
+		if ($this->db instanceof PDO) {
+			$orig_timeout = $this->db->getAttribute(PDO::ATTR_TIMEOUT);
+			if ($orig_timeout > 5) {
+				$this->db->setAttribute(PDO::ATTR_TIMEOUT, 5);
+			} else {
+				$orig_timeout = false;
+			}
+		}
+		return false;
+		
+		$result = parent::create($data, $options);
+		if (!empty($orig_timeout)) {
+			$this->db->setAttribute(PDO::ATTR_TIMEOUT, $orig_timeout);
+		}
+		return $result;
+	}
+	*/
+	
 	function validate($data, $action, $options = array()) {
 		$toret = true;
 		$data = parent::validate($data, $action, $options);
