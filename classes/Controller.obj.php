@@ -542,41 +542,44 @@ class Controller {
 			if (!$location) {
 				$location = $_SERVER['REQUEST_URI'];
 			}
+			
+			//The following is only for on site redirects
+			if (substr($location, 0, 7) != 'http://' || substr($location, 0, strlen(SITE_LINK)) == SITE_LINK) {
+				//This should fix most redirects, but it may happen that location == '?debug=true&q=something/or/another' or something similiar
+				if (Value::get('clean_urls', false) && substr($location, 0, 3) == '?q=') {
+					$location = SITE_LINK . substr($location, 3);
+				}
+				//Add some meta variables
+				if (!empty($_SERVER['QUERY_STRING'])) {
+					parse_str($_SERVER['QUERY_STRING'], $vars);
+					$new_vars = array();
+					if (array_key_exists('debug', $vars)) {
+						$new_vars['debug'] = $vars['debug'];
+					}
+					if (array_key_exists('nocache', $vars)) {
+						$new_vars['nocache'] = $vars['nocache'];
+					}
+					if (array_key_exists('recache', $vars)) {
+						$new_vars['recache'] = $vars['recache'];
+					}
+					if (array_key_exists('mode', $vars)) {
+						$new_vars['mode'] = $vars['mode'];
+					}
 
-			//This should fix most redirects, but it may happen that location == '?debug=true&q=something/or/another' or something similiar
-			if (Value::get('clean_urls', false) && substr($location, 0, 3) == '?q=') {
-				$location = SITE_LINK . substr($location, 3);
-			}
-			//Add some meta variables
-			if (!empty($_SERVER['QUERY_STRING'])) {
-				parse_str($_SERVER['QUERY_STRING'], $vars);
-				$new_vars = array();
-				if (array_key_exists('debug', $vars)) {
-					$new_vars['debug'] = $vars['debug'];
-				}
-				if (array_key_exists('nocache', $vars)) {
-					$new_vars['nocache'] = $vars['nocache'];
-				}
-				if (array_key_exists('recache', $vars)) {
-					$new_vars['recache'] = $vars['recache'];
-				}
-				if (array_key_exists('mode', $vars)) {
-					$new_vars['mode'] = $vars['mode'];
-				}
+					$url = parse_url($location);
+					if (!empty($url['query'])) {
+						parse_str($url['query'], $old_vars);
+					} else {
+						$old_vars = array();
+					}
+					//Allow the redirect to overwrite these vars
+					$new_vars = array_merge($new_vars, $old_vars);
 
-				$url = parse_url($location);
-				if (!empty($url['query'])) {
-					parse_str($url['query'], $old_vars);
-				} else {
-					$old_vars = array();
+					$old_url = parse_url(get_current_url());
+					$url['query'] = http_build_query($new_vars);
+					$url = array_merge($old_url, $url);
+					$location = build_url($url);
 				}
-				//Allow the redirect to overwrite these vars
-				$new_vars = array_merge($new_vars, $old_vars);
-
-				$old_url = parse_url(get_current_url());
-				$url['query'] = http_build_query($new_vars);
-				$url = array_merge($old_url, $url);
-				$location = build_url($url);
 			}
 			
 			try {
