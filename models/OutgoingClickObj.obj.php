@@ -19,7 +19,6 @@ class OutgoingClickObj extends DBObject {
 		if (!is_array($meta) && is_numeric($meta)) {
 			$meta = array('id' => $meta);
 		}
-		$meta['database'] = 'jrgns_wuim';
 		$meta['table'] = 'outgoing_clicks';
 		$meta['name'] = 'OutgoingClick';
 		$meta['fields'] = array(
