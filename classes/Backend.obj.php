@@ -327,6 +327,9 @@ class Backend {
 					self::$DB[$name]['username'],
 					self::$DB[$name]['password']
 				);
+				if (self::getConfig('backend.dsn_header', false)) {
+					header('X-DB-' . computerize($name) . '-DSN: ' . self::$DB[$name]['dsn']);
+				}
 			} catch (Exception $e) {
 				if (array_key_exists('debug', $_REQUEST)) {
 					throw new ConnectToDBException($e->getMessage());
@@ -574,9 +577,43 @@ class Backend {
 	public static function __exception_handler($exception) {
 		echo "Uncaught exception: " , $exception->getMessage(), "\n";
 	}
+	
+	private static function loadCoreClass($classname) {
+		$code = false;
+		if (file_exists(BACKEND_FOLDER . '/controllers/' . $classname . '.obj.php')) {
+			$code = file_get_contents(BACKEND_FOLDER . '/controllers/' . $classname . '.obj.php');
+		} else if (file_exists(BACKEND_FOLDER . '/models/' . $classname . '.obj.php')) {
+			$code = file_get_contents(BACKEND_FOLDER . '/models/' . $classname . '.obj.php');
+		} else if (file_exists(BACKEND_FOLDER . '/classes/' . $classname . '.obj.php')) {
+			$code = file_get_contents(BACKEND_FOLDER . '/classes/' . $classname . '.obj.php');
+		} else if (file_exists(BACKEND_FOLDER . '/views/' . $classname . '.obj.php')) {
+			$code = file_get_contents(BACKEND_FOLDER . '/views/' . $classname . '.obj.php');
+		} else if (file_exists(BACKEND_FOLDER . '/utilities/' . $classname . '.obj.php')) {
+			$code = file_get_contents(BACKEND_FOLDER . '/utilities/' . $classname . '.obj.php');
+		}
+		if (empty($code)) {
+			return false;
+		}
+		$code = preg_replace('/class ' . $classname . '/', 'class BE' . $classname, $code, 1, $count);
+		if (!$count) {
+			return false;
+		}
+		$code = preg_replace('/^<\?php\s+/', '', $code, 1);
+		eval($code);
+		if (!class_exists('BE' . $classname)) {
+			return false;
+		}
+		return true;
+	}
 
 	static public function __autoload($classname) {
 		$included = false;
+		//Check if it's a core module first
+		if (substr($classname, 0, 2) == 'BE') {
+			if (self::loadCoreClass(substr($classname, 2))) {
+				return true;
+			}
+		}
 		//TODO eventually cache / determine by class name exactly where the file should be to improve performance
 		if (defined('SITE_FOLDER')) {
 			$folders = array(

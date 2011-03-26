@@ -137,8 +137,9 @@ class DBObject {
 	
 	private function loadDeep($mode = 'array') {
 		if (in_array($mode, array('array', 'object')) && $this->$mode) {
-			foreach ($this->meta['relations'] as $class => $options) {
-				$type     = array_key_exists('type', $options) ? $options['type'] : 'single';
+			foreach ($this->meta['relations'] as $name => $options) {
+				$class = array_key_exists('class', $options) ? $options['class'] : $name;
+				$type  = array_key_exists('type', $options)  ? $options['type']  : 'single';
 				if ($relation = $this->loadRelation($class, $options, $mode)) {
 					switch ($type) {
 					case 'multiple':

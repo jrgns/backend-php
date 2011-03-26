@@ -15,15 +15,15 @@
  * Default class to handle Area specific functions
  */
 class AreaCtl {
-	static private $error_msgs = array();
+	public static $error_msgs = array();
 
 	/**
 	 * The standard action for an Area
 	 */
 	public final function action() {
 		$toret = null;
-		if (array_key_exists('msg', $_REQUEST)) {
-			Backend::addError(self::getError($_REQUEST['msg']));
+		if ($error_number = Controller::getVar('err', FILTER_VALIDATE_INT)) {
+			Backend::addError(self::getError($error_number));
 		}
 
 		if (Controller::$debug) {
@@ -74,7 +74,7 @@ class AreaCtl {
 	 */
 	public static function getError($num, $class_name = false) {
 		$msg = 'Unknown Error Message';
-		$class_name = $class_name ? $class_name : class_name(Controller::$area);
+		$class_name = $class_name ? $class_name : get_called_class();
 		if (class_exists($class_name, true)) {
 			$vars = eval('return ' . $class_name . '::$error_msgs;');
 			$msg = empty($vars[$num]) ? 'Unknown Error Message for ' . $class_name : $vars[$num];
@@ -121,6 +121,9 @@ class AreaCtl {
 		}
 		
 		if (Value::get('admin_installed', false)) {
+			//TODO This should probable be
+			//$toret = Permission::check($action, $subject, $subject_id);
+			//Change and test
 			$toret = Permission::check(Controller::$action, Controller::$area, $subject_id);
 		} else if (!($subject == 'admin' && in_array($action, array('install', 'pre_install', 'post_install')))) {
 			$toret = false;

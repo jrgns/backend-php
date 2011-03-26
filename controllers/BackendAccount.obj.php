@@ -11,10 +11,13 @@
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
 class BackendAccount extends TableCtl {
+	const ERR_DISABLED_COOKIES            = 1;
+	const ERR_UNMATCHED_USERNAME_PASSWORD = 2;
+	const ERR_MISSING_USERNAME_PASSWORD   = 3;
 	public static $error_msgs = array(
-		1 => 'Please enable cookies. This site can\'t function properly without them',
-		2 => 'Username and password does not match',
-		3 => 'Please supply a username and password',
+		self::ERR_DISABLED_COOKIES            => 'Please enable cookies. This site can\'t function properly without them',
+		self::ERR_UNMATCHED_USERNAME_PASSWORD => 'Username and password does not match',
+		self::ERR_MISSING_USERNAME_PASSWORD   => 'Please supply a username and password',
 	);
 	
 	protected static $name = false;
@@ -84,12 +87,12 @@ class BackendAccount extends TableCtl {
 				}
 				return $User;
 			} else {
-				return -2;
+				return 2;
 			}
 		} else if (empty($_SESSION['cookie_is_working'])) {
-			return -1;
+			return 1;
 		} else {
-			return -3;
+			return 3;
 		}
 	}
 	
@@ -108,8 +111,8 @@ class BackendAccount extends TableCtl {
 		case $result === true:
 			Controller::redirect('previous');
 			break;
-		case is_numeric($result) && $result < 0:
-			Backend::addError(BackendAccount::getError(0 - $result));
+		case is_numeric($result):
+			Backend::addError(BackendAccount::getError($result));
 			break;
 		default:
 			break;
@@ -392,6 +395,23 @@ END;
 		call_user_func(array(self::getName(), 'setupAnonymous'));
 		//Return false as the user is obviously anonymous
 		return false;
+	}
+	
+	/**
+	 * Return all users within a specific role
+	 */
+	public static function withRole($role) {
+		$role  = Role::retrieve($role);
+		if (!$role) {
+			return false;
+		}
+		$query = self::getQuery();
+		$query
+			->field('`' . self::getTable() . '`.*')
+			->leftJoin('Assignment', array('`access_type` = "users"', '`access_id` = `' . self::getTable() . '`.`id`'))
+			->filter('`role_id` = :id');
+		;
+		return $query->fetchAll(array(':id' => $role['id']));
 	}
 	
 	public static function getGravatar($email, $size = 120, $default = false) {
