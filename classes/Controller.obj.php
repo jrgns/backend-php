@@ -283,7 +283,7 @@ class Controller {
 			if ($last_error['type'] === E_ERROR) {
 				$id = send_email(
 					Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)),
-					'Fatal PHP Error in ' . Backend::getConfig('application.Title'),
+					'Fatal PHP Error in ' . Backend::getConfig('application.Title', 'Application'),
 					'Error: ' . var_export($last_error, true) . PHP_EOL
 					. 'Query: ' . self::$query_string . PHP_EOL
 					. 'Payload: ' . var_export(self::$payload, true)
@@ -482,8 +482,10 @@ class Controller {
 		self::$area   = count($terms) ? array_shift($terms) : Value::get('default_controller', 'home');
 		if (count($terms)) {
 			self::$action = array_shift($terms);
+		} else if (Component::isActive(class_name(self::$area))) {
+			self::$action = Value::get('default_' . class_name(self::$area) . '_action', Value::get('default_action', 'index'));
 		} else {
-			Value::get('default_' . class_name(self::$area) . '_action', Value::get('default_action', 'index'));
+			self::$action = Value::get('default_action', 'index');
 		}
 		
 		self::$parameters = !empty($terms) ? $terms : array();
