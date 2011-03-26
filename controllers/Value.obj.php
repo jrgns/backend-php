@@ -48,7 +48,8 @@ class Value extends TableCtl {
 			'name' => $name,
 			'value' => $new_value,
 		);
-		$toret = $value->replace($data);
+		//Replace increments the id the whole time, rather do an update
+		$toret = $value->create($data, array('on_duplicate' => array('value' => $new_value)));
 		self::$cache[$name] = $new_value;
 		return $toret;
 	}
