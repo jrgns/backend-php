@@ -119,6 +119,9 @@ class Controller {
 						break;
 				}
 			}
+			if ($config_debug = Backend::getConfig('application.debug', false)) {
+				self::$debug = $config_debug;
+			}
 
 			Backend::add('debug', self::$debug);
 			if (SITE_STATE != 'production' || self::$debug) {
