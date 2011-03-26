@@ -19,14 +19,10 @@ class JsonView extends TextView {
 
 	function __construct() {
 		parent::__construct();
-		$this->mode = 'json';
+		$this->mode     = 'json';
+		self::$ob_level = ob_get_level();
 	}
 	
-	public static function hook_post_init() {
-		self::$ob_level = ob_get_level();
-		ob_start();
-	}
-
 	public static function hook_output($to_print) {
 		$result_only = Controller::getVar('result_only');
 		if (!empty($result_only)) {
@@ -53,7 +49,6 @@ class JsonView extends TextView {
 
 	public static function install() {
 		$toret = true;
-		Hook::add('init', 'post', __CLASS__, array('global' => 1, 'mode' => 'json')) && $toret;
 		return $toret;
 	}
 }
