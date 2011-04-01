@@ -47,7 +47,7 @@ class View {
 				if (Controller::$debug) {
 					Backend::addNotice('Running ' . get_class($controller) . '::' . $mode_method);
 				}
-				$controller->$mode_method();
+				$data = $controller->$mode_method($data);
 			}
 			//Application->view
 			$app_class = Backend::getConfig('backend.application.class', 'Application');
