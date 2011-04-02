@@ -299,7 +299,7 @@ class TableCtl extends AreaCtl {
 			$options['parameters'] = array();
 		}
 		$options['parameters'][':term'] = $term;
-		return $this->action_list($start, $count, $options);
+		return self::do_list($start, $count, $options);
 	}
 	
 	public function html_search($object) {
