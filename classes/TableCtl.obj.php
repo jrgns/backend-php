@@ -147,6 +147,13 @@ class TableCtl extends AreaCtl {
 					'type'        => 'array',
 				),
 			),
+			'optional' => array(
+				'order' => array(
+					'description' => 'Which field should be used to order the records',
+					'type'        => 'string',
+					'default'     => false,
+				),
+			),
 			'return'      => array(
 				'description' => 'The DB Object to list',
 				'type'        => 'DBObject',
@@ -158,7 +165,13 @@ class TableCtl extends AreaCtl {
 	 * Action for listing an area's records
 	 */
 	public function action_list($start, $count, array $options = array()) {
-		$object = self::getObject(get_class($this));
+		$p_options = API::extract(self::define_list());
+		$options   = array_merge($options, $p_options);
+		return self::do_list($start, $count, $options);
+	}
+	
+	public static function do_list($start, $count, array $options = array()) {
+		$object = self::getObject(get_called_class());
 		if (!($object instanceof DBObject)) {
 			Controller::whoops('Invalid Object Returned');
 			return false;
@@ -171,6 +184,14 @@ class TableCtl extends AreaCtl {
 		} else {
 			$limit = false;
 		}
+		if (!empty($options['order'])) {
+			//TODO Check for commma delimited list of fields to order by
+			if (!in_array($options['order'], array_keys($object->getMeta('fields')))) {
+				//Backend::addNotice('Invalid Order Field');
+				unset($options['order']);
+			}
+		}
+
 		$object->read(array_merge(array('limit' => $limit), $options));
 		return $object;
 	}
