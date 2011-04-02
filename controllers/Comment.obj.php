@@ -28,10 +28,10 @@ class Comment extends TableCtl {
 	}
 	
 	public static function getComments($table = false, $table_id = false, $limit = false) {
-		$query = new SelectQuery('`comments`');
+		$query = new SelectQuery('Comment');
 		$query
-			->field(array('`comments`.*, `users`.`username`, `users`.`email`'))
-			->leftJoin('`users`', '`comments`.`user_id` = `users`.`id`')
+			->field(array('`comments`.*, `' . BackendAccount::getTable() . '`.`username`, `' . BackendAccount::getTable() . '`.`email`'))
+			->leftJoin(BackendAccount::getName(), '`comments`.`user_id` = `' . BackendAccount::getTable() . '`.`id`')
 			->filter('`comments`.`active` = 1')
 			->order('IF(`comments`.`in_reply_to` = 0, `comments`.`id`, `comments`.`in_reply_to`) DESC');
 		$params = array();

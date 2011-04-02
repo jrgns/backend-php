@@ -6,8 +6,10 @@ class CommentedController extends TableCtl {
 			if ($result instanceof DBObject) {
 				$comments = Comment::getComments($result->getMeta('table'), $result->getMeta('id'));
 				Backend::addContent(Render::renderFile('comments.tpl.php', array('comment_list' => $comments)));
-
-				Backend::addContent(Render::renderFile('comment.form.tpl.php'));
+				if (Permission::check('create', 'comment')) {
+					$values = array('foreign_table' => $result->getMeta('table'), 'foreign_id' => $result->getMeta('id'));
+					Backend::addContent(Render::renderFile('comment.add.tpl.php', $values));
+				}
 			}
 		}
 		return $result;
