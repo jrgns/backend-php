@@ -50,31 +50,34 @@ class Comment extends TableCtl {
 	}
 	
 	public function action_create() {
-		$object = Controller::getVar('obj');
-		if (is_post() && !empty($object)) {
+		if (is_post()) {
 			$parameters = get_previous_parameters();
-			$object['foreign_id']    = empty($object['foreign_id'])    ? reset($parameters)              : $object['foreign_id'];
-			$object['foreign_table'] = empty($object['foreign_table']) ? table_name(get_previous_area()) : $object['foreign_table'];
+			$data = array(
+				'foreign_table' => Controller::getVar('foreign_table'),
+				'foreign_id'    => Controller::getVar('foreign_id'),
+			);
+			$object['foreign_id']    = empty($data['foreign_id'])    ? reset($parameters)              : $data['foreign_id'];
+			$object['foreign_table'] = empty($data['foreign_table']) ? table_name(get_previous_area()) : $data['foreign_table'];
 			//If we don't have a logged in user, create a dummy account
 			if (!BackendAccount::checkUser()) {
-				$query = new SelectQuery('users');
+				$account_class = BackendAccount::getName();
+				$query = new SelectQuery($account_class);
 				$query->filter('`email` = :email');
 				if ($old_user = Controller::getVar('user')) {
-					$old_user = $query->fetchAssoc(array(':email' => $old_user['email']));
+					$existing_user = $query->fetchAssoc(array(':email' => $old_user['email']));
 				}
 				switch (true) {
-				case $old_user && $old_user['confirmed'] && $old_user['active']:
+				case $existing_user && $existing_user['confirmed'] && $existing_user['active']:
 					//Attribute quote to user? Seems risque, actually, if I know a user's email address, I can just attribute to him. Auth first
 					Backend::addError('Comment not added. Please login first');
 					return false;
 					break;
-				case $old_user && !$old_user['confirmed'] && $old_user['active']:
+				case $existing_user && !$existing_user['confirmed'] && $existing_user['active']:
 					//Unregistered user commented before
-					$object['user_id'] = $old_user['id'];
+					$object['user_id'] = $existing_user['id'];
 					break;
 				default:
-				case !$old_user:
-					$old_user = Controller::getVar('user');
+				case !$existing_user:
 					$user_data = array(
 						'name'      => $old_user['name'],
 						'surname'   => '',
@@ -86,7 +89,8 @@ class Comment extends TableCtl {
 						'confirmed' => 0,
 						'active'    => 1,
 					);
-					$user = new BackendAccountObj();
+					
+					$user = self::getObject($account_class);
 					if ($user->create($user_data)) {
 						$object['user_id'] = $user->array['id'];
 
@@ -104,6 +108,9 @@ Please note that you don't need to do this for your comments to show, but this a
 Regards
 END;
 						send_email($user->array['email'], 'Thank you for your comment.', $message);
+					} else {
+						Backend::addError('Could not create user to add Comment');
+						return false;
 					}
 					break;
 				}
