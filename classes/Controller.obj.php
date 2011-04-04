@@ -187,7 +187,7 @@ class Controller {
 		}
 		$controller = class_exists($control_name, true) ? new $control_name() : false;
 		if (!($controller instanceof AreaCtl && Component::isActive($control_name))) {
-			Controller::whoops('Component is Inactive or Invalid', array('message' => 'The requested component doesn\'t exist or is inactive.', 'code_hint' => 404));
+			Controller::whoops('Component ' . $control_name . ' is Inactive or Invalid', array('message' => 'The requested component doesn\'t exist or is inactive.', 'code_hint' => 404));
 			self::$area   = Value::get('default_error_controller', 'home');
 			self::$action = Value::get('default_error_action', 'error');
 			$control_name = class_name(self::$area);
