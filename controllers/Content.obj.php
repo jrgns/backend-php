@@ -230,6 +230,13 @@ class Content extends CommentedController {
 		return $toret;
 	}
 
+	protected function getTabLinks($action) {
+		if ($action != 'display') {
+			return parent::getTabLinks($action);
+		}
+		return array();
+	}
+
 	/*
 	 * @todo This isn't entirely accurate. If you want to create a random action_something, it need's to be
 	 * added to the array below... This isn't optimal. Either get the array dynamically (get_class_methods) or refactor.
