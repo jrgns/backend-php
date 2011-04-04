@@ -641,6 +641,7 @@ class DBObject {
 				case 'url':
 					if ($value !== null && $value != '') {
 						$parts = parse_url($value);
+						//We need the scheme to validate the URL
 						if (empty($parts['scheme'])) {
 							$value = 'http://' . $value;
 						}

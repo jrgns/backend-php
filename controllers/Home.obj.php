@@ -11,7 +11,7 @@ class Home extends AreaCtl {
 	}
 	
 	public function html_error() {
-		var_dump(Controller::$whoopsed); die;
+		Backend::addContent('Something Went Wrong');
 	}
 	
 	public static function install(array $options = array()) {
