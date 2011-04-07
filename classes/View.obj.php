@@ -55,7 +55,7 @@ class View {
 				if (Controller::$debug) {
 					Backend::addNotice('Running ' . $app_class . '::' . $mode_method);
 				}
-				call_user_func(array($app_class, $mode_method));
+				$data = call_user_func(array($app_class, $mode_method), $data);
 			}
 			
 			if (Controller::$debug) {
