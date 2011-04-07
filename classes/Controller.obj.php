@@ -42,6 +42,7 @@ class Controller {
 	public static $firephp    = false;
 	
 	private static $whoopsed  = false;
+	private static $ob_level  = 0;
 	
 	public static function serve($query_string = false, $method = null, $payload = null) {
 		if ($query_string) {
@@ -66,6 +67,7 @@ class Controller {
 				break;
 			}
 		}
+		self::$ob_level = ob_get_level();
 	
 		parse_str(self::$query_string, self::$query_vars);
 		if (empty(self::$payload) && !is_array(self::$payload)) {
@@ -296,7 +298,7 @@ class Controller {
 
 			Hook::run('finish', 'post');
 
-			while (ob_get_level() > 0) {
+			while (ob_get_level() > self::$ob_level) {
 				ob_end_flush();
 			}
 		}
