@@ -144,17 +144,17 @@ class DBObject {
 					switch ($type) {
 					case 'multiple':
 						if ($mode == 'array') {
-							$this->array[$class]  = $relation->list ? $relation->list : array();
+							$this->array[$name]  = $relation->list ? $relation->list : array();
 						} else if ($mode == 'object') {
-							$this->object->$class = $relation->list ? $relation->list : array();
+							$this->object->$name = $relation->list ? $relation->list : array();
 						}
 						break;
 					default:
 					case 'single':
 						if ($mode == 'array') {
-							$this->array[$class]  = $relation->array  ? $relation->array  : false;
+							$this->array[$name]  = $relation->array  ? $relation->array  : false;
 						} else if ($mode == 'object') {
-							$this->object->$class = $relation->object ? $relation->object : false;
+							$this->object->$name = $relation->object ? $relation->object : false;
 						}
 						break;
 					}
