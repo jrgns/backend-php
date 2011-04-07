@@ -92,7 +92,7 @@ class DBObject {
 		$relation = new $class_name();
 		$conditions = array_key_exists('conditions', $options) ? $options['conditions'] : false;
 		$type       = array_key_exists('type', $options)       ? $options['type']       : 'single';
-		$order      = array_key_exists('order', $options)      ? $options['order']      : false;
+		$order      = array_key_exists('order', $options)      ? $options['order']      : $relation->getMeta('order');
 		if ($conditions) {
 			foreach($conditions as $field => $name) {
 				if (is_array($name)) {
