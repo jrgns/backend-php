@@ -82,6 +82,9 @@ class Controller {
 		if ($controller instanceof AreaCtl) {
 			self::display($controller, $result);
 		}
+		if (self::$mode == self::MODE_EXECUTE) {
+			self::finish();
+		}
 	}
 
 	public static function init() {
