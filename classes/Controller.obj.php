@@ -82,7 +82,6 @@ class Controller {
 		if ($controller instanceof AreaCtl) {
 			self::display($controller, $result);
 		}
-		self::finish();
 	}
 
 	public static function init() {
@@ -188,7 +187,7 @@ class Controller {
 		}
 		$controller = class_exists($control_name, true) ? new $control_name() : false;
 		if (!($controller instanceof AreaCtl && Component::isActive($control_name))) {
-			Controller::whoops('Component is Inactive or Invalid', array('message' => 'The requested component doesn\'t exist or is inactive.', 'code_hint' => 404));
+			Controller::whoops('Component ' . $control_name . ' is Inactive or Invalid', array('message' => 'The requested component doesn\'t exist or is inactive.', 'code_hint' => 404));
 			self::$area   = Value::get('default_error_controller', 'home');
 			self::$action = Value::get('default_error_action', 'error');
 			$control_name = class_name(self::$area);
@@ -226,6 +225,9 @@ class Controller {
 		Hook::run('action_display', 'post', array($result));
 	}
 	
+	/**
+	 * This function get's called when the script finishes or exit is called via register_shutdown_function
+	 */
 	public static function finish() {
 		if (self::$init) {
 			Hook::run('finish', 'pre');
@@ -292,6 +294,9 @@ class Controller {
 					. 'Payload: ' . var_export(self::$payload, true)
 				);
 			}
+		}
+		while (ob_get_level() > 0) {
+			ob_end_flush();
 		}
 	}
 	
@@ -592,15 +597,12 @@ class Controller {
 					Backend::addSuccess('The script should now redirect to <a href="' . $location . '">here</a>');
 				} else {
 					//Redirect
-					self::finish();
 					header('Location: ' . $location);
 					die('redirecting to <a href="' . $location . '">');
 				}
 			} catch (Exception $e) {
 				Backend::addError('Could not redirect');
 			}
-		} else {
-			self::finish();
 		}
 		return true;
 	}
@@ -611,7 +613,6 @@ class Controller {
 	public static function refresh() {
 		try {
 			redirect(false, true);
-			self::finish();
 			die('redirecting');
 		} catch (Exception $e) {
 		}
@@ -647,9 +648,5 @@ class Controller {
 			var_dump($title, $message);
 			print_stacktrace();
 		}
-	}
-	
-	function __destruct() {
-		self::finish();
 	}
 }

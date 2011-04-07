@@ -16,27 +16,6 @@ class Content extends CommentedController {
 		Backend::add('Sub Title', '');
 	}
 
-	function html_display($content) {
-		if ($content instanceof DBObject) {
-			Backend::add('Sub Title', $content->array['title']);
-			if ($content->array['from_file']) {
-				//Move this to the object
-				$filename = 'content/static/' . $content->array['name'] . '.html';
-				$template = 'content/' . $content->array['name'] . '.tpl.php';
-				if (Render::checkTemplateFile($template)) {
-					$content->object->body = Render::renderFile($template);
-				} else if (file_exists(APP_FOLDER . '/' . $filename)) {
-					$content->object->body = file_get_contents(APP_FOLDER . '/' . $filename);
-				} else if (file_exists(BACKEND_FOLDER . '/' . $filename)) {
-					$content->object->body = file_get_contents(BACKEND_FOLDER . '/' . $filename);
-				//SITE FOLDER too?
-				}
-			}
-		}
-		$content = parent::html_display($content);
-		return $content;
-	}
-	
 	function html_update($result) {
 		$result = parent::html_update($result);
 		if ($result === true) {
@@ -127,6 +106,27 @@ class Content extends CommentedController {
 
 		$object = Hook::run('table_display', 'post', array($toret), array('toret' => $toret));
 		return $toret;
+	}
+	
+	function html_display($content) {
+		if ($content instanceof DBObject) {
+			Backend::add('Sub Title', $content->array['title']);
+			if ($content->array['from_file']) {
+				//Move this to the object
+				$filename = 'content/static/' . $content->array['name'] . '.html';
+				$template = 'content/' . $content->array['name'] . '.tpl.php';
+				if (Render::checkTemplateFile($template)) {
+					$content->object->body = Render::renderFile($template);
+				} else if (file_exists(APP_FOLDER . '/' . $filename)) {
+					$content->object->body = file_get_contents(APP_FOLDER . '/' . $filename);
+				} else if (file_exists(BACKEND_FOLDER . '/' . $filename)) {
+					$content->object->body = file_get_contents(BACKEND_FOLDER . '/' . $filename);
+				//SITE FOLDER too?
+				}
+			}
+		}
+		$content = parent::html_display($content);
+		return $content;
 	}
 	
 	public function action_search_index() {
@@ -228,6 +228,13 @@ class Content extends CommentedController {
 		$toret = Permission::add('anonymous', 'display', 'content') && $toret;
 		$toret = Permission::add('anonymous', 'list', 'content') && $toret;
 		return $toret;
+	}
+
+	protected function getTabLinks($action) {
+		if ($action != 'display') {
+			return parent::getTabLinks($action);
+		}
+		return array();
 	}
 
 	/*

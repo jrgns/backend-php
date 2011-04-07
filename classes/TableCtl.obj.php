@@ -95,7 +95,9 @@ class TableCtl extends AreaCtl {
 		}
 		Backend::add('Object', $object);
 		Backend::add('TabLinks', $this->getTabLinks('display'));
-		Backend::add('Sub Title', $object->getMeta('name'));
+		if (!Backend::get('Sub Title')) {
+			Backend::add('Sub Title', $object->getMeta('name'));
+		}
 		$template_file = $object->getArea() . '.display.tpl.php';
 		if (Render::checkTemplateFile($template_file)) {
 			Backend::addContent(Render::renderFile($template_file));
@@ -147,6 +149,13 @@ class TableCtl extends AreaCtl {
 					'type'        => 'array',
 				),
 			),
+			'optional' => array(
+				'order' => array(
+					'description' => 'Which field should be used to order the records',
+					'type'        => 'string',
+					'default'     => false,
+				),
+			),
 			'return'      => array(
 				'description' => 'The DB Object to list',
 				'type'        => 'DBObject',
@@ -158,7 +167,13 @@ class TableCtl extends AreaCtl {
 	 * Action for listing an area's records
 	 */
 	public function action_list($start, $count, array $options = array()) {
-		$object = self::getObject(get_class($this));
+		$p_options = API::extract(self::define_list());
+		$options   = array_merge($options, $p_options);
+		return self::do_list($start, $count, $options);
+	}
+	
+	public static function do_list($start, $count, array $options = array()) {
+		$object = self::getObject(get_called_class());
 		if (!($object instanceof DBObject)) {
 			Controller::whoops('Invalid Object Returned');
 			return false;
@@ -171,6 +186,14 @@ class TableCtl extends AreaCtl {
 		} else {
 			$limit = false;
 		}
+		if (!empty($options['order'])) {
+			//TODO Check for commma delimited list of fields to order by
+			if (!in_array($options['order'], array_keys($object->getMeta('fields')))) {
+				//Backend::addNotice('Invalid Order Field');
+				unset($options['order']);
+			}
+		}
+
 		$object->read(array_merge(array('limit' => $limit), $options));
 		return $object;
 	}
@@ -189,7 +212,9 @@ class TableCtl extends AreaCtl {
 		
 		Backend::add('Object', $object);
 		Backend::add('TabLinks', $this->getTabLinks('list'));
-		Backend::add('Sub Title', $object->getMeta('name'));
+		if (!Backend::get('Sub Title')) {
+			Backend::add('Sub Title', $object->getMeta('name'));
+		}
 
 		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
 		Backend::addScript(SITE_LINK . 'scripts/table_list.js');
@@ -278,7 +303,7 @@ class TableCtl extends AreaCtl {
 			$options['parameters'] = array();
 		}
 		$options['parameters'][':term'] = $term;
-		return $this->action_list($start, $count, $options);
+		return self::do_list($start, $count, $options);
 	}
 	
 	public function html_search($object) {
@@ -289,7 +314,9 @@ class TableCtl extends AreaCtl {
 		
 		Backend::add('Object', $object);
 		Backend::add('TabLinks', $this->getTabLinks('list'));
-		Backend::add('Sub Title', 'Searching ' . $object->getMeta('name'));
+		if (!Backend::get('Sub Title')) {
+			Backend::add('Sub Title', 'Searching ' . $object->getMeta('name'));
+		}
 		Backend::add('term', Controller::$parameters[0]);
 
 		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
@@ -388,7 +415,9 @@ class TableCtl extends AreaCtl {
 			if ($object) {
 				Backend::add('Object', $object);
 				Backend::add('TabLinks', $this->getTabLinks('create'));
-				Backend::add('Sub Title', 'Add ' . $object->getMeta('name'));
+				if (!Backend::get('Sub Title')) {
+					Backend::add('Sub Title', 'Add ' . $object->getMeta('name'));
+				}
 				$template_file = $object->getArea() . '.form.tpl.php';
 				if (Render::checkTemplateFile($template_file)) {
 					Backend::addContent(Render::renderFile($template_file));
@@ -588,7 +617,9 @@ class TableCtl extends AreaCtl {
 			if ($object) {
 				Backend::add('Object', $object);
 				Backend::add('TabLinks', $this->getTabLinks('update'));
-				Backend::add('Sub Title', 'Update ' . $object->getMeta('name'));
+				if (!Backend::get('Sub Title')) {
+					Backend::add('Sub Title', 'Update ' . $object->getMeta('name'));
+				}
 				$template_file = $object->getArea() . '.form.tpl.php';
 				if (Render::checkTemplateFile($template_file)) {
 					Backend::addContent(Render::renderFile($template_file));
@@ -766,9 +797,11 @@ class TableCtl extends AreaCtl {
 	public function html_import($result) {
 		switch (true) {
 		case $result instanceof DBObject:
-			Backend::add('Sub Title', 'Import');
 			Backend::add('Object', $result);
-			Backend::add('Sub Title', 'Import ' . $result->getMeta('name'));
+			if (!Backend::get('Sub Title')) {
+				Backend::add('Sub Title', 'Import');
+				Backend::add('Sub Title', 'Import ' . $result->getMeta('name'));
+			}
 			$template_file = singularize(computerize(class_name(Controller::$area))) . '.import.tpl.php';
 			if (!Render::checkTemplateFile($template_file)) {
 				$template_file = 'std_import.tpl.php';

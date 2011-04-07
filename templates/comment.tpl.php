@@ -6,7 +6,7 @@ if ($Comment->array):
 	if (filter_var($comment[$account_name]['username'], FILTER_VALIDATE_EMAIL) && !$comment[$account_name]['confirmed']) {
 		$posted_by = $comment[$account_name]['name'];
 		if (!empty($comment[$account_name]['website'])) {
-			$posted_by = '<a href="' . $comment['Account']['website'] . '">' . $posted_by . '</a>';
+			$posted_by = '<a href="http://' . $comment['Account']['website'] . '">' . $posted_by . '</a>';
 		}
 	} else {
 		$posted_by = $comment[$account_name]['username'];

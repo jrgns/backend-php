@@ -641,6 +641,7 @@ class DBObject {
 				case 'url':
 					if ($value !== null && $value != '') {
 						$parts = parse_url($value);
+						//We need the scheme to validate the URL
 						if (empty($parts['scheme'])) {
 							$value = 'http://' . $value;
 						}
@@ -899,6 +900,9 @@ class DBObject {
 			$query->group($options['group']);
 		} else if (!empty($group)) {
 			$query->group($group);
+		}
+		if (get_class($this) == 'ContactObj') {
+			//die("<pre>$query");
 		}
 		return array($query, $q_params);
 	}
