@@ -263,14 +263,16 @@ class Controller {
 			}
 			
 			//Check if we encountered a fatal error
-			if ($last_error = error_get_last() && $last_error['type'] === E_ERROR) {
-				$id = send_email(
-					Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)),
-					'Fatal PHP Error in ' . Backend::getConfig('application.Title', 'Application'),
-					'Error: ' . var_export($last_error, true) . PHP_EOL
-					. 'Query: ' . self::$query_string . PHP_EOL
-					. 'Payload: ' . var_export(self::$payload, true)
-				);
+			if ($last_error = error_get_last()) {
+				if ($last_error['type'] === E_ERROR) {
+					$id = send_email(
+						Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)),
+						'Fatal PHP Error in ' . Backend::getConfig('application.Title', 'Application'),
+						'Error: ' . var_export($last_error, true) . PHP_EOL
+						. 'Query: ' . self::$query_string . PHP_EOL
+						. 'Payload: ' . var_export(self::$payload, true)
+					);
+				}
 			}
 
 			//Clean up
