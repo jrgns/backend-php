@@ -181,6 +181,13 @@ class Query {
 		return $this;
 	}
 	
+	public function getParameter($name) {
+		if (array_key_exists($name, $this->parameters)) {
+			return $this->parameters[$name];
+		}
+		return null;
+	}
+	
 	public function group($group_field) {
 		$this->query = false;
 		if (is_array($group_field)) {
