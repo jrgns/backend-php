@@ -4,7 +4,7 @@
 	<?php if (!empty($subtitle)): ?><subtitle><?php echo htmlspecialchars($sub_title) ?></subtitle><?php endif; ?>
 	<link href="<?php echo $link ?>" rel="self" />
 	<id><?php echo $link ?></id>
-	<updated><?php echo date('r') ?></updated>
+	<updated><?php echo date('Y-m-d\TH:i:s\Z') ?></updated>
 	<?php $author = Backend::getConfig('application.author'); ?>
 	<?php if (is_string($author)): ?>
 		<author><name><?php echo $author ?></name></author>
@@ -26,7 +26,7 @@
 			<title><?php echo htmlspecialchars($item['title']) ?></title>
 			<link href="<?php echo $item['link'] ?>" />
 			<summary type="html"><![CDATA[<?php echo Content::createPreview($item['body']) ?>]]></summary>
-			<updated><?php echo gmdate('r', strtotime($item['modified'])) ?></updated>
+			<updated><?php echo gmdate('Y-m-d\TH:i:s\Z', strtotime($item['modified'])) ?></updated>
 			<id><?php echo $item['link'] ?></id>
 		</entry>
 	<?php endforeach; ?>
