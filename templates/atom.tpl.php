@@ -4,7 +4,7 @@
 	<?php if (!empty($subtitle)): ?><subtitle><?php echo htmlspecialchars($sub_title) ?></subtitle><?php endif; ?>
 	<link href="<?php echo $link ?>" rel="self" />
 	<id><?php echo $link ?></id>
-	<updated><?php echo date('Y-m-d\TH:i:s\Z') ?></updated>
+	<updated>#AtomLastDate#</updated>
 	<?php $author = Backend::getConfig('application.author'); ?>
 	<?php if (is_string($author)): ?>
 		<author><name><?php echo $author ?></name></author>
