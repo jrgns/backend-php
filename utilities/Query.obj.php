@@ -150,6 +150,10 @@ class Query {
 		return $this;
 	}
 	
+	public function getFields() {
+		return $this->fields;
+	}
+	
 	public function filter($condition) {
 		$this->query = false;
 		if (is_array($condition)) {
@@ -165,6 +169,10 @@ class Query {
 		$this->query = false;
 		$this->conditions = array_filter(array_unique($filters));
 		return $this;
+	}
+	
+	public function getFilterd() {
+		return $this->conditions;
 	}
 	
 	public function parameter($name, $value) {
@@ -186,6 +194,10 @@ class Query {
 			return $this->parameters[$name];
 		}
 		return null;
+	}
+	
+	public function getParameters() {
+		return $this->parameters;
 	}
 	
 	public function group($group_field) {

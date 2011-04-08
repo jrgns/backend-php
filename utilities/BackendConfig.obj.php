@@ -53,12 +53,14 @@ class BackendConfig {
 			$names = explode('.', $names);
 		}
 		$value = $this->config;
-		foreach($names as $name) {
-			if (array_key_exists($name, $value)) {
-				$value = $value[$name];
-			} else {
-				$toret = false;
-				break;
+		if (is_array($value)) {
+			foreach($names as $name) {
+				if (array_key_exists($name, $value)) {
+					$value = $value[$name];
+				} else {
+					$toret = false;
+					break;
+				}
 			}
 		}
 		return $toret ? $value : $default;

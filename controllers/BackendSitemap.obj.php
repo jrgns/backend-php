@@ -48,8 +48,8 @@ class BackendSitemap extends AreaCtl {
 		}
 
 		$filename = WEB_FOLDER . '/sitemap_' . $area . '.xml';
-		if (!is_writable($filename)) {
-			Backend::addError('Could not generate sitemap: Cannot open sitemap file. (' . $area . ')');
+		if (file_exists($filename) && !is_writable($filename)) {
+			Backend::addError('Could not generate sitemap: Cannot open sitemap file. (' . $filename . ')');
 			return false;
 		}
 		$fp = fopen($filename, 'w');

@@ -173,6 +173,7 @@ class Tag extends TableCtl {
 		Backend::add('description', $result->array['description']);
 		if (!empty($result->array['list']) && is_array($result->array['list'])) {
 			$list = array();
+			$max_time = 0;
 			foreach($result->array['list'] as $item) {
 				$link = SITE_LINK;
 				if (Value::get('clean_urls', false)) {
@@ -185,7 +186,9 @@ class Tag extends TableCtl {
 					$item['body'] = Content::createPreview($item['body']);
 				}
 				$list[] = $item;
+				$max_time = strtotime($item['modified']) > $max_time ? strtotime($item['modified']) : $max_time;
 			}
+			Backend::add('AtomLastDate', gmdate('Y-m-d\TH:i:s\Z', $max_time));
 		} else {
 			$list = false;
 		}
