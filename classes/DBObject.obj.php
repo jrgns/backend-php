@@ -995,7 +995,7 @@ class DBObject {
 						$query .= ' ON DUPLICATE KEY UPDATE ' . implode(', ', $temp);
 					//Use this for fields that get's changed in process();
 					} else if (array_key_exists($options['on_duplicate'], $fields)) {
-						$query .= ' ON DUPLICATE KEY UPDATE ' . Query::enclose($name) . ' = :' . $options['on_duplicate'];
+						$query .= ' ON DUPLICATE KEY UPDATE ' . Query::enclose($options['on_duplicate']) . ' = :' . $options['on_duplicate'];
 					} else {
 						$query .= ' ON DUPLICATE KEY UPDATE ' . $options['on_duplicate'];
 					}
