@@ -42,6 +42,7 @@ class Controller {
 	public static $firephp    = false;
 	
 	private static $whoopsed  = false;
+	private static $ob_level  = 0;
 	
 	public static function serve($query_string = false, $method = null, $payload = null) {
 		if ($query_string) {
@@ -66,6 +67,7 @@ class Controller {
 				break;
 			}
 		}
+		self::$ob_level = ob_get_level();
 	
 		parse_str(self::$query_string, self::$query_vars);
 		if (empty(self::$payload) && !is_array(self::$payload)) {
@@ -81,6 +83,9 @@ class Controller {
 		list ($controller, $result) = self::action();
 		if ($controller instanceof AreaCtl) {
 			self::display($controller, $result);
+		}
+		if (self::$mode == self::MODE_EXECUTE) {
+			self::finish();
 		}
 	}
 
@@ -226,7 +231,7 @@ class Controller {
 	}
 	
 	/**
-	 * This function get's called when the script finishes or exit is called via register_shutdown_function
+	 * This function get's called via register_shutdown_function when the script finishes or exit is called 
 	 */
 	public static function finish() {
 		if (self::$init) {
@@ -256,7 +261,20 @@ class Controller {
 				}
 				$_SESSION['previous_parameters'][self::$view->mode] = self::$parameters;
 			}
-		
+			
+			//Check if we encountered a fatal error
+			if ($last_error = error_get_last()) {
+				if ($last_error['type'] === E_ERROR) {
+					$id = send_email(
+						Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)),
+						'Fatal PHP Error in ' . Backend::getConfig('application.Title', 'Application'),
+						'Error: ' . var_export($last_error, true) . PHP_EOL
+						. 'Query: ' . self::$query_string . PHP_EOL
+						. 'Payload: ' . var_export(self::$payload, true)
+					);
+				}
+			}
+
 			//Clean up
 			self::$query_string = false;
 			self::$query_vars   = array();
@@ -281,23 +299,12 @@ class Controller {
 			Backend::shutdown();
 
 			Hook::run('finish', 'post');
-		}
-		self::$init = false;
-		//Check if we encountered a fatal error
-		if ($last_error = error_get_last()) {
-			if ($last_error['type'] === E_ERROR) {
-				$id = send_email(
-					Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)),
-					'Fatal PHP Error in ' . Backend::getConfig('application.Title', 'Application'),
-					'Error: ' . var_export($last_error, true) . PHP_EOL
-					. 'Query: ' . self::$query_string . PHP_EOL
-					. 'Payload: ' . var_export(self::$payload, true)
-				);
+
+			while (ob_get_level() > self::$ob_level) {
+				ob_end_flush();
 			}
 		}
-		while (ob_get_level() > 0) {
-			ob_end_flush();
-		}
+		self::$init = false;
 	}
 	
 	public static function getPayload() {

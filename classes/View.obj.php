@@ -47,7 +47,7 @@ class View {
 				if (Controller::$debug) {
 					Backend::addNotice('Running ' . get_class($controller) . '::' . $mode_method);
 				}
-				$controller->$mode_method();
+				$data = $controller->$mode_method($data);
 			}
 			//Application->view
 			$app_class = Backend::getConfig('backend.application.class', 'Application');
@@ -55,7 +55,7 @@ class View {
 				if (Controller::$debug) {
 					Backend::addNotice('Running ' . $app_class . '::' . $mode_method);
 				}
-				call_user_func(array($app_class, $mode_method));
+				$data = call_user_func(array($app_class, $mode_method), $data);
 			}
 			
 			if (Controller::$debug) {

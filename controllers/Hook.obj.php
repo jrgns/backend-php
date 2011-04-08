@@ -85,17 +85,21 @@ class Hook extends TableCtl {
 		if ($hooks = self::get($hook_name, $type)) {
 			foreach($hooks as $hook) {
 				//Check if the hook is active and callable
-				if (Component::isActive($hook['class']) && is_callable(array($hook['class'], $hook['method']))) {
-					if (Controller::$debug) {
-						Backend::addNotice('Running ' . $hook['class'] . '::' . $hook['method'] . ' for hook ' . $hook_name . '-' . $type);
-					}
-					//Run it
-					$toret = call_user_func_array(array($hook['class'], $hook['method']), $parameters);
-					if (!is_null($toret)) {
-						$result = $toret;
-						if (count($parameters)) {
-							$parameters[$return_index] = $toret;
+				if (Component::isActive($hook['class'])) {
+					if (is_callable(array($hook['class'], $hook['method']))) {
+						if (Controller::$debug) {
+							Backend::addNotice('Running ' . $hook['class'] . '::' . $hook['method'] . ' for hook ' . $hook_name . '-' . $type);
 						}
+						//Run it
+						$toret = call_user_func_array(array($hook['class'], $hook['method']), $parameters);
+						if (!is_null($toret)) {
+							$result = $toret;
+							if (count($parameters)) {
+								$parameters[$return_index] = $toret;
+							}
+						}
+					} else if (Controller::$debug) {
+						Backend::addNotice('Undefined Hook: ' . $hook['class'] . '::' . $hook['method']);
 					}
 				}
 			}
