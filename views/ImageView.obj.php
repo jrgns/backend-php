@@ -16,7 +16,6 @@
  */
 class ImageView extends FileView {
 	function __construct() {
-		parent::__construct();
 		$this->mode = 'image';
 		$this->mime_type = 'image/*';
 	}

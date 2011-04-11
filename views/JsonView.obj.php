@@ -18,7 +18,6 @@ class JsonView extends TextView {
 	private static $ob_level = 0;
 
 	function __construct() {
-		parent::__construct();
 		$this->mode     = 'json';
 		self::$ob_level = ob_get_level();
 		ob_start();

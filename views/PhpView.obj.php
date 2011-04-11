@@ -16,7 +16,6 @@
  */
 class PhpView extends TextView {
 	function __construct() {
-		parent::__construct();
 		$this->mode = 'php';
 	}
 		

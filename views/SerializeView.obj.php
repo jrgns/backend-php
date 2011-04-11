@@ -16,7 +16,6 @@
  */
 class SerializeView extends TextView {
 	function __construct() {
-		parent::__construct();
 		$this->mode = 'serialize';
 	}
 	

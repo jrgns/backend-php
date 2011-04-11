@@ -16,7 +16,6 @@
  */
 class CssView extends TextView {
 	function __construct() {
-		parent::__construct();
 		$this->mode = 'css';
 		$this->mime_type = 'text/css';
 	}

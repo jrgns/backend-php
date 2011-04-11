@@ -16,7 +16,6 @@
  */
 class AtomView extends View {
 	function __construct() {
-		parent::__construct();
 		$this->mode = 'atom';
 		$this->mime_type = 'application/atom+xml';
 	}

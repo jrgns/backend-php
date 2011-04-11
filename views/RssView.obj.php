@@ -16,7 +16,6 @@
  */
 class RssView extends View {
 	function __construct() {
-		parent::__construct();
 		$this->mode = 'rss';
 		$this->mime_type = 'application/xml';
 		$this->charset = 'utf-8';

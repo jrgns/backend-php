@@ -16,7 +16,6 @@
  */
 class CsvView extends View {
 	function __construct() {
-		parent::__construct();
 		$this->mode = 'csv';
 		$this->mime_type = 'application/csv';
 	}

@@ -142,7 +142,7 @@ class Controller {
 			self::parseQuery($query);
 			
 			//View
-			self::$view = self::getView();
+			self::$view = View::getInstance();
 			if (!(self::$view instanceof View)) {
 				self::$view = new View();
 				self::whoops('Unrecognized Request', array('message' => 'Could not find a View for the Request', 'code_hint' => 406));
@@ -336,83 +336,7 @@ class Controller {
 	
 	public static function setVar($name, $value) {
 		self::$payload[$name] = $value;
-	}
-	
-	/**
-	 * Decide on which view to use
-	 *
-	 * In an ideal world, we will just use the first mime type in the Http-Acccept header. But IE decided
-	 * to put a lot of crud in it's Accept header, so we need some hacks.
-	 *
-	 * Mode takes precedence over the extension, which takes precedence over the accept headers/
-	 *
-	 * @todo the extension screws up requests such as ?q=content/display/2.txt, as the id is now 2.txt, and not 2 as expected.
-	 * @todo Make the process on deciding a view better / extendable! Or, setup preferences that ignore the
-	 * Accept header, or just rely on what the client asks for (mode=[json|xml|xhtml|jpg])
-	 */
-	private static function getView() {
-		$view_name = false;
-		if (array_key_exists('mode', self::$query_vars)) {
-			$view_name = ucwords(self::$query_vars['mode']) . 'View';
-			if (!Component::isActive($view_name)) {
-				return false;
-			}
-		}
-		if (!$view_name) {
-			$default_precedence = array(
-				'text/html' => (float)1,
-				'application/xhtml+xml' => 0.9,
-				'application/xml' => 0,
-			);
-			$mime_ranges = Parser::accept_header(false, $default_precedence);
-			if ($mime_ranges) {
-				$types = array();
-				$main_types = array();
-				$view_name = false;
-				foreach($mime_ranges as $mime_type) {
-					$types[] = $mime_type['main_type'] . '/' . $mime_type['sub_type'];
-					$main_types[] = $mime_type['main_type'];
-					if (!$view_name) {
-						$name = class_name(str_replace('+', ' ', $mime_type['main_type']) . ' ' . str_replace('+', ' ', $mime_type['sub_type'])) . 'View';
-						if (Component::isActive($name)) {
-							$view_name = $name;
-						} else {
-							$name = class_name(str_replace('+', ' ', $mime_type['main_type'])) . 'View';
-							if (Component::isActive($name)) {
-								$view_name = $name;
-							} else {
-								$name = class_name(str_replace('+', ' ', $mime_type['sub_type'])) . 'View';
-								if (Component::isActive($name)) {
-									$view_name = $name;
-								}
-							}
-						}
-					}
-				}
-				if (in_array('image', $main_types) && in_array('application', $main_types)) {
-				//Probably IE
-					$view_name = 'HtmlView';
-				} else if (in_array('application/xml', $types) && in_array('application/xhtml+xml', $types) && in_array('text/html', $types)) {
-				//Maybe another confused browser that asks for XML and HTML
-					$view_name = 'HtmlView';
-				} else if (count($mime_ranges) == 1 && $mime_ranges[0]['main_type'] == '*' && $mime_ranges[0]['sub_type'] == '*') {
-					$view_name = Backend::getConfig('backend.default.view', 'HtmlView');
-				}
-			} else {
-				$view_name = Backend::getConfig('backend.default.view', 'HtmlView');
-			}
-		}
-		if ($view_name == 'View') {
-			//Unrecognized Request, abort
-			return false;
-		}
-		//We have an active view, or an HTML Request on an uninstalled installation
-		if (Component::isActive($view_name) || (!BACKEND_INSTALLED && $view_name == 'HtmlView')) {
-			$view = new $view_name();
-			return $view;
-		}
-		return false;
-	}
+	}	
 
 	private static function check_quotes() {
 		if (get_magic_quotes_gpc()) {

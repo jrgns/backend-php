@@ -16,7 +16,6 @@
  */
 class FileView extends View {
 	function __construct() {
-		parent::__construct();
 		$this->mode = 'file';
 	}
 	

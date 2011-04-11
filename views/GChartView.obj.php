@@ -19,7 +19,6 @@ class GChartView extends View {
 	public static $colors = array('FF0000', '00FF00', '0000FF');
 
 	function __construct() {
-		parent::__construct();
 		$this->mode = 'gchart';
 		$this->mime_type = 'image/png';
 	}

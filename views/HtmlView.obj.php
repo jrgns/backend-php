@@ -18,7 +18,6 @@ class HtmlView extends View {
 	private static $ob_level = 0;
 
 	function __construct() {
-		parent::__construct();
 		$this->mode      = 'html';
 		$this->mime_type = 'text/html';
 		$this->charset   = 'utf-8';
