@@ -25,6 +25,7 @@ class View {
 	
 	function __construct() {
 		trigger_error('Instansiated Factory Class. Use View::getInstance instead');
+		return false;
 	}
 	
 	/**
@@ -117,6 +118,36 @@ class View {
 			return $view;
 		}
 		return false;
+	}
+	
+	public function getTemplateLocation($filename) {
+		$folders = $this->getTemplateFolders();
+		foreach($folders as $folder) {
+			if (is_readable($folder . '/' . $filename)) {
+				return $folder . '/' . $filename;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Override / extend this function to provide extra folders to check in for templates.
+	 * Usefull to do themes in
+	 */
+	protected static function getTemplateFolders() {
+		$template_loc = Backend::getConfig('backend.templates.location', 'templates');
+		$folders      = array();
+		//SITE FOLDER
+		if (defined('SITE_FOLDER') && is_readable(SITE_FOLDER . '/' . $template_loc)) {
+			$folders[] = SITE_FOLDER . '/'. $template_loc;
+		//APP FOLDER
+		} else if (is_readable(APP_FOLDER . '/' . $template_loc)) {
+			$folders[] = APP_FOLDER . '/'. $template_loc;
+		//BACKEND_FOLDER
+		} else if (is_readable(BACKEND_FOLDER . '/' . $template_loc)) {
+			$folders[] = BACKEND_FOLDER . '/'. $template_loc;
+		}
+		return $folders;
 	}
 
 	/**

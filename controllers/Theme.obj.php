@@ -18,16 +18,29 @@
  * This is the controller for the table themes.
  */
 class Theme extends TableCtl {
-	public static function get($name = false) {
-		$theme = false;
-		if (Value::get('admin_installed', false)) {
-			$name = $name ? $name : Value::get('default_theme', 'backend');
-			$theme = Theme::retrieve($name);
-			if ($theme) {
-				$theme['path'] = str_replace(array('#BACKEND_FOLDER#', '#APP_FOLDER#', '#SITE_FOLDER#', '#WEB_FOLDER#'), array(BACKEND_FOLDER, APP_FOLDER, SITE_FOLDER, WEB_FOLDER), $theme['path']);
+	public static function hook_view_name($view_name) {
+		//TODO Check for a Theme here
+		
+		//Check for a Mobile version of the View
+		$mobile = false;
+		if (Component::isActive('Wurfl')) {
+			$device = Wurfl::getDevice();
+			if (($device && $device->getCapability('mobile_browser') != '') || array_key_exists('mobile', $_REQUEST)) {
+				$mobile = true;
 			}
 		}
-		return $theme;
+		if ($mobile && Component::isActive('Mobile' . $view_name)) {
+			$view_name = 'Mobile' . $view_name;
+		}
+		return $view_name;
+	}
+
+	public static function install(array $options = array()) {
+		$toret = parent::install($options);
+		$toret = Hook::add('update', 'post', get_called_class(),
+							array('description' => 'Check for enabled / requested themes, and change the view name accordingly.')
+						) && $toret;
+		return $toret;
 	}
 }
 
