@@ -41,7 +41,7 @@ class Query {
 	function __construct($action, $table, array $options = array()) {
 		$action = strtoupper($action);
 		if (!in_array($action, array('SELECT', 'INSERT', 'REPLACE', 'DELETE', 'UPDATE', 'SHOW'))) {
-			trigger_error('Unknown Query Action', E_USER_ERROR);
+			throw new Exception('Unknown Query Action');
 			return false;
 		}
 		if (array_key_exists('connection', $options) && $options['connection'] instanceof PDO) {
@@ -430,7 +430,7 @@ class Query {
 			}
 		}
 		if (empty($table)) {
-			trigger_error('Empty Table for Query', E_USER_ERROR);
+			throw new Exception('Empty Table for Query');
 		}
 		return self::enclose($table);
 	}
