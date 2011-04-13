@@ -383,7 +383,11 @@ class TableCtl extends AreaCtl {
 				Backend::addSuccess($object->getMeta('name') . ' Added');
 				$result = $object;
 			} else {
-				Backend::addError('Could not add ' . $object->getMeta('name'));
+				if (Controller::$debug && !empty($object->error_msg)) {
+					Backend::addError('Could not add ' . $object->getMeta('name') . ': ' . $object->error_msg);
+				} else {
+					Backend::addError('Could not add ' . $object->getMeta('name'));
+				}
 				$result = false;
 			}
 			if (!empty($object->error_msg)) {
@@ -471,13 +475,12 @@ class TableCtl extends AreaCtl {
 	}
 
 	public function action_replace() {
-		$toret = false;
 		$object = self::getObject(get_class($this));
 		if (!($object instanceof DBObject)) {
 			Controller::whoops('Invalid Object Returned');
 			return $object;
 		}
-		$toret = true;
+		$result = true;
 		//We need to check if the post data is valid in some way?
 		$data = $object->fromPost();
 		if (is_post()) {
@@ -485,13 +488,18 @@ class TableCtl extends AreaCtl {
 			if ($object->replace($data)) {
 				Hook::run('replace', 'post', array($data, $object));
 				Backend::addSuccess($object->getMeta('name') . ' Added');
-				$toret = $object;
+				$result = $object;
 			} else {
-				$toret = false;
-				Backend::addError('Could not replace ' . $object->getMeta('name'));
+				if (Controller::$debug && !empty($object->error_msg)) {
+					Backend::addError('Could not replace ' . $object->getMeta('name') . ': ' . $object->error_msg);
+				} else {
+					Backend::addError('Could not replace ' . $object->getMeta('name'));
+				}
+				$result = false;
 			}
 		}
 		Backend::add('obj_values', $data);
+		return $result;
 	}
 	
 	public function html_replace($result) {
@@ -571,7 +579,6 @@ class TableCtl extends AreaCtl {
 	 * Action for updating a record in an area
 	 */
 	public function action_update($id) {
-		$toret = false;
 		$object = self::getObject(get_class($this), $id);
 		if (!($object instanceof DBObject)) {
 			Controller::whoops('Invalid Object Returned');
@@ -591,7 +598,11 @@ class TableCtl extends AreaCtl {
 				$result = $object;
 				Backend::addSuccess($object->getMeta('name') . ' Modified');
 			} else {
-				Backend::addError('Could not update ' . $object->getMeta('name'));
+				if (Controller::$debug && !empty($object->error_msg)) {
+					Backend::addError('Could not update ' . $object->getMeta('name') . ': ' . $object->error_msg);
+				} else {
+					Backend::addError('Could not update ' . $object->getMeta('name'));
+				}
 				$result = false;
 			}
 		} else {
