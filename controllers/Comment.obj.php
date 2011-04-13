@@ -52,12 +52,10 @@ class Comment extends TableCtl {
 	public function action_create() {
 		if (is_post()) {
 			$parameters = get_previous_parameters();
-			$data = array(
-				'foreign_table' => Controller::getVar('foreign_table'),
-				'foreign_id'    => Controller::getVar('foreign_id'),
-			);
-			$object['foreign_id']    = empty($data['foreign_id'])    ? reset($parameters)              : $data['foreign_id'];
-			$object['foreign_table'] = empty($data['foreign_table']) ? table_name(get_previous_area()) : $data['foreign_table'];
+			$object = new CommentObj();
+			$object = $object->fromPost();
+			$object['foreign_id']    = empty($object['foreign_id'])    ? reset($parameters)              : $object['foreign_id'];
+			$object['foreign_table'] = empty($object['foreign_table']) ? table_name(get_previous_area()) : $object['foreign_table'];
 			//If we don't have a logged in user, create a dummy account
 			if (!BackendAccount::checkUser()) {
 				$account_class = BackendAccount::getName();
@@ -115,6 +113,7 @@ END;
 					break;
 				}
 			}
+			$object = array_filter($object, create_function('$var', 'return !is_null($var);'));
 			Controller::setVar('obj', $object);
 		}
 		return parent::action_create();

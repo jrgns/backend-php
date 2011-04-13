@@ -77,7 +77,7 @@ class TableCtl extends AreaCtl {
 	 */
 	public function action_display($id) {
 		$id = Hook::run('table_display', 'pre', array($id), array('toret' => $id));
-		$object = self::action_read($id, 'dbobject');
+		$object = $this->action_read($id, 'dbobject');
 		$object = Hook::run('table_display', 'post', array($object), array('toret' => $object));
 		return $object;
 	}
@@ -167,9 +167,9 @@ class TableCtl extends AreaCtl {
 	 * Action for listing an area's records
 	 */
 	public function action_list($start, $count, array $options = array()) {
-		$p_options = API::extract(self::define_list());
+		$p_options = API::extract(call_user_func(array(get_called_class(), 'define_list')));
 		$options   = array_merge($options, $p_options);
-		return self::do_list($start, $count, $options);
+		return call_user_func(array(get_called_class(), 'do_list'), $start, $count, $options);
 	}
 	
 	public static function do_list($start, $count, array $options = array()) {
@@ -303,7 +303,7 @@ class TableCtl extends AreaCtl {
 			$options['parameters'] = array();
 		}
 		$options['parameters'][':term'] = $term;
-		return self::do_list($start, $count, $options);
+		return call_user_func(array(get_called_class(), 'do_list'), $start, $count, $options);
 	}
 	
 	public function html_search($object) {
@@ -383,7 +383,11 @@ class TableCtl extends AreaCtl {
 				Backend::addSuccess($object->getMeta('name') . ' Added');
 				$result = $object;
 			} else {
-				Backend::addError('Could not add ' . $object->getMeta('name'));
+				if (Controller::$debug && !empty($object->error_msg)) {
+					Backend::addError('Could not add ' . $object->getMeta('name') . ': ' . $object->error_msg);
+				} else {
+					Backend::addError('Could not add ' . $object->getMeta('name'));
+				}
 				$result = false;
 			}
 			if (!empty($object->error_msg)) {
@@ -471,13 +475,12 @@ class TableCtl extends AreaCtl {
 	}
 
 	public function action_replace() {
-		$toret = false;
 		$object = self::getObject(get_class($this));
 		if (!($object instanceof DBObject)) {
 			Controller::whoops('Invalid Object Returned');
 			return $object;
 		}
-		$toret = true;
+		$result = true;
 		//We need to check if the post data is valid in some way?
 		$data = $object->fromPost();
 		if (is_post()) {
@@ -485,13 +488,18 @@ class TableCtl extends AreaCtl {
 			if ($object->replace($data)) {
 				Hook::run('replace', 'post', array($data, $object));
 				Backend::addSuccess($object->getMeta('name') . ' Added');
-				$toret = $object;
+				$result = $object;
 			} else {
-				$toret = false;
-				Backend::addError('Could not replace ' . $object->getMeta('name'));
+				if (Controller::$debug && !empty($object->error_msg)) {
+					Backend::addError('Could not replace ' . $object->getMeta('name') . ': ' . $object->error_msg);
+				} else {
+					Backend::addError('Could not replace ' . $object->getMeta('name'));
+				}
+				$result = false;
 			}
 		}
 		Backend::add('obj_values', $data);
+		return $result;
 	}
 	
 	public function html_replace($result) {
@@ -571,7 +579,6 @@ class TableCtl extends AreaCtl {
 	 * Action for updating a record in an area
 	 */
 	public function action_update($id) {
-		$toret = false;
 		$object = self::getObject(get_class($this), $id);
 		if (!($object instanceof DBObject)) {
 			Controller::whoops('Invalid Object Returned');
@@ -591,7 +598,11 @@ class TableCtl extends AreaCtl {
 				$result = $object;
 				Backend::addSuccess($object->getMeta('name') . ' Modified');
 			} else {
-				Backend::addError('Could not update ' . $object->getMeta('name'));
+				if (Controller::$debug && !empty($object->error_msg)) {
+					Backend::addError('Could not update ' . $object->getMeta('name') . ': ' . $object->error_msg);
+				} else {
+					Backend::addError('Could not update ' . $object->getMeta('name'));
+				}
 				$result = false;
 			}
 		} else {
@@ -985,7 +996,7 @@ class TableCtl extends AreaCtl {
 		$class = get_called_class();
 		if ($class && class_exists($class, true)) {
 			if ($install_model) {
-				$toret = self::installModel($class . 'Obj', $options);
+				$toret = call_user_func(array(get_called_class(), 'installModel'), $class . 'Obj', $options);
 			}
 		}
 		return $toret;
