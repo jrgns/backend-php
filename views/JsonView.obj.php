@@ -21,6 +21,7 @@ class JsonView extends TextView {
 		parent::__construct();
 		$this->mode     = 'json';
 		self::$ob_level = ob_get_level();
+		ob_start();
 	}
 	
 	public static function hook_output($to_print) {
@@ -36,7 +37,7 @@ class JsonView extends TextView {
 		$object->content = Backend::getContent();
 		$last = '';
 		while (ob_get_level() > self::$ob_level) {
-			//Ending the ob_start from JsonView::hook_post_init
+			//Ending the ob_start from __construct
 			$last .= ob_get_clean();
 		}
 		$object->output  = $last;

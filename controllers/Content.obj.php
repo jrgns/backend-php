@@ -124,6 +124,17 @@ class Content extends CommentedController {
 				//SITE FOLDER too?
 				}
 			}
+			Backend::add('meta_description', plain(self::createPreview($content->object->body, false)));
+			$http_equiv = Backend::get('meta_http_equiv', array());
+			$http_equiv['Last-Modified'] = $content->object->modified;
+			Backend::add('meta_http_equiv', $http_equiv);
+			if (!headers_sent()) {
+				$max_age = Value::get('ContentMaxAge', 86400);
+				header('Last-Modified: ' . $content->object->modified);
+				header('Expires: ' . gmdate('r', strtotime('+1 day')));
+				header('Cache-Control: max-age=' . $max_age . ', must-revalidate');
+				header('Pragma: cache');
+			}
 		}
 		$content = parent::html_display($content);
 		return $content;
@@ -160,13 +171,18 @@ class Content extends CommentedController {
 	
 	public static function createPreview($content, $ellips = true) {
 		$pattern = '/(<br\/?><br\/?>|<!--break-->)/';
-		$content = current(preg_split($pattern, $content, 2));
-		if (is_string($ellips)) {
-			return $content . $ellips;
-		} else if ($ellips) {
-			return $content . '&hellip;';
+		$preview = current(preg_split($pattern, $content, 2));
+		if ($preview == $content) {
+			$preview = preg_split("/\n\n|\r\n\r\n|\n\r\n\r/", $content);
+			$preview = reset($preview);
 		}
-		return $content;
+		
+		if (is_string($ellips)) {
+			return $preview . $ellips;
+		} else if ($ellips) {
+			return $preview . '&hellip;';
+		}
+		return $preview;
 	}
 
 	/**
