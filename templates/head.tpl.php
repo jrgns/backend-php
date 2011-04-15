@@ -17,3 +17,8 @@
 				<meta property="<?php echo $name ?>" content="<?php echo $value ?>"/>
 			<?php endforeach; ?>
 		<?php endif; ?>
+		<?php if (!empty($meta_http_equiv) && is_array($meta_http_equiv)): ?>
+			<?php foreach($meta_http_equiv as $name => $value): ?>
+				<meta http-equiv="<?php echo $name ?>" content="<?php echo $value ?>"/>
+			<?php endforeach; ?>
+		<?php endif; ?>
