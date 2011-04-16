@@ -446,6 +446,9 @@ class DBObject {
 		}
 		$data = $this->validate($data, 'update', $options);
 		if (!$data) {
+			if (Controller::$debug) {
+				Backend::addError($this->getMeta('name') . ' Validation failed');
+			}
 			return false;
 		}
 		$data = $this->process($data, 'in');
