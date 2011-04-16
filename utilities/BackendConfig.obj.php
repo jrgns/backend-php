@@ -31,7 +31,14 @@ class BackendConfig {
 			$config = parse_ini_file($config, true);
 			self::__construct($config, $site_state);
 		} else {
-			die('Unknown config: ' . $config);
+			//Default values
+			$this->config['application'] = array(
+				'Title'          => "Backend",
+				'Moto'           => "Something pithy and funny...",
+				'HelpBoxContent' => "Backend aims to be an easy to use data manipulator and translator for the Web Developer.",
+				'author'         => "J Jurgens du Toit (jrgns at jrgns dot net)",
+				'description'    => "A PHP Backend that reduces coding and makes life easier for a programmer",
+			);
 		}
 	}
 	
