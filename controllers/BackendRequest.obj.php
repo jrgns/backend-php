@@ -20,7 +20,7 @@
 class BackendRequest extends TableCtl {
 	public static function hook_start() {
 		$data = array(
-			'mode' => Controller::$view->mode instanceof View ? Controller::$view->mode : 'unknown',
+			'mode' => Controller::$view instanceof View ? Controller::$view->mode : 'unknown',
 		);
 		$BR = new BackendRequestObj();
 		return $BR->create($data);
