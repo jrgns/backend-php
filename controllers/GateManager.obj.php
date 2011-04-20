@@ -168,7 +168,7 @@ class GateManager extends AreaCtl {
 			Links::add('All Permissions', '?q=gate_manager/permissions', 'secondary');
 
 		} else {
-			Backend::add('Sub Title', Backend::getConfig('application.Title') . ' Permissions');
+			Backend::add('Sub Title', ConfigValue::get('Title') . ' Permissions');
 		}
 		Backend::addContent(Render::renderFile('gate_manager.permissions.tpl.php', (array)$result));
 	}

@@ -106,10 +106,10 @@ class Controller {
 				@session_start();
 			}
 
-			date_default_timezone_set(Backend::getConfig('application.timezone', 'Africa/Johannesburg'));
+			date_default_timezone_set(ConfigValue::get('Timezone', 'Africa/Johannesburg'));
 
 			self::check_quotes();
-			self::$salt = Backend::getConfig('application.salt', 'Change this to something random!');
+			self::$salt = ConfigValue::get('Salt', 'Change this to something random!');
 
 			//TODO jrgns: Don't know if I like this here...
 			$user = BackendAccount::checkUser();
@@ -123,7 +123,7 @@ class Controller {
 						break;
 				}
 			}
-			if ($config_debug = Backend::getConfig('application.debug', false)) {
+			if ($config_debug = ConfigValue::get('Debug', false)) {
 				self::$debug = $config_debug;
 			}
 
@@ -267,7 +267,7 @@ class Controller {
 				if ($last_error['type'] === E_ERROR) {
 					$id = send_email(
 						Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)),
-						'Fatal PHP Error in ' . Backend::getConfig('application.Title', 'Application'),
+						'Fatal PHP Error in ' . ConfigValue::get('Title', 'Application'),
 						'Error: ' . var_export($last_error, true) . PHP_EOL
 						. 'Query: ' . self::$query_string . PHP_EOL
 						. 'Payload: ' . var_export(self::$payload, true)

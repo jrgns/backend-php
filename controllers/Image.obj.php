@@ -35,9 +35,9 @@ class Image extends File {
 	
 	private function feed_list($result, $mode) {
 		if ($result instanceof DBObject) {
-			Backend::add('title', Backend::getConfig('application.Title'));
+			Backend::add('title', ConfigValue::get('Title'));
 			Backend::add('link', SITE_LINK . '?q=content');
-			Backend::add('description', Backend::getConfig('application.description'));
+			Backend::add('description', ConfigValue::get('Description'));
 			if (!empty($result->list) && is_array($result->list)) {
 				$list = array();
 				foreach($result->list as $item) {

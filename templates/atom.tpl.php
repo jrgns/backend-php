@@ -5,7 +5,7 @@
 	<link href="<?php echo $link ?>" rel="self" />
 	<id><?php echo $link ?></id>
 	<updated>#AtomLastDate#</updated>
-	<?php $author = Backend::getConfig('application.author'); ?>
+	<?php $author = ConfigValue::get('Author'); ?>
 	<?php if (is_string($author)): ?>
 		<author><name><?php echo $author ?></name></author>
 	<?php elseif (is_array($author)): ?>

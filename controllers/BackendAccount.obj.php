@@ -99,7 +99,7 @@ class BackendAccount extends TableCtl {
 	function html_login($result) {
 		switch (true) {
 		case $result instanceof DBObject:
-			Backend::addSuccess('Welcome to ' . Backend::getConfig('application.Title') . '!');
+			Backend::addSuccess('Welcome to ' . ConfigValue::get('Title') . '!');
 			if (!empty($_SESSION['bookmark'])) {
 				$bookmark = $_SESSION['bookmark'];
 				unset($_SESSION['bookmark']);
@@ -218,7 +218,7 @@ class BackendAccount extends TableCtl {
 	}
 	
 	public function html_signup($result) {
-		Backend::add('Sub Title', 'Signup to ' . Backend::getConfig('application.Title'));
+		Backend::add('Sub Title', 'Signup to ' . ConfigValue::get('Title'));
 		switch (true) {
 		case ($result instanceof DBObject):
 			//Successful signup, redirect
@@ -353,7 +353,7 @@ class BackendAccount extends TableCtl {
 	
 	protected function confirmUser($object) {
 		$url = SITE_LINK . '?q=' . class_for_url(self::getName()) . '/confirm/' . $object->array['salt'];
-		$app_name = Backend::getConfig('application.Title');
+		$app_name = ConfigValue::get('Title');
 		$message = <<< END
 Hi {$object->array['name']}!
 
