@@ -279,7 +279,20 @@ class Render {
 	}
 	
 	public static function install_check() {
-		return self::checkCacheFolder();
+		if (!self::checkCacheFolder()) {
+			if (function_exists('posix_getgrgid') && function_exists('posix_getegid')) {
+				if ($group = posix_getgrgid(posix_getegid())) {
+					$group = $group['name'];
+				}
+			}
+			$values = array(
+				'folder' => self::$cache_folder,
+				'group'  => isset($group) ? $group : false,
+			);
+			Backend::addContent(Render::renderFile('render.fix_cache_folder.tpl.php', $values));
+			return false;
+		}
+		return true;
 	}
 }
 
