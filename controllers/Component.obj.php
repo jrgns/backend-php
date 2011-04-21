@@ -42,7 +42,8 @@ class Component extends TableCtl {
 	
 	public static function fromFolder() {
 		$toret = array();
-		$base_c = self::getBaseComponents(array('filenames' => true));
+		$base_c = self::getCoreComponents();
+		$base_c = array_flatten($base_c, 'name', 'filename');
 		$toret  = array_merge($toret, files_from_folder(BACKEND_FOLDER . '/controllers/', array('prepend_folder' => true)));
 		$toret  = array_merge($toret, files_from_folder(APP_FOLDER . '/controllers/', array('prepend_folder' => true)));
 		$toret  = array_merge($toret, files_from_folder(BACKEND_FOLDER . '/views/', array('prepend_folder' => true)));
@@ -67,66 +68,40 @@ class Component extends TableCtl {
 		return true;
 	}
 
-	private static function getBaseComponents() {
-		$toret = array();
-		$toret['Backend']     = '/classes/Backend.obj.php';
-
-		$toret['Controller']  = '/classes/Controller.obj.php';
-		$toret['Render']      = '/classes/Render.obj.php';
-		$toret['View']        = '/classes/View.obj.php';
-		$toret['GateKeeper']  = '/classes/GateKeeper.obj.php';
-
-		$toret['Component']   = '/controllers/Component.obj.php';
-		$toret['Hook']        = '/controllers/Hook.obj.php';
-
-		$toret['Role']        = '/controllers/Role.obj.php';
-		$toret['Assignment']  = '/controllers/Assignment.obj.php';
-		$toret['Permission']  = '/controllers/Permission.obj.php';
-		$toret['GateManager'] = '/controllers/GateManager.obj.php';
-		$toret['Admin']       = '/controllers/Admin.obj.php';
-		$toret['Content']     = '/controllers/Content.obj.php';
-		$toret['Value']       = '/controllers/Value.obj.php';
-		$toret['BackendAccount'] = '/controllers/BackendAccount.obj.php';
-		$toret['Account']     = '/controllers/Account.obj.php';
-		$toret['Home']        = '/controllers/Home.obj.php';
-		//Views
-		$toret['HtmlView']    = '/views/HtmlView.obj.php';
-		$toret['ImageView']   = '/views/ImageView.obj.php';
-		$toret['JsonView']    = '/views/JsonView.obj.php';
-		$toret['CssView']     = '/views/CssView.obj.php';
-		$toret['SerializeView'] = '/views/SerializeView.obj.php';
-		$toret['PhpView']     = '/views/PhpView.obj.php';
-		$toret['AtomView']    = '/views/AtomView.obj.php';
-		$toret['RssView']     = '/views/RssView.obj.php';
-		$toret['ChunkView']   = '/views/ChunkView.obj.php';
-		return $toret;
+	private static function getCoreComponents(array $options = array()) {
+		return include(BACKEND_FOLDER . '/stuph/core_classes.inc.php');
 	}
 	
 	public static function getActive($refresh = false) {
+		if (!BACKEND_INSTALLED) {
+			//Return the core components
+			return self::getCoreComponents();
+		}
 		$toret = Backend::get('Component::active', false);
 		if (!$toret || $refresh) {
 			$component = new ComponentObj();
 			list ($query, $params) = $component->getSelectSQL(array('conditions' => '`active` = 1'));
-			$query = new CustomQuery($query);
-			$toret = $query->fetchAll($params);
-			Backend::add('Component::active', $toret);
+			if ($query) {
+				$query = new CustomQuery($query);
+				$toret = $query->fetchAll($params);
+				Backend::add('Component::active', $toret);
+			}
 		}
 		return $toret;
 	}
 	
 	public static function isActive($name) {
-		$toret = false;
 		if (Value::get('admin_installed', false)) {
 			$name = preg_replace('/Obj$/', '', $name);
 			$active = self::getActive();
 			if ($active) {
 				$active = array_flatten($active, 'id', 'name');
-				$toret = in_array($name, $active);
+				return in_array($name, $active);
 			}
 		} else if ($name == 'Admin') {
-			$toret = true;
+			return true;
 		}
-		return $toret;
+		return false;
 	}
 	
 	public static function hook_init() {
@@ -153,7 +128,7 @@ class Component extends TableCtl {
 	
 	private static function add($filename) {
 		$name = preg_replace('/\.obj\.php$/', '', basename($filename));
-		$active = in_array($name, array_keys(self::getBaseComponents())) ||
+		$active = in_array($name, array_flatten(self::getCoreComponents(), null, 'name')) ||
 				  $name == Backend::getConfig('backend.application.class');
 
 		$data = array(
