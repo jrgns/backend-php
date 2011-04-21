@@ -83,10 +83,10 @@ class Query {
 			} else {
 				$stmt = $this->connection->prepare($this->query);
 				if ($stmt) {
+					$this->last_stmt   = $stmt;
+					$this->last_params = $parameters;
 					if ($stmt->execute($parameters)) {
 						$toret             = $stmt;
-						$this->last_stmt   = $stmt;
-						$this->last_params = $parameters;
 					} else {
 						$error_info = $stmt->errorInfo();
 						
@@ -357,7 +357,7 @@ class Query {
 		}
 		return $result;
 	}
-
+	
 	public function setQuery($query, array $options = array()) {
 		if (array_key_exists('connection', $options) && $options['connection'] instanceof PDO) {
 			$this->connection = $options['connection'];
@@ -465,6 +465,42 @@ class Query {
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * Get the error info of the last executed statement
+	 *
+	 * @param object The error statement to return the info on. Defaults to the last executed statement
+	 */
+	public function getError($statement = false) {
+		$statement = $statement ? $statement : $this->last_stmt;
+		if (!$statement) {
+			return null;
+		}
+		return $statement->errorInfo();
+	}
+	
+	/**
+	 * Get the error string of the last executed statement
+	 *
+	 * @param object The error statement to return the info on. Defaults to the last executed statement	 
+	 * @param boolean If a verbose or simple error string should be returned. Defaults to verbose.
+	 */
+	public function getErrorString($statement = false, $verbose = true) {
+		$error_info = $this->getError($statement);
+		if (!$error_info) {
+			return $error_info;
+		}
+		$error = array('Error executing Statement');
+		if (!empty($error_info[1])) {
+			$error[] =  '(' . $error_info[1] . ')';
+		}
+		if ($verbose) {
+			if (!empty($error_info[2])) {
+				$error[] = $error_info[2];
+			}
+		}
+		return implode(' ', $error);
 	}
 	
 	public function __toString() {
