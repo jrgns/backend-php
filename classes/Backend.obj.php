@@ -575,7 +575,24 @@ class Backend {
 	}
 	
 	public static function __exception_handler($exception) {
-		echo "Uncaught exception: " , $exception->getMessage(), "\n";
+		if (Controller::$debug) {
+			$trace = array_reverse($exception->getTrace());
+			echo '<ol>';
+			foreach($trace as $item) {
+				echo '<li>';
+				if (isset($item['file'])) echo $item['file'];
+				if (isset($item['line'])) echo '('.$item['line'].') called ';
+				if (isset($item['class'])) echo '<strong>'.$item['class'].'</strong>->';
+				if (isset($item['function'])) echo '<i>'.$item['function'].'</i>';
+				echo '</li>';
+			}
+			echo '</ol>';
+		}
+		echo "Uncaught exception: " , $exception->getMessage(), ' in ', $exception->getFile(), ' line ', $exception->getLine(), "\n";
+		if (defined('BACKEND_INSTALLED') && BACKEND_INSTALLED && Component::isActive('BackendError')) {
+			BackendError::add($exception->getCode(), "Uncaught exception: " . $exception->getMessage(), $exception->getFile(), $exception->getLine());
+		}
+		//Execution ends here
 	}
 	
 	private static function loadCoreClass($classname) {
