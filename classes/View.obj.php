@@ -113,7 +113,7 @@ class View {
 		if (Component::isActive($view_name) || (!BACKEND_INSTALLED && $view_name == 'HtmlView')) {
 			$view = new $view_name();
 			if (!headers_sent()) {
-				header('X-Backend-View: ' . get_class($this));
+				header('X-Backend-View: ' . $view_name);
 			}
 			return $view;
 		}

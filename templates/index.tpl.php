@@ -43,7 +43,9 @@
 					<?php else: ?>
 						{tpl:secondary_links.tpl.php}
 					<?php endif; ?>
-					{tpl:loginout.tpl.php}
+					<?php if (Component::isActive(BackendAccount::getName())): ?>
+						{tpl:loginout.tpl.php}
+					<?php endif; ?>
 				</div>
 				<?php if ($debug): ?>
 					<div id="lastcontent" class="notice span-23 last">

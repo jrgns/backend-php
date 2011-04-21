@@ -26,36 +26,39 @@ class Render {
 			self::$do_cache = Backend::getConfig('backend.application.renderer.use_cache', true);
 			
 			if (self::$do_cache) {
-				if (defined('SITE_FOLDER')) {
-					self::$cache_folder = SITE_FOLDER . '/cache/';
-				} else {
-					self::$cache_folder = APP_FOLDER . '/cache/';
-				}
-				//Check the cache folder
-				if (!file_exists(self::$cache_folder)) {
-					if (@!mkdir(self::$cache_folder, 0755)) {
-						if (SITE_STATE != 'production') {
-							Backend::addError('Cannot create cache folder ' . self::$cache_folder);
-						} else {
-							Backend::addError('Cannot create cache folder');
-						}
-						self::$do_cache = false;
-						self::$init = true;
-						return;
-					}
-				}
-
-				if (!is_writable(self::$cache_folder)) {
-					self::$do_cache = false;
-					if (SITE_STATE != 'production') {
-						Backend::addError('Render::Cache folder unwritable (' . self::$cache_folder . ')');
-					} else {
-						Backend::addError('Render::Cache folder unwritable');
-					}
-				}
+				self::$do_cache = self::checkCacheFolder();
 			}
 			self::$init = true;
 		}
+	}
+	
+	private static function checkCacheFolder() {
+		if (defined('SITE_FOLDER')) {
+			self::$cache_folder = SITE_FOLDER . '/cache/';
+		} else {
+			self::$cache_folder = APP_FOLDER . '/cache/';
+		}
+
+		//Check the cache folder
+		if (!file_exists(self::$cache_folder)) {
+			if (@!mkdir(self::$cache_folder, 0755)) {
+				if (SITE_STATE != 'production') {
+					Backend::addError('Cannot create cache folder ' . self::$cache_folder);
+				} else {
+					Backend::addError('Cannot create cache folder');
+				}
+				return false;
+			}
+		}
+		if (!is_writable(self::$cache_folder)) {
+			if (SITE_STATE != 'production') {
+				Backend::addError('Render::Cache folder unwritable (' . self::$cache_folder . ')');
+			} else {
+				Backend::addError('Render::Cache folder unwritable');
+			}
+			return false;
+		}
+		return true;
 	}
 
 	public static function createTemplate($destination, $origin) {
@@ -274,4 +277,9 @@ class Render {
 	public static function getTemplateVarName($name) {
 		return '#' . $name . '#';
 	}
+	
+	public static function install_check() {
+		return self::checkCacheFolder();
+	}
 }
+
