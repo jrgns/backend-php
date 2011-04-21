@@ -27,7 +27,7 @@ class BackendSystemLockObj extends BackendLockObj {
 		}
 		$result = parent::get($name, $type, $expire);
 		if ($result) {
-			Value::set('lock_password_' . $this->array['name'], $password);
+			ConfigValue::set('LockPassword_' . $this->array['name'], $password);
 		}
 		
 	}
@@ -35,7 +35,7 @@ class BackendSystemLockObj extends BackendLockObj {
 	public function check() {
 		$result = parent::check();
 		if ($result === false && $password = Controller::getVar('lock_password_' . $this->array['name'])) {
-			if ($password == Value::get('lock_password_' . $this->array['name'], false)) {
+			if ($password == ConfigValue::get('LockPassword_' . $this->array['name'], false)) {
 				return true;
 			}
 		}

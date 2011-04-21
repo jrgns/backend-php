@@ -235,11 +235,11 @@ function get_random($options = array()) {
 
 function reseed() {
 	//Get and generate new seed
-	$seed = Value::get('seed', mt_rand());
+	$seed = ConfigValue::get('Seed', mt_rand());
 	srand($seed);
 	//$new_seed = floor($seed / 4) . floor(mt_rand() / 4);
 	$new_seed = mt_rand();
-	Value::set('seed', $new_seed);
+	ConfigValue::set('Seed', $new_seed);
 }
 
 if (!function_exists('send_email')) {
