@@ -94,10 +94,10 @@ class View {
 				//Maybe another confused browser that asks for XML and HTML
 					$view_name = 'HtmlView';
 				} else if (count($mime_ranges) == 1 && $mime_ranges[0]['main_type'] == '*' && $mime_ranges[0]['sub_type'] == '*') {
-					$view_name = Backend::getConfig('backend.default.view', 'HtmlView');
+					$view_name = Backend::getConfig('settings.DefaultView', 'HtmlView');
 				}
 			} else {
-				$view_name = Backend::getConfig('backend.default.view', 'HtmlView');
+				$view_name = Backend::getConfig('settings.DefaultView', 'HtmlView');
 			}
 		}
 
@@ -135,7 +135,7 @@ class View {
 	 * Usefull to do themes in
 	 */
 	protected static function getTemplateFolders() {
-		$template_loc = Backend::getConfig('backend.templates.location', 'templates');
+		$template_loc = Backend::getConfig('settings.TemplateLocation', 'templates');
 		$folders      = array();
 		//SITE FOLDER
 		if (defined('SITE_FOLDER') && is_readable(SITE_FOLDER . '/' . $template_loc)) {
@@ -174,7 +174,7 @@ class View {
 				$data = $controller->$mode_method($data);
 			}
 			//Application->view
-			$app_class = Backend::getConfig('backend.application.class', 'Application');
+			$app_class = Backend::getConfig('settings.Class', 'Application');
 			if (is_callable(array($app_class, $mode_method))) {
 				if (Controller::$debug) {
 					Backend::addNotice('Running ' . $app_class . '::' . $mode_method);

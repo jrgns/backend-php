@@ -17,41 +17,31 @@ class BackendConfig {
 	protected $config = array();
 
 	public function __construct($config, $site_state = 'production') {
-		$this->config = array();
-		if (is_array($config)) {
-			foreach($config as $section => $values) {
-				$sections = explode(':', $section);
-				if (in_array($site_state, $sections) || $section == 'application') {
-					foreach($config[$section] as $name => $value) {
-						$this->config = array_merge_recursive($this->config, self::buildValue($name, $value));
-					}
-				}
-			}
-		} else if (is_string($config) && file_exists($config)) {
-			$config = parse_ini_file($config, true);
-			self::__construct($config, $site_state);
+		if (file_exists($config)) {
+			$this->config = parse_ini_file($config, true);
 		} else {
 			//Default values
+			//Settings are used to manipulate how the application behaves
+			$this->config['settings'] = array(
+				'Class'            => 'Application',
+				'DefaultView'      => 'HtmlView',
+				'UseCache'         => true,
+				'TemplateLocation' => 'templates'
+			);
+			//Application values are used in and around the application, and is often presented to the end user.
 			$this->config['application'] = array(
-				'Title'          => "Backend",
-				'Moto'           => "Something pithy and funny...",
-				'HelpBoxContent' => "Backend aims to be an easy to use data manipulator and translator for the Web Developer.",
-				'author'         => "J Jurgens du Toit (jrgns at jrgns dot net)",
-				'description'    => "A PHP Backend that reduces coding and makes life easier for a programmer",
+				'Title'          => 'Backend',
+				'Moto'           => 'Something pithy and funny...',
+				'HelpBoxContent' => 'Backend aims to be an easy to use data manipulator and translator for the Web Developer.',
+				'Description'    => 'A PHP Backend that reduces coding and makes life easier for a programmer',
+			);
+			//Authoer values are used in and around the application, nad is often presented to the end user.
+			$this->config['author'] = array(
+				'Name'    => 'J Jurgens du Toit',
+				'Email'   => 'jrgns@jadeit.co.za',
+				'Website' => 'http://jrgns.net',
 			);
 		}
-	}
-	
-	private static function buildValue($names, $value, array $config = array()) {
-		if (is_string($names)) {
-			$names = explode('.', $names);
-		}
-		if (count($names) > 0) {
-			$config[array_shift($names)] = self::buildValue($names, $value, $config);
-		} else {
-			$config = $value;
-		}
-		return $config;
 	}
 	
 	public function getValue($names, $default = null) {
@@ -59,18 +49,54 @@ class BackendConfig {
 		if (is_string($names)) {
 			$names = explode('.', $names);
 		}
-		$value = $this->config;
-		if (is_array($value)) {
-			foreach($names as $name) {
-				if (array_key_exists($name, $value)) {
-					$value = $value[$name];
-				} else {
-					$toret = false;
-					break;
-				}
+		if (count($names) > 2) {
+			return null;
+		}
+		if (count($names) == 1) {
+			$section = reset($names);
+			if (array_key_exists($section, $this->config)) {
+				return $this->config[$section];
+			}
+		} else {
+			list($section, $name) = $names;
+			if (array_key_exists($section, $this->config)
+				&& array_key_exists($name, $this->config[$section])) {
+					return $this->config[$section][$name];
 			}
 		}
-		return $toret ? $value : $default;
+		return $default;
+	}
+	
+	public function setValue($names, $value, $write_file = true) {
+		if (is_string($names)) {
+			$names = explode('.', $names);
+		}
+		if (is_string($names)) {
+			$names = explode('.', $names);
+		}
+		if (count($names) > 2) {
+			return null;
+		}
+
+		foreach(array_reverse($names) as $name) {
+			$value = array($name => $value);
+		}
+		$this->config = array_replace_recursive($this->config, $value);
+		if ($write_file) {
+			return (bool)$this->writeFile();
+		}
+		return true;
+	}
+	
+	public function writeFile() {
+		$location = Backend::getConfigFileLocation();
+		if ($result = write_ini_file($this->config, $location, true)) {
+			$content = file_get_contents($location);
+			//Some added security
+			$content = ';<?php die(); ?>' . PHP_EOL . $content;
+			$result = file_put_contents($location, $content);
+		}
+		return $result;
 	}
 	
 	public static function asArray() {

@@ -19,9 +19,10 @@ class Admin extends AreaCtl {
 	/**
 	 *	Do some checks before the install commences
 	 */
-	public function get_pre_install() {
+	public function action_pre_install() {
 		$components = Component::getActive();
 		if (!$components) {
+			Backend::addError('Could not get components to check');
 			return false;
 		}
 
@@ -56,23 +57,23 @@ class Admin extends AreaCtl {
 		}
 		$install_log_file = 'install_log_' . date('Ymd_His') . '.txt';
 		Backend::add('log_to_file', $install_log_file);
-		if (!Component::pre_install()) {
-			Backend::addError('Could not pre install Component');
-			return false; 
-		}
-		if (!Permission::pre_install()) {
-			Backend::addError('Could not pre install Permission');
+
+		$components = Component::getActive();
+		if (!$components) {
+			Backend::addError('Could not get components to pre install');
 			return false;
 		}
-		if (!Hook::pre_install()) {
-			Backend::addError('Could not pre install Hook');
-			return false;
+		$components = array_flatten($components, null, 'name');
+		foreach($components as $component) {
+			if (class_exists($component, true) && method_exists($component, 'pre_install')) {
+				Backend::addNotice('Pre Installing ' . $component);
+				if (!call_user_func_array(array($component, 'pre_install'), array())) {
+					Backend::addError('Error on pre install for ' . $component);
+					return false;
+				}
+			}
 		}
-		if (!Value::pre_install()) {
-			Backend::addError('Could not pre install Value');
-			return false;
-		}
-	
+
 		$original = ConfigValue::get('LogToFile', false);
 		ConfigValue::set('LogToFile', $install_log_file);
 

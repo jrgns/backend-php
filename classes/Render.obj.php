@@ -23,7 +23,7 @@ class Render {
 	
 	private static function init() {
 		if (!self::$init) {
-			self::$do_cache = Backend::getConfig('backend.application.renderer.use_cache', true);
+			self::$do_cache = Backend::getConfig('settings.UseCache', true);
 			
 			if (self::$do_cache) {
 				self::$do_cache = self::checkCacheFolder();
@@ -70,7 +70,7 @@ class Render {
 			Backend::addError('Could not generate template');
 			return false;
 		}
-		$template_loc     = Backend::getConfig('backend.templates.location', 'templates');
+		$template_loc     = Backend::getConfig('settings.TemplateLocation', 'templates');
 		$dest_file        = APP_FOLDER . '/' . $template_loc . '/' . $destination;
 		if (@file_put_contents($dest_file, $template_content)) {
 			if (SITE_STATE != 'production') {

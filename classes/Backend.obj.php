@@ -16,19 +16,20 @@
  */
 class Backend {
 	private static $initialized = false;
-	private static $vars = array();
-	private static $DB = array();
-	private static $config = false;
-	private static $options = array();
+	private static $vars        = array();
+	private static $DB          = array();
+	private static $config      = false;
+	private static $config_file = false;
+	private static $options     = array();
 
-	protected static $error = array();
-	protected static $notice = array();
-	protected static $success = array();
+	protected static $error     = array();
+	protected static $notice    = array();
+	protected static $success   = array();
 
-	protected static $content = array();
-	protected static $scripts = array();
+	protected static $content   = array();
+	protected static $scripts   = array();
+	protected static $styles    = array();	
 	protected static $script_content = array();
-	protected static $styles = array();	
 
 	static private function checkSelf() {
 		$toret = false;
@@ -109,7 +110,7 @@ class Backend {
 
 		$url = SITE_DOMAIN . WEB_SUB_FOLDER;
 		define('SITE_LINK', 'http://' . $url);
-		if (Backend::getConfig('backend.application.use_ssl', false)) {
+		if (Backend::getConfig('settings.UseSSL', false)) {
 			define('S_SITE_LINK', 'https://' . $url);
 		} else {
 			define('S_SITE_LINK', 'http://' . $url);
@@ -119,20 +120,12 @@ class Backend {
 		
 		//Application Values
 		$values = self::$config->getValue('application');
-		if ($values) {
+		if (is_array($values)) {
 			foreach($values as $name => $value) {
 				self::add($name, $value);
 			}
 		}
 
-		//Backend Values
-		$values = self::$config->getValue('backend.values');
-		if ($values) {
-			foreach($values as $name => $value) {
-				self::add($name, $value);
-			}
-		}
-		
 		//DBs
 		$dbs = self::$config->getValue('backend.dbs');
 		if ($dbs) {
@@ -209,13 +202,17 @@ class Backend {
 		return $toret;
 	}
 	
-	static private function initConfigs() {
+	public static function getConfigFileLocation() {
+		return self::$config_file;
+	}
+	
+	private static function initConfigs() {
 		if (array_key_exists('config_file', self::$options)) {
-			$ini_file = self::$options['config_file'];
+			self::$config_file = self::$options['config_file'];
 		} else {
-			$ini_file = defined('SITE_FOLDER') ? SITE_FOLDER . '/configs/configure.ini' : APP_FOLDER . '/configs/configure.ini';
+			self::$config_file = defined('SITE_FOLDER') ? SITE_FOLDER . '/configs/configure.ini.php' : APP_FOLDER . '/configs/configure.ini.php';
 		}
-		self::$config = new BackendConfig($ini_file, SITE_STATE);
+		self::$config = new BackendConfig(self::$config_file, SITE_STATE);
 	}
 	
 	static function getConfig($name, $default = null) {
@@ -223,7 +220,34 @@ class Backend {
 		return is_null($toret) ? $default : $toret;
 	}
 	
-	static private function initDBs($dbs) {
+	static function setConfig($name, $value) {
+		return self::$config->setValue($name, $value);
+	}
+		
+	public static function checkConfigFile() {
+		$folder = dirname(self::$config_file);
+		if (!file_exists($folder)) {
+			if (@!mkdir($folder, 0755)) {
+				if (SITE_STATE != 'production') {
+					Backend::addError('Cannot create config file folder ' . $folder);
+				} else {
+					Backend::addError('Cannot create config file folder');
+				}
+				return false;
+			}
+		}
+		if (!is_writable($folder)) {
+			if (SITE_STATE != 'production') {
+				Backend::addError('Backend::Config file folder unwritable (' . $folder . ')');
+			} else {
+				Backend::addError('Backend::Config file folder unwritable');
+			}
+			return false;
+		}
+		return true;
+	}
+
+	private static function initDBs($dbs) {
 		if (is_array($dbs)) {
 			foreach($dbs as $name => $db) {
 				self::addDB($name, $db);
