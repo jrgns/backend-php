@@ -12,6 +12,10 @@
  */
 class Hook extends TableCtl {
 	public static function add($hook, $type, $class, array $options = array()) {
+		if (!BACKEND_WITH_DATABASE) {
+			return false;
+		}
+
 		$mode        = array_key_exists('mode', $options)        ? $options['mode'] : '*';
 		$name        = array_key_exists('name', $options)        ? $options['name'] : ucwords($class . ' ' . $type . ' ' . $hook);
 		$description = array_key_exists('description', $options) ? $options['description'] : '';
@@ -47,28 +51,28 @@ class Hook extends TableCtl {
 	}
 
 	public static function get($hook, $type = 'pre') {
-		$toret = false;
-		if (Value::get('admin_installed', false)) {
-			$params = array(':type' => $type, ':hook' => $hook);
-			$query = new SelectQuery('Hook');
-			$query
-				->leftJoin('Component', array('`hooks`.`class` = `components`.`name`'))
-				->filter('`hooks`.`hook` = :hook')
-				->filter('`hooks`.`type` = :type')
-				->filter('`hooks`.`active` = 1')
-				->filter('`components`.`active` = 1');
-			if (Controller::$area) {
-				$query->filter('`global` = 1 OR `class` = :area');
-				$params[':area'] = Controller::$area;
-			}
-			if (Controller::$view && Controller::$view->mode) {
-				$query->filter('`mode` IN (:mode, \'*\')');
-				$params[':mode'] = Controller::$view->mode;
-			}
-			$query->order('`sequence`');
-			$toret = $query->fetchAll($params);
+		if (!BACKEND_WITH_DATABASE) {
+			return false;
 		}
-		return $toret;
+
+		$params = array(':type' => $type, ':hook' => $hook);
+		$query = new SelectQuery('Hook');
+		$query
+			->leftJoin('Component', array('`hooks`.`class` = `components`.`name`'))
+			->filter('`hooks`.`hook` = :hook')
+			->filter('`hooks`.`type` = :type')
+			->filter('`hooks`.`active` = 1')
+			->filter('`components`.`active` = 1');
+		if (Controller::$area) {
+			$query->filter('`global` = 1 OR `class` = :area');
+			$params[':area'] = Controller::$area;
+		}
+		if (Controller::$view && Controller::$view->mode) {
+			$query->filter('`mode` IN (:mode, \'*\')');
+			$params[':mode'] = Controller::$view->mode;
+		}
+		$query->order('`sequence`');
+		return $query->fetchAll($params);
 	}
 	
 	public static function run($hook_name, $type, array $parameters = array(), array $options = array()) {
@@ -104,19 +108,25 @@ class Hook extends TableCtl {
 				}
 			}
 		}
-		//die;
 		return $result;
 	}
 	
 	public static function install(array $options = array()) {
-		$options['drop_table'] = array_key_exists('drop_table', $options) ? $options['drop_table'] : true;
+		$options['drop_table']    = array_key_exists('drop_table', $options) ? $options['drop_table'] : true;
 		$options['install_model'] = array_key_exists('install_model', $options) ? $options['install_model'] : false;
 		$toret = parent::install($options);
 		return $toret;
 	}
 
+	/**
+	 * Make sure the hooks table exists so that other components can add hooks with installation
+	 */
 	public static function pre_install() {
-		$toret = self::installModel(__CLASS__ . 'Obj');
-		return $toret;
+		if (!BACKEND_WITH_DATABASE) {
+			return true;
+		}
+
+		$result = self::installModel(__CLASS__ . 'Obj');
+		return $result;
 	}
 }

@@ -21,23 +21,19 @@ class Value extends TableCtl {
 	}
 	
 	public static function get($name, $default = null) {
-		$toret = $default;
-		//The only call allowed without BACKEND_INSTALLED = true, is to get the value for BACKEND_INSTALLED
-		if (!defined('BACKEND_INSTALLED') || BACKEND_INSTALLED) {
-			if (isset(self::$cache[$name])) {
-				$toret = self::$cache[$name];
-			} else {
-				$toret = Value::retrieve($name);
-				if ($toret) {
-					$toret = array_key_exists('value', $toret) ? $toret['value'] : $default;
-				} else if (!is_null($default)) {
-					$toret = $default;
-					Value::set($name, $default);
-				}
+		if (isset(self::$cache[$name])) {
+			return self::$cache[$name];
+		} else {
+			$toret = Value::retrieve($name);
+			if ($toret && array_key_exists('value', $toret)) {
+				$result = array_key_exists('value', $toret) ? $toret['value'] : $default;
+			} else if (!is_null($default)) {
+				$result = $default;
+				Value::set($name, $default);
 			}
 		}
-		self::$cache[$name] = $toret;
-		return $toret;
+		self::$cache[$name] = $result;
+		return $result;
 	}
 	
 	public static function set($name, $new_value) {
@@ -77,13 +73,7 @@ class Value extends TableCtl {
 		);
 	}
 
-	public static function pre_install() {
-		$toret = self::installModel(__CLASS__ . 'Obj', array('drop_table' => true));
-		return $toret;
-	}
-
 	public static function install(array $options = array()) {
-		$options['install_model'] = array_key_exists('install_model', $options) ? $options['install_model'] : false;
 		$toret = parent::install($options);
 		return $toret;
 	}

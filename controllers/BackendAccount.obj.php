@@ -26,7 +26,7 @@ class BackendAccount extends TableCtl {
 	
 	public static function getName() {
 		if (empty(self::$name)) {
-			self::$name = Value::get('BackendAccount', 'Account');
+			self::$name = ConfigValue::get('BackendAccount', 'Account');
 		}
 		return self::$name;
 	}
@@ -525,19 +525,22 @@ Site Admin
 
 	public static function install(array $options = array()) {
 		$options['install_model'] = array_key_exists('install_model', $options) ? $options['install_model'] : true;
-		$toret = parent::install($options);
+		$result = parent::install($options);
 
-		$toret = Hook::add('init', 'post', self::getName(), array('global' => true, 'sequence' => 0)) && $toret;
-		$toret = Hook::add('start', 'pre', self::getName(), array('global' => true)) && $toret;
-		$toret = Hook::add('finish', 'post', self::getName(), array('global' => true)) && $toret;
+		if (!BACKEND_WITH_DATABASE) {
+			return $result;
+		}
+		$result = Hook::add('init', 'post', self::getName(), array('global' => true, 'sequence' => 0)) && $result;
+		$result = Hook::add('start', 'pre', self::getName(), array('global' => true)) && $result;
+		$result = Hook::add('finish', 'post', self::getName(), array('global' => true)) && $result;
 		
-		$toret = Permission::add('anonymous', 'signup', self::getName()) && $toret;
-		$toret = Permission::add('anonymous', 'confirm', self::getName()) && $toret;
+		$result = Permission::add('anonymous', 'signup', self::getName()) && $result;
+		$result = Permission::add('anonymous', 'confirm', self::getName()) && $result;
 
-		$toret = Permission::add('anonymous', 'login', self::getName()) && $toret;
-		$toret = Permission::add('authenticated', 'login', self::getName()) && $toret;
-		$toret = Permission::add('authenticated', 'logout', self::getName()) && $toret;
-		return $toret;
+		$result = Permission::add('anonymous', 'login', self::getName()) && $result;
+		$result = Permission::add('authenticated', 'login', self::getName()) && $result;
+		$result = Permission::add('authenticated', 'logout', self::getName()) && $result;
+		return $result;
 	}
 }
 

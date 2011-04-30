@@ -59,14 +59,14 @@ class ConfigValue extends Value {
 						Backend::addError('Could not set ' . $name);
 						$result = false;
 					}
+				} else {
+					var_dump('Rejected:', $name);
 				}
 			}
-			if ($result) {
-				self::set('settings.ConfigValueSet', true);
-			}
+			self::set('settings.ConfigValueSet', $result);
 			return $result;
 		}
-		Backend::addContent(Render::renderFile('config_value.values.tpl.php', $values));
+		Backend::addContent(Render::renderFile('config_value.values.tpl.php'));
 		return false;
 	}
 }

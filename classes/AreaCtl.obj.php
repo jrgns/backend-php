@@ -120,12 +120,9 @@ class AreaCtl {
 			$subject_id = 0;
 		}
 		
-		if (Value::get('admin_installed', false)) {
-			//TODO This should probable be
-			//$toret = Permission::check($action, $subject, $subject_id);
-			//Change and test
-			$toret = Permission::check(Controller::$action, Controller::$area, $subject_id);
-		} else if (!($subject == 'admin' && in_array($action, array('install', 'pre_install', 'post_install')))) {
+		if (ConfigValue::get('AdminInstalled', false)) {
+			$toret = Permission::check($action, $subject, $subject_id);
+		} else if (!($subject == 'admin' && in_array($action, array('pre_install', 'check_install', 'install', 'post_install')))) {
 			$toret = false;
 		}
 		return $toret;
@@ -150,24 +147,29 @@ class AreaCtl {
 	}
 	
 	public static function install(array $options = array()) {
-		$toret = false;
-		$class = get_called_class();
-		if ($class && class_exists($class, true)) {
-			//Purge permissions first
-			$query = new DeleteQuery('Permission');
-			$query
-				->filter('`subject` = :subject')
-				->filter('`system` = 0');
-			$query->execute(array(':subject' => class_for_url($class)));
-			$toret = true;
-			$methods = get_class_methods($class);
-			$methods = array_filter($methods, create_function('$var', '$temp = explode(\'_\', $var, 2); return count($temp) == 2 && in_array(strtolower($temp[0]), array(\'action\', \'get\', \'post\', \'put\', \'delete\'));'));
-			$methods = array_map(create_function('$var', 'return preg_replace(\'/^(action|get|post|put|delete)_/\', \'\', $var);'), $methods);
-			foreach($methods as $action) {
-				Permission::add('nobody', $action, class_for_url($class));
-			}
+		if (!BACKEND_WITH_DATABASE) {
+			return true;
 		}
-		return $toret;
+		$class = get_called_class();
+		if (!$class || !class_exists($class, true)) {
+			return false;
+		}
+
+		//Purge permissions first
+		$query = new DeleteQuery('Permission');
+		$query
+			->filter('`subject` = :subject')
+			->filter('`system` = 0');
+		$query->execute(array(':subject' => class_for_url($class)));
+		$methods = get_class_methods($class);
+		$methods = array_filter($methods, create_function('$var', '$temp = explode(\'_\', $var, 2); return count($temp) == 2 && in_array(strtolower($temp[0]), array(\'action\', \'get\', \'post\', \'put\', \'delete\'));'));
+		$methods = array_map(create_function('$var', 'return preg_replace(\'/^(action|get|post|put|delete)_/\', \'\', $var);'), $methods);
+		
+		$result = true;
+		foreach($methods as $action) {
+			$result = Permission::add('nobody', $action, class_for_url($class)) && $result;
+		}
+		return $result;
 	}
 	
 	public function get_home() {

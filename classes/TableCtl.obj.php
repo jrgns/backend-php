@@ -990,6 +990,10 @@ class TableCtl extends AreaCtl {
 	}
 	
 	public static function install(array $options = array()) {
+		if (!BACKEND_WITH_DATABASE) {
+			return true;
+		}
+
 		$install_model = array_key_exists('install_model', $options) ? $options['install_model'] : true;
 
 		$toret = parent::install($options);

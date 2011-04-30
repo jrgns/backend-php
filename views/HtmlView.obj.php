@@ -215,7 +215,7 @@ class HtmlView extends View {
 	}
 	
 	public static function rewriteLinks($to_print) {
-		if (Value::get('clean_urls', false)) {
+		if (ConfigValue::get('CleanURLs', false)) {
 			preg_match_all('/(<a\s+.*?href=[\'\"]|<form\s+.*?action=[\'"]|<link\s+.*?href=[\'"])(|.*?[\?&]q=.*?&?.*?)[\'"]/', $to_print, $matches);
 			if (count($matches) == 3) {
 				$matched = $matches[0];
@@ -285,9 +285,13 @@ class HtmlView extends View {
 	}
 
 	public static function install() {
-		$toret = true;
-		Hook::add('init', 'post', __CLASS__, array('global' => 1, 'mode' => 'html')) && $toret;
-		return $toret;
+		if (!BACKEND_WITH_DATABASE) {
+			return true;
+		}
+
+		$result = true;
+		Hook::add('init', 'post', __CLASS__, array('global' => 1, 'mode' => 'html')) && $result;
+		return $result;
 	}
 }
 
