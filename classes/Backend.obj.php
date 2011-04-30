@@ -126,35 +126,18 @@ class Backend {
 			}
 		}
 
+		$with_database = false;
 		//DBs
+		//TODO Get a way to store db details in the config
 		$dbs = self::$config->getValue('backend.dbs');
 		if ($dbs) {
-			self::initDBs($dbs);
-		} else if (array_key_exists('debug', $_REQUEST)) {
-			Backend::addError('No DBs');
-		}
-		
-		//Dont use Value::get, because it might not be installed yet
-		$installed = false;
-		try {
-			$db = self::getDB();
-			if ($db instanceof PDO) {
-				$stmt = $db->prepare('SELECT * FROM `values` WHERE `name` = \'admin_installed\'');
-				if ($stmt) {
-					if ($stmt->execute()) {
-						$row = $stmt->fetch(PDO::FETCH_ASSOC);
-						if ($row) {
-							$installed = unserialize(base64_decode($row['value']));
-						}
-					} else if (array_key_exists('debug', $_REQUEST)) {
-						Backend::addError('Could not determine if backend was installed');
-					}
-				}
+			$with_database = self::initDBs($dbs);
+		} else {
+			if (array_key_exists('debug', $_REQUEST)) {
+				Backend::addError('No DBs');
 			}
-		} catch (Exception $e) {
-			Backend::addError($e->getMessage());
 		}
-		define('BACKEND_INSTALLED', $installed);
+		define('BACKEND_WITH_DATABASE', $with_database);
 	}
 	
 	public static function shutdown() {
@@ -250,9 +233,12 @@ class Backend {
 	private static function initDBs($dbs) {
 		if (is_array($dbs)) {
 			foreach($dbs as $name => $db) {
-				self::addDB($name, $db);
+				if (!self::addDB($name, $db)) {
+					return false;
+				}
 			}
 		}
+		return true;
 	}
 	/**
 	 * Add a DB definition to the Backend
@@ -266,48 +252,47 @@ class Backend {
 	 * @returns boolean True if the connection succeeded.
 	 */
 	static function addDB($name, array $options = array()) {
-		$toret = false;
-		if (self::checkSelf()) {
-			$dsn = array_key_exists('dsn', $options) ? $options['dsn'] : false;
-			if (!$dsn) {
-				$options['host']     = empty($options['host'])     ? self::getConfig('backend.db.default_host')     : $options['host'];
-				$options['username'] = empty($options['username']) ? self::getConfig('backend.db.default_username') : $options['username'];
-				$options['password'] = empty($options['password']) ? self::getConfig('backend.db.default_password') : $options['password'];
-				$options['database'] = empty($options['database']) ? self::getConfig('backend.db.default_database') : $options['database'];
-				$options['driver']   = empty($options['driver'])   ? self::getConfig('backend.db.default_driver')   : $options['driver'];
-
-				$dsn = array();
-				$driver = array_key_exists('driver', $options)   ? $options['driver'] : 'mysql';
-				if (!empty($options['database'])) {
-					$dsn[] = 'dbname=' . $options['database'];
-				}
-				$dsn[] = 'host=' . (array_key_exists('host', $options) ? $options['host'] : 'localhost');
-				$dsn = strtolower($driver) . ':' . implode(';', $dsn);
-			}
-			$username   = array_key_exists('username', $options) ? $options['username'] : '';
-			$password   = array_key_exists('password', $options) ? $options['password'] : '';
-			$alias      = empty($options['alias'])               ? $name                : $options['alias'];
-			$connection = empty($options['connection'])          ? false                : $options['connection'];
-
-			if (array_key_exists($name, self::$DB)) {
-				Backend::addNotice('Overwriting existing DB definition: ' . $name);
-			}
-			self::$DB[$name] = array(
-				'database' => $options['database'],
-				'dsn'      => $dsn,
-				'username' => $username,
-				'password' => $password,
-				'connection' => $connection
-			);
-			if ($alias != $name) {
-				if (array_key_exists($alias, self::$DB)) {
-					Backend::addNotice('Overwriting existing DB definition: ' . $alias);
-				}
-				self::$DB[$alias] = self::$DB[$name];
-			}
-			$toret = true;
+		if (!self::checkSelf()) {
+			return false;
 		}
-		return $toret;
+		$dsn = array_key_exists('dsn', $options) ? $options['dsn'] : false;
+		if (!$dsn) {
+			$options['host']     = empty($options['host'])     ? self::getConfig('backend.db.default_host')     : $options['host'];
+			$options['username'] = empty($options['username']) ? self::getConfig('backend.db.default_username') : $options['username'];
+			$options['password'] = empty($options['password']) ? self::getConfig('backend.db.default_password') : $options['password'];
+			$options['database'] = empty($options['database']) ? self::getConfig('backend.db.default_database') : $options['database'];
+			$options['driver']   = empty($options['driver'])   ? self::getConfig('backend.db.default_driver')   : $options['driver'];
+
+			$dsn = array();
+			$driver = array_key_exists('driver', $options)   ? $options['driver'] : 'mysql';
+			if (!empty($options['database'])) {
+				$dsn[] = 'dbname=' . $options['database'];
+			}
+			$dsn[] = 'host=' . (array_key_exists('host', $options) ? $options['host'] : 'localhost');
+			$dsn = strtolower($driver) . ':' . implode(';', $dsn);
+		}
+		$username   = array_key_exists('username', $options) ? $options['username'] : '';
+		$password   = array_key_exists('password', $options) ? $options['password'] : '';
+		$alias      = empty($options['alias'])               ? $name                : $options['alias'];
+		$connection = empty($options['connection'])          ? false                : $options['connection'];
+
+		if (array_key_exists($name, self::$DB)) {
+			Backend::addNotice('Overwriting existing DB definition: ' . $name);
+		}
+		self::$DB[$name] = array(
+			'database' => $options['database'],
+			'dsn'      => $dsn,
+			'username' => $username,
+			'password' => $password,
+			'connection' => $connection
+		);
+		if ($alias != $name) {
+			if (array_key_exists($alias, self::$DB)) {
+				Backend::addNotice('Overwriting existing DB definition: ' . $alias);
+			}
+			self::$DB[$alias] = self::$DB[$name];
+		}
+		return true;
 	}
 	
 	/**
@@ -378,13 +363,7 @@ class Backend {
 		} else {
 			array_push(self::$$what, $string);
 			//Log to file if necessary
-			$log_to_file = array_key_exists('log_to_file', $options) ? $options['log_to_file'] : true;
-			if (defined('BACKEND_INSTALLED') && BACKEND_INSTALLED) {
-				$log_to_file = $log_to_file && Value::get('log_to_file', false);
-			} else {
-				//Only use this pre installation
-				$log_to_file = $log_to_file && Backend::get('log_to_file');
-			}
+			$log_to_file = array_key_exists('log_to_file', $options) ? $options['log_to_file'] : ConfigValue::get('LogToFile', false);
 
 			if ($log_to_file) {
 				@list($file, $log_what) = explode('|', $log_to_file);
@@ -550,7 +529,7 @@ class Backend {
 				//Go through to the DEFAULT
 			}
 		default:
-			if (defined('BACKEND_INSTALLED') && BACKEND_INSTALLED && Component::isActive('BackendError')) {
+			if (Component::isActive('BackendError')) {
 				BackendError::add($number, $string, $file, $line, $context);
 			}
 			break;
@@ -613,7 +592,7 @@ class Backend {
 			echo '</ol>';
 		}
 		echo "Uncaught exception: " , $exception->getMessage(), ' in ', $exception->getFile(), ' line ', $exception->getLine(), "\n";
-		if (defined('BACKEND_INSTALLED') && BACKEND_INSTALLED && Component::isActive('BackendError')) {
+		if (Component::isActive('BackendError')) {
 			BackendError::add($exception->getCode(), "Uncaught exception: " . $exception->getMessage(), $exception->getFile(), $exception->getLine());
 		}
 		//Execution ends here
