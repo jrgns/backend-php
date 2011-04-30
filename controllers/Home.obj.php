@@ -5,7 +5,7 @@ class Home extends AreaCtl {
 			Backend::addContent(Render::renderFile('home.index.tpl.php', $results));
 		} else {
 			Backend::add('Sub Title', 'Welcome');
-			Backend::addContent('Welcome to #Title#');
+			Backend::addContent('<h3>Welcome to #Title#</h3><p>The code for this URL is in the Home Controller</p>');
 		}
 		return true;
 	}
@@ -15,10 +15,13 @@ class Home extends AreaCtl {
 	}
 	
 	public static function install(array $options = array()) {
-		$toret = parent::install($options);
+		$result = parent::install($options);
+		if (!BACKEND_WITH_DATABASE) {
+			return $result;
+		}
 		
-		$toret = Permission::add('anonymous', 'index', 'home') && $toret;
-		$toret = Permission::add('anonymous', 'error', 'home') && $toret;
-		return $toret;
+		$result = Permission::add('anonymous', 'index', 'home') && $result;
+		$result = Permission::add('anonymous', 'error', 'home') && $result;
+		return $result;
 	}
 }

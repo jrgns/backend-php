@@ -200,7 +200,7 @@ class Controller {
 
 		$controller = class_exists($control_name, true) ? new $control_name() : false;
 		if (!($controller instanceof AreaCtl && Component::isActive($control_name))) {
-			Controller::whoops('Invalid Error Area Controller', 'The default_error_controller isn\'t a invalid or inactive.');
+			Controller::whoops('Invalid Error Area Controller', 'The DefaultErrorController is invalid or inactive.');
 			return null;
 		}
 		

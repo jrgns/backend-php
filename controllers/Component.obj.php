@@ -198,6 +198,9 @@ class Component extends TableCtl {
 	}
 	
 	public static function admin_links() {
+		if (!BACKEND_WITH_DATABASE) {
+			return false;
+		}
 		return array(
 			array('text' => 'Manage Components', 'href' => '?q=component/manage'),
 			array('text' => 'Check Components' , 'href' => '?q=component/check'),

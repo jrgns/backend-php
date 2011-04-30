@@ -78,6 +78,10 @@ class Permission extends TableCtl {
 	}
 	
 	public static function check($action = '*', $subject = '*', $subject_id = 0) {
+		if (!BACKEND_WITH_DATABASE) {
+			return true;
+		}
+
 		static $cache = array();
 		if (is_object($subject)) {
 			$subject = get_class($subject);

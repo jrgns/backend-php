@@ -442,6 +442,7 @@ class Query {
 			}
 		}
 		if (empty($table)) {
+			print_stacktrace(); die;
 			throw new Exception('Empty Table for Query');
 		}
 		return self::enclose($table);

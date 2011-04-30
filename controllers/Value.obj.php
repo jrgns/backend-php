@@ -68,6 +68,9 @@ class Value extends TableCtl {
 	}
 	
 	public static function admin_links() {
+		if (!BACKEND_WITH_DATABASE) {
+			return false;
+		}
 		return array(
 			array('href' => '?q=value/admin', 'text' => 'Values')
 		);

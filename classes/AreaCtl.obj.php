@@ -122,7 +122,7 @@ class AreaCtl {
 		
 		if (ConfigValue::get('AdminInstalled', false)) {
 			$toret = Permission::check($action, $subject, $subject_id);
-		} else if (!($subject == 'admin' && in_array($action, array('pre_install', 'check_install', 'install', 'post_install')))) {
+		} else if (!($subject == 'admin' && in_array($action, array('pre_install', 'check_install', 'install')))) {
 			$toret = false;
 		}
 		return $toret;

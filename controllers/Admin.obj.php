@@ -17,9 +17,20 @@
  */
 class Admin extends AreaCtl {
 	/**
-	 *	Do some checks before the install commences
+	 * Simple page to notify the user that the app has not been installed yet
 	 */
-	public function action_pre_install() {
+	public function html_pre_install($result) {
+		Backend::add('Sub Title', 'This application has not been installed yet.');
+		Backend::addContent(Render::renderFile('admin.pre_install.tpl.php'));
+		return $result;
+	}
+
+	/**
+	 *	Do some checks before the install commences
+	 *
+	 * Catch both get and post
+	 */
+	public function action_check_install() {
 		$components = Component::getActive();
 		if (!$components) {
 			Backend::addError('Could not get components to check');
@@ -37,14 +48,15 @@ class Admin extends AreaCtl {
 				}
 			}
 		}
-		
+
 		return $can_install;
 	}
 	
-	public function html_pre_install($can_install) {
+	public function html_check_install($result) {
+		Backend::add('Sub Title', 'Pre Installation Check');
 		Backend::addNotice('This application has not been installed yet');
-		Backend::addContent(Render::renderFile('uninstalled_msg.tpl.php', array('can_install' => $can_install)));
-		return $can_install;
+		Backend::addContent(Render::renderFile('admin.check_install.tpl.php', array('can_install' => $result)));
+		return $result;
 	}
 
 	/**
@@ -55,14 +67,20 @@ class Admin extends AreaCtl {
 		if ($installed) {
 			return false;
 		}
-		$install_log_file = 'install_log_' . date('Ymd_His') . '.txt';
-		Backend::add('log_to_file', $install_log_file);
 
 		$components = Component::getActive();
 		if (!$components) {
 			Backend::addError('Could not get components to pre install');
 			return false;
 		}
+
+		//Save original LogToFile setting
+		$original = ConfigValue::get('LogToFile', false);
+		$install_log_file = 'install_log_' . date('Ymd_His') . '.txt';
+		ConfigValue::set('LogToFile', $install_log_file);
+
+		//Pre Install components
+		Backend::addNotice(PHP_EOL . PHP_EOL . 'Installation started at ' . date('Y-m-d H:i:s'));
 		$components = array_flatten($components, null, 'name');
 		foreach($components as $component) {
 			if (class_exists($component, true) && method_exists($component, 'pre_install')) {
@@ -73,44 +91,40 @@ class Admin extends AreaCtl {
 				}
 			}
 		}
-
-		$original = ConfigValue::get('LogToFile', false);
-		ConfigValue::set('LogToFile', $install_log_file);
-
-		Backend::addNotice(PHP_EOL . PHP_EOL . 'Installation started at ' . date('Y-m-d H:i:s'));
 		
-		if (!self::installConfig()) {
-			return false;
-		}
-		$result = self::installComponents();
-
-		ConfigValue::set('LogToFile', $original);
-		return $result;
-	}
-	
-	private static function installConfig() {
-	}
-	
-	private static function installComponents() {
-		$components = Component::getActive();
-		if (!$components) {
-			return false;
-		}
-
-		$result = true;
-		$components = array_flatten($components, null, 'name');
+		//Install Components
 		foreach($components as $component) {
 			if (class_exists($component, true) && method_exists($component, 'install')) {
 				Backend::addNotice('Installing ' . $component);
 				if (!call_user_func_array(array($component, 'install'), array())) {
 					Backend::addError('Error on installing ' . $component);
-					$result = false;
+					return false;
 				}
 			}
 		}
-		return $result;
+
+		//Restore Original
+		ConfigValue::set('LogToFile', $original);
+		
+		ConfigValue::set('AdminInstalled', true);
+		return true;
 	}
 	
+	public function html_install($result) {
+		if (is_post() && $result) {
+			Backend::addSuccess('Backend Install Successful');
+			$_SESSION['just_installed'] = true;
+			ConfigValue::set('AdminInstalled', date('Y-m-d H:i:s'));
+			if (BACKEND_WITH_DATABASE) {
+				Controller::redirect('?q=account/signup');
+			} else {
+				Controller::redirect('?q=home/index');
+			}
+		}
+		Backend::add('Sub Title', 'Install Backend Application');
+		Backend::addContent('<p class="large loud">Something went wrong with the installation</p>');
+	}
+
 	function get_daily(array $options = array()) {
 		$components = Component::getActive();
 		$result = true;
@@ -150,32 +164,6 @@ class Admin extends AreaCtl {
 		}
 		return $result;
 	}
-
-	public function html_install($result) {
-		$installed = ConfigValue::get('AdminInstalled', false);
-		if ($installed) {
-			Backend::addNotice('Installation script already ran at ' . $installed);
-			Controller::redirect('?q=admin');
-		
-		}
-		if ($result && is_post()) {
-			Backend::addSuccess('Backend Install Successful');
-			$_SESSION['just_installed'] = true;
-			ConfigValue::set('AdminInstalled', date('Y-m-d H:i:s'));
-			Controller::redirect('?q=account/signup');
-		} else {
-			Backend::add('Sub Title', 'Install Backend Application');
-		}
-	}
-	
-	function html_post_install($result) {
-		if (ConfigValue::get('AdminInstalled', false)) {
-			Backend::add('Sub Title', 'Installation Successfull');
-		} else {
-			Backend::add('Sub Title', 'Installation Failed');
-		}
-		return true;
-	}
 	
 	function html_update($result) {
 		Backend::add('Sub Title', 'Update Backend Components');
@@ -193,6 +181,7 @@ class Admin extends AreaCtl {
 				$admin_links[$component['name']] = call_user_func(array($component['name'], 'admin_links'));
 			}
 		}
+		$admin_links = array_filter($admin_links);
 		Backend::add('admin_links', $admin_links);
 		Backend::addContent(Render::renderFile('admin.index.tpl.php'));
 	}
@@ -206,27 +195,25 @@ class Admin extends AreaCtl {
 		if ($user && count(array_intersect(array('superadmin', 'admin'), $user->roles))) {
 			Links::add('Manage Application', '?q=admin', 'secondary');
 		}
-		
 		return $data;
 	}
 	
 	public static function install(array $options = array()) {
-		$toret = parent::install($options);
+		$result = parent::install($options);
+		if (!BACKEND_WITH_DATABASE) {
+			return $result;
+		}
 
-		$toret = Hook::add('display', 'post', __CLASS__, array('global' => true, 'mode' => 'html')) && $toret;
+		$result = Hook::add('display', 'post', __CLASS__, array('global' => true, 'mode' => 'html')) && $result;
 
-		$toret = Permission::add('nobody', 'post_install', 'admin') && $toret;
-		$toret = Permission::add('anonymous', 'post_install', 'admin') && $toret;
-		$toret = Permission::add('nobody', 'pre_install', 'admin') && $toret;
-		$toret = Permission::add('anonymous', 'pre_install', 'admin') && $toret;
-		$toret = Permission::add('nobody', 'daily', 'admin') && $toret;
-		$toret = Permission::add('anonymous', 'daily', 'admin') && $toret;
-		$toret = Permission::add('authenticated', 'daily', 'admin') && $toret;
-		$toret = Permission::add('nobody', 'weekly', 'admin') && $toret;
-		$toret = Permission::add('anonymous', 'weekly', 'admin') && $toret;
-		$toret = Permission::add('authenticated', 'weekly', 'admin') && $toret;
+		$result = Permission::add('nobody', 'daily', 'admin') && $result;
+		$result = Permission::add('anonymous', 'daily', 'admin') && $result;
+		$result = Permission::add('authenticated', 'daily', 'admin') && $result;
+		$result = Permission::add('nobody', 'weekly', 'admin') && $result;
+		$result = Permission::add('anonymous', 'weekly', 'admin') && $result;
+		$result = Permission::add('authenticated', 'weekly', 'admin') && $result;
 
-		return $toret;
+		return $result;
 	}
 }
 

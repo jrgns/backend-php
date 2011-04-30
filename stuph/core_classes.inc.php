@@ -42,14 +42,19 @@ $result = array(
 		'name'     => 'BackendAccount',
 		'filename' => '/controllers/BackendAccount.obj.php',
 	),
+	'Home' => array(
+		'id'       => 9,
+		'name'     => 'Home',
+		'filename' => '/controllers/Home.obj.php',
+	),
 	//Views
 	'HtmlView' => array(
-		'id'       => 9,
+		'id'       => 10,
 		'name'     => 'HtmlView',
 		'filename' => '/views/HtmlView.obj.php',
 	),
 	'JsonView' => array(
-		'id'       => 10,
+		'id'       => 11,
 		'name'     => 'JsonView',
 		'filename' => '/views/JsonView.obj.php',
 	),
