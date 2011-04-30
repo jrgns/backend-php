@@ -40,84 +40,79 @@ class View {
 	 * @todo Make the process on deciding a view better / extendable! Or, setup preferences that ignore the
 	 * Accept header, or just rely on what the client asks for (mode=[json|xml|xhtml|jpg])
 	 */
-	public static function getInstance() {
+	public static function getInstance($view_name = false) {
 		if (self::$instance instanceof View) {
 			return self::$instance;
 		}
-		$view_name  = false;
+		
+		$view_name = $view_name ? $view_name : self::getViewName();
+		//Last chance to get a View / Modify the view
+		$view_name = Hook::run('view_name', 'pre', array($view_name));
 
+		if (!$view_name || !Component::isActive($view_name)) {
+			return false;
+		}
+
+		//We have an active view
+		$view = new $view_name();
+		if (!headers_sent()) {
+			header('X-Backend-View: ' . $view_name);
+		}
+		return $view;
+	}
+	
+	private static function getViewName() {
 		//Check the mode parameter
 		$query_vars = Controller::getQueryVars();
 		if (array_key_exists('mode', $query_vars)) {
 			$view_name = ucwords($query_vars['mode']) . 'View';
-			if (!Component::isActive($view_name)) {
-				return false;
-			}
+			return $view_name;
 		}
 		
 		//No View found, check the accept header
-		if (!$view_name) {
-			$default_precedence = array(
-				'text/html' => (float)1,
-				'application/xhtml+xml' => 0.9,
-				'application/xml' => 0,
-			);
-			$mime_ranges = Parser::accept_header(false, $default_precedence);
-			if ($mime_ranges) {
-				$types = array();
-				$main_types = array();
-				$view_name = false;
-				foreach($mime_ranges as $mime_type) {
-					$types[] = $mime_type['main_type'] . '/' . $mime_type['sub_type'];
-					$main_types[] = $mime_type['main_type'];
-					if (!$view_name) {
-						$name = class_name(str_replace('+', ' ', $mime_type['main_type']) . ' ' . str_replace('+', ' ', $mime_type['sub_type'])) . 'View';
+		$default_precedence = array(
+			'text/html' => (float)1,
+			'application/xhtml+xml' => 0.9,
+			'application/xml' => 0,
+		);
+		$mime_ranges = Parser::accept_header(false, $default_precedence);
+		if (!$mime_ranges) {
+			return ConfigValue::get('DefaultView', 'HtmlView');
+		}
+
+		$types = array();
+		$main_types = array();
+		$view_name = false;
+		foreach($mime_ranges as $mime_type) {
+			$types[] = $mime_type['main_type'] . '/' . $mime_type['sub_type'];
+			$main_types[] = $mime_type['main_type'];
+			if (!$view_name) {
+				$name = class_name(str_replace('+', ' ', $mime_type['main_type']) . ' ' . str_replace('+', ' ', $mime_type['sub_type'])) . 'View';
+				if (Component::isActive($name)) {
+					$view_name = $name;
+				} else {
+					$name = class_name(str_replace('+', ' ', $mime_type['main_type'])) . 'View';
+					if (Component::isActive($name)) {
+						$view_name = $name;
+					} else {
+						$name = class_name(str_replace('+', ' ', $mime_type['sub_type'])) . 'View';
 						if (Component::isActive($name)) {
 							$view_name = $name;
-						} else {
-							$name = class_name(str_replace('+', ' ', $mime_type['main_type'])) . 'View';
-							if (Component::isActive($name)) {
-								$view_name = $name;
-							} else {
-								$name = class_name(str_replace('+', ' ', $mime_type['sub_type'])) . 'View';
-								if (Component::isActive($name)) {
-									$view_name = $name;
-								}
-							}
 						}
 					}
 				}
-				if (in_array('image', $main_types) && in_array('application', $main_types)) {
-				//Probably IE
-					$view_name = 'HtmlView';
-				} else if (in_array('application/xml', $types) && in_array('application/xhtml+xml', $types) && in_array('text/html', $types)) {
-				//Maybe another confused browser that asks for XML and HTML
-					$view_name = 'HtmlView';
-				} else if (count($mime_ranges) == 1 && $mime_ranges[0]['main_type'] == '*' && $mime_ranges[0]['sub_type'] == '*') {
-					$view_name = Backend::getConfig('settings.DefaultView', 'HtmlView');
-				}
-			} else {
-				$view_name = Backend::getConfig('settings.DefaultView', 'HtmlView');
 			}
 		}
-
-		//Last chance to get a View / Modify the view
-		$view_name = Hook::run('view_name', 'pre', array($view_name));
-
-		if ($view_name == 'View') {
-			//Unrecognized Request, abort
-			return false;
+		if (in_array('image', $main_types) && in_array('application', $main_types)) {
+		//Probably IE
+			$view_name = 'HtmlView';
+		} else if (in_array('application/xml', $types) && in_array('application/xhtml+xml', $types) && in_array('text/html', $types)) {
+		//Maybe another confused browser that asks for XML and HTML
+			$view_name = 'HtmlView';
+		} else if (count($mime_ranges) == 1 && $mime_ranges[0]['main_type'] == '*' && $mime_ranges[0]['sub_type'] == '*') {
+			$view_name = ConfigValue::get('DefaultView', 'HtmlView');
 		}
-	
-		//We have an active view, or an HTML Request on an uninstalled installation
-		if (Component::isActive($view_name) || (!BACKEND_INSTALLED && $view_name == 'HtmlView')) {
-			$view = new $view_name();
-			if (!headers_sent()) {
-				header('X-Backend-View: ' . $view_name);
-			}
-			return $view;
-		}
-		return false;
+		return $view_name;
 	}
 	
 	public function getTemplateLocation($filename) {
