@@ -144,7 +144,7 @@ class Controller {
 			//View
 			self::$view = View::getInstance();
 			if (!(self::$view instanceof View)) {
-				self::$view = new View();
+				self::$view = View::getInstance(ConfigValue::get('DefaultView', 'HtmlView'));
 				self::whoops('Unrecognized Request', array('message' => 'Could not find a View for the Request', 'code_hint' => 406));
 				if (self::$debug) {
 					print_stacktrace();
@@ -193,8 +193,8 @@ class Controller {
 		$controller = class_exists($control_name, true) ? new $control_name() : false;
 		if (!($controller instanceof AreaCtl && Component::isActive($control_name))) {
 			Controller::whoops('Component ' . $control_name . ' is Inactive or Invalid', array('message' => 'The requested component doesn\'t exist or is inactive.', 'code_hint' => 404));
-			self::$area   = Value::get('default_error_controller', 'home');
-			self::$action = Value::get('default_error_action', 'error');
+			self::$area   = ConfigValue::get('DefaultErrorController', 'home');
+			self::$action = ConfigValue::get('DefaultErrorAction', 'error');
 			$control_name = class_name(self::$area);
 		}
 
@@ -266,7 +266,7 @@ class Controller {
 			if ($last_error = error_get_last()) {
 				if ($last_error['type'] === E_ERROR) {
 					$id = send_email(
-						Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)),
+						ConfigValue::get('author.Email', ConfigValue::get('Email', 'info@' . SITE_DOMAIN)),
 						'Fatal PHP Error in ' . ConfigValue::get('Title', 'Application'),
 						'Error: ' . var_export($last_error, true) . PHP_EOL
 						. 'Query: ' . self::$query_string . PHP_EOL
@@ -406,7 +406,7 @@ class Controller {
 	}
 	
 	protected static function parseQuery($query) {
-		if (!Value::get('admin_installed', false) && !in_array($query, array('admin/pre_install', 'admin/install'))) {
+		if (!ConfigValue::get('AdminInstalled', false) && !in_array($query, array('admin/pre_install', 'admin/check_install', 'admin/install'))) {
 			$query = 'admin/pre_install';
 		}
 
@@ -418,13 +418,13 @@ class Controller {
 		//We want to now what a parameter was, even if it's empty, so don't filter
 		//$terms = array_filter($terms);
 		
-		self::$area   = count($terms) ? array_shift($terms) : Value::get('default_controller', 'home');
+		self::$area   = count($terms) ? array_shift($terms) : ConfigValue::get('DefaultController', 'home');
 		if (count($terms)) {
 			self::$action = array_shift($terms);
 		} else if (Component::isActive(class_name(self::$area))) {
-			self::$action = Value::get('default_' . class_name(self::$area) . '_action', Value::get('default_action', 'index'));
+			self::$action = ConfigValue::get('Default' . class_name(self::$area) . 'Action', ConfigValue::get('DefaultAction', 'index'));
 		} else {
-			self::$action = Value::get('default_action', 'index');
+			self::$action = ConfigValue::get('DefaultAction', 'index');
 		}
 		
 		self::$parameters = !empty($terms) ? $terms : array();
@@ -487,7 +487,7 @@ class Controller {
 			//The following is only for on site redirects
 			if (substr($location, 0, 7) != 'http://' || substr($location, 0, strlen(SITE_LINK)) == SITE_LINK) {
 				//This should fix most redirects, but it may happen that location == '?debug=true&q=something/or/another' or something similiar
-				if (Value::get('clean_urls', false) && substr($location, 0, 3) == '?q=') {
+				if (ConfigValue::get('CleanURLs', false) && substr($location, 0, 3) == '?q=') {
 					$location = SITE_LINK . substr($location, 3);
 				}
 				//Add some meta variables
@@ -571,9 +571,8 @@ class Controller {
 
 		if (is_callable(array(self::$view, 'whoops'))) {
 			call_user_func_array(array(self::$view, 'whoops'), array($title, $message, $code_hint));
-		} else {
-			$view = new View();
-			$view->whoops($title, $message, $code_hint);
+		} else if (self::$view instanceof View) {
+			self::$view->whoops($title, $message, $code_hint);
 		}
 		if (array_key_exists('debug', $_REQUEST)) {
 			var_dump($title, $message);
