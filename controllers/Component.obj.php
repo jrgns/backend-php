@@ -91,6 +91,15 @@ class Component extends TableCtl {
 	}
 	
 	public static function isActive($name) {
+		//No DB, so we use files to determine if it's active or not
+		if (defined('BACKEND_WITH_DATABASE') && !BACKEND_WITH_DATABASE) {
+			//Return true if the controller is in the APP / SITE Folder
+			if (file_exists(APP_FOLDER . '/controllers/' . $name . '.obj.php')) {
+				return true;
+			} else if (defined('SITE_FOLDER') && file_exists(SITE_FOLDER . '/controllers/' . $name . '.obj.php')) {
+				return true;
+			}
+		}
 		$name = preg_replace('/Obj$/', '', $name);
 		$active = self::getActive();
 		if ($active) {

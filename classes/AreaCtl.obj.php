@@ -105,7 +105,6 @@ class AreaCtl {
 	 * Override this function if you want to customize the permissions for an area. BUT preferably use the DB...
 	 */
 	public function checkPermissions(array $options = array()) {
-		$toret = true;
 		$action = !empty($options['action']) ? $options['action'] : (
 			!empty(Controller::$action) ? Controller::check_reverse_map('action', Controller::$action) : '*'
 		);
@@ -121,11 +120,11 @@ class AreaCtl {
 		}
 		
 		if (ConfigValue::get('AdminInstalled', false)) {
-			$toret = Permission::check($action, $subject, $subject_id);
+			return Permission::check($action, $subject, $subject_id);
 		} else if (!($subject == 'admin' && in_array($action, array('pre_install', 'check_install', 'install')))) {
-			$toret = false;
+			return false;
 		}
-		return $toret;
+		return true;
 	}
 
 	public static function checkParameters($parameters) {

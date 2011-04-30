@@ -366,7 +366,9 @@ class Backend {
 			$log_to_file = array_key_exists('log_to_file', $options) ? $options['log_to_file'] : ConfigValue::get('LogToFile', false);
 
 			if ($log_to_file) {
-				@list($file, $log_what) = explode('|', $log_to_file);
+				if (is_string($log_to_file)) {
+					@list($file, $log_what) = explode('|', $log_to_file);
+				}
 				$file     = empty($file)     ? 'logfile_' . date('Ymd') . 'txt' : $file;
 				$log_what = empty($log_what) ? array('success', 'notice', 'error') : explode(',', $log_what);
 				if ((is_array($log_what) && in_array($what, $log_what)) || $log_what == '*') {
