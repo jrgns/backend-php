@@ -73,7 +73,7 @@ class Component extends TableCtl {
 	}
 	
 	public static function getActive($refresh = false) {
-		if (!BACKEND_INSTALLED) {
+		if (!defined('BACKEND_WITH_DATABASE') || !BACKEND_WITH_DATABASE) {
 			//Return the core components
 			return self::getCoreComponents();
 		}
@@ -91,15 +91,11 @@ class Component extends TableCtl {
 	}
 	
 	public static function isActive($name) {
-		if (Value::get('admin_installed', false)) {
-			$name = preg_replace('/Obj$/', '', $name);
-			$active = self::getActive();
-			if ($active) {
-				$active = array_flatten($active, 'id', 'name');
-				return in_array($name, $active);
-			}
-		} else if ($name == 'Admin') {
-			return true;
+		$name = preg_replace('/Obj$/', '', $name);
+		$active = self::getActive();
+		if ($active) {
+			$active = array_flatten($active, 'id', 'name');
+			return in_array($name, $active);
 		}
 		return false;
 	}
@@ -108,8 +104,16 @@ class Component extends TableCtl {
 		self::getActive();
 	}
 	
+	/**
+	 * This installs a default list of components.
+	 * 
+	 * It needs to be pre_installed so that the rest of the components can be installed from there
+	 */
 	public static function pre_install() {
-		$toret = self::installModel(get_called_class() . 'Obj', array('drop_table' => true));
+		if (!BACKEND_WITH_DATABASE) {
+			return true;
+		}
+		$result = self::installModel(get_called_class() . 'Obj', array('drop_table' => true));
 
 		$components = self::fromFolder();
 
@@ -120,10 +124,10 @@ class Component extends TableCtl {
 				//TODO Move this to a install log file
 				//echo 'Installed ' . $name;
 			} else {
-				$toret = false;
+				$result = false;
 			}
 		}
-		return $toret;
+		return $result;
 	}
 	
 	private static function add($filename) {
@@ -143,9 +147,13 @@ class Component extends TableCtl {
 		
 	public static function install(array $options = array()) {
 		$options['install_model'] = array_key_exists('install_model', $options) ? $options['install_model'] : false;
-		$toret = parent::install($options);
-		Hook::add('init', 'pre', get_called_class()) && $toret;
-		return $toret;
+		$result = parent::install($options);
+		if (!BACKEND_WITH_DATABASE) {
+			return $result;
+		}
+
+		Hook::add('init', 'pre', get_called_class()) && $result;
+		return $result;
 	}
 	
 	public function action_check() {
