@@ -21,6 +21,10 @@ class BackendError extends TableCtl {
 	private static $adding = false;
 
 	private static function shouldAdd($one, $two = false, $three = false, $four = false, $five = false) {
+		//Controller not initiated yet.
+		if (!Controller::getInit()) {
+			return false;
+		}
 		//Some low level utilities only checks if the class exists, not if it is active
 		if (!Component::isActive('BackendError')) {
 			return false;
