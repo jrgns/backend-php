@@ -330,7 +330,7 @@ class Backend {
 
 		if (empty(self::$DB[$name]['connection']) || !(self::$DB[$name]['connection'] instanceof PDO)) {
 			try {
-				//This might be problematic if there shouldn't be a username/password?
+				//TODO This might be problematic if there shouldn't be a username/password?
 				self::$DB[$name]['connection'] = new PDO(
 					self::$DB[$name]['dsn'],
 					self::$DB[$name]['username'],

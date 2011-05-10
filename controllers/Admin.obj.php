@@ -16,6 +16,13 @@
  * @package Controllers
  */
 class Admin extends AreaCtl {
+	const ERR_DB_INSUFFICIENT_INFO = 1;
+	const ERR_DB_CANT_CONNECT      = 2;
+	public static $error_msgs = array(
+		self::ERR_DB_INSUFFICIENT_INFO => 'Insufficient information supplied.',
+		self::ERR_DB_CANT_CONNECT      => 'Could not connect to the DB. Please check the information supplied and that the DB exists.',
+	);
+
 	/**
 	 * Simple page to notify the user that the app has not been installed yet
 	 */
@@ -113,10 +120,9 @@ class Admin extends AreaCtl {
 	public function html_install($result) {
 		if (is_post() && $result) {
 			Backend::addSuccess('Backend Install Successful');
-			$_SESSION['just_installed'] = true;
 			ConfigValue::set('AdminInstalled', date('Y-m-d H:i:s'));
-			if (BACKEND_WITH_DATABASE) {
-				Controller::redirect('?q=account/signup');
+			if (Controller::getVar('add_database')) {
+				Controller::redirect('?q=admin/install_db');
 			} else {
 				Controller::redirect('?q=home/index');
 			}
@@ -124,7 +130,67 @@ class Admin extends AreaCtl {
 		Backend::add('Sub Title', 'Install Backend Application');
 		Backend::addContent('<p class="large loud">Something went wrong with the installation</p>');
 	}
+	
+	/**
+	 * Get and save the database settings
+	 */
+	public function post_install_db() {
+		//Get the values
+		$username = Controller::getVar('username');
+		$password = Controller::getVar('password');
+		$database = Controller::getVar('database');
+		$hostname = Controller::getVar('hostname');
+		if (empty($username) || empty($password) || empty($database)
+				|| empty($hostname)) {
+			return self::ERR_DB_INSUFFICIENT_INFO;
+		}
+		
+		//Connect to the DB
+		$dsn = array();
+		$driver = 'mysql';
+		$dsn[] = 'dbname=' . $database;
+		$dsn[] = 'host=' . $hostname;
+		$dsn = strtolower($driver) . ':' . implode(';', $dsn);
+		try {
+			$conn = new PDO(
+						$dsn,
+						$username,
+						$password
+					);
+		} catch (Exception $e) {
+			return self::ERR_DB_CANT_CONNECT;
+		}
+		if (!($conn instanceof PDO)) {
+			return self::ERR_DB_CANT_CONNECT;
+		}
+		//Set the values
+		Backend::setConfig('database1.username', $username);
+		Backend::setConfig('database1.password', $password);
+		Backend::setConfig('database1.database', $database);
+		Backend::setConfig('database1.hostname', $hostname);
+		return true;
+	}
+	
+	public function html_install_db($result) {
+		//TODO Give an interface / option to create the Database
+		if ($result === true) {
+			Backend::addSuccess('Set up DB Connection');
+			Controller::redirect('?q=account/super_signup');
+		} else {
+			$vars = array(
+				'username' => Controller::getVar('username'),
+				'password' => Controller::getVar('password'),
+				'hostname' => Controller::getVar('hostname'),
+				'database' => Controller::getVar('database'),
+			);
+			Backend::addContent(Render::renderFile('admin.install_db.tpl.php', $vars));
+			Backend::addError(self::getError($result));
+		}
+	}
 
+	/**
+	 * Run this request daily to run daily maintenance scripts
+	 */
 	function get_daily(array $options = array()) {
 		$components = Component::getActive();
 		$result = true;
@@ -145,6 +211,9 @@ class Admin extends AreaCtl {
 		return $result;
 	}
 
+	/**
+	 * Run this request weekly to run weekly maintenance scripts
+	 */
 	function get_weekly(array $options = array()) {
 		$components = Component::getActive();
 		$result = true;
@@ -165,33 +234,8 @@ class Admin extends AreaCtl {
 		return $result;
 	}
 	
-	function html_update($result) {
-		Backend::add('Sub Title', 'Update Backend Components');
-		Backend::add('result', $result);
-	}
-	
-	function html_index($result) {
-		Backend::add('Sub Title', 'Manage Application');
-		Backend::add('result', $result);
-
-		$admin_links = array();
-		$components = Component::getActive();
-		foreach($components as $component) {
-			if (method_exists($component['name'], 'admin_links')) {
-				$admin_links[$component['name']] = call_user_func(array($component['name'], 'admin_links'));
-			}
-		}
-		$admin_links = array_filter($admin_links);
-		Backend::add('admin_links', $admin_links);
-		Backend::addContent(Render::renderFile('admin.index.tpl.php'));
-	}
-	
 	public static function hook_post_display($data, $controller) {
 		$user = BackendAccount::checkUser();
-		$installed = ConfigValue::get('AdminInstalled', false);
-		if (!$installed) {
-			Links::add('Install Application', '?q=admin/install', 'secondary');
-		}
 		if ($user && count(array_intersect(array('superadmin', 'admin'), $user->roles))) {
 			Links::add('Manage Application', '?q=admin', 'secondary');
 		}
