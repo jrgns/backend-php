@@ -26,7 +26,11 @@ class JsonView extends TextView {
 	public static function hook_output($to_print) {
 		$result_only = Controller::getVar('result_only');
 		if (!empty($result_only)) {
-			return json_encode($to_print);
+			if (@is_object(json_decode($to_print))){
+				return $to_print;
+			} else {
+				return json_encode($to_print);
+			}
 		}
 		$object = new stdClass();
 		$object->result  = $to_print;
