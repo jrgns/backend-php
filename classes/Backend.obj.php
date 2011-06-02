@@ -78,7 +78,19 @@ class Backend {
 		require(BACKEND_FOLDER . '/constants.inc.php');
 		require(BACKEND_FOLDER . '/functions.inc.php');
 		require(BACKEND_FOLDER . '/modifiers.inc.php');
+		
+		self::requireFile('classes', 'Controller');
+		self::requireFile('utilities', 'BackendConfig');
+		self::requireFile('classes', 'AreaCtl');
+		self::requireFile('classes', 'TableCtl');
+		self::requireFile('controllers', 'Component');
+		self::requireFile('controllers', 'Value');
+		self::requireFile('controllers', 'ConfigValue');
+		self::requireFile('classes', 'View');
+		self::requireFile('utilities', 'Request');
+		self::requireFile('utilities', 'Parser');
 
+		//TODO Maybe add a config value to decide if this should be included...		
 		include(BACKEND_FOLDER . '/libraries/Markdown/markdown.php');
 		spl_autoload_register(array('Backend', '__autoload'));
 		set_error_handler    (array('Backend', '__error_handler'));
@@ -126,17 +138,8 @@ class Backend {
 			}
 		}
 
-		$with_database = false;
-		//DBs
-		//TODO Get a way to store db details in the config
-		$dbs = self::$config->getValue('backend.dbs');
-		if ($dbs) {
-			$with_database = self::initDBs($dbs);
-		} else {
-			if (array_key_exists('debug', $_REQUEST)) {
-				Backend::addError('No DBs');
-			}
-		}
+		//Init DBs
+		$with_database = self::initDBs();
 		define('BACKEND_WITH_DATABASE', $with_database);
 	}
 	
@@ -230,63 +233,76 @@ class Backend {
 		return true;
 	}
 
-	private static function initDBs($dbs) {
-		if (is_array($dbs)) {
-			foreach($dbs as $name => $db) {
-				if (!self::addDB($name, $db)) {
-					return false;
+	private static function initDBs() {
+		$result = false;
+		//Get the DEFAULT db first,
+		if ($db_settings = self::$config->getValue('database')) {
+			if (is_array($db_settings)) {
+				$db_settings['alias'] = 'default';
+				if (self::addDB('default', $db_settings)) {
+					$result = true;
+				} else {
+					Backend::addError('Could not add Default Database');
 				}
 			}
 		}
-		return true;
+		//Get all the other DB's, if any
+		$count = 1;
+		while ($db_settings = self::$config->getValue('database_' . $count)) {
+			if (self::addDB('database_' . $count, $db_settings)) {
+				$result = true;
+			} else {
+				Backend::addError('Could not add Database: ' . $db_settings['alias']);
+			}
+			$count++;
+		}
+		return $result;
 	}
+	
 	/**
 	 * Add a DB definition to the Backend
 	 *
-	 * @param string A PDO DSN for the DB.
+	 * @param string The name of the DB
 	 * @param array Options for the DB Connection. Can include 
 	 * + username, the username for the connection.
 	 * + password, the password for the connection.
-	 * + name, the name for the connection, defaults to 'default'.
+	 * + name, the name for the connection.
 	 * + connection, An actual PDO connection.
 	 * @returns boolean True if the connection succeeded.
 	 */
-	static function addDB($name, array $options = array()) {
+	public static function addDB($name, array $options = array()) {
 		if (!self::checkSelf()) {
 			return false;
 		}
 		$dsn = array_key_exists('dsn', $options) ? $options['dsn'] : false;
 		if (!$dsn) {
-			$options['host']     = empty($options['host'])     ? self::getConfig('backend.db.default_host')     : $options['host'];
-			$options['username'] = empty($options['username']) ? self::getConfig('backend.db.default_username') : $options['username'];
-			$options['password'] = empty($options['password']) ? self::getConfig('backend.db.default_password') : $options['password'];
-			$options['database'] = empty($options['database']) ? self::getConfig('backend.db.default_database') : $options['database'];
-			$options['driver']   = empty($options['driver'])   ? self::getConfig('backend.db.default_driver')   : $options['driver'];
+			$options['hostname'] = empty($options['hostname']) ? self::getConfig('database.hostname') : $options['hostname'];
+			$options['database'] = empty($options['database']) ? self::getConfig('database.database') : $options['database'];
+			$options['driver']   = empty($options['driver'])   ? self::getConfig('backend.db.default_driver', 'mysql') : $options['driver'];
 
 			$dsn = array();
-			$driver = array_key_exists('driver', $options)   ? $options['driver'] : 'mysql';
 			if (!empty($options['database'])) {
 				$dsn[] = 'dbname=' . $options['database'];
 			}
-			$dsn[] = 'host=' . (array_key_exists('host', $options) ? $options['host'] : 'localhost');
-			$dsn = strtolower($driver) . ':' . implode(';', $dsn);
+			$dsn[] = 'host=' . (empty($options['host']) ? 'localhost' : $options['host']);
+			$dsn = strtolower($options['driver']) . ':' . implode(';', $dsn);
 		}
-		$username   = array_key_exists('username', $options) ? $options['username'] : '';
-		$password   = array_key_exists('password', $options) ? $options['password'] : '';
-		$alias      = empty($options['alias'])               ? $name                : $options['alias'];
-		$connection = empty($options['connection'])          ? false                : $options['connection'];
+		$alias      = empty($options['alias'])      ? null : $options['alias'];
+		$username   = empty($options['username'])   ? null : $options['username'];
+		$password   = empty($options['password'])   ? null : $options['password'];
+		$connection = empty($options['connection']) ? null : $options['connection'];
 
 		if (array_key_exists($name, self::$DB)) {
 			Backend::addNotice('Overwriting existing DB definition: ' . $name);
 		}
 		self::$DB[$name] = array(
-			'database' => $options['database'],
-			'dsn'      => $dsn,
-			'username' => $username,
-			'password' => $password,
+			'database'   => $options['database'],
+			'dsn'        => $dsn,
+			'username'   => $username,
+			'password'   => $password,
 			'connection' => $connection
 		);
-		if ($alias != $name) {
+		if (!is_null($alias) && $alias != $name) {
 			if (array_key_exists($alias, self::$DB)) {
 				Backend::addNotice('Overwriting existing DB definition: ' . $alias);
 			}
@@ -301,30 +317,20 @@ class Backend {
 	 * @param string The name of the DB connections. Defaults to 'default' :P.
 	 * @returns PDO The PDO DB connection, or false.
 	 */
-	static function getDB($name = false) {
+	static function getDB($name = 'default') {
 		$definition = self::getDBDefinition($name);
-		if ($definition) {
+		if ($definition && $definition['connection'] instanceof PDO) {
 			return $definition['connection'];
 		}
 		return false;
 	}
 
-	static function getDBDefinition($name = false) {
+	static function getDBDefinition($name = 'default') {
 		if (!self::checkSelf()) {
 			return false;
 		}
-		//Single connection or no connection
-		if (self::$DB instanceof PDO || empty(self::$DB)) {
-			return self::$DB;
-		}
 		
-		$name = $name ? $name : 'default';
 		if (!array_key_exists($name, self::$DB)) {
-			if ($name == 'default' && current(self::$DB) instanceof PDO) {
-				return current(self::$DB);
-			} else if (array_key_exists('default', self::$DB) && self::$DB['default']['database'] == $name) {
-				return self::$DB['default'];
-			}
 			return false;
 		}
 
@@ -627,8 +633,25 @@ class Backend {
 		}
 		return true;
 	}
+	
+	public static function requireFile($type, $name) {
+		if (strpos($name, '.') === false) {
+			$name .= '.obj.php';
+		}
+		$folders = array(APP_FOLDER, BACKEND_FOLDER);
+		if (defined('SITE_FOLDER')) {
+			array_unshift($folders, SITE_FOLDER);
+		}
+		foreach(array_unique($folders) as $folder) {
+			if (file_exists($folder . '/' . $type . '/' . $name)) {
+				include($folder . '/' . $type . '/' . $name);
+				return true;
+			}
+		}
+		return false;
+	}
 
-	static public function __autoload($classname) {
+	public static function __autoload($classname) {
 		$included = false;
 		//Check if it's a core module first
 		if (substr($classname, 0, 2) == 'BE') {
@@ -636,61 +659,14 @@ class Backend {
 				return true;
 			}
 		}
+		
 		//TODO eventually cache / determine by class name exactly where the file should be to improve performance
-		if (defined('SITE_FOLDER')) {
-			$folders = array(
-				SITE_FOLDER . '/controllers/' => 'controller',
-				APP_FOLDER . '/controllers/' => 'controller',
-				BACKEND_FOLDER . '/controllers/' => 'controller',
-
-				SITE_FOLDER . '/models/' => 'model',
-				APP_FOLDER . '/models/' => 'model',
-				BACKEND_FOLDER . '/models/' => 'model',
-
-				SITE_FOLDER . '/classes/' => 'class',
-				APP_FOLDER . '/classes/' => 'class',
-				BACKEND_FOLDER . '/classes/' => 'class',
-
-				SITE_FOLDER . '/views/' => 'view',
-				APP_FOLDER . '/views/' => 'view',
-				BACKEND_FOLDER . '/views/' => 'view',
-
-				SITE_FOLDER . '/utilities/' => 'utility',
-				APP_FOLDER . '/utilities/' => 'utility',
-				BACKEND_FOLDER . '/utilities/' => 'utility',
-
-				SITE_FOLDER . '/widgets/' => 'widget',
-				APP_FOLDER . '/widgets/' => 'widget',
-				BACKEND_FOLDER . '/widgets/' => 'widget',
-			);
-		} else {
-			$folders = array(
-				APP_FOLDER . '/controllers/' => 'controller',
-				BACKEND_FOLDER . '/controllers/' => 'controller',
-
-				APP_FOLDER . '/models/' => 'model',
-				BACKEND_FOLDER . '/models/' => 'model',
-
-				APP_FOLDER . '/classes/' => 'class',
-				BACKEND_FOLDER . '/classes/' => 'class',
-
-				APP_FOLDER . '/views/' => 'view',
-				BACKEND_FOLDER . '/views/' => 'view',
-
-				APP_FOLDER . '/utilities/' => 'utility',
-				BACKEND_FOLDER . '/utilities/' => 'utility',
-
-				APP_FOLDER . '/widgets/' => 'widget',
-				BACKEND_FOLDER . '/widgets/' => 'widget',
-			);
-		}
-		foreach($folders as $folder => $type) {
-			if (file_exists($folder . $classname . '.obj.php')) {
-				include($folder . $classname . '.obj.php');
+		$types = array('controllers', 'models', 'classes', 'views', 'utilities', 'widgets');
+		foreach($types as $type) {
+			if (self::requireFile($type, $classname . '.obj.php')) {
 				$included = true;
 				break;
-			} else if ($type == 'controller' && file_exists($folder . $classname . '/index.php')) {
-				include($folder . $classname . '/index.php');
+			} else if ($type == 'controllers' && self::requireFile($type, $classname . '/index.php')) {
 				$included = true;
 				break;
 			}
@@ -700,17 +676,17 @@ class Backend {
 			case !class_exists($classname):
 				trigger_error('Could not load Class: ' . $classname, E_USER_ERROR);
 				break;
-			case $type == 'model':
+			case $type == 'models':
 				if (!(is_subclass_of($classname, 'DBObject'))) {
 					trigger_error('Invalid class: ' . $classname . ' not a DBObject', E_USER_ERROR);
 				}
 				break;
-			case $type == 'controller':
+			case $type == 'controllers':
 				if (!(is_subclass_of($classname, 'AreaCtl'))) {
 					trigger_error('Invalid class: ' . $classname . ' not a AreaController', E_USER_ERROR);
 				}
 				break;
-			case $type == 'view':
+			case $type == 'views':
 				if (!(is_subclass_of($classname, 'View'))) {
 					trigger_error('Invalid class: ' . $classname . ' not a View', E_USER_ERROR);
 				}
@@ -727,3 +703,4 @@ class Backend {
 		}
 	}
 }
+
