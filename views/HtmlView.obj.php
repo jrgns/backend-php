@@ -285,7 +285,7 @@ class HtmlView extends View {
 	}
 
 	public static function install() {
-		if (!BACKEND_WITH_DATABASE) {
+		if (!Backend::getDB('default')) {
 			return true;
 		}
 

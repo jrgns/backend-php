@@ -12,7 +12,7 @@
  */
 class Hook extends TableCtl {
 	public static function add($hook, $type, $class, array $options = array()) {
-		if (!BACKEND_WITH_DATABASE) {
+		if (!Backend::getDB('default')) {
 			return false;
 		}
 
@@ -122,7 +122,7 @@ class Hook extends TableCtl {
 	 * Make sure the hooks table exists so that other components can add hooks with installation
 	 */
 	public static function pre_install() {
-		if (!BACKEND_WITH_DATABASE) {
+		if (!Backend::getDB('default')) {
 			return true;
 		}
 
@@ -130,3 +130,4 @@ class Hook extends TableCtl {
 		return $result;
 	}
 }
+

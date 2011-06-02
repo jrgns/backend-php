@@ -42,7 +42,7 @@ class Component extends TableCtl {
 	
 	public static function fromFolder() {
 		$toret = array();
-		$base_c = self::getCoreComponents();
+		$base_c = self::getCoreComponents(true);
 		$base_c = array_flatten($base_c, 'name', 'filename');
 		$toret  = array_merge($toret, files_from_folder(BACKEND_FOLDER . '/controllers/', array('prepend_folder' => true)));
 		$toret  = array_merge($toret, files_from_folder(APP_FOLDER . '/controllers/', array('prepend_folder' => true)));
@@ -68,31 +68,37 @@ class Component extends TableCtl {
 		return true;
 	}
 
-	private static function getCoreComponents(array $options = array()) {
-		return include(BACKEND_FOLDER . '/stuph/core_classes.inc.php');
+	public static function getCoreComponents($with_db = false) {
+		$result = include(BACKEND_FOLDER . '/stuph/core_classes.inc.php');
+		if (!$with_db) {
+			return $result;
+		}
+		$result = array_merge($result, include(BACKEND_FOLDER . '/stuph/core_db_classes.inc.php'));
+		return $result;
 	}
 	
 	public static function getActive($refresh = false) {
-		if (!defined('BACKEND_WITH_DATABASE') || !BACKEND_WITH_DATABASE) {
+		if (!BACKEND_WITH_DATABASE) {
 			//Return the core components
 			return self::getCoreComponents();
 		}
-		$toret = Backend::get('Component::active', false);
-		if (!$toret || $refresh) {
-			$component = new ComponentObj();
-			list ($query, $params) = $component->getSelectSQL(array('conditions' => '`active` = 1'));
-			if ($query) {
-				$query = new CustomQuery($query);
-				$toret = $query->fetchAll($params);
-				Backend::add('Component::active', $toret);
-			}
+		$result = $refresh ? false : Backend::get('Component::active', false);
+		if ($result) {
+			return $result;
 		}
-		return $toret;
+		$component = new ComponentObj();
+		list ($query, $params) = $component->getSelectSQL(array('conditions' => '`active` = 1'));
+		if ($query) {
+			$query = new CustomQuery($query);
+			$result = $query->fetchAll($params);
+			Backend::add('Component::active', $result);
+		}
+		return $result;
 	}
 	
 	public static function isActive($name) {
 		//No DB, so we use files to determine if it's active or not
-		if (defined('BACKEND_WITH_DATABASE') && !BACKEND_WITH_DATABASE) {
+		if (!Backend::getDB('default')) {
 			//Return true if the controller is in the APP / SITE Folder
 			if (file_exists(APP_FOLDER . '/controllers/' . $name . '.obj.php')) {
 				return true;
@@ -119,7 +125,7 @@ class Component extends TableCtl {
 	 * It needs to be pre_installed so that the rest of the components can be installed from there
 	 */
 	public static function pre_install() {
-		if (!BACKEND_WITH_DATABASE) {
+		if (!Backend::getDB('default')) {
 			return true;
 		}
 		$result = self::installModel(get_called_class() . 'Obj', array('drop_table' => true));
@@ -141,7 +147,7 @@ class Component extends TableCtl {
 	
 	private static function add($filename) {
 		$name = preg_replace('/\.obj\.php$/', '', basename($filename));
-		$active = in_array($name, array_flatten(self::getCoreComponents(), null, 'name')) ||
+		$active = in_array($name, array_flatten(self::getCoreComponents(true), null, 'name')) ||
 				  $name == Backend::getConfig('backend.application.class');
 
 		$data = array(
@@ -157,7 +163,7 @@ class Component extends TableCtl {
 	public static function install(array $options = array()) {
 		$options['install_model'] = array_key_exists('install_model', $options) ? $options['install_model'] : false;
 		$result = parent::install($options);
-		if (!BACKEND_WITH_DATABASE) {
+		if (!Backend::getDB('default')) {
 			return $result;
 		}
 
@@ -207,7 +213,7 @@ class Component extends TableCtl {
 	}
 	
 	public static function admin_links() {
-		if (!BACKEND_WITH_DATABASE) {
+		if (!Backend::getDB('default')) {
 			return false;
 		}
 		return array(

@@ -98,7 +98,7 @@ class Query {
 							$verbose_error[] = '(' . $error_info[1] . ')';
 						}
 						$verbose_error = implode(' ', $verbose_error);
-						if (class_exists('BackendError', false) && empty($options['dont_moan'])) {
+						if (Component::isActive('BackendError') && empty($options['dont_moan'])) {
 							BackendError::add($verbose_error, 'execute');
 						}
 
@@ -434,9 +434,8 @@ class Query {
 			if (substr($table, -3) == 'Obj') {
 				$table = substr($table, 0, strlen($table) - 3);
 			}
-			$components = array_flatten($components, null, 'name');
-			if (in_array($table, $components) && class_exists($table . 'Obj', true)) {
-				$name  = $table . 'Obj';
+			$name  = $table . 'Obj';
+			if (class_exists($name, true)) {
 				$table = new $name();
 				$table = $table->getSource();
 			}

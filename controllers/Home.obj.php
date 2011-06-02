@@ -16,7 +16,7 @@ class Home extends AreaCtl {
 	
 	public static function install(array $options = array()) {
 		$result = parent::install($options);
-		if (!BACKEND_WITH_DATABASE) {
+		if (!Backend::getDB('default')) {
 			return $result;
 		}
 		

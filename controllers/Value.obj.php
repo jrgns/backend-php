@@ -24,9 +24,9 @@ class Value extends TableCtl {
 		if (isset(self::$cache[$name])) {
 			return self::$cache[$name];
 		} else {
-			$toret = Value::retrieve($name);
-			if ($toret && array_key_exists('value', $toret)) {
-				$result = array_key_exists('value', $toret) ? $toret['value'] : $default;
+			$result = Value::retrieve($name);
+			if ($result && array_key_exists('value', $result)) {
+				$result = array_key_exists('value', $result) ? $result['value'] : $default;
 			} else if (!is_null($default)) {
 				$result = $default;
 				Value::set($name, $default);
@@ -68,7 +68,7 @@ class Value extends TableCtl {
 	}
 	
 	public static function admin_links() {
-		if (!BACKEND_WITH_DATABASE) {
+		if (!Backend::getDB('default')) {
 			return false;
 		}
 		return array(
@@ -77,7 +77,7 @@ class Value extends TableCtl {
 	}
 
 	public static function install(array $options = array()) {
-		$toret = parent::install($options);
-		return $toret;
+		$result = parent::install($options);
+		return $result;
 	}
 }

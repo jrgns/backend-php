@@ -48,9 +48,8 @@ class Admin extends AreaCtl {
 		$components = array_flatten($components, null, 'name');
 		foreach($components as $component) {
 			if (class_exists($component, true) && method_exists($component, 'install_check')) {
-				Backend::addNotice('Checking ' . $component);
 				if (!call_user_func_array(array($component, 'install_check'), array())) {
-					Backend::addError('Error on checking install for ' . $component);
+					Backend::addNotice('Error on checking install for ' . $component);
 					$can_install = false;
 				}
 			}
@@ -75,46 +74,7 @@ class Admin extends AreaCtl {
 			return false;
 		}
 
-		$components = Component::getActive();
-		if (!$components) {
-			Backend::addError('Could not get components to pre install');
-			return false;
-		}
-
-		//Save original LogToFile setting
-		$original = ConfigValue::get('LogToFile', false);
-		$install_log_file = 'install_log_' . date('Ymd_His') . '.txt';
-		ConfigValue::set('LogToFile', $install_log_file);
-
-		//Pre Install components
-		Backend::addNotice(PHP_EOL . PHP_EOL . 'Installation started at ' . date('Y-m-d H:i:s'));
-		$components = array_flatten($components, null, 'name');
-		foreach($components as $component) {
-			if (class_exists($component, true) && method_exists($component, 'pre_install')) {
-				Backend::addNotice('Pre Installing ' . $component);
-				if (!call_user_func_array(array($component, 'pre_install'), array())) {
-					Backend::addError('Error on pre install for ' . $component);
-					return false;
-				}
-			}
-		}
-		
-		//Install Components
-		foreach($components as $component) {
-			if (class_exists($component, true) && method_exists($component, 'install')) {
-				Backend::addNotice('Installing ' . $component);
-				if (!call_user_func_array(array($component, 'install'), array())) {
-					Backend::addError('Error on installing ' . $component);
-					return false;
-				}
-			}
-		}
-
-		//Restore Original
-		ConfigValue::set('LogToFile', $original);
-		
-		ConfigValue::set('AdminInstalled', true);
-		return true;
+		return self::installComponents();
 	}
 	
 	public function html_install($result) {
@@ -164,18 +124,31 @@ class Admin extends AreaCtl {
 			return self::ERR_DB_CANT_CONNECT;
 		}
 		//Set the values
-		Backend::setConfig('database1.username', $username);
-		Backend::setConfig('database1.password', $password);
-		Backend::setConfig('database1.database', $database);
-		Backend::setConfig('database1.hostname', $hostname);
-		return true;
+		Backend::setConfig('database.alias', 'default');
+		Backend::setConfig('database.database', $database);
+		Backend::setConfig('database.username', $username);
+		Backend::setConfig('database.password', $password);
+		Backend::setConfig('database.hostname', $hostname);
+		
+		//Add the DB settings to the Backend
+		Backend::addDB('default', array(
+			'alias'    => 'default',
+			'database' => $database,
+			'username' => $username,
+			'password' => $password,
+			'hostname' => $hostname,
+		));
+		
+		//Reinstall the components
+		return self::installComponents(true);
 	}
 	
 	public function html_install_db($result) {
-		//TODO Give an interface / option to create the Database
 		if ($result === true) {
+			ConfigValue::set('DatabaseInstalled', date('Y-m-d H:i:s'));
 			Backend::addSuccess('Set up DB Connection');
-			Controller::redirect('?q=account/super_signup');
+			//Setup the super user
+			Controller::redirect('?q=backend_user/super_signup');
 		} else {
 			$vars = array(
 				'username' => Controller::getVar('username'),
@@ -235,16 +208,57 @@ class Admin extends AreaCtl {
 	}
 	
 	public static function hook_post_display($data, $controller) {
-		$user = BackendAccount::checkUser();
+		$user = BackendUser::check();
 		if ($user && count(array_intersect(array('superadmin', 'admin'), $user->roles))) {
 			Links::add('Manage Application', '?q=admin', 'secondary');
 		}
 		return $data;
 	}
 	
+	private static function installComponents($with_db = false) {
+		$components = Component::getCoreComponents($with_db);
+		if (!$components) {
+			Backend::addError('Could not get components to pre install');
+			return false;
+		}
+
+		//Save original LogToFile setting
+		$original = ConfigValue::get('LogToFile', false);
+		$install_log_file = 'install_log_' . date('Ymd_His') . '.txt';
+		ConfigValue::set('LogToFile', $install_log_file);
+
+		//Pre Install components
+		Backend::addNotice(PHP_EOL . PHP_EOL . 'Installation started at ' . date('Y-m-d H:i:s'));
+		$components = array_flatten($components, null, 'name');
+		foreach($components as $component) {
+			if (class_exists($component, true) && method_exists($component, 'pre_install')) {
+				Backend::addNotice('Pre Installing ' . $component);
+				if (!call_user_func_array(array($component, 'pre_install'), array())) {
+					Backend::addError('Error on pre install for ' . $component);
+					return false;
+				}
+			}
+		}
+		
+		//Install Components
+		foreach($components as $component) {
+			if (class_exists($component, true) && method_exists($component, 'install')) {
+				Backend::addNotice('Installing ' . $component);
+				if (!call_user_func_array(array($component, 'install'), array())) {
+					Backend::addError('Error on installing ' . $component);
+					return false;
+				}
+			}
+		}
+
+		//Restore Original
+		ConfigValue::set('LogToFile', $original);
+		return true;
+	}
+	
 	public static function install(array $options = array()) {
 		$result = parent::install($options);
-		if (!BACKEND_WITH_DATABASE) {
+		if (!Backend::getDB('default')) {
 			return $result;
 		}
 

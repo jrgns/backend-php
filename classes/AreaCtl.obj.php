@@ -22,7 +22,8 @@ class AreaCtl {
 	 */
 	public final function action() {
 		$toret = null;
-		if ($error_number = Controller::getVar('err', FILTER_VALIDATE_INT)) {
+		$error_number = Controller::getVar('err');
+		if (!empty($error_number)) {
 			Backend::addError(self::getError($error_number));
 		}
 
@@ -77,7 +78,7 @@ class AreaCtl {
 		$class_name = $class_name ? $class_name : get_called_class();
 		if (class_exists($class_name, true)) {
 			$vars = eval('return ' . $class_name . '::$error_msgs;');
-			$msg = empty($vars[$num]) ? 'Unknown Error Message for ' . $class_name : $vars[$num];
+			$msg = empty($vars[$num]) ? 'Unknown Error Message for ' . $class_name . ' (' . $num . ')' : $vars[$num];
 		}
 		return $msg;
 	}
@@ -146,7 +147,7 @@ class AreaCtl {
 	}
 	
 	public static function install(array $options = array()) {
-		if (!BACKEND_WITH_DATABASE) {
+		if (!Backend::getDB('default')) {
 			return true;
 		}
 		$class = get_called_class();

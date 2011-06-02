@@ -14,7 +14,7 @@ class ConfigValue extends Value {
 	 * Config Value names should be CamelCase
 	 */
 	public static function get($name, $default = null) {
-		if (Component::isActive('Value')) {
+		if (BACKEND_WITH_DATABASE) {
 			$value = Value::get($name, null);
 			//Retrieved from the DB
 			if (!is_null($value)) {
@@ -68,6 +68,10 @@ class ConfigValue extends Value {
 		}
 		Backend::addContent(Render::renderFile('config_value.values.tpl.php'));
 		return false;
+	}
+	
+	public static function installModel($model, array $options = array()) {
+		return parent::installModel('Value', $options);
 	}
 }
 

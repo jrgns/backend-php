@@ -16,7 +16,7 @@ class Permission extends TableCtl {
 	 * for all subjects? Eg, display.
 	 */
 	public static function add($role, $action, $subject, $subject_id = 0, array $options = array()) {
-		if (!BACKEND_WITH_DATABASE) {
+		if (!Backend::getDB('default')) {
 			return false;
 		}
 

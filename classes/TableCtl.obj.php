@@ -990,7 +990,7 @@ class TableCtl extends AreaCtl {
 	}
 	
 	public static function install(array $options = array()) {
-		if (!BACKEND_WITH_DATABASE) {
+		if (!Backend::getDB('default')) {
 			return true;
 		}
 
@@ -1020,3 +1020,4 @@ class TableCtl extends AreaCtl {
 		return $toret;
 	}
 }
+
