@@ -46,7 +46,7 @@ class GateManager extends AreaCtl {
 
 				$query = new SelectQuery('Assignment');
 				$query
-					->leftJoin(BackendAccount::getName(), array('`' . BackendAccount::getTable() . '`.`id` = `assignments`.`access_id`'))
+					->leftJoin('BackendUser', array('`backend_users`.`id` = `assignments`.`access_id`'))
 					->filter("`assignments`.`access_type` = 'users'")
 					->filter('`role_id` = :role OR `role_id` = 0');
 				$toret->assignments = $query->fetchAll(array(':role' => $toret->role->array['id']));

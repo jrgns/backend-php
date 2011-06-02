@@ -37,13 +37,15 @@ class Request {
 			if ($test == $query) {
 				return $new_query;
 			} else {
-				$search  = array('/', ':any', ':num', ':area_ctl', ':table_ctl');
+				$search  = array('/', ':any', ':num', ':controller', ':area_ctl', ':table_ctl');
+				//TODO Get the controllers from the Component table, remove area and table
 				$replace = array(
 					'\/',
 					'([^\/]+)',
 					'([0-9]+)',
+					'(home)',
 					'(admin)',
-					'(content|comment|content_revision|tag|image|account|hook)',
+					'(content|comment|content_revision|tag|image|backend_user|hook)',
 				);
 				$pattern = '/^' . str_replace($search, $replace, $test) . '\/?$/';
 				preg_match_all($pattern, $query, $matches);

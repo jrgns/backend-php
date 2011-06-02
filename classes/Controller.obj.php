@@ -112,7 +112,7 @@ class Controller {
 			self::$salt = ConfigValue::get('Salt', 'Change this to something random!');
 
 			//TODO jrgns: Don't know if I like this here...
-			$user = BackendAccount::checkUser();
+			$user = BackendUser::check();
 			//Debugging
 			self::$debug = false;
 			if (SITE_STATE != 'production' || ($user && in_array('superadmin', $user->roles))) {

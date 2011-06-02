@@ -42,7 +42,7 @@ class TagObj extends DBObject {
 			'foreign_table,name' => 'unique',
 		);
 		$meta['relations'] = array(
-			//BackendAccount::getName() => array('conditions' => array('id' => 'owner_id')),
+			//'BackendUser' => array('conditions' => array('id' => 'owner_id')),
 			//This isn't really usefull at the moment
 			//'TagLink' => array('conditions' => array('tag_id' => 'id'), 'type' => 'multiple'),
 		);

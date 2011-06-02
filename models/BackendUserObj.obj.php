@@ -11,13 +11,13 @@
  * Contributors:
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
-class BackendAccountObj extends DBObject {
+class BackendUserObj extends DBObject {
 	function __construct($meta = array(), array $options = array()) {
 		if (!is_array($meta) && is_numeric($meta)) {
 			$meta = array('id' => $meta);
 		}
 		if (!array_key_exists('table', $meta)) {
-			$meta['table'] = 'users';
+			$meta['table'] = 'backend_users';
 		}
 		if (!array_key_exists('name', $meta)) {
 			$meta['name'] = 'User';
@@ -72,38 +72,37 @@ class BackendAccountObj extends DBObject {
 	}
 	
 	function validate($data, $action, $options = array()) {
-		$toret = false;
-
 		$data = parent::validate($data, $action, $options);
-		if ($data) {
-			$banned_usernames = array('root', 'admin', 'superadmin', 'superuser', 'webadmin', 'postmaster', 'webdeveloper', 'webmaster', 'administrator', 'sysadmin');
-			$toret = true;
+		if (!$data) {
+			return $data;
+		}
+		if ($action == 'create') {
+			$data['active'] = array_key_exists('active', $data) ? $data['active'] : true;
+		}
+		if (empty($data['username'])) {
 			if ($action == 'create') {
-				$data['active'] = array_key_exists('active', $data) ? $data['active'] : true;
+				Backend::addError('Please choose a username');
+				return false;
 			}
-			if (empty($data['username'])) {
-				if ($action == 'create') {
-					$toret = false;
-					Backend::addError('Please choose a username');
-				}
-			} else {
-				//Lower ASCII only
-				$data['username'] = filter_var(trim($data['username']), FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH);
-				if (in_array($data['username'], $banned_usernames) && empty($_SESSION['just_installed'])) {
-					$toret = false;
-					Backend::addError('Please choose a valid username');
-				}
+		} else {
+			//Lower ASCII only
+			$data['username'] = filter_var(trim($data['username']), FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH);
+			//TODO Make the banned usernames configurable
+			$banned_usernames = array('root', 'admin', 'superadmin', 'superuser', 'webadmin', 'postmaster', 'webdeveloper', 'webmaster', 'administrator', 'sysadmin');
+			if (in_array($data['username'], $banned_usernames) && BackendUser::hasSuperUser()) {
+				Backend::addError('Please choose a valid username');
+				return false;
 			}
 		}
-		if ($toret && $action == 'create') {
+		if ($action == 'create') {
 			$data['salt'] = get_random('numeric');
 			$data['password'] = md5($data['salt'] . $data['password'] . Controller::$salt);
-			if (Backend::getConfig('backend.application.user.confirm')) {
+			if (ConfigValue::get('application.confirmUser')) {
 				$data['confirmed'] = false;
 			} else {
 				$data['confirmed'] = array_key_exists('confirmed', $data) ? $data['confirmed'] : true;
 			}
 		}
-		return $toret ? $data : false;
+		return $data;
 	}
 }

@@ -25,12 +25,12 @@ class GateKeeper {
 	public static function check(array $user_roles, $action = '*', $subject = '*', $subject_id = 0) {
 		$roles = self::permittedRoles($action, $subject, $subject_id);
 		$intersect = array_intersect($user_roles, $roles);
-		$toret = count($intersect) ? true : false;
-		return $toret;
+		$result = count($intersect) ? true : false;
+		return $result;
 	}
 	
 	public static function permit($role, $action, $subject, $subject_id, $control) {
-		$toret = false;
+		$result = false;
 		$params = array(':role' => $role, ':control' => $control, ':action' => $action, ':subject' => $subject, ':subject_id' => $subject_id);
 		$query = new SelectQuery('Permission');
 		$query
@@ -57,7 +57,7 @@ class GateKeeper {
 	}
 	
 	public static function assign($role_id, $access_type, $access_id) { 
-		$toret = false;
+		$result = false;
 		//if (!self::barredRole($role)) {
 			if (!is_numeric($role_id)) {
 				$role_id = Role::retrieve($role_id);
@@ -71,16 +71,16 @@ class GateKeeper {
 				->filter('`access_id` = :access_id');
 			$id = $query->fetchColumn($params);
 			if ($id) {
-				$toret = true;
+				$result = true;
 			} else {
 				$keys = array('role_id', 'access_type', 'access_id');
 				$data = array_combine($keys, array_values($params));
 				$query = new InsertQuery('Assignment');
 				$query->data($data);
-				$toret = $query->execute() ? true : false;
+				$result = $query->execute() ? true : false;
 			}
 		//}
-		return $toret;
+		return $result;
 	}
 
 	public static function dropPermissions($action, $subject, $subject_id) { 
@@ -102,7 +102,7 @@ class GateKeeper {
 		$roles = self::permissionHolders($action, $subject, $subject_id);
 		$specific = false;
 		if ($roles) {
-			$toret = array();
+			$result = array();
 			$most_spec = array(
 				0 => array(),
 				1 => array(),
@@ -110,7 +110,7 @@ class GateKeeper {
 				3 => array(),
 			);
 			foreach ($roles as $permission) {
-				$toret[$permission['role']] = $permission['role'];
+				$result[$permission['role']] = $permission['role'];
 				if ($action != '*' && $permission['action'] == $action) {
 					if ($subject != '*' && $permission['subject'] == $subject) {
 						if ($subject_id != 0 && $permission['subject_id'] == $subject_id) {
@@ -128,17 +128,17 @@ class GateKeeper {
 			}
 			$most_spec = array_filter($most_spec);
 		} else {
-			$toret = false;
+			$result = false;
 		}
-		$toret = $specific ? end($most_spec) : $toret;
+		$result = $specific ? end($most_spec) : $result;
 		if (Controller::$debug) {
-			Backend::addNotice('Roles found: ' . serialize($toret));
+			Backend::addNotice('Roles found: ' . serialize($result));
 		}
-		return $toret;
+		return $result;
 	}
 	
 	public static function getRoles() {
-		$toret = false;
+		$result = false;
 		$where = array();
 		$params = array();
 
@@ -150,16 +150,16 @@ class GateKeeper {
 
 		$rows = $query->fetchAll($params);
 		if ($rows) {
-			$toret = array();
+			$result = array();
 			foreach($rows as $row) {
-				$toret[$row['id']] = $row['role'];
+				$result[$row['id']] = $row['role'];
 			}
 		}
-		return $toret;
+		return $result;
 	}
 	
 	private static function permissionHolders($action = '*', $subject = '*', $subject_id = 0) {
-		$toret = false;
+		$result = false;
 		$query = new SelectQuery('Permission');
 		$params = array();
 		if ($action != '*') {
@@ -174,8 +174,8 @@ class GateKeeper {
 			$query->filter("(`subject_id` = :subject_id OR `subject_id` = 0)");
 			$params[':subject_id'] = $subject_id;
 		}
-		$toret = $query->fetchAll($params);
-		return $toret;
+		$result = $query->fetchAll($params);
+		return $result;
 	}
 	
 	private static function barredRole($role) {
@@ -183,14 +183,14 @@ class GateKeeper {
 	}
 
 	public static function dropAccess($access_type, $access_id) { 
-		$toret = false;
+		$result = false;
 		$params = array(':access_type' => $access_type, ':access_id' => $access_id);
 		$query = new DeleteQuery('Assignment');
 		$query
 			->filter('`access_type` = :access_type')
 			->filter('`access_id` = :access_id');
-		$toret = $query->execute($params) ? true : false;
-		return $toret;
+		$result = $query->execute($params) ? true : false;
+		return $result;
 	}
 
 	public static function assignRoleSet($roleset, $access_type, $access_id) { 

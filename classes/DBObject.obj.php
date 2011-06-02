@@ -688,7 +688,7 @@ class DBObject {
 					if ($value !== null) {
 						$value = (int)$value;
 					} else if ($action == 'create') {
-						$user = BackendAccount::checkUser();
+						$user = BackendUser::check();
 						if ($user && $user->id > 0) {
 							$value = $user->id;
 						} else {

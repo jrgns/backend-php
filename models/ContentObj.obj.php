@@ -50,7 +50,7 @@ class ContentObj extends CommentedObject {
 			$options['order'] = '`added` DESC';
 		}
 		if (!Permission::check('manage', 'content')) {
-			//$user = BackendAccount::checkUser();
+			//$user = BackendUser::check();
 			//$filter = $user ? '`active` = 1 OR `user_id` = :user_id' : '`active` = 1';
 			$filter = '`active` = 1';
 			if (array_key_exists('filter', $options)) {

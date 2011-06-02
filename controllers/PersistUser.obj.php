@@ -49,9 +49,9 @@ class PersistUser extends TableCtl {
 				->fetchAssoc(array(':hash' => $_COOKIE['remembered']));
 			if ($persist) {
 				//Get User
-				$User = self::getObject(BackendAccount::getName());
+				$User = self::getObject('BackendUser');
 
-				$query = BackendAccount::getQuery();
+				$query = BackendUser::getQuery();
 				$query->filter('`users`.`id` = :id');
 				$params = array(':id' => $persist['user_id']);
 
@@ -85,7 +85,7 @@ class PersistUser extends TableCtl {
 	}
 
 	public static function hook_start() {
-		if (!BackendAccount::checkUser()) {
+		if (!BackendUser::check()) {
 			if (PersistUser::check()) {
 				Controller::redirect();
 			}

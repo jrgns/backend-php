@@ -45,7 +45,7 @@
 					<?php else: ?>
 						{tpl:secondary_links.tpl.php}
 					<?php endif; ?>
-					<?php if (Component::isActive(BackendAccount::getName())): ?>
+					<?php if (Component::isActive('BackendUser')): ?>
 						{tpl:loginout.tpl.php}
 					<?php endif; ?>
 				</div>
@@ -66,3 +66,4 @@
 		<?php endif; ?>
 	</body>
 </html>
+

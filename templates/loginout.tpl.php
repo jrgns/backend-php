@@ -1,6 +1,6 @@
 <div id="loginout" class="box">
-<?php if (!BackendAccount::checkUser()): ?>
-	<form method="post" action="#S_SITE_LINK#?q=<?php echo class_for_url(BackendAccount::getName()) ?>/login">
+<?php if (!BackendUser::check()): ?>
+	<form method="post" action="#S_SITE_LINK#?q=backend_user/login">
 		<div>
 			<label>Username:</label> <input class="text" type="text" name="username"><br>
 			<label>Password:</label> <input class="text" type="password" name="password"><br>
@@ -9,7 +9,7 @@
 	</form>
 <?php else: ?>
 	You are logged in as <?php echo $_SESSION['BackendUser']->username ?>
-	<form method="post" action="#S_SITE_LINK#?q=<?php echo class_for_url(BackendAccount::getName()) ?>/logout">
+	<form method="post" action="#S_SITE_LINK#?q=backend_user/logout">
 		<div>
 			<input type="submit" value="Logout" name="do_logout">
 		</div>

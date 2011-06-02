@@ -10,7 +10,7 @@
  * Contributors:
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
-class BackendAccount extends TableCtl {
+class BackendUser extends TableCtl {
 	const ERR_DISABLED_COOKIES            = 1;
 	const ERR_UNMATCHED_USERNAME_PASSWORD = 2;
 	const ERR_MISSING_USERNAME_PASSWORD   = 3;
@@ -23,19 +23,6 @@ class BackendAccount extends TableCtl {
 	protected static $name = false;
 	
 	protected static $current_user = false;
-	
-	public static function getName() {
-		if (empty(self::$name)) {
-			self::$name = ConfigValue::get('BackendAccount', 'Account');
-		}
-		return self::$name;
-	}
-	
-	public static function getTable() {
-		$obj_name = self::getName() . 'Obj';
-		$obj = new $obj_name();
-		return $obj->getMeta('table');
-	}
 	
 	public static function getCurrentUser() {
 		return self::$current_user;
@@ -53,24 +40,24 @@ class BackendAccount extends TableCtl {
 	}
 	
 	public static function getQuery() {
-		$query = new SelectQuery(BackendAccount::getName());
+		$query = new SelectQuery('BackendUser');
 		$query
-			->filter('`' . BackendAccount::getTable() . '`.`active` = 1')
-			->filter('`' . BackendAccount::getTable() . '`.`confirmed` = 1');
+			->filter('`backend_users`.`active` = 1')
+			->filter('`backend_users`.`confirmed` = 1');
 		return $query;
 	}
 
 	function post_login($username, $password) {
-		if (self::checkUser()) {
+		if (self::check()) {
 			return true;
 		}
 		if ($username && $password) {
-			$User = self::getObject(self::getName());
+			$User = self::getObject(get_called_class());
 
 			$query = self::getQuery();
 			$query
-				->filter('`' . BackendAccount::getTable() . '`.`Username` = :username OR `' . BackendAccount::getTable() . '`.`Mobile` = :username OR `' . BackendAccount::getTable() . '`.`Email` = :username')
-				->filter('`' . BackendAccount::getTable() . '`.`password` = MD5(CONCAT(`' . BackendAccount::getTable() . '`.`salt`, :password, :salt))');
+				->filter('`backend_users`.`Username` = :username OR `backend_users`.`Mobile` = :username OR `backend_users`.`Email` = :username')
+				->filter('`backend_users`.`password` = MD5(CONCAT(`backend_users`.`salt`, :password, :salt))');
 			$params = array(
 				':username' => $username,
 				':password' => $password,
@@ -80,7 +67,7 @@ class BackendAccount extends TableCtl {
 			$User->read(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
 			if ($User->object) {
 				session_regenerate_id();
-				$toret = $User->object;
+				$result = $User->object;
 				$_SESSION['BackendUser'] = $User->object;
 				if (Component::isActive('PersistUser')) {
 					PersistUser::remember($User->object);
@@ -112,7 +99,7 @@ class BackendAccount extends TableCtl {
 			Controller::redirect('previous');
 			break;
 		case is_numeric($result):
-			Backend::addError(BackendAccount::getError($result));
+			Backend::addError(self::getError($result));
 			break;
 		default:
 			break;
@@ -140,8 +127,8 @@ class BackendAccount extends TableCtl {
 	}
 	
 	public function action_update_old($id) {
-		$toret = false;
-		if (self::checkUser()) {
+		$result = false;
+		if (self::check()) {
 			$User = self::getObject(get_class($this), $_SESSION['BackendUser']->id);
 			$data = $User->fromPost();
 			if (is_post()) {
@@ -154,14 +141,14 @@ class BackendAccount extends TableCtl {
 					Backend::addError('We could not update your account details');
 				}
 			}
-			$toret = true;
+			$result = true;
 		} else {
 			$User = self::getObject(get_class($this));
 			$data = $User->fromPost();
-			$toret = true;
+			$result = true;
 		}
 		Backend::add('obj_values', $data);
-		return $toret ? $User : false;
+		return $result ? $User : false;
 	}
 	
 	public function action_list($start, $count, array $options = array()) {
@@ -190,31 +177,65 @@ class BackendAccount extends TableCtl {
 			}
 		}
 	}
+	
+	public function get_super_signup() {
+		//Check if a super user already exists
+		if (self::hasSuperUser()) {
+			Backend::addError('Super User already created');
+			return false;
+		}
+		return true;
+	}
+
+	public function post_super_signup() {
+		//Check if a super user already exists
+		if (self::hasSuperUser()) {
+			Backend::addError('Super User already created');
+			return false;
+		}
+		$object = self::getObject(get_class($this));
+		$data = $object->fromPost();
+		if ($object->create($data)) {
+			Backend::addSuccess('Super User signed up!');
+			$this->postSignup($object);
+			return $object;
+		} else {
+			Backend::addError('Could not sign up the Super User.');
+		}
+		return false;
+	}
+	
+	public function html_super_signup($result) {
+		if ($result instanceof DBObject) {
+			//Give option after successful signup to edit details
+			Backend::addNotice('You can edit the details of the super user <a href="?q=backend_user/edit/1">here</a>');
+			Controller::redirect('?q=home');
+		} else if ($result) {
+			Backend::addContent(Render::renderFile('backend_user.super_signup.tpl.php'));
+		} else {
+			Controller::redirect('?q=home');
+		}
+	}
 
 	public function action_signup() {
-		$toret = false;
+		$result = false;
 		$object = self::getObject(get_class($this));
 		$data = $object->fromPost();
 		if (is_post()) {
 			if ($object->create($data)) {
-				if (!empty($_SESSION['just_installed']) && Backend::getConfig('backend.application.user.confirm')) {
-					$data = array('confirmed' => 1);
-					$object->update($data);
-					unset($_SESSION['just_installed']);
-				}
 				Backend::addSuccess('Signed up!');
 				$this->postSignup($object);
-				$toret = $object;
+				$result = $object;
 			} else {
 				Backend::addError('Could not sign you up. Please try again later!');
 			}
 		} else if (!empty($_SESSION['just_installed'])) {
-			$toret = true;
+			$result = true;
 			$data['username'] = 'admin';
 		}
 		
 		Backend::add('obj_values', $data);
-		return $toret;
+		return $result;
 	}
 	
 	public function html_signup($result) {
@@ -238,9 +259,9 @@ class BackendAccount extends TableCtl {
 	 * @TODO Find a way to disable an account permanently, in other words, prevent this code from working in some way
 	 */
 	public function action_confirm($salt) {
-		$toret = false;
-		$account = self::getObject(get_class($this));
-		$query = new SelectQuery(BackendAccount::getName());
+		$result = false;
+		$account = self::getObject('BackendUser');
+		$query = new SelectQuery('BackendUser');
 		$query
 			->filter('`salt` = :salt')
 			->filter('`confirmed` = 0')
@@ -267,7 +288,7 @@ class BackendAccount extends TableCtl {
 	public function html_confirm($result) {
 		if ($result) {
 			Backend::addSuccess('Your user account has been confirmed. Please login.');
-			Controller::redirect('?q=' . class_for_url(self::getName()) . '/login');
+			Controller::redirect('?q=' . class_for_url(get_called_class()) . '/login');
 		}
 		Backend::addError('Could not confirm your account at the moment. Please try again later');
 		Controller::redirect('?q=');
@@ -295,12 +316,12 @@ class BackendAccount extends TableCtl {
 	}
 	
 	public static function hook_start() {
-		$user = self::checkUser();
+		$user = self::check();
 		if ($user && in_array('superadmin', $user->roles)) {
 			Backend::addNotice('You are the super user. Be carefull, careless clicking costs lives...');
 		}
 		self::$current_user = $user;
-		Backend::add('BackendAccount', $user);
+		Backend::add('BackendUser', $user);
 	}
 	
 	public static function hook_post_finish() {
@@ -317,19 +338,18 @@ class BackendAccount extends TableCtl {
 		$query = new SelectQuery('User');
 		$query->field('password')->filter('`username` = ?');
 		//It's tricky, because the password is not stored in plain text. Use the hash as the password for HTTP Auth requests
-		//jrgns: 98884858b06963be03b23f679aac9bf3
 		return DigestAuthentication::getInstance(array($query, 'fetchColumn'));
 	}
 	
 	public static function processHTTPAuth() {
-		$auth = BackendAccount::getHTTPAuth();
+		$auth = self::getHTTPAuth();
 
 		if (empty($_SERVER['PHP_AUTH_DIGEST'])) {
 			$auth->challenge();
 		} else if ($username = $auth->process()) {
-			$query = BackendAccount::getQuery();
+			$query = self::getQuery();
 			$query->filter('`username` = :username');
-			$User = TableCtl::getObject(BackendAccount::getName());
+			$User = TableCtl::getObject('BackendUser');
 			$params = array(':username' => $username);
 			$User->read(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
 			if ($User->object) {
@@ -341,9 +361,9 @@ class BackendAccount extends TableCtl {
 	
 	public static function checkExecuteUser() {
 		$username = Backend::get('ExecuteUser');
-		$query = BackendAccount::getQuery();
+		$query = self::getQuery();
 		$query->filter('`username` = :username');
-		$User = TableCtl::getObject(BackendAccount::getName());
+		$User = TableCtl::getObject('BackendUser');
 		$params = array(':username' => $username);
 		$User->read(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
 		if ($User->object) {
@@ -352,7 +372,7 @@ class BackendAccount extends TableCtl {
 	}
 	
 	protected function confirmUser($object) {
-		$url = SITE_LINK . '?q=' . class_for_url(self::getName()) . '/confirm/' . $object->array['salt'];
+		$url = SITE_LINK . '?q=' . class_for_url(get_called_class()) . '/confirm/' . $object->array['salt'];
 		$app_name = ConfigValue::get('Title');
 		$message = <<< END
 Hi {$object->array['name']}!
@@ -385,16 +405,23 @@ END;
 		return $_SESSION['BackendUser'];
 	}
 	
-	public static function checkUser($user = false) {
+	public static function check($user = false) {
 		if (!empty(self::$current_user)) {
 			return self::$current_user;
 		}
 		if (!empty($_SESSION['BackendUser']) && is_object($_SESSION['BackendUser']) && $_SESSION['BackendUser']->id > 0) {
 			return $_SESSION['BackendUser'];
 		}
-		call_user_func(array(self::getName(), 'setupAnonymous'));
+		call_user_func(array(get_called_class(), 'setupAnonymous'));
 		//Return false as the user is obviously anonymous
 		return false;
+	}
+	
+	public static function hasSuperUser() {
+		$query = new SelectQuery('BackendUser');
+		$query
+			->filter('`id` = 1');
+		return (bool)$query->fetchAssoc();
 	}
 	
 	/**
@@ -420,32 +447,32 @@ END;
 	}
 	
 	public function checkPermissions(array $options = array()) {
-		$toret = parent::checkPermissions($options);
-		if (!$toret && in_array(Controller::$action, array('update', 'display'))) {
-			$toret = Controller::$parameters[0] == $_SESSION['BackendUser']->id || Controller::$parameters[0] == 0;
+		$result = parent::checkPermissions($options);
+		if (!$result && in_array(Controller::$action, array('update', 'display'))) {
+			$result = Controller::$parameters[0] == $_SESSION['BackendUser']->id || Controller::$parameters[0] == 0;
 			//TODO This should go into a permission denied hook
-			if (!$toret) {
-				Controller::redirect('?q=' . class_for_url(self::getName()) . '/' . Controller::$action . '/' . $_SESSION['BackendUser']->id);
+			if (!$result) {
+				Controller::redirect('?q=' . class_for_url(get_called_class()) . '/' . Controller::$action . '/' . $_SESSION['BackendUser']->id);
 			}
 		}
-		return $toret;
+		return $result;
 	}
 
 	public function daily(array $options = array()) {
-		if (get_class($this) == BackendAccount::getName()) {
+		if (get_class($this) == 'BackendUser') {
 			return self::purgeUnconfirmed();
 		}
 	}
 	
 	public function weekly(array $options = array()) {
-		if (get_class($this) == BackendAccount::getName()) {
+		if (get_class($this) == 'BackendUser') {
 			$result = self::userStats();
 		}
 		return true;
 	}
 	
 	public static function purgeUnconfirmed() {
-		$query = new DeleteQuery(BackendAccount::getName());
+		$query = new DeleteQuery('BackendUser');
 		$query
 			->filter('`confirmed` = 0')
 			->filter('`added` < DATE_SUB(DATE(NOW()), INTERVAL 1 WEEK)');
@@ -467,7 +494,7 @@ Site Admin
 	
 	public static function userStats() {
 		$msg = array();
-		$query = new SelectQuery(BackendAccount::getName());
+		$query = new SelectQuery('BackendUser');
 		$query
 			->field('COUNT(*) AS `Total`, SUM(IF(TO_DAYS(NOW()) - TO_DAYS(`added`) < 7, 1, 0)) AS `New`')
 			->filter('`active` = 1')
@@ -475,7 +502,7 @@ Site Admin
 		if ($stats = $query->fetchAssoc()) {
 			$msg[] = 'There are a total of ' . $stats['Total'] . ' **active** users, of which ' . $stats['New'] . ' signed up in the last 7 days';
 		}
-		$query = new SelectQuery(BackendAccount::getName());
+		$query = new SelectQuery('BackendUser');
 		$query
 			->field('COUNT(*) AS `Total`, SUM(IF(TO_DAYS(NOW()) - TO_DAYS(`added`) < 7, 1, 0)) AS `New`')
 			->filter('`active` = 1')
@@ -514,7 +541,7 @@ Site Admin
 					array_key_exists('BackendUser', $_SESSION)
 					&& $_SESSION['BackendUser']->id > 0
 					&& (empty($parameters['0']) || $parameters[0] != $_SESSION['BackendUser']->id)
-					&& !Permission::check('manage', class_for_url(self::getName()))
+					&& !Permission::check('manage', class_for_url(get_called_class()))
 			) {
 				$parameters[0] = $_SESSION['BackendUser']->id;
 			}
@@ -527,19 +554,20 @@ Site Admin
 		$options['install_model'] = array_key_exists('install_model', $options) ? $options['install_model'] : true;
 		$result = parent::install($options);
 
-		if (!BACKEND_WITH_DATABASE) {
+		if (!Backend::getDB('default')) {
 			return $result;
 		}
-		$result = Hook::add('init', 'post', self::getName(), array('global' => true, 'sequence' => 0)) && $result;
-		$result = Hook::add('start', 'pre', self::getName(), array('global' => true)) && $result;
-		$result = Hook::add('finish', 'post', self::getName(), array('global' => true)) && $result;
+		$result = Hook::add('init', 'post', get_called_class(), array('global' => true, 'sequence' => 0)) && $result;
+		$result = Hook::add('start', 'pre', get_called_class(), array('global' => true)) && $result;
+		$result = Hook::add('finish', 'post', get_called_class(), array('global' => true)) && $result;
 		
-		$result = Permission::add('anonymous', 'signup', self::getName()) && $result;
-		$result = Permission::add('anonymous', 'confirm', self::getName()) && $result;
+		$result = Permission::add('anonymous', 'super_signup', get_called_class()) && $result;
+		$result = Permission::add('anonymous', 'signup', get_called_class()) && $result;
+		$result = Permission::add('anonymous', 'confirm', get_called_class()) && $result;
+		$result = Permission::add('anonymous', 'login', get_called_class()) && $result;
 
-		$result = Permission::add('anonymous', 'login', self::getName()) && $result;
-		$result = Permission::add('authenticated', 'login', self::getName()) && $result;
-		$result = Permission::add('authenticated', 'logout', self::getName()) && $result;
+		$result = Permission::add('authenticated', 'login', get_called_class()) && $result;
+		$result = Permission::add('authenticated', 'logout', get_called_class()) && $result;
 		return $result;
 	}
 }

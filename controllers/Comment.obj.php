@@ -30,8 +30,8 @@ class Comment extends TableCtl {
 	public static function getComments($table = false, $table_id = false, $limit = false) {
 		$query = new SelectQuery('Comment');
 		$query
-			->field(array('`comments`.*, `' . BackendAccount::getTable() . '`.`username`, `' . BackendAccount::getTable() . '`.`email`'))
-			->leftJoin(BackendAccount::getName(), '`comments`.`user_id` = `' . BackendAccount::getTable() . '`.`id`')
+			->field(array('`comments`.*, `backend_users`.`username`, `backend_users`.`email`'))
+			->leftJoin('BackendUser', '`comments`.`user_id` = `backend_users`.`id`')
 			->filter('`comments`.`active` = 1')
 			->order('IF(`comments`.`in_reply_to` = 0, `comments`.`id`, `comments`.`in_reply_to`) DESC');
 		$params = array();
@@ -57,9 +57,8 @@ class Comment extends TableCtl {
 			$object['foreign_id']    = empty($object['foreign_id'])    ? reset($parameters)              : $object['foreign_id'];
 			$object['foreign_table'] = empty($object['foreign_table']) ? table_name(get_previous_area()) : $object['foreign_table'];
 			//If we don't have a logged in user, create a dummy account
-			if (!BackendAccount::checkUser()) {
-				$account_class = BackendAccount::getName();
-				$query = new SelectQuery($account_class);
+			if (!BackendUser::check()) {
+				$query = new SelectQuery('BackendUser');
 				$query->filter('`email` = :email');
 				if ($old_user = Controller::getVar('user')) {
 					$existing_user = $query->fetchAssoc(array(':email' => $old_user['email']));
@@ -88,11 +87,11 @@ class Comment extends TableCtl {
 						'active'    => 1,
 					);
 					
-					$user = self::getObject($account_class);
+					$user = self::getObject('BackendUser');
 					if ($user->create($user_data)) {
 						$object['user_id'] = $user->array['id'];
 
-						$url = SITE_LINK . '?q=account/confirm/' . $user->array['salt'];
+						$url = SITE_LINK . '?q=backend_user/confirm/' . $user->array['salt'];
 						$app_name = ConfigValue::get('Title');
 						$message = <<< END
 Hi {$user->array['name']}!

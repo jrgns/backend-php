@@ -37,10 +37,10 @@ $result = array(
 		'name'     => 'ConfigValue',
 		'filename' => '/controllers/ConfigValue.obj.php',
 	),
-	'BackendAccount' => array(
+	'BackendUser' => array(
 		'id'       => 8,
-		'name'     => 'BackendAccount',
-		'filename' => '/controllers/BackendAccount.obj.php',
+		'name'     => 'BackendUser',
+		'filename' => '/controllers/BackendUser.obj.php',
 	),
 	'Home' => array(
 		'id'       => 9,
