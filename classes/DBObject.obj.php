@@ -13,6 +13,8 @@
  
 /**
  * The base model class.
+ *
+ * TODO Implement an increment field type (not reliant on MySQL's auto increment)
  */
 class DBObject {
 	private $db;
