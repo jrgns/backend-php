@@ -11,26 +11,35 @@
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
 class Image extends File {
-	function image_read($image) {
-		return $image;
+	function image_read($result) {
+		if ($result instanceof ImageObj && $result->array) {
+			//Set the specific mime type for this image
+			Controller::$view->mime_type = $result->getMimeType();
+		} else {
+			Controller::whoops();
+		}
+		return $result;
+	}
+
+	function html_display($result) {
+		if ($result instanceof ImageObj && $result->array) {
+			$extension = explode('/', $result->getMimeType());
+			$extension = end($extension);
+			Backend::add('TabLinks', $this->getTabLinks(Controller::$action));
+			Backend::add('Sub Title', $result->array['name']);
+			Backend::addContent('<div class="image_container"><img src="' . SITE_LINK . '?q=image/read/' . $result->array['id'] . '.' . $extension . '" title="' . $result->array['title'] . '" alt="' . $result->array['title'] . '" /></div>');
+		} else {
+			Controller::whoops();
+		}
 	}
 	
-	function html_display($image) {
-		$extension = explode('/', $image->getMimeType());
-		$extension = end($extension);
+	public function html_list($result) {
+		Backend::add('Sub Title', $result->getMeta('name'));
 		Backend::add('TabLinks', $this->getTabLinks(Controller::$action));
-		Backend::add('Sub Title', $image->array['name']);
-		Backend::addContent('<div class="image_container"><img src="' . SITE_LINK . '?q=image/read/' . $image->array['id'] . '.' . $extension . '" title="' . $image->array['title'] . '" alt="' . $image->array['title'] . '" /></div>');
-	}
-	
-	public function html_list($content) {
-		Backend::add('Sub Title', $content->getMeta('name'));
-		Backend::add('TabLinks', $this->getTabLinks(Controller::$action));
-		Backend::add('Object', $content);
 		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
 		Backend::addScript(SITE_LINK . 'scripts/image_list.js');
 		Backend::addStyle(SITE_LINK . 'styles/image_list.css');
-		Backend::addContent(Render::renderFile('image.list.tpl.php'));
+		Backend::addContent(Render::renderFile('image.list.tpl.php', array('db_object' => $result)));
 	}
 	
 	private function feed_list($result, $mode) {

@@ -24,15 +24,12 @@ class File extends TableCtl {
 		return $toret;
 	}
 
+	/**
+	 * Read defaults to dbobject, as we need to get mime types, etc.
+	 */
 	public function action_read($id, $mode = 'dbobject') {
-		$toret = false;
-		$toret    = parent::action_read($id, $mode);
-		if ($toret->array) {
-			Controller::$view->mime_type = $toret->getMimeType();
-		} else {
-			Controller::whoops();
-		}
-		return $toret;
+		$result = parent::action_read($id, $mode);
+		return $result;
 	}
 	
 	function html_read($file) {
