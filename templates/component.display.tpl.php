@@ -2,38 +2,38 @@
 			<div class="span-3" style="text-align: right;">
 				<label>Name:</label>
 			</div>
-			<span><?php echo empty($Object->array['name']) ? '&nbsp;' : plain($Object->array['name']) ?></span>
+			<span><?php echo empty($db_object->array['name']) ? '&nbsp;' : plain($db_object->array['name']) ?></span>
 		</div>
 		<div class="">
 			<div class="span-3" style="text-align: right;">
 				<label>Filename:</label>
 			</div>
-			<span><?php echo empty($Object->array['filename']) ? '&nbsp;' : plain($Object->array['filename']) ?></span>
+			<span><?php echo empty($db_object->array['filename']) ? '&nbsp;' : plain($db_object->array['filename']) ?></span>
 		</div>
 		<div class="">
 			<div class="span-3" style="text-align: right;">
 				<label>Options:</label>
 			</div>
-			<span><?php echo empty($Object->array['options']) ? '&nbsp;' : plain($Object->array['options']) ?></span>
+			<span><?php echo empty($db_object->array['options']) ? '&nbsp;' : plain($db_object->array['options']) ?></span>
 		</div>
 		<div class="">
 			<div class="span-3" style="text-align: right;">
 				<label>Active:</label>
 			</div>
-			<span><?php echo empty($Object->array['active']) ? '&nbsp;' : plain($Object->array['active']) ?></span>
+			<span><?php echo empty($db_object->array['active']) ? '&nbsp;' : plain($db_object->array['active']) ?></span>
 		</div>
 		<div class="">
 			<div class="span-3" style="text-align: right;">
 				<label>Modified:</label>
 			</div>
-			<span><?php echo empty($Object->array['modified']) ? '&nbsp;' : plain($Object->array['modified']) ?></span>
+			<span><?php echo empty($db_object->array['modified']) ? '&nbsp;' : plain($db_object->array['modified']) ?></span>
 		</div>
 		<div class="">
 			<div class="span-3" style="text-align: right;">
 				<label>Added:</label>
 			</div>
-			<span><?php echo empty($Object->array['added']) ? '&nbsp;' : plain($Object->array['added']) ?></span>
+			<span><?php echo empty($db_object->array['added']) ? '&nbsp;' : plain($db_object->array['added']) ?></span>
 		</div>
 		<p>
-			<a href="?q=gate_manager/permissions/<?php echo class_for_url($Object->array['name']) ?>">Check Permissions</a>
+			<a href="?q=gate_manager/permissions/<?php echo class_for_url($db_object->array['name']) ?>">Check Permissions</a>
 		</p>

@@ -1,6 +1,6 @@
-<?php if (!empty($Object) && !empty($Object->list)):
-	$list         = $Object->list;
-	$list_count   = $Object->list_count;
+<?php if (!empty($db_object) && !empty($db_object->list)):
+	$list         = $db_object->list;
+	$list_count   = $db_object->list_count;
 	$area         = empty($area)        ? Controller::$area          : $area;
 	$action       = empty($action)      ? Controller::$action        : $action;
 	$list_start   = empty($list_start)  ? Controller::$parameters[0] : $list_start;
@@ -22,7 +22,7 @@
 			</tr>
 		</thead>
 		<tbody>
-			<?php foreach($Object->list as $error): ?>
+			<?php foreach($db_object->list as $error): ?>
 				<tr>
 					<td><?php echo $error['count'] ?></td>
 					<td><?php echo $error['string'] ?></td>

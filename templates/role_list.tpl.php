@@ -1,5 +1,5 @@
-<?php if (!empty($Object)): 
-	$list = $Object->list;
+<?php if (!empty($db_object)): 
+	$list = $db_object->list;
 	$odd = true;
 ?>
 	<table>

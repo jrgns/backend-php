@@ -1,17 +1,17 @@
-<?php if (!empty($Object)) {
-	$fields = $Object->getMeta('fields');
+<?php if (!empty($db_object)) {
+	$fields = $db_object->getMeta('fields');
 	$odd = false;
 	foreach($fields as $name => $field) {
 		if (in_array($field, array('primarykey'))) {
 			continue;
 		}
-		$text  = '<?php echo empty($Object->array[\'' . $name . '\']) ? \'&nbsp;\' : plain($Object->array[\'' . $name . '\']) ?>';
+		$text  = '<?php echo empty($db_object->array[\'' . $name . '\']) ? \'&nbsp;\' : plain($db_object->array[\'' . $name . '\']) ?>';
 		switch ($field) {
 		case 'title';
 			$class = 'large bottom';
 			break;
 		case 'boolean':
-			$text  = '<?php echo empty($Object->array[\'' . $name . '\']) ? \'No\' : \'Yes\' ?>';
+			$text  = '<?php echo empty($db_object->array[\'' . $name . '\']) ? \'No\' : \'Yes\' ?>';
 			break;
 		default:
 			$class = '';

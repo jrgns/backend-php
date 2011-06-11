@@ -5,7 +5,7 @@
 						Username:
 					</th>
 					<td>
-						<?php echo empty($Object->array['username']) ? '&nbsp;' : plain($Object->array['username']) ?>
+						<?php echo empty($db_object->array['username']) ? '&nbsp;' : plain($db_object->array['username']) ?>
 					</td>
 				</tr>
 				<tr>
@@ -13,7 +13,7 @@
 						Name:
 					</th>
 					<td>
-						<?php echo plain(trim($Object->array['name'] . ' ' . $Object->array['surname'])) ?>
+						<?php echo plain(trim($db_object->array['name'] . ' ' . $db_object->array['surname'])) ?>
 					</td>
 				</tr>
 				<tr>
@@ -21,19 +21,19 @@
 						Website:
 					</th>
 					<td>
-						<?php echo empty($Object->array['website']) ? 'None' : plain($Object->array['website']) ?>
+						<?php echo empty($db_object->array['website']) ? 'None' : plain($db_object->array['website']) ?>
 					</td>
 				</tr>
 				<tr>
 					<td colspan="2" style="text-align: center;">
-						<?php echo empty($Object->array['bio']) ? '&nbsp;' : simple($Object->array['bio']) ?>
+						<?php echo empty($db_object->array['bio']) ? '&nbsp;' : simple($db_object->array['bio']) ?>
 					</tr>
 				</tr>
 			</table>
 		</div>
 		<div id="gravatar_div" class="span-4 last">
-			<a href="http://en.gravatar.com/site/check/<?php echo $Object->array['email'] ?>" target="_blank">
-				<img src="<?php echo BackendUser::getGravatar($Object->array['email']) ?>" alt="Gravatar" />
+			<a href="http://en.gravatar.com/site/check/<?php echo $db_object->array['email'] ?>" target="_blank">
+				<img src="<?php echo BackendUser::getGravatar($db_object->array['email']) ?>" alt="Gravatar" />
 			</a>
 		</div>
 		<div class="clear">&nbsp;</div>

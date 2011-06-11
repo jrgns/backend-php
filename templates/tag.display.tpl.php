@@ -1,7 +1,7 @@
-<?php if ($Object):
-	if (!empty($Object->array['description'])): ?>
+<?php if ($db_object):
+	if (!empty($db_object->array['description'])): ?>
 		<div>
-			<?php echo $Object->array['description'] ?>
+			<?php echo $db_object->array['description'] ?>
 		</div>
 		<hr/>
 	<?php endif;

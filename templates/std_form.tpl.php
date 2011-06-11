@@ -1,6 +1,6 @@
-<?php if (!empty($Object)):
-	Hook::run('form', 'pre', array($Object));
-	$fields = $Object->getMeta('fields');
+<?php if (!empty($db_object)):
+	Hook::run('form', 'pre', array($db_object));
+	$fields = $db_object->getMeta('fields');
 	$odd = false;
 	$row_width = 15;
 	$title_width = 2;
@@ -84,9 +84,9 @@ $action_name = empty($action_name) ? ucwords(Controller::$action) : $action_name
 
 			</div>
 <?php endforeach;
-		Hook::run('form', 'post', array($Object));
+		Hook::run('form', 'post', array($db_object));
 ?>
-			<input type="submit" value="<?php echo '<?php echo $action_name ?>' ?> <?php echo $Object->getMeta('name') ?>" class=""/>
+			<input type="submit" value="<?php echo '<?php echo $action_name ?>' ?> <?php echo $db_object->getMeta('name') ?>" class=""/>
 		</form>
 <?php else: ?>
 	No object

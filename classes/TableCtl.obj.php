@@ -88,29 +88,28 @@ class TableCtl extends AreaCtl {
 	 * Override this function if you want to customize the way a record is displayed.
 	 * You can also just create a template named $areaname.display.tpl.php to customize the HTML.
 	 */
-	public function html_display($object) {
-		if (!($object instanceof DBObject)) {
+	public function html_display($result) {
+		if (!($result instanceof DBObject)) {
 			Controller::whoops('Invalid Object Returned');
-			return $object;
+			return $result;
 		}
-		Backend::add('Object', $object);
 		Backend::add('TabLinks', $this->getTabLinks('display'));
 		if (!Backend::get('Sub Title')) {
-			Backend::add('Sub Title', $object->getMeta('name'));
+			Backend::add('Sub Title', $result->getMeta('name'));
 		}
-		$template_file = $object->getArea() . '.display.tpl.php';
+		$template_file = $result->getArea() . '.display.tpl.php';
 		if (Render::checkTemplateFile($template_file)) {
-			Backend::addContent(Render::renderFile($template_file));
+			Backend::addContent(Render::renderFile($template_file, array('db_object' => $result)));
 		} else {
 			//TODO It's a bit of a hack to redirect just because we can't generate the template
 			if (Render::createTemplate($template_file, 'std_display.tpl.php')) {
-				Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' display');
+				Backend::addSuccess('Created template for ' . $result->getMeta('name') . ' display');
 				Controller::redirect();
 			} else {
-				Backend::addError('Could not create template file for ' . $object->getMeta('name') . '::display');
+				Backend::addError('Could not create template file for ' . $result->getMeta('name') . '::display');
 			}
 		}
-		return $object;
+		return $result;
 	}
 	
 	public function json_display($result) {
@@ -204,34 +203,33 @@ class TableCtl extends AreaCtl {
 	 * Override this function if you want to customize the way the list of records are displayed.
 	 * You can also just create a template named $areaname.list.tpl.php to customize the HTML.
 	 */
-	public function html_list($object) {
-		if (!($object instanceof DBObject)) {
+	public function html_list($result) {
+		if (!($result instanceof DBObject)) {
 			Controller::whoops('Invalid Object Returned');
-			return $object;
+			return $result;
 		}
 		
-		Backend::add('Object', $object);
 		Backend::add('TabLinks', $this->getTabLinks('list'));
 		if (!Backend::get('Sub Title')) {
-			Backend::add('Sub Title', $object->getMeta('name'));
+			Backend::add('Sub Title', $result->getMeta('name'));
 		}
 
 		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
 		Backend::addScript(SITE_LINK . 'scripts/table_list.js');
-		$template_file = $object->getArea() . '.list.tpl.php';
+		$template_file = $result->getArea() . '.list.tpl.php';
 		if (Render::checkTemplateFile($template_file)) {
-			Backend::addContent(Render::renderFile($template_file));
+			Backend::addContent(Render::renderFile($template_file, array('db_object' => $result)));
 		} else {
 			//TODO It's a bit of a hack to redirect just because we can't generate the template
 			//if (Render::createTemplate($template_file, 'std_list.tpl.php')) {
-				//Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' list');
+				//Backend::addSuccess('Created template for ' . $result->getMeta('name') . ' list');
 				//Controller::redirect();
 			//} else {
-				//Backend::addError('Could not create template file for ' . $object->getMeta('name') . '::list');
+				//Backend::addError('Could not create template file for ' . $result->getMeta('name') . '::list');
 			//}
-			Backend::addContent(Render::renderFile('std_list.tpl.php'));
+			Backend::addContent(Render::renderFile('std_list.tpl.php', array('db_object' => $result)));
 		}
-		return $object;
+		return $result;
 	}
 	
 	public function json_list($result) {
@@ -306,28 +304,27 @@ class TableCtl extends AreaCtl {
 		return call_user_func(array(get_called_class(), 'do_list'), $start, $count, $options);
 	}
 	
-	public function html_search($object) {
-		if (!($object instanceof DBObject)) {
+	public function html_search($result) {
+		if (!($result instanceof DBObject)) {
 			Controller::whoops('Invalid Object Returned');
-			return $object;
+			return $result;
 		}
 		
-		Backend::add('Object', $object);
 		Backend::add('TabLinks', $this->getTabLinks('list'));
 		if (!Backend::get('Sub Title')) {
-			Backend::add('Sub Title', 'Searching ' . $object->getMeta('name'));
+			Backend::add('Sub Title', 'Searching ' . $result->getMeta('name'));
 		}
 		Backend::add('term', Controller::$parameters[0]);
 
 		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
 		Backend::addScript(SITE_LINK . 'scripts/table_list.js');
 
-		$template_file = $object->getArea() . '.search_results.tpl.php';
+		$template_file = $result->getArea() . '.search_results.tpl.php';
 		if (!Render::checkTemplateFile($template_file)) {
 			$template_file = 'std_search_results.tpl.php';
 		}
-		Backend::addContent(Render::renderFile($template_file));
-		return $object;
+		Backend::addContent(Render::renderFile($template_file, array('db_object' => $result)));
+		return $result;
 	}
 	
 	public static function define_create() {
@@ -417,14 +414,13 @@ class TableCtl extends AreaCtl {
 		default:
 			$object = self::getObject(get_class($this));
 			if ($object) {
-				Backend::add('Object', $object);
 				Backend::add('TabLinks', $this->getTabLinks('create'));
 				if (!Backend::get('Sub Title')) {
 					Backend::add('Sub Title', 'Add ' . $object->getMeta('name'));
 				}
 				$template_file = $object->getArea() . '.form.tpl.php';
 				if (Render::checkTemplateFile($template_file)) {
-					Backend::addContent(Render::renderFile($template_file));
+					Backend::addContent(Render::renderFile($template_file, array('db_object' => $object)));
 				} else {
 					//TODO It's a bit of a hack to redirect just because we can't generate the template
 					if (Render::createTemplate($template_file, 'std_form.tpl.php')) {
@@ -626,14 +622,13 @@ class TableCtl extends AreaCtl {
 		case $result:
 			$object = self::getObject(get_class($this));
 			if ($object) {
-				Backend::add('Object', $object);
 				Backend::add('TabLinks', $this->getTabLinks('update'));
 				if (!Backend::get('Sub Title')) {
 					Backend::add('Sub Title', 'Update ' . $object->getMeta('name'));
 				}
 				$template_file = $object->getArea() . '.form.tpl.php';
 				if (Render::checkTemplateFile($template_file)) {
-					Backend::addContent(Render::renderFile($template_file));
+					Backend::addContent(Render::renderFile($template_file, array('db_object' => $object)));
 				} else {
 					//TODO It's a bit of a hack to redirect just because we can't generate the template
 					Render::createTemplate($template_file, 'std_form.tpl.php');
@@ -808,7 +803,6 @@ class TableCtl extends AreaCtl {
 	public function html_import($result) {
 		switch (true) {
 		case $result instanceof DBObject:
-			Backend::add('Object', $result);
 			if (!Backend::get('Sub Title')) {
 				Backend::add('Sub Title', 'Import');
 				Backend::add('Sub Title', 'Import ' . $result->getMeta('name'));
@@ -817,7 +811,7 @@ class TableCtl extends AreaCtl {
 			if (!Render::checkTemplateFile($template_file)) {
 				$template_file = 'std_import.tpl.php';
 			}
-			Backend::addContent(Render::renderFile($template_file));
+			Backend::addContent(Render::renderFile($template_file, array('db_object' => $result)));
 			break;
 		case is_numeric($result) && $result >= 0:
 			Backend::addSuccess($result . ' records imported');

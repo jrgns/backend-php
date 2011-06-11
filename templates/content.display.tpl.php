@@ -1,1 +1,1 @@
-<?php echo CodeHighlight::execute($Object->object->body); ?>
+<?php echo CodeHighlight::execute($db_object->object->body); ?>

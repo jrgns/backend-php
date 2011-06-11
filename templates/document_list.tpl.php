@@ -1,6 +1,6 @@
-<?php if (!empty($Object)):
-	$fields = $Object->getMeta('fields');
-	$list = $Object->list;
+<?php if (!empty($db_object)):
+	$fields = $db_object->getMeta('fields');
+	$list = $db_object->list;
 	$odd = false;
 	$row_width = 3;
 	$count = 0;
@@ -15,7 +15,7 @@
 				$odd = $odd ? false : true;
 				echo $odd ? '' : 'even' ?>">
 				<?php endif;
-				$document = $Object->process($document, 'out');
+				$document = $db_object->process($document, 'out');
 				$extension = empty($document['meta_info']['extension']) ? 'unknown' : $document['meta_info']['extension'];
 				switch ($extension) {
 				case 'xls':
