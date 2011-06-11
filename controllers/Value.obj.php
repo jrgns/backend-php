@@ -67,15 +67,6 @@ class Value extends TableCtl {
 		Backend::addContent(Render::renderFile('values.tpl.php', $values));
 	}
 	
-	public static function admin_links() {
-		if (!Backend::getDB('default')) {
-			return false;
-		}
-		return array(
-			array('href' => '?q=value/admin', 'text' => 'Values')
-		);
-	}
-
 	public static function install(array $options = array()) {
 		$result = parent::install($options);
 		return $result;

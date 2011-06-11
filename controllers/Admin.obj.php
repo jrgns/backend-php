@@ -207,6 +207,21 @@ class Admin extends AreaCtl {
 		return $result;
 	}
 	
+		function html_index($result) {
+			Backend::add('Sub Title', 'Manage Application');
+			Backend::add('result', $result);
+
+			$admin_links = array();
+			$components = Component::getActive();
+			foreach($components as $component) {
+				if (method_exists($component['name'], 'admin_links')) {
+					$admin_links[$component['name']] = call_user_func(array($component['name'], 'admin_links'));
+				}
+			}
+			Backend::add('admin_links', $admin_links);
+			Backend::addContent(Render::renderFile('admin.index.tpl.php'));
+		}
+
 	public static function hook_post_display($data, $controller) {
 		$user = BackendUser::check();
 		if ($user && count(array_intersect(array('superadmin', 'admin'), $user->roles))) {

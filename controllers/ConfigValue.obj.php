@@ -41,6 +41,15 @@ class ConfigValue extends Value {
 		return Backend::setConfig($name, $value);
 	}
 
+	public static function admin_links() {
+		if (!Backend::getDB('default')) {
+			return false;
+		}
+		return array(
+			array('href' => '?q=value/admin', 'text' => 'Values')
+		);
+	}
+
 	public static function install_check() {
 		//Check the cache folder
 		if (!Backend::checkConfigFile()) {
