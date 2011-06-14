@@ -61,9 +61,11 @@
 		</tbody>
 	</table>
 	{tpl:list_paging.tpl.php}
-<form class="inline" id="form_list_delete" method="post" action="?q=<?php echo class_for_url($Object) ?>/delete">
-	<input type="hidden" id="delete_id" name="delete_id" value="false" />
-</form>
+	<?php if (Permission::check('delete', class_for_url($Object))): ?>
+		<form class="inline" id="form_list_delete" method="post" action="?q=<?php echo class_for_url($Object) ?>/delete">
+			<input type="hidden" id="delete_id" name="delete_id" value="false" />
+		</form>
+	<?php endif; ?>
 <?php else: ?>
 	No object
 <?php endif; ?>
