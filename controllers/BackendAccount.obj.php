@@ -515,6 +515,7 @@ Site Admin
 					&& $_SESSION['BackendUser']->id > 0
 					&& (empty($parameters['0']) || $parameters[0] != $_SESSION['BackendUser']->id)
 					&& !Permission::check('manage', class_for_url(self::getName()))
+					&& !Permission::check(Controller::$action, class_for_url(self::getName()))
 			) {
 				$parameters[0] = $_SESSION['BackendUser']->id;
 			}

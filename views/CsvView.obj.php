@@ -38,6 +38,7 @@ class CsvView extends View {
 		switch (true) {
 		//Output SelectQuery as CSV
 		case $to_print instanceof SelectQuery:
+		case $to_print instanceof CustomQuery:
 			return self::output_query($to_print);
 			break;
 		//Output Array of Arrays as CSV

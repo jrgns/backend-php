@@ -108,11 +108,16 @@ class Backend {
 		Backend::add('SITE_DOMAIN', SITE_DOMAIN);
 
 		$url = SITE_DOMAIN . WEB_SUB_FOLDER;
-		define('SITE_LINK', 'http://' . $url);
-		if (Backend::getConfig('backend.application.use_ssl', false)) {
-			define('S_SITE_LINK', 'https://' . $url);
+		if (Backend::getConfig('backend.application.protocol_less_site_link', false)) {
+			define('SITE_LINK', '//' . $url);
+			define('S_SITE_LINK', '//' . $url);
 		} else {
-			define('S_SITE_LINK', 'http://' . $url);
+			define('SITE_LINK', 'http://' . $url);
+			if (Backend::getConfig('backend.application.use_ssl', false)) {
+				define('S_SITE_LINK', 'https://' . $url);
+			} else {
+				define('S_SITE_LINK', 'http://' . $url);
+			}
 		}
 		Backend::add('SITE_LINK', SITE_LINK);
 		Backend::add('S_SITE_LINK', S_SITE_LINK);

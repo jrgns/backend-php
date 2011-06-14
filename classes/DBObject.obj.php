@@ -13,6 +13,8 @@
  
 /**
  * The base model class.
+ *
+ * TODO Implement an increment field type (not reliant on MySQL's auto increment)
  */
 class DBObject {
 	private $db;
@@ -28,6 +30,7 @@ class DBObject {
 	//If you set $error_msg in a function, reset it in the beginning of the function as well.
 	public $error_msg = false;
 
+	private static $top_class = false;
 	/**
 	 * Construct a DB Object
 	 *
@@ -139,24 +142,26 @@ class DBObject {
 		if (in_array($mode, array('array', 'object')) && $this->$mode) {
 			foreach ($this->meta['relations'] as $name => $options) {
 				$class = array_key_exists('class', $options) ? $options['class'] : $name;
-				$type  = array_key_exists('type', $options)  ? $options['type']  : 'single';
-				if ($relation = $this->loadRelation($class, $options, $mode)) {
-					switch ($type) {
-					case 'multiple':
-						if ($mode == 'array') {
-							$this->array[$name]  = $relation->list ? $relation->list : array();
-						} else if ($mode == 'object') {
-							$this->object->$name = $relation->list ? $relation->list : array();
+				if (!in_array(self::$top_class, array($class, $class . 'Obj'))) {
+					$type  = array_key_exists('type', $options)  ? $options['type']  : 'single';
+					if ($relation = $this->loadRelation($class, $options, $mode)) {
+						switch ($type) {
+						case 'multiple':
+							if ($mode == 'array') {
+								$this->array[$name]  = $relation->list ? $relation->list : array();
+							} else if ($mode == 'object') {
+								$this->object->$name = $relation->list ? $relation->list : array();
+							}
+							break;
+						default:
+						case 'single':
+							if ($mode == 'array') {
+								$this->array[$name]  = $relation->array  ? $relation->array  : false;
+							} else if ($mode == 'object') {
+								$this->object->$name = $relation->object ? $relation->object : false;
+							}
+							break;
 						}
-						break;
-					default:
-					case 'single':
-						if ($mode == 'array') {
-							$this->array[$name]  = $relation->array  ? $relation->array  : false;
-						} else if ($mode == 'object') {
-							$this->object->$name = $relation->object ? $relation->object : false;
-						}
-						break;
 					}
 				}
 			}
@@ -179,7 +184,11 @@ class DBObject {
 		return $this->read($options);
 	}
 
-	public function read($options = array()) {
+	public function read($options = array()) {		
+		if (!self::$top_class) {
+			self::$top_class = get_class($this);
+		}
+
 		if (is_string($options)) {
 			$options = array('mode' => $options);
 		}
@@ -276,6 +285,9 @@ class DBObject {
 				BackendError::add(get_class($this) . ': DB Connection Error', 'load');
 			}
 			$this->error_msg = 'DB Connection Error';
+		}
+		if (get_class($this) == self::$top_class) {
+			self::$top_class = false;
 		}
 		return $result;
 	}

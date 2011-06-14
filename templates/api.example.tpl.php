@@ -7,6 +7,7 @@ public static function define_example() {
 				'description' => 'This is the first paramater',
 				'type'        => 'string',
 				'default'     => 'The default string. It can be omitted',
+			),
 		),
 		'example'     => '<code><?php echo SITE_LINK ?>?q=area/example/Something</code>',
 		//Extra parameters. Can not be omitted
