@@ -56,7 +56,8 @@ class BackendAccount extends TableCtl {
 		$query = new SelectQuery(BackendAccount::getName());
 		$query
 			->filter('`' . BackendAccount::getTable() . '`.`active` = 1')
-			->filter('`' . BackendAccount::getTable() . '`.`confirmed` = 1');
+			->filter('`' . BackendAccount::getTable() . '`.`confirmed` = 1')
+			->order('`' . BackendAccount::getTable() . '`.`username`');
 		return $query;
 	}
 
@@ -400,18 +401,26 @@ END;
 	/**
 	 * Return all users within a specific role
 	 */
-	public static function withRole($role) {
-		$role  = Role::retrieve($role);
-		if (!$role) {
+	public static function withRole($roles) {
+		if (!is_array($roles)) {
+			$roles = array($roles);
+		}
+		$role_obj = new RoleObj();
+		$query = new SelectQuery('Role');
+		$query->filter('`name` IN (' . implode(', ', array_pad(array(), count($roles), '?')) . ')');
+		$role_obj->read(array('query' => $query, 'parameters' => $roles));
+		if (!$role_obj->list) {
 			return false;
 		}
+		$role_ids = array_flatten($role_obj->list, null, 'id');
+
 		$query = self::getQuery();
 		$query
+			->distinct()
 			->field('`' . self::getTable() . '`.*')
 			->leftJoin('Assignment', array('`access_type` = "users"', '`access_id` = `' . self::getTable() . '`.`id`'))
-			->filter('`role_id` = :id');
-		;
-		return $query->fetchAll(array(':id' => $role['id']));
+			->filter('`role_id` IN (' . implode(', ', array_pad(array(), count($role_ids), '?')) . ')');
+		return $query->fetchAll($role_ids);
 	}
 	
 	public static function getGravatar($email, $size = 120, $default = false) {
