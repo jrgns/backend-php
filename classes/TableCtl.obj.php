@@ -340,7 +340,7 @@ class TableCtl extends AreaCtl {
 			'parameters'  => array(
 			),
 			'return'      => array(
-				'description' => 'The DB Object searched',
+				'description' => 'The DB Object created',
 				'type'        => 'DBObject',
 			),
 		);
@@ -450,7 +450,7 @@ class TableCtl extends AreaCtl {
 			'parameters'  => array(
 			),
 			'return'      => array(
-				'description' => 'The DB Object searched',
+				'description' => 'The DB Object created',
 				'type'        => 'DBObject',
 			),
 		);
