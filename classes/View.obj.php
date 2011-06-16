@@ -135,11 +135,13 @@ class View {
 		//SITE FOLDER
 		if (defined('SITE_FOLDER') && is_readable(SITE_FOLDER . '/' . $template_loc)) {
 			$folders[] = SITE_FOLDER . '/'. $template_loc;
+		}
 		//APP FOLDER
-		} else if (is_readable(APP_FOLDER . '/' . $template_loc)) {
+		if (is_readable(APP_FOLDER . '/' . $template_loc)) {
 			$folders[] = APP_FOLDER . '/'. $template_loc;
+		}
 		//BACKEND_FOLDER
-		} else if (is_readable(BACKEND_FOLDER . '/' . $template_loc)) {
+		if (is_readable(BACKEND_FOLDER . '/' . $template_loc)) {
 			$folders[] = BACKEND_FOLDER . '/'. $template_loc;
 		}
 		return $folders;

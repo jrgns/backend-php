@@ -71,7 +71,11 @@ class Render {
 			return false;
 		}
 		$template_loc     = Backend::getConfig('settings.TemplateLocation', 'templates');
-		$dest_file        = APP_FOLDER . '/' . $template_loc . '/' . $destination;
+		if (defined('SITE_FOLDER')) {
+			$dest_file = SITE_FOLDER . '/' . $template_loc . '/' . $destination;
+		} else {
+			$dest_file = APP_FOLDER . '/' . $template_loc . '/' . $destination;
+		}
 		if (@file_put_contents($dest_file, $template_content)) {
 			if (SITE_STATE != 'production') {
 				chmod($dest_file, 0664);
