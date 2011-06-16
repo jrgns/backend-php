@@ -230,6 +230,60 @@ class Admin extends AreaCtl {
 		return $data;
 	}
 	
+	public function get_scaffold() {
+		if (SITE_STATE == 'live') {
+			Backend::addError('Cannot run scaffold on a live site');
+			return false;
+		}
+		//TODO Return list of tables that are not under the framework
+	}
+	
+	public function post_scaffold($table, $database = false) {
+		if (SITE_STATE == 'live') {
+			Backend::addError('Cannot run scaffold on a live site');
+			return false;
+		}
+		
+		if (empty($database)) {
+			$db = Backend::getDB('default', true);
+		} else {
+			$db = Backend::getDB($database, true);
+		}
+		$database   = $db['database'];
+		$connection = $db['connection'];
+		if (!($connection instanceof PDO)) {
+			Backend::addError('Could not get Database Connection');
+			return false;
+		}
+
+		$destination = defined('SITE_FOLDER') ? SITE_FOLDER : APP_FOLDER;
+		if (!is_writable($destination . '/controllers')
+			|| !is_writable($destination . '/models')
+			|| !is_writable($destination . '/templates')
+		) {
+			Backend::addError('Destinations aren\'t writable');
+			return false;
+		}
+		
+		$variables = array(
+			'table_name' => $table,
+			'class_name' => class_name($table),
+			'db_name'    => $database,
+			'author'     => ConfigValue::get('author.Name'),
+			'company'    => ConfigValue::get('author.Company'),
+		);
+		return Scaffold::generate($variables, $connection, $destination);
+	}
+	
+	public function html_scaffold($result) {
+		if (is_post() && $result) {
+			Backend::addSuccess('Scaffolds created for ' . class_name(Controller::$parameters[0]));
+			Controller::redirect();
+		}
+		Backend::addContent('<p>Please choose a table</p><form method="post"><input type="text" name="table"><input type="text" name="database"><input type="submit" value="Scaffold"></form>');
+		return $result;
+	}
+	
 	private static function installComponents($with_db = false) {
 		$components = Component::getCoreComponents($with_db);
 		if (!$components) {
@@ -271,6 +325,21 @@ class Admin extends AreaCtl {
 		return true;
 	}
 	
+	public static function checkParameters($parameters) {
+		$parameters = parent::checkParameters($parameters);
+		switch (Controller::$action) {
+		case 'scaffold':
+			if (empty($parameters[0])) {
+				$parameters[0] = Controller::getVar('table');
+			}
+			if (empty($parameters[1])) {
+				$parameters[1] = Controller::getVar('database');
+			}
+			break;
+		}
+		return $parameters;
+	}
+
 	public static function install(array $options = array()) {
 		$result = parent::install($options);
 		if (!Backend::getDB('default')) {
