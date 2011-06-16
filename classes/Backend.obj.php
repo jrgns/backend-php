@@ -239,7 +239,10 @@ class Backend {
 		if ($db_settings = self::$config->getValue('database')) {
 			if (is_array($db_settings)) {
 				$db_settings['alias'] = 'default';
-				if (self::addDB('default', $db_settings)) {
+				if (empty($db_settings['name'])) {
+					$db_settings['name'] = $db_settings['database'];
+				}
+				if (self::addDB($db_settings['name'], $db_settings)) {
 					$result = true;
 				} else {
 					Backend::addError('Could not add Default Database');
@@ -317,10 +320,10 @@ class Backend {
 	 * @param string The name of the DB connections. Defaults to 'default' :P.
 	 * @returns PDO The PDO DB connection, or false.
 	 */
-	static function getDB($name = 'default') {
+	static function getDB($name = 'default', $full = false) {
 		$definition = self::getDBDefinition($name);
 		if ($definition && $definition['connection'] instanceof PDO) {
-			return $definition['connection'];
+			return $full ? $definition : $definition['connection'];
 		}
 		return false;
 	}
