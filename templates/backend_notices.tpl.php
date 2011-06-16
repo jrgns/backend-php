@@ -1,4 +1,4 @@
-<div class="notice span-23 last" id="backend_notice_container"<?php if (!isset($BackendNotices) || count($BackendNotices) == 0): ?> style="display: none;"<?php endif; ?>>
+<div class="notice" id="backend_notice_container"<?php if (!isset($BackendNotices) || count($BackendNotices) == 0): ?> style="display: none;"<?php endif; ?>>
 	<ul class="bottom loud large" id="backend_notice">
 		<?php if (isset($BackendNotices) && count($BackendNotices)): ?>
 			<?php foreach($BackendNotices as $notice): ?>

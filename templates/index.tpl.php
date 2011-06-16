@@ -8,57 +8,36 @@
 		<link rel="shortcut icon" type="image/x-icon" href="#SITE_LINK#favicon.ico">
 	</head>
 	<body>
-		<div id="middleback">
-			<div class="container">
-				{tpl:header.tpl.php}
-				<div id="topinfo" class="span-24 success hide">
-					Top Info
+		<div class="container">
+			{tpl:header.tpl.php}
+			<?php if (!empty($primary_links)): ?>
+				{tpl:topnav.tpl.php}
+			<?php endif; ?>
+			<hr class="space" style="color: #EFFFBF; background-color: #EFFFBF;">
+			<?php if (!empty($BackendNotices) || !empty($BackendErrors) || !empty($BackendSuccess) || !empty($Teaser)): ?>
+				<div id="teaser" class="span-24 last clear">
+					{tpl:backend_errors.tpl.php}
+					{tpl:backend_success.tpl.php}
+					{tpl:backend_notices.tpl.php}
+					<?php if (!empty($Teaser)): ?><p class="bottom">#Teaser#</p><?php endif; ?>
 				</div>
-				<div id="topnav" class="span-24">
-					{tpl:topnav.tpl.php}
+			<?php endif; ?>
+			<div id="maincol" class="span-16 clear">
+				{tpl:tab_links.tpl.php}
+				<?php if (!empty($Sub_Title)): ?><h2 class="quiet">#Sub Title#</h2><?php endif; ?>
+				<div id="content">
+					{tpl:maincontent.tpl.php}
 				</div>
-				<?php if (!empty($BackendNotices) || !empty($BackendErrors) || !empty($BackendSuccess) || !empty($Teaser)): ?>
-					<div id="teaser" class="span-24">
-						{tpl:backend_errors.tpl.php}
-						{tpl:backend_success.tpl.php}
-						{tpl:backend_notices.tpl.php}
-						<?php if (!empty($Teaser)): ?><p class="bottom">#Teaser#</p><?php endif; ?>
-						<hr>
-					</div>
-				<?php endif; ?>
-
-				<div id="maincol" class="span-15 prepend-1 colborder">
-					{tpl:tab_links.tpl.php}
-					<?php if (!empty($Sub_Title)): ?><h2 class="quiet">#Sub Title#</h2><?php endif; ?>
-					<div id="content">
-						{tpl:maincontent.tpl.php}
-					</div>
-				</div>
-				<div id="rightcol" class="span-6 last">
-					<?php if (!empty($HelpBoxContent)): ?>
-						<div class="box loud" id="helpbox">
-							#HelpBoxContent#
-						</div>
-					<?php endif; ?>
-					<?php if(!empty($HelpBoxContent) && empty($secondary_links)): ?>
-						<hr>
-					<?php else: ?>
-						{tpl:secondary_links.tpl.php}
-					<?php endif; ?>
-					<?php if (Component::isActive('BackendUser')): ?>
-						{tpl:loginout.tpl.php}
-					<?php endif; ?>
-				</div>
-				<?php if ($debug): ?>
-					<div id="lastcontent" class="notice span-23 last">
-						#Last Content#
-					</div>
-				<?php endif; ?>
-				{tpl:footer.tpl.php}
 			</div>
-		</div>
-		<div id="lowerback">
-			&nbsp;
+			<div id="rightcol" class="span-7 last">
+				{tpl:rightcol.tpl.php}
+			</div>
+			<?php if ($debug): ?>
+				<div id="lastcontent" class="notice span-23 last">
+					#Last Content#
+				</div>
+			<?php endif; ?>
+			{tpl:footer.tpl.php}
 		</div>
 		{tpl:scripts.tpl.php}
 		<?php if (SITE_STATE == 'production'): ?>
@@ -66,4 +45,3 @@
 		<?php endif; ?>
 	</body>
 </html>
-

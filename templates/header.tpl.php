@@ -1,5 +1,17 @@
-<div id="header" class="span-24">
-	<h1 class="bottom prepend-1"><a href="?q=">#Title#</a></h1>
-	<p class="">&nbsp;#Moto#</p>
+<div id="header" class="prepend-top">
+	<div class="prepend-1 span-9">
+		<a href="?q=">
+			<?php if (file_exists(SITE_FOLDER . '/images/logo.png')): ?>
+				<img src="#SITE_LINK#images/logo.png" alt="#Title#" title="#Title#">
+			<?php else: ?>
+				<h1 class="bottom">#Title#</h1>
+			<?php endif; ?>
+		</a>
+	</div>
+	<?php if (!empty($Moto)): ?>
+		<div class="span-13 last prepend-top append-1" style="text-align: right;">
+			<p class="large loud">#Moto#</p>
+		</div>
+	<?php endif; ?>
 </div>
 

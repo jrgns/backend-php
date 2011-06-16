@@ -1,15 +1,10 @@
-body {
-	background-color: #DEDEDE;
+html {
+	overflow-x: auto;
+	overflow-y: scroll;
 }
 
-.container {
-	background-color: white;
-	border: 2px solid black;
-	border-top: 0px;
-	-moz-border-radius-bottomleft: 10px;
-	-webkit-border-bottom-left-radius: 10px;
-	-moz-border-radius-bottomright: 10px;
-	-webkit-border-bottom-right-radius: 10px;
+body {
+	background-color: #EFFFBF;
 }
 
 #topinfo {
@@ -18,51 +13,40 @@ body {
 	color: darkblue;
 }
 
-#topnav {
-	background-color: silver;
-	border-top: 2px solid black;
-	border-bottom: 2px solid black;
-	border-right: 1px solid black;
-	border-left: 1px solid black;
-	margin-bottom: 5px;
-	margin-left: -1px;
-	height: 24px;
-	width: 950px;
-	float: left;
-	overflow: hidden;
-	-moz-border-radius-topright: 5px;
-	-webkit-border-top-right-radius: 5px;
-	-moz-border-radius-topleft: 5px;
-	-webkit-border-top-left-radius: 5px;
-}
-
-#topnav_container {
-	float: left;
-	text-align:center;
-	position: relative;
-	left: 50%;
+#helpbox {
+	background-color: #BFFF00;
 }
 
 #loginout .text {
 	width: 180px;
+	background-color: #FFEEBB;
 }
 
-.menu_item {
+#topnav {
+	background-color: #491829;
+	border-top-left-radius: 6px;
+	border-top-right-radius: 6px;
+	border-bottom-left-radius: 6px;
+	border-bottom-right-radius: 6px;
+}
+
+#maincol {
+	background-color: white;
+	border: 2px solid #CFDDA6;
+	width: 626px;
+	border-top-left-radius: 6px;
+	border-top-right-radius: 6px;
+	border-bottom-left-radius: 6px;
+	border-bottom-right-radius: 6px;
+	padding: 20px;
+}
+
+label.nav_item {
+	font-weight: normal;
 	display: block;
 	float: left;
-	width: 110px;
-	border-right: 1px solid black;
-	border-left: 1px solid black;
-	padding: 3px 5px;
 	text-align: center;
-	position: relative;
-	right: 50%;
-	margin-left: -1px;
-}
-
-.menu_item:hover, a.active {
-	background-color: silver;
-	font-weight: bold;
+	width: 120px;
 }
 
 #topnav a {
@@ -75,6 +59,35 @@ body {
 
 #footer {
 	text-align: center;
+}
+
+#footer a {
+	color: black;
+}
+
+a.menu_item, .box a {
+	color: white;
+}
+
+.box {
+	background-color: #DFFF80;
+	/*color: white;*/
+	border-top-left-radius: 6px;
+	border-top-right-radius: 6px;
+	border-bottom-left-radius: 6px;
+	border-bottom-right-radius: 6px;
+}
+
+.right_button {
+	border: 1px solid silver;
+	padding-right: 17px;
+	padding-left: 3px;
+	background-color: white;
+	width: 250px;
+}
+
+.right_button img {
+	vertical-align: middle;
 }
 
 /* Resets */
@@ -91,12 +104,6 @@ pre, code, tt {
 }
 
 /* Blueprint mods */
-.error, .notice, .success {
-	margin-left: 7px;
-}
-
-.text {
-}
 
 .clickable {
 	cursor: pointer;
@@ -109,13 +116,4 @@ pre, code, tt {
 #maincol {
 	overflow: auto;
 }
-
-li.even {
-	background-color: #e5ecf9;
-}
-
-tr.odd, li.odd {
-	background-color: white;
-}
-
 
