@@ -93,8 +93,13 @@ class Render {
 		}
 		return false;
 	}
-
+	
 	public static function renderFile($template_name, array $values = array()) {
+		trigger_error('Render::renderFile deprecated, use Render::file instead', E_USER_NOTICE);
+		return self::file($template_name, $values);
+	}
+
+	public static function file($template_name, array $values = array()) {
 		self::init();
 
 		//Build the template
