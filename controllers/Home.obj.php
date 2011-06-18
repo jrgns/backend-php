@@ -22,6 +22,10 @@ class Home extends AreaCtl {
 		
 		$result = Permission::add('anonymous', 'index', 'home') && $result;
 		$result = Permission::add('anonymous', 'error', 'home') && $result;
+
+		//TODO Keep this here until we have role hierarchies
+		$result = Permission::add('authenticated', 'index', 'home') && $result;
+		$result = Permission::add('authenticated', 'error', 'home') && $result;
 		return $result;
 	}
 }
