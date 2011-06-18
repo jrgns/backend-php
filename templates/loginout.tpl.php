@@ -8,7 +8,9 @@
 		</div>
 	</form>
 <?php else: ?>
-	You are logged in as <?php echo $_SESSION['BackendUser']->username ?>
+	You are logged in as <a href="?q=backend_user/<?php echo $_SESSION['BackendUser']->id ?>">
+		<?php echo $_SESSION['BackendUser']->username ?>
+	</a>
 	<form method="post" action="#S_SITE_LINK#?q=backend_user/logout">
 		<div>
 			<input type="submit" value="Logout" name="do_logout">

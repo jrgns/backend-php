@@ -76,15 +76,9 @@ class BackendUserObj extends DBObject {
 		if (!$data) {
 			return $data;
 		}
-		if ($action == 'create') {
+		switch ($action) {
+		case 'create':
 			$data['active'] = array_key_exists('active', $data) ? $data['active'] : true;
-		}
-		if (empty($data['username'])) {
-			if ($action == 'create') {
-				Backend::addError('Please choose a username');
-				return false;
-			}
-		} else {
 			//Lower ASCII only
 			$data['username'] = filter_var(trim($data['username']), FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH);
 			//TODO Make the banned usernames configurable
@@ -93,8 +87,6 @@ class BackendUserObj extends DBObject {
 				Backend::addError('Please choose a valid username');
 				return false;
 			}
-		}
-		if ($action == 'create') {
 			$data['salt'] = get_random('numeric');
 			$data['password'] = md5($data['salt'] . $data['password'] . Controller::$salt);
 			if (ConfigValue::get('application.confirmUser')) {
@@ -102,6 +94,12 @@ class BackendUserObj extends DBObject {
 			} else {
 				$data['confirmed'] = array_key_exists('confirmed', $data) ? $data['confirmed'] : true;
 			}
+			break;
+		case 'update':
+			if (!empty($data['password'])) {
+				$data['password'] = md5($this->array['salt'] . $data['password'] . Controller::$salt);
+			}
+			break;
 		}
 		return $data;
 	}

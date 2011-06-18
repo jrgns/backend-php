@@ -35,8 +35,18 @@ class BackendUser extends TableCtl {
 		return false;
 	}
 	
-	public static function authenticate_user($username, $password) {
-		
+	public static function authenticate($username, $password, $return_query = false) {
+		$query = self::getQuery();
+		$query
+			->filter('`backend_users`.`Username` = :username OR `backend_users`.`Mobile` = :username OR `backend_users`.`Email` = :username')
+			->filter('`backend_users`.`password` = MD5(CONCAT(`backend_users`.`salt`, :password, :salt))')
+			->limit(1);
+		$parameters = array(
+			':username' => $username,
+			':password' => $password,
+			':salt' => Controller::$salt
+		);
+		return $return_query ? array($query, $parameters) : $query->fetchAssoc($parameters);
 	}
 	
 	public static function getQuery() {
@@ -52,18 +62,9 @@ class BackendUser extends TableCtl {
 			return true;
 		}
 		if ($username && $password) {
+			list($query, $params) = self::authenticate($username, $password, true);
+
 			$User = self::getObject(get_called_class());
-
-			$query = self::getQuery();
-			$query
-				->filter('`backend_users`.`Username` = :username OR `backend_users`.`Mobile` = :username OR `backend_users`.`Email` = :username')
-				->filter('`backend_users`.`password` = MD5(CONCAT(`backend_users`.`salt`, :password, :salt))');
-			$params = array(
-				':username' => $username,
-				':password' => $password,
-				':salt' => Controller::$salt
-			);
-
 			$User->read(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
 			if ($User->object) {
 				session_regenerate_id();
@@ -123,35 +124,6 @@ class BackendUser extends TableCtl {
 		return true;
 	}
 	
-	public function action_update_old($id) {
-		$result = false;
-		if (self::check()) {
-			$User = self::getObject(get_class($this), $_SESSION['BackendUser']->id);
-			$data = $User->fromPost();
-			if (is_post()) {
-				if ($User->update($data)) {
-					Backend::addSuccess('Your account details have been updated');
-					$User->read(array('mode' => 'full_object'));
-					$_SESSION['BackendUser'] = $User->object;
-					self::$current_user = $User->object;
-				} else {
-					Backend::addError('We could not update your account details');
-				}
-			}
-			$result = true;
-		} else {
-			$User = self::getObject(get_class($this));
-			$data = $User->fromPost();
-			$result = true;
-		}
-		Backend::add('obj_values', $data);
-		return $result ? $User : false;
-	}
-	
-	public function action_list($start, $count, array $options = array()) {
-		return parent::action_list($start, $count, $options);
-	}
-	
 	public function html_display($result) {
 		parent::html_display($result);
 		if ($result instanceof DBObject) {
@@ -173,6 +145,53 @@ class BackendUser extends TableCtl {
 				Backend::add('Sub Title', 'Update User ' . $result->array['username']);
 			}
 		}
+	}
+
+	public function post_change_password() {
+		$current  = Controller::getVar('current_password');
+		$password = Controller::getVar('password');
+		$confirm  = Controller::getVar('confirm_password');
+		if ($confirm != $password) {
+			Backend::addError('New password doesn\'t match');
+			return false;
+		}
+		if (!($user = self::check())) {
+			Backend::addError('Invalid User (Anonymous)');
+			return false;
+		}
+		$user_obj = self::getObject(get_class($this), $user->id);
+		if (!$user_obj->array) {
+			Backend::addError('Invalid User');
+			return false;
+		}
+		list($query, $params) = self::authenticate($user->username, $current, true);
+		if (!$query->fetchAssoc($params)) {
+			Backend::addError('Incorrect current password provided');
+			return false;
+		}
+		if (!$user_obj->update(array('password' => $password))) {
+			Backend::addError('Could not update password');
+			return false;
+		}
+		//Reread the user
+		$user_obj->read(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
+		if ($User->object) {
+			session_regenerate_id();
+			$_SESSION['BackendUser'] = $user_obj->object;
+			if (Component::isActive('PersistUser')) {
+				PersistUser::remember($user_obj->object);
+			}
+		}
+		return true;
+	}
+
+	public function html_change_password($result) {
+		if (is_post() && $result) {
+			Backend::addSuccess('Password updated');
+			Controller::redirect('?q=backend_user/display');
+		}
+		Backend::addContent(Render::renderfile('backend_user.change_password.tpl.php'));
+		return $result;
 	}
 	
 	public function get_super_signup() {
@@ -214,23 +233,24 @@ class BackendUser extends TableCtl {
 		}
 	}
 
-	public function action_signup() {
+	public function get_signup() {
+		$object = self::getObject(get_class($this));
+		$data = $object->fromPost();
+		Backend::add('obj_values', $data);
+		return true;
+	}
+
+	public function post_signup() {
 		$result = false;
 		$object = self::getObject(get_class($this));
 		$data = $object->fromPost();
-		if (is_post()) {
-			if ($object->create($data)) {
-				Backend::addSuccess('Signed up!');
-				$this->postSignup($object);
-				$result = $object;
-			} else {
-				Backend::addError('Could not sign you up. Please try again later!');
-			}
-		} else if (!empty($_SESSION['just_installed'])) {
-			$result = true;
-			$data['username'] = 'admin';
+		if ($object->create($data)) {
+			Backend::addSuccess('Signed up!');
+			$this->postSignup($object);
+			$result = $object;
+		} else {
+			Backend::addError('Could not sign you up. Please try again later!');
 		}
-		
 		Backend::add('obj_values', $data);
 		return $result;
 	}
@@ -240,7 +260,7 @@ class BackendUser extends TableCtl {
 		switch (true) {
 		case ($result instanceof DBObject):
 			//Successful signup, redirect
-			Controller::redirect(SITE_LINK);
+			Controller::redirect('?q=');
 			break;
 		case ($result):
 		default:
@@ -402,7 +422,7 @@ END;
 		return $_SESSION['BackendUser'];
 	}
 	
-	public static function check($user = false) {
+	public static function check() {
 		if (!empty(self::$current_user)) {
 			return self::$current_user;
 		}
@@ -539,7 +559,7 @@ Site Admin
 					&& $_SESSION['BackendUser']->id > 0
 					&& (empty($parameters['0']) || $parameters[0] != $_SESSION['BackendUser']->id)
 					&& !Permission::check('manage', class_for_url(get_called_class()))
-					&& !Permission::check(Controller::$action, class_for_url(get_called_class()))
+					&& Permission::check(Controller::$action, class_for_url(get_called_class()))
 			) {
 				$parameters[0] = $_SESSION['BackendUser']->id;
 			}
@@ -566,6 +586,9 @@ Site Admin
 
 		$result = Permission::add('authenticated', 'login', get_called_class()) && $result;
 		$result = Permission::add('authenticated', 'logout', get_called_class()) && $result;
+		$result = Permission::add('authenticated', 'display', get_called_class()) && $result;
+		$result = Permission::add('authenticated', 'update', get_called_class()) && $result;
+		$result = Permission::add('authenticated', 'change_password', get_called_class()) && $result;
 		return $result;
 	}
 }
