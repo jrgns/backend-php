@@ -212,7 +212,7 @@ class Component extends TableCtl {
 		Backend::addContent(Render::renderFile('component.manage.tpl.php'));
 	}
 	
-	public static function admin_links() {
+	public static function adminLinks() {
 		if (!Backend::getDB('default')) {
 			return false;
 		}

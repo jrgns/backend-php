@@ -207,20 +207,23 @@ class Admin extends AreaCtl {
 		return $result;
 	}
 	
-		function html_index($result) {
-			Backend::add('Sub Title', 'Manage Application');
-			Backend::add('result', $result);
+	function html_index($result) {
+		Backend::add('Sub Title', 'Manage Application');
+		Backend::add('result', $result);
 
-			$admin_links = array();
-			$components = Component::getActive();
-			foreach($components as $component) {
-				if (method_exists($component['name'], 'admin_links')) {
-					$admin_links[$component['name']] = call_user_func(array($component['name'], 'admin_links'));
+		$admin_links = array();
+		$components = Component::getActive();
+		foreach($components as $component) {
+			if (method_exists($component['name'], 'adminLinks')) {
+				$links = call_user_func(array($component['name'], 'adminLinks'));
+				if (is_array($links) && count($links)) {
+					$admin_links[$component['name']] = $links;
 				}
 			}
-			Backend::add('admin_links', $admin_links);
-			Backend::addContent(Render::renderFile('admin.index.tpl.php'));
 		}
+		Backend::add('admin_links', $admin_links);
+		Backend::addContent(Render::renderFile('admin.index.tpl.php'));
+	}
 
 	public static function hook_post_display($data, $controller) {
 		$user = BackendUser::check();
@@ -338,6 +341,24 @@ class Admin extends AreaCtl {
 			break;
 		}
 		return $parameters;
+	}
+	
+	public static function adminLinks() {
+		$result = array();
+		if (!($user = BackendUser::check())) {
+			return false;
+		}
+		
+		if (!ConfigValue::get('AdminInstalled', false) && in_array('superadmin', $user->roles)) {
+			$result[] = array('text' => 'Install Application', 'href' => '?q=admin/install');
+		}
+		if (!BACKEND_WITH_DATABASE) {
+			$result[] = array('text' => 'Install Database', 'href' => '?q=admin/install_db');
+		}
+		if (SITE_STATE != 'live') {
+			$result[] = array('text' => 'Scaffold', 'href' => '?q=admin/scaffold');
+		}
+		return count($result) ? $result : false;
 	}
 
 	public static function install(array $options = array()) {

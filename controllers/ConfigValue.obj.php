@@ -41,7 +41,7 @@ class ConfigValue extends Value {
 		return Backend::setConfig($name, $value);
 	}
 
-	public static function admin_links() {
+	public static function adminLinks() {
 		if (!Backend::getDB('default')) {
 			return false;
 		}

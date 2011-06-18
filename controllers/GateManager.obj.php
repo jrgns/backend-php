@@ -173,7 +173,7 @@ class GateManager extends AreaCtl {
 		Backend::addContent(Render::renderFile('gate_manager.permissions.tpl.php', (array)$result));
 	}
 	
-	public static function admin_links() {
+	public static function adminLinks() {
 		return array(
 			array('text' => 'Manage Roles'      , 'href' => '?q=gate_manager/roles'),
 			array('text' => 'Manage Permissions', 'href' => '?q=gate_manager/permissions'),
