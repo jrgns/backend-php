@@ -61,11 +61,11 @@ class Render {
 		return true;
 	}
 
-	public static function createTemplate($destination, $origin) {
+	public static function createTemplate($destination, $origin, array $variables = array()) {
 		self::init();
 		
 		$template_content = self::buildTemplate($origin);
-		$template_content = self::evalContent($origin, $template_content);
+		$template_content = self::evalContent($origin, $template_content, $variables);
 		if (!$template_content) {
 			Backend::addError('Could not generate template');
 			return false;

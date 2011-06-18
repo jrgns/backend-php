@@ -101,8 +101,7 @@ class TableCtl extends AreaCtl {
 		if (Render::checkTemplateFile($template_file)) {
 			Backend::addContent(Render::renderFile($template_file, array('db_object' => $result)));
 		} else {
-			//TODO It's a bit of a hack to redirect just because we can't generate the template
-			if (Render::createTemplate($template_file, 'std_display.tpl.php')) {
+			if (Render::createTemplate($template_file, 'std_display.tpl.php', array('db_object' => $result))) {
 				Backend::addSuccess('Created template for ' . $result->getMeta('name') . ' display');
 				Controller::redirect();
 			} else {
@@ -220,8 +219,8 @@ class TableCtl extends AreaCtl {
 		if (Render::checkTemplateFile($template_file)) {
 			Backend::addContent(Render::renderFile($template_file, array('db_object' => $result)));
 		} else {
-			//TODO It's a bit of a hack to redirect just because we can't generate the template
-			//if (Render::createTemplate($template_file, 'std_list.tpl.php')) {
+			//TODO Check and finish this
+			//if (Render::createTemplate($template_file, 'std_list.tpl.php', array('db_object' => $result))) {
 				//Backend::addSuccess('Created template for ' . $result->getMeta('name') . ' list');
 				//Controller::redirect();
 			//} else {
@@ -426,8 +425,7 @@ class TableCtl extends AreaCtl {
 				if (Render::checkTemplateFile($template_file)) {
 					Backend::addContent(Render::renderFile($template_file, array('db_object' => $object)));
 				} else {
-					//TODO It's a bit of a hack to redirect just because we can't generate the template
-					if (Render::createTemplate($template_file, 'std_form.tpl.php')) {
+					if (Render::createTemplate($template_file, 'std_form.tpl.php', array('db_object' => $object))) {
 						Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
 						Controller::redirect();
 					} else {
@@ -634,8 +632,7 @@ class TableCtl extends AreaCtl {
 				if (Render::checkTemplateFile($template_file)) {
 					Backend::addContent(Render::renderFile($template_file, array('db_object' => $object)));
 				} else {
-					//TODO It's a bit of a hack to redirect just because we can't generate the template
-					Render::createTemplate($template_file, 'std_form.tpl.php');
+					Render::createTemplate($template_file, 'std_form.tpl.php', array('db_object' => $object));
 					Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
 					Controller::redirect();
 				}
