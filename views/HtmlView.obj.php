@@ -39,7 +39,7 @@ class HtmlView extends View {
 			$template_file = Controller::$area . '.' . Controller::$action . '.tpl.php';
 			if (Render::checkTemplateFile($template_file)) {
 				$results = is_array($results) ? $results : array('results' => $results);
-				Backend::addContent(Render::renderFile($template_file, $results));
+				Backend::addContent(Render::file($template_file, $results));
 			}
 		}
 		$sub_title = Backend::get('Sub Title');
@@ -68,7 +68,7 @@ class HtmlView extends View {
 			Backend::addContent($content);
 		}
 
-		$to_print = Render::renderFile('index.tpl.php');
+		$to_print = Render::file('index.tpl.php');
 
 		$to_print = self::addLastContent($to_print);
 		$to_print = self::replace($to_print);
