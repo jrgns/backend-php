@@ -11,18 +11,22 @@ $action_name = empty($action_name) ? ucwords(Controller::$action) : $action_name
 ?>
 ';
 ?>
-		<form method="post" action="?q=<?php echo '<?php echo $action_url ?>' ?>" enctype="multipart/form-data">
+<form method="post" action="?q=<?php echo '<?php echo $action_url ?>' ?>" enctype="multipart/form-data">
 <?php 
 		foreach($fields as $name => $field):
 			if (!is_array($field)) {
 				$field = array('type' => $field);
 			}
-			if (in_array($field['type'], array('primarykey', 'lastmodified', 'dateadded', 'hidden', 'serialized', 'current_user'))) {
+			$skip_fields = array(
+				'primarykey', 'lastmodified', 'dateadded', 'hidden',
+				'serialized', 'current_user', 'password', 'salt'
+			);
+			if (in_array($field['type'], $skip_fields)) {
 				continue;
 			}
 			$odd = $odd ? false : true;
-			$input_id    = 'obj_' . $name;
-			$input_name  = 'obj[' . $name . ']';
+			$input_id    = 'value_' . $name;
+			$input_name  = $name;
 			$raw_value = '$obj_values[\'' . $name . '\']';
 			if (array_key_exists('default', $field)) {
 				$value = 'empty(' . $raw_value . ') ? \'' . $field['default'] . '\' : ' . $raw_value;
@@ -39,6 +43,7 @@ $action_name = empty($action_name) ? ucwords(Controller::$action) : $action_name
 				case $field['type']['type'] == 'email':
 				case $field['type'] == 'website':
 				case $field['type'] == 'telnumber':
+				case $field['type'] == 'email':
 					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="text" class="text" value="' . $plain_value . '">';
 					break;
 				case $field['type'] == 'date':
@@ -74,20 +79,23 @@ $action_name = empty($action_name) ? ucwords(Controller::$action) : $action_name
 					$field_str = '<input id="' . $input_id . '" name="' . $input_name . '" type="text" class="text" value="' . $plain_value . '">';
 					break;
 				default:
+					var_dump($field); die;
 					$field_str = '';
 					break;
 			}
 ?>
-			<div id="<?php echo $input_id ?>_container">
-				<label id="<?php echo $input_id ?>_label" for="<?php echo $input_id ?>"><?php echo humanize($name) ?></label><br>
-				<?php echo $field_str ?>
+	<div id="<?php echo $input_id ?>_container">
+		<label id="<?php echo $input_id ?>_label"><?php echo humanize($name) ?><br>
+			<?php echo $field_str ?>
 
-			</div>
+		</label>
+	</div>
 <?php endforeach;
+	//TODO Sort this out
 		Hook::run('form', 'post', array($db_object));
 ?>
-			<input type="submit" value="<?php echo '<?php echo $action_name ?>' ?> <?php echo $db_object->getMeta('name') ?>" class=""/>
-		</form>
+	<input type="submit" value="<?php echo '<?php echo $action_name ?>' ?> <?php echo $db_object->getMeta('name') ?>" class=""/>
+</form>
 <?php else: ?>
 	No object
 <?php endif; ?>
