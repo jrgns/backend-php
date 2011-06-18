@@ -28,7 +28,7 @@ class Admin extends AreaCtl {
 	 */
 	public function html_pre_install($result) {
 		Backend::add('Sub Title', 'This application has not been installed yet.');
-		Backend::addContent(Render::renderFile('admin.pre_install.tpl.php'));
+		Backend::addContent(Render::file('admin.pre_install.tpl.php'));
 		return $result;
 	}
 
@@ -61,7 +61,7 @@ class Admin extends AreaCtl {
 	public function html_check_install($result) {
 		Backend::add('Sub Title', 'Pre Installation Check');
 		Backend::addNotice('This application has not been installed yet');
-		Backend::addContent(Render::renderFile('admin.check_install.tpl.php', array('can_install' => $result)));
+		Backend::addContent(Render::file('admin.check_install.tpl.php', array('can_install' => $result)));
 		return $result;
 	}
 
@@ -156,7 +156,7 @@ class Admin extends AreaCtl {
 				'hostname' => Controller::getVar('hostname'),
 				'database' => Controller::getVar('database'),
 			);
-			Backend::addContent(Render::renderFile('admin.install_db.tpl.php', $vars));
+			Backend::addContent(Render::file('admin.install_db.tpl.php', $vars));
 			Backend::addError(self::getError($result));
 		}
 	}
@@ -222,7 +222,7 @@ class Admin extends AreaCtl {
 			}
 		}
 		Backend::add('admin_links', $admin_links);
-		Backend::addContent(Render::renderFile('admin.index.tpl.php'));
+		Backend::addContent(Render::file('admin.index.tpl.php'));
 	}
 
 	public static function hook_post_display($data, $controller) {
@@ -283,7 +283,7 @@ class Admin extends AreaCtl {
 			Backend::addSuccess('Scaffolds created for ' . class_name(Controller::$parameters[0]));
 			Controller::redirect();
 		}
-		Backend::addContent('<p>Please choose a table</p><form method="post"><input type="text" name="table"><input type="text" name="database"><input type="submit" value="Scaffold"></form>');
+		Backend::addContent(Render::file('admin.scaffold.tpl.php'));
 		return $result;
 	}
 	
