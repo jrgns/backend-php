@@ -78,7 +78,7 @@ class Component extends TableCtl {
 	}
 	
 	public static function getActive($refresh = false) {
-		if (!BACKEND_WITH_DATABASE) {
+		if (!defined('BACKEND_WITH_DATABASE') || !BACKEND_WITH_DATABASE) {
 			//Return the core components
 			return self::getCoreComponents();
 		}

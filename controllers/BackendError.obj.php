@@ -19,6 +19,43 @@
  */
 class BackendError extends TableCtl {
 	private static $adding = false;
+
+	private static function shouldAdd($one, $two = false, $three = false, $four = false, $five = false) {
+		//Controller not initiated yet.
+		if (!Controller::getInit()) {
+			return false;
+		}
+		//Some low level utilities only checks if the class exists, not if it is active
+		if (!Component::isActive('BackendError')) {
+			return false;
+		}
+		//Busy with something?
+		if (self::$adding) {
+			if (Controller::$debug) {
+				var_dump($one, $two, $three, $four, $five);
+				print_stacktrace();
+				die('Recursive Backend Errors');
+			}
+			return false;
+		}
+		//Probably addBE
+		if (!is_string($three) || !file_exists($three)) {
+			return true;
+		}
+		if (Controller::$mode == Controller::MODE_EXECUTE) {
+		//Check if the error originated in our realm
+			if (
+				stripos(BACKEND_FOLDER, $three) === false &&
+				stripos(APP_FOLDER, $three) === false &&
+				stripos(WEB_FOLDER, $three) === false &&
+				(!defined('SITE_FOLDER') || stripos(SITE_FOLDER, $three) === false)
+			) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	/**
 	 * Add an error.
 	 *
@@ -28,21 +65,14 @@ class BackendError extends TableCtl {
 	 * @param string Description
 	 */
 	public static function add($one, $two = false, $three = false, $four = false, $five = false) {
-		//Some low level utilities only checks if the class exists, not if it is active
-		if (Component::isActive('BackendError')) {
-			if (!self::$adding) {
-				self::$adding = true;
-				if (!is_numeric($one) && !$three && !$four && !$five) {
-					self::addBE($one, $two);
-				} else {
-					self::addPHP($one, $two, $three, $four, $five);
-				}
-				self::$adding = false;
+		if (self::shouldAdd($one, $two, $three, $four, $five)) {
+			self::$adding = true;
+			if (!is_numeric($one) && !$three && !$four && !$five) {
+				self::addBE($one, $two);
 			} else {
-				var_dump($one, $two, $three, $four, $five);
-				print_stacktrace();
-				die('Recursive Backend Errors');
+				self::addPHP($one, $two, $three, $four, $five);
 			}
+			self::$adding = false;
 		}
 	}
 	

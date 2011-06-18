@@ -34,7 +34,11 @@ class Links extends AreaCtl {
 	}
 	
 	public static function render($link) {
-		echo '<a href="', $link['href'], '">', $link['text'], '</a>';
+		if (empty($link['href'])) {
+			echo $link['text'];
+		} else {
+			echo '<a href="', $link['href'], '">', $link['text'], '</a>';
+		}
 	}
 
 	function html_index() {

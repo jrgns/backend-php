@@ -287,6 +287,10 @@ class TableCtl extends AreaCtl {
 		if (empty($term)) {
 			return $object;
 		}
+		if (Controller::$debug) {
+			var_dump('Search Fields:', $fields);
+		}
+
 		$filter = array();
 		foreach($fields as $field) {
 			$filter[] = $field . " LIKE CONCAT('%', :term, '%')";

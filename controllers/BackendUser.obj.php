@@ -107,22 +107,19 @@ class BackendUser extends TableCtl {
 		Backend::addContent(Render::renderFile('loginout.tpl.php'));
 	}
 	
-	function action_logout() {
-		if (is_post()) {
-			self::$current_user = false;
-			if (array_key_exists('BackendUser', $_SESSION)) {
-				
-				if (Component::isActive('PersistUser')) {
-					PersistUser::forget($_SESSION['BackendUser']);
-				}
-				$_SESSION = array();
-				if (isset($_COOKIE[session_name()])) {
-					setcookie(session_name(), '', time() - 42000, '/');
-				}			
-				session_destroy();
+	function post_logout() {
+		self::$current_user = false;
+		if (array_key_exists('BackendUser', $_SESSION)) {
+			if (Component::isActive('PersistUser')) {
+				PersistUser::forget($_SESSION['BackendUser']);
 			}
+			$_SESSION = array();
+			if (isset($_COOKIE[session_name()])) {
+				setcookie(session_name(), '', time() - 42000, '/');
+			}
+			session_destroy();
 		}
-		Controller::redirect(SITE_LINK);
+		Controller::redirect('?q=');
 		return true;
 	}
 	
@@ -542,6 +539,7 @@ Site Admin
 					&& $_SESSION['BackendUser']->id > 0
 					&& (empty($parameters['0']) || $parameters[0] != $_SESSION['BackendUser']->id)
 					&& !Permission::check('manage', class_for_url(get_called_class()))
+					&& !Permission::check(Controller::$action, class_for_url(get_called_class()))
 			) {
 				$parameters[0] = $_SESSION['BackendUser']->id;
 			}

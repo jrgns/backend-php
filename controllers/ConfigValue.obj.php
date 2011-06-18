@@ -14,7 +14,7 @@ class ConfigValue extends Value {
 	 * Config Value names should be CamelCase
 	 */
 	public static function get($name, $default = null) {
-		if (BACKEND_WITH_DATABASE) {
+		if (defined('BACKEND_WITH_DATABASE') && BACKEND_WITH_DATABASE) {
 			$value = Value::get($name, null);
 			//Retrieved from the DB
 			if (!is_null($value)) {
