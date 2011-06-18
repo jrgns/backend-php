@@ -265,7 +265,7 @@ class BackendUser extends TableCtl {
 		case ($result):
 		default:
 			Backend::add('Object', $result);
-			Backend::addContent(Render::renderFile('signup.tpl.php'));
+			Backend::addContent(Render::renderFile('backend_user.signup.tpl.php'));
 			break;
 		}
 	}
