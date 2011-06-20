@@ -136,7 +136,7 @@ class BackendAccount extends TableCtl {
 				session_destroy();
 			}
 		}
-		Controller::redirect(SITE_LINK);
+		Controller::redirect('?q=');
 		return true;
 	}
 	
@@ -223,7 +223,7 @@ class BackendAccount extends TableCtl {
 		switch (true) {
 		case ($result instanceof DBObject):
 			//Successful signup, redirect
-			Controller::redirect(SITE_LINK);
+			Controller::redirect('?q=');
 			break;
 		case ($result):
 		default:
