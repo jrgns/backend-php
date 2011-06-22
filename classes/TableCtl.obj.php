@@ -187,10 +187,15 @@ class TableCtl extends AreaCtl {
 			$limit = false;
 		}
 		if (!empty($options['order'])) {
-			//TODO Check for commma delimited list of fields to order by
-			if (!in_array($options['order'], array_keys($object->getMeta('fields')))) {
-				//Backend::addNotice('Invalid Order Field');
-				unset($options['order']);
+			if (!is_array($options['order'])) {
+				$options['order'] = array($options['order']);
+			}
+			foreach($options['order'] as $key => $order) {
+				$order = preg_replace('/^`?(\S+)`( (ASC|DESC))?$/', '$1', $order);
+				if (!in_array($order, array_keys($object->getMeta('fields')))) {
+					//Backend::addNotice('Invalid Order Field');
+					unset($options['order'][$key]);
+				}
 			}
 		}
 
