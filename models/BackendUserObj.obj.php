@@ -45,6 +45,9 @@ class BackendUserObj extends DBObject {
 				'email'    => 'unique',
 			);
 		}
+		if (!array_key_exists('order', $meta)) {
+			$meta['order'] = '`username`';
+		}
 		return parent::__construct($meta, $options);
 	}
 

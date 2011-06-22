@@ -30,7 +30,7 @@ class GChartView extends View {
 			$max  = max($data);
 		} else {
 			$min  = min(array_merge(array(0), reset($data)));
-			$max  = max(reset($data));
+			$max  = count(reset($data)) ? max(reset($data)) : 0;
 		}
 		$params['cht'] = 'lc';
 		if (array_depth($data) == 1) {

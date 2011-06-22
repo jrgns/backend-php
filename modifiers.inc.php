@@ -356,3 +356,14 @@ function and_items($numbers) {
     }
     return $numbers;
 }
+
+if (!function_exists('lcfirst')) {
+	function lcfirst($string) {
+		$string[0] = strtolower($string[0]);
+		return $string;
+	}
+}
+
+function inline_markdown($string) {
+	return function_exists('markdown') ? preg_replace('/^<p>(.*)<\/p>$/', '$1', markdown($string)) : $string;
+}

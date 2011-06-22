@@ -182,6 +182,7 @@ class View {
 			if (Controller::$debug) {
 				Backend::addNotice('Checking ' . get_class($controller) . '::' . $display_method . ' and then ' . get_class($this) . '::' . $view_method);
 			}
+			//Controller->display_method and View->view_method
 			if (method_exists($controller, $display_method)) {
 				if (Controller::$debug) {
 					Backend::addNotice('Running ' . get_class($controller) . '::' . $display_method);
@@ -189,7 +190,7 @@ class View {
 				$data = $controller->$display_method($data);
 			} else if (method_exists($this, $view_method)) {
 				if (Controller::$debug) {
-					Backend::addNotice('Running ' . get_class($controller) . '::' . $view_method);
+					Backend::addNotice('Running ' . get_class($this) . '::' . $view_method);
 				}
 				$data = $this->$view_method($data);
 			}
