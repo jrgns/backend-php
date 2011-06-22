@@ -559,6 +559,16 @@ class Backend {
 				}
 				return true;
 			}
+			preg_match_all("/[\S]+\/classes\/Render.obj.php\([0-9]+\) : eval\(\)'d code/", $file, $vars, PREG_SET_ORDER);
+			if (!empty($vars)) {
+				$template_name = empty($context['be_template_name']) ? 'Unknown' : $context['be_template_name'];
+				if (SITE_STATE != 'production') {
+					Backend::addError('Error in template: ' . $template_name . ' on line ' . $line . ': ' . $string);
+				} else {
+					Backend::addError('Template Error');
+				}
+				return true;
+			}
 			break;
 		case E_STRICT:
 			if (SITE_STATE == 'production') {

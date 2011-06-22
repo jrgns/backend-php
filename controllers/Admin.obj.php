@@ -82,13 +82,31 @@ class Admin extends AreaCtl {
 	function action_check() {
 	}
 	
-	function action_daily(array $options = array()) {
+	public function action_continual(array $options = array()) {
+		$components = Component::getActive();
+		$result = true;
+		foreach($components as $component) {
+			if (is_callable(array($component['name'], 'continual'))) {
+				$object = new $component['name']();
+				$result = call_user_func_array(array($object, 'continual'), $options) && $result;
+			}
+		}
+		return $result;
+	}
+	
+	public function json_continual($result) {
+		if ($result) {
+			die;
+		}
+	}
+
+	public function action_daily(array $options = array()) {
 		$components = Component::getActive();
 		$result = true;
 		foreach($components as $component) {
 			if (is_callable(array($component['name'], 'daily'))) {
 				$object = new $component['name']();
-				call_user_func_array(array($object, 'daily'), $options) && $result;
+				$result = call_user_func_array(array($object, 'daily'), $options) && $result;
 			}
 		}
 		return $result;
@@ -100,7 +118,7 @@ class Admin extends AreaCtl {
 		}
 	}
 
-	function action_weekly(array $options = array()) {
+	public function action_weekly(array $options = array()) {
 		$components = Component::getActive();
 		$result = true;
 		foreach($components as $component) {

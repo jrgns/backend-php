@@ -39,7 +39,7 @@ class CsvView extends View {
 		//Output SelectQuery as CSV
 		case $to_print instanceof SelectQuery:
 		case $to_print instanceof CustomQuery:
-			return self::output_query($to_print);
+			return self::outputQuery($to_print);
 			break;
 		//Output Array of Arrays as CSV
 		case is_array($to_print):
@@ -67,6 +67,16 @@ class CsvView extends View {
 			fclose($fp);
 			return ob_get_clean();
 			break;
+		//Output a DBObject. Try the list first, then the array | object
+		case $to_print instanceof DBObject:
+			if ($to_print->list) {
+				return self::outputList($to_print->list);
+			} else if ($to_print->array || $to_print->db_object) {
+				$to_print = $to_print->array ? $to_print->array : (array)$to_print->db_object;
+				$to_print = array_filter($to_print, create_function('$var', 'return !is_array($var) && !is_object($var);'));
+				return self::outputList(array($to_print));
+			}
+			break;
 		//Output a specified file as CSV
 		case is_string($to_print):
 			if (is_readable($to_print)) {
@@ -81,7 +91,47 @@ class CsvView extends View {
 		}
 	}
 	
-	private static function output_query($query) {
+	/**
+	 * Generic output function called from View::display
+	 */
+	public function output_list($data) {
+		if ($data instanceof DBObject && $data->list) {
+			$data = $data->list;
+			return self::outputList($data);
+		} else {
+			return '';
+		}
+	}
+	
+	/**
+	 * Generic output function called from View::display
+	 */
+	public function output_display($data) {
+		if (!($data instanceof DBObject) || !($data->array || $data->object)) {
+			return '';
+		}
+		$data = $data->array ? $data->array : (array)$data->object;
+		$data = array_filter($data, create_function('$var', 'return !is_array($var) && !is_object($var);'));
+		return self::outputList(array($data));
+	}
+
+	/**
+	 * Generic output function called from View::display
+	 */
+	public function output_read($data) {
+		if (!$fp = fopen('php://temp', 'r+')) {
+			Backend::addError('Could not open temporary file for CSV output');
+			return '';
+		}
+		fputcsv($fp, $data);
+		rewind($fp);
+		ob_start();
+		fpassthru($fp);
+		fclose($fp);
+		return ob_get_clean();
+	}
+
+	private static function outputQuery($query) {
 		if (!$fp = fopen('php://temp', 'r+')) {
 			Backend::addError('Could not open temporary file for CSV output');
 			return '';
@@ -102,35 +152,23 @@ class CsvView extends View {
 		fclose($fp);
 		return ob_get_clean();
 	}
-
-	public function output_list($data) {
+	
+	private static function outputList($data) {
+		if (!is_array($data)) {
+			Backend::addError('Invalid Result');
+			return '';
+		}
 		if (!$fp = fopen('php://temp', 'r+')) {
 			Backend::addError('Could not open temporary file for CSV output');
 			return '';
 		}
 		
-		if (!is_array($data)) {
-			Backend::addError('Invalid Result');
-		}
 		$data = array_filter($data, 'is_array');
 		$first = reset($data);
 		fputcsv($fp, array_keys($first));
 		foreach($data as $line) {
 			fputcsv($fp, $line);
 		}
-		rewind($fp);
-		ob_start();
-		fpassthru($fp);
-		fclose($fp);
-		return ob_get_clean();
-	}
-
-	public function output_read($data) {
-		if (!$fp = fopen('php://temp', 'r+')) {
-			Backend::addError('Could not open temporary file for CSV output');
-			return '';
-		}
-		fputcsv($fp, $data);
 		rewind($fp);
 		ob_start();
 		fpassthru($fp);
