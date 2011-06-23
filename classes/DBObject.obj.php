@@ -10,7 +10,7 @@
  * @license http://www.eclipse.org/legal/epl-v10.html Eclipse Public License v1.0
  * @package Core
  */
- 
+
 /**
  * The base model class.
  *
@@ -20,13 +20,13 @@ class DBObject {
 	private $db;
 	protected $meta;
 	protected $load_mode = 'array';
-	
+
 	public $list = null;
 	public $array = null;
 	public $object = null;
 	public $inserted_id;
 	public $list_count = null;
-	
+
 	//If you set $error_msg in a function, reset it in the beginning of the function as well.
 	public $error_msg = false;
 
@@ -65,7 +65,7 @@ class DBObject {
 			}
 		}
 	}
-	
+
 	private function checkConnection() {
 		$this->error_msg = false;
 		if (!$this->db instanceof PDO) {
@@ -84,7 +84,7 @@ class DBObject {
 		}
 		return ($this->db instanceof PDO);
 	}
-	
+
 	private function loadRelation($class, $options, $load_mode) {
 		$class_name = array_key_exists('model', $options) ? $options['model'] . 'Obj' : $class . 'Obj';
 		if (!Component::isActive($class_name)) {
@@ -137,7 +137,7 @@ class DBObject {
 		$relation->loadDeep($mode);
 		return $relation;
 	}
-	
+
 	private function loadDeep($mode = 'array') {
 		if (in_array($mode, array('array', 'object')) && $this->$mode) {
 			foreach ($this->meta['relations'] as $name => $options) {
@@ -167,19 +167,19 @@ class DBObject {
 			}
 		}
 	}
-	
+
 	public function loadArray(array $options = array()) {
 		$this->read(array_merge($options, array('mode' => 'array')));
 	}
-	
+
 	public function loadObject(array $options = array()) {
 		$this->read(array_merge($options, array('mode' => 'object')));
 	}
-	
+
 	public function loadList(array $options = array()) {
 		$this->read(array_merge($options, array('mode' => 'list')));
 	}
-	
+
 	public function load($options = array()) {
 		return $this->read($options);
 	}
@@ -202,7 +202,7 @@ class DBObject {
 			$this->error_msg = 'DB Connection Error';
 			return false;
 		}
-		
+
 		//Get the SQL Query
 		if (!array_key_exists('mode', $options)) {
 			if (empty($this->meta['id'])) {
@@ -295,7 +295,7 @@ class DBObject {
 		}
 		return $result;
 	}
-	
+
 	function process($data, $direction) {
 		foreach($data as $name => $value) {
 			if (array_key_exists($name, $this->meta['fields'])) {
@@ -342,7 +342,7 @@ class DBObject {
 		}
 		return $data;
 	}
-	
+
 	public function create($data, array $options = array()) {
 		$this->error_msg = false;
 		if (!$this->checkConnection()) {
@@ -380,7 +380,7 @@ class DBObject {
 		$this->error_msg = 'Could not validate data for creation';
 		return false;
 	}
-	
+
 	public function replace($data, array $options = array()) {
 		$this->error_msg = false;
 		if (!$this->checkConnection()) {
@@ -423,7 +423,7 @@ class DBObject {
 		}
 		return false;
 	}
-	
+
 	public function retrieve($parameter) {
 		$this->error_msg = false;
 		if (!$this->checkConnection()) {
@@ -450,7 +450,7 @@ class DBObject {
 		}
 		return null;
 	}
-	
+
 	public function update($data, array $options = array()) {
 		$this->error_msg = false;
 		if (!$this->checkConnection()) {
@@ -485,7 +485,7 @@ class DBObject {
 		}
 		return false;
 	}
-	
+
 	function delete(array $options = array()) {
 		$this->error_msg = false;
 		if (!$this->checkConnection()) {
@@ -505,7 +505,7 @@ class DBObject {
 		}
 		return false;
 	}
-	
+
 	function truncate(array $options = array()) {
 		$toret = false;
 		$this->error_msg = false;
@@ -526,7 +526,7 @@ class DBObject {
 		}
 		return false;
 	}
-	
+
 	public function install(array $options = array()) {
 		$toret = false;
 		$this->error_msg = false;
@@ -562,12 +562,12 @@ class DBObject {
 		}
 		return $toret;
 	}
-	
+
 	function validate($data, $action, $options = array()) {
 		//TODO Try to use $this->error_msg here
 		$ret_data = array();
 		$toret = true;
-		
+
 		if (is_array($data)) {
 			foreach($this->meta['fields'] as $name => $field_options) {
 				$value = array_key_exists($name, $data) ? $data[$name] : null;
@@ -587,7 +587,7 @@ class DBObject {
 					if (empty($field_options['non_automatic'])) {
 						$value = null;
 					} else if (is_null($value)) {
-						Backend::addError('Missing ' . $name);
+						Backend::addError('Missing Primary Key ' . $name);
 						$toret = false;
 					}
 					break;
@@ -740,27 +740,43 @@ class DBObject {
 					}
 					break;
 				}
-				
+
 				if (!is_null($value)) {
-					if (empty($value) && !empty($field_options['required'])) {
+					if (
+						empty($value)
+						&& !empty($field_options['required'])
+						&& $type != 'primarykey'
+					) {
+						if (array_key_exists('default', $field_options)) {
+							$ret_data[$name] = $field_options['default'];
+						} else {
+							$this->error_msg = 'Validation Failed';
+							Backend::addError('Missing ' . $name);
+							$toret = false;
+							break;
+						}
+					} else {
+						$ret_data[$name] = $value;
+					}
+				} else if (
+					$action == 'create'
+					&& !empty($field_options['required'])
+					&& $type != 'primarykey'
+				) {
+					if (array_key_exists('default', $field_options)) {
+						$ret_data[$name] = $field_options['default'];
+					} else {
 						$this->error_msg = 'Validation Failed';
 						Backend::addError('Missing ' . $name);
 						$toret = false;
 						break;
-					} else {
-						$ret_data[$name] = $value;
 					}
-				} else if ($action == 'create' && !empty($field_options['required'])) {
-					$this->error_msg = 'Validation Failed';
-					Backend::addError('Missing ' . $name);
-					$toret = false;
-					break;
 				}
 			}
 		}
 		return ($toret && count($ret_data)) ? $ret_data : false;
 	}
-	
+
 	function fromPost() {
 		$toret = array();
 		$data  = Controller::getVar('obj');
@@ -830,19 +846,19 @@ class DBObject {
 		}
 		return $toret;
 	}
-	
+
 	public function getSource() {
 		$database = Backend::getDBDefinition($this->meta['database']);
 		return $database ? '`' . $database['database'] . '`.`' . $this->meta['table'] . '`' : false;
 	}
-	
+
 	public function getConnection() {
 		if ($this->db instanceof PDO) {
 			return $this->db;
 		}
 		return false;
 	}
-	
+
 	public function getSelectSQL($options = array()) {
 		//Check the DB Connection
 		$this->error_msg = false;
@@ -857,7 +873,7 @@ class DBObject {
 		extract($this->meta);
 
 		$mode = array_key_exists('mode', $options) ? $options['mode'] : 'list';
-		
+
 		$query = new SelectQuery($this, array('connection' => $this->db));
 		//Fields
 		$fields = array_key_exists('fields', $options) ? $options['fields'] : array();
@@ -914,7 +930,7 @@ class DBObject {
 				$q_params[] = $parameters;
 			}
 		}
-		
+
 		if (array_key_exists('filters', $options)) {
 			$query->filter($options['filters']);
 		} else if (!empty($filters)) {
@@ -935,7 +951,7 @@ class DBObject {
 		}
 		return array($query, $q_params);
 	}
-	
+
 	public function getRetrieveSQL() {
 		$query  = new SelectQuery($this);
 		$filter = '`' . $this->getMeta('id_field') . '` = :parameter';
@@ -951,7 +967,7 @@ class DBObject {
 
 	public function getCreateSQL($data, array $options = array()) {
 		extract($this->meta);
-		
+
 		$query = false;
 		$field_data = array();
 		$value_data = array();
@@ -1045,7 +1061,7 @@ class DBObject {
 		$field_data = array();
 		$value_data = array();
 		$parameters = array();
-		
+
 		$non_parameter_aware = array_key_exists('non_parameter', $options);
 		$non_parameters = array_key_exists('non_parameter', $options) ? $options['non_parameter'] : array();
 		foreach ($fields as $name => $options) {
@@ -1107,7 +1123,7 @@ class DBObject {
 		}
 		return array($query, count($parameters) ? $parameters : false);
 	}
-	
+
 	public function getDeleteSQL() {
 		$query = false;
 		if ($id) {
@@ -1117,7 +1133,7 @@ class DBObject {
 		}
 		return $query;
 	}
-	
+
 	public function getInstallSQL() {
 		extract($this->meta);
 		$query_fields = array();
@@ -1268,7 +1284,7 @@ class DBObject {
 			}
 			$query_fields[] = implode(' ', array_map('trim', $field_arr));
 		}
-		
+
 		foreach($keys as $key => $key_options) {
 			//Legacy
 			if (is_string($key_options)) {
@@ -1312,7 +1328,7 @@ class DBObject {
 		}
 		return $query;
 	}
-	
+
 	public function getMeta($name = false) {
 		if ($name) {
 			$toret = array_key_exists($name, $this->meta) ? $this->meta[$name] : null;
@@ -1321,19 +1337,19 @@ class DBObject {
 		}
 		return $toret;
 	}
-	
+
 	public function getObjectName() {
 		return $this->getMeta('name');
 	}
-	
+
 	public function getSearchFields() {
 		return array_map(array('Query', 'enclose'), array_keys($this->getMeta('fields')));
 	}
-	
+
 	public function getArea() {
 		return class_for_url(get_class($this));
 	}
-	
+
 	public function __toString() {
 		$class = get_called_class();
 		if (!$class) {
