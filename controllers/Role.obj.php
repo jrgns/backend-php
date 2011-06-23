@@ -21,7 +21,7 @@ class Role extends TableCtl {
 	public static function add($name, $description, array $options = array()) {
 		$id     = array_key_exists('id', $options)     ? $options['id']     : null;
 		$active = array_key_exists('active', $options) ? $options['active'] : null;
-		
+
 		$data = array(
 			'name'        => $name,
 			'description' => $description,
@@ -41,7 +41,7 @@ class Role extends TableCtl {
 		}
 		return $toret;
 	}
-	
+
 	public function action_create($id = false) {
 		if (is_get()) {
 			$obj = Controller::getVar('obj');
@@ -59,7 +59,7 @@ class Role extends TableCtl {
 			array('id' => 2, 'name' => 'anonymous', 'description' => 'The standard, anonymous user with minimum rights', 'active' => 1),
 			array('id' => 3, 'name' => 'authenticated', 'description' => 'A registered user', 'active' => 1),
 			array('id' => 4, 'name' => 'superadmin', 'description' => 'The user with all the rights', 'active' => 1),
-			
+
 		);
 		return $toret;
 	}
@@ -74,4 +74,3 @@ class Role extends TableCtl {
 		return $toret;
 	}
 }
-

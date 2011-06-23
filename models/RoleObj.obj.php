@@ -26,9 +26,15 @@ class RoleObj extends DBObject {
 			'modified' => 'lastmodified',
 			'added' => 'dateadded',
 		);
+		$meta['keys'] = array(
+			'table' => array(
+				'type'   => 'unique',
+				'fields' => array('name'),
+			),
+		);
 		return parent::__construct($meta, $options);
 	}
-	
+
 	function validate($data, $action, $options = array()) {
 		$toret = false;
 		$data = parent::validate($data, $action, $options);
