@@ -160,7 +160,7 @@ class Admin extends AreaCtl {
 			Backend::addError(self::getError($result));
 		}
 	}
-	
+
 	/**
 	 * Run this request every 10 minutes or more to run daily continuous maintenance scripts
 	 */
@@ -175,7 +175,7 @@ class Admin extends AreaCtl {
 		}
 		return $result;
 	}
-	
+
 	public function json_continual($result) {
 		if ($result) {
 			die;
@@ -259,7 +259,14 @@ class Admin extends AreaCtl {
 			Backend::addError('Cannot run scaffold on a live site');
 			return false;
 		}
-		//TODO Return list of tables that are not under the framework
+		$databases = Backend::getDBNames();
+		if ($default_key = array_search('default', $databases)) {
+			unset($databases[$default_key]);
+		}
+		return array(
+			'databases' => $databases,
+			//TODO Return list of tables that are not under the framework
+		);
 	}
 	
 	public function post_scaffold($table, $database = false) {
@@ -304,7 +311,7 @@ class Admin extends AreaCtl {
 			Backend::addSuccess('Scaffolds created for ' . class_name(Controller::$parameters[0]));
 			Controller::redirect();
 		}
-		Backend::addContent(Render::file('admin.scaffold.tpl.php'));
+		Backend::addContent(Render::file('admin.scaffold.tpl.php', $result));
 		return $result;
 	}
 	
