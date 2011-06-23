@@ -19,7 +19,7 @@ class Scaffold {
 		}
 		return true;
 	}
-	
+
 	public static function controller() {
 		$year = date('Y');
 		extract(self::$variables);
@@ -48,15 +48,15 @@ class Scaffold {
  */
 class $class_name extends TableCtl {
 	public static function install(array \$options = array()) {
-		\$toret = parent::install(\$options);
-		return \$toret;
+		\$result = parent::install(\$options);
+		return \$result;
 	}
 }
 
 END;
 		return file_put_contents(self::$destination . '/controllers/' . $class_name . '.obj.php', $file);
 	}
-	
+
 	public static function model() {
 		$year = date('Y');
 		extract(self::$variables);
@@ -118,7 +118,7 @@ END;
 				$length = sscanf($row['Type'], 'char(%d)');
 				if ($length && count($length)) {
 					$length = reset($length);
-					$type = "array('type' => 'string', 'string_size' => $length)";
+					$definition['string_size'] = $length;
 				}
 				break;
 			case strtolower(substr($row['Type'], -4)) == 'text':
@@ -151,6 +151,16 @@ END;
 				var_dump($row); die;
 				break;
 			}
+
+			if (!$definition['null']) {
+				if (!in_array($definition['type'], array('primarykey', 'dateadded', 'lastmodified'))) {
+					$definition['required'] = true;
+				}
+				if (is_null($definition['default'])) {
+					unset($definition['default']);
+				}
+			}
+
 			$fields[$row['Field']] = $definition;
 		}
 		foreach($fields as $name => $definition) {
@@ -194,19 +204,18 @@ END;
 		);
 		return parent::__construct(\$meta, \$options);
 	}
-	
+
 	function validate(\$data, \$action, \$options = array()) {
-		\$toret = true;
+		\$result = true;
 		\$data = parent::validate(\$data, \$action, \$options);
-		return \$toret ? \$data : false;
+		return \$result ? \$data : false;
 	}
 }
 END;
 		return file_put_contents(self::$destination . '/models/' . $class_name . 'Obj.obj.php', $file);
 	}
-	
+
 	public static function views() {
 		return true;
 	}
 }
-
