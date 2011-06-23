@@ -364,6 +364,10 @@ class Backend {
 		return self::$DB[$name];
 	}
 
+	public static function getDBNames() {
+		return array_keys(self::$DB);
+	}
+
 	private static function addSomething($what, $string, $options = array()) {
 		if (is_null($string)) {
 			return false;
