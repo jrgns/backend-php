@@ -58,4 +58,3 @@ $action_name = empty($action_name) ? ucwords(Controller::$action) : $action_name
 	<legend>Change Password</legend>
 	 {tpl:backend_user.change_password.tpl.php}
 </fieldset>
-
