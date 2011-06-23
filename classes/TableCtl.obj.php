@@ -10,7 +10,7 @@
  * @license http://www.eclipse.org/legal/epl-v10.html Eclipse Public License v1.0
  * @package Core
  */
- 
+
 /**
  * Default class to handle the specific functions for Areas that are linked to Tables
  */
@@ -25,7 +25,7 @@ class TableCtl extends AreaCtl {
 	public static $P_FULL = array(
 		'read', 'display', 'list', 'search', 'create', 'replace', 'import', 'update', 'toggle', 'delete'
 	);
-	
+
 	/**
 	 * Return Tab Links for this area
 	 *
@@ -49,13 +49,13 @@ class TableCtl extends AreaCtl {
 		}
 		return $links;
 	}
-	
+
 	public function getHomeMethods() {
 		$methods = parent::getHomeMethods();
 		$methods = array_filter($methods, create_function('$var', "return !in_array(\$var, array('display', 'replace', 'read', 'update', 'delete', 'toggle'));"));
 		return $methods;
 	}
-	
+
 	public static function define_display() {
 		return array(
 			'description' => 'Display a specified record',
@@ -81,7 +81,7 @@ class TableCtl extends AreaCtl {
 		$object = Hook::run('table_display', 'post', array($object), array('toret' => $object));
 		return $object;
 	}
-	
+
 	/**
 	 * Output an object in HTML
 	 *
@@ -99,7 +99,7 @@ class TableCtl extends AreaCtl {
 		}
 		$template_file = $result->getArea() . '.display.tpl.php';
 		if (Render::checkTemplateFile($template_file)) {
-			Backend::addContent(Render::renderFile($template_file, array('db_object' => $result)));
+			Backend::addContent(Render::file($template_file, array('db_object' => $result)));
 		} else {
 			if (Render::createTemplate($template_file, 'std_display.tpl.php', array('db_object' => $result))) {
 				Backend::addSuccess('Created template for ' . $result->getMeta('name') . ' display');
@@ -110,7 +110,7 @@ class TableCtl extends AreaCtl {
 		}
 		return $result;
 	}
-	
+
 	public function json_display($result) {
 		if ($result instanceof DBObject) {
 			switch (true) {
@@ -127,7 +127,7 @@ class TableCtl extends AreaCtl {
 		}
 		return $result;
 	}
-	
+
 	public static function define_list() {
 		return array(
 			'description' => 'List a number of records',
@@ -169,7 +169,7 @@ class TableCtl extends AreaCtl {
 		$options   = array_merge($options, $p_options);
 		return call_user_func(array(get_called_class(), 'do_list'), $start, $count, $options);
 	}
-	
+
 	public static function do_list($start, $count, array $options = array()) {
 		$object = self::getObject(get_called_class());
 		if (!($object instanceof DBObject)) {
@@ -200,7 +200,7 @@ class TableCtl extends AreaCtl {
 		$object->read(array_merge(array('limit' => $limit), $options));
 		return $object;
 	}
-	
+
 	/**
 	 * Output a list of records in HTML
 	 *
@@ -212,7 +212,7 @@ class TableCtl extends AreaCtl {
 			Controller::whoops('Invalid Object Returned');
 			return $result;
 		}
-		
+
 		Backend::add('TabLinks', $this->getTabLinks('list'));
 		if (!Backend::get('Sub Title')) {
 			Backend::add('Sub Title', $result->getMeta('name'));
@@ -222,7 +222,7 @@ class TableCtl extends AreaCtl {
 		Backend::addScript(SITE_LINK . 'scripts/table_list.js');
 		$template_file = $result->getArea() . '.list.tpl.php';
 		if (Render::checkTemplateFile($template_file)) {
-			Backend::addContent(Render::renderFile($template_file, array('db_object' => $result)));
+			Backend::addContent(Render::file($template_file, array('db_object' => $result)));
 		} else {
 			//TODO Check and finish this
 			//if (Render::createTemplate($template_file, 'std_list.tpl.php', array('db_object' => $result))) {
@@ -231,11 +231,11 @@ class TableCtl extends AreaCtl {
 			//} else {
 				//Backend::addError('Could not create template file for ' . $result->getMeta('name') . '::list');
 			//}
-			Backend::addContent(Render::renderFile('std_list.tpl.php', array('db_object' => $result)));
+			Backend::addContent(Render::file('std_list.tpl.php', array('db_object' => $result)));
 		}
 		return $result;
 	}
-	
+
 	public function json_list($result) {
 		if ($result instanceof DBObject) {
 			Backend::addContent(array('list_count' => $result->list_count), array('as_is' => 1));
@@ -243,7 +243,7 @@ class TableCtl extends AreaCtl {
 		}
 		return $result;
 	}
-	
+
 	public static function define_search() {
 		return array(
 			'description' => 'Search and return records',
@@ -311,13 +311,13 @@ class TableCtl extends AreaCtl {
 		$options['parameters'][':term'] = $term;
 		return call_user_func(array(get_called_class(), 'do_list'), $start, $count, $options);
 	}
-	
+
 	public function html_search($result) {
 		if (!($result instanceof DBObject)) {
 			Controller::whoops('Invalid Object Returned');
 			return $result;
 		}
-		
+
 		Backend::add('TabLinks', $this->getTabLinks('list'));
 		if (!Backend::get('Sub Title')) {
 			Backend::add('Sub Title', 'Searching ' . $result->getMeta('name'));
@@ -331,10 +331,10 @@ class TableCtl extends AreaCtl {
 		if (!Render::checkTemplateFile($template_file)) {
 			$template_file = 'std_search_results.tpl.php';
 		}
-		Backend::addContent(Render::renderFile($template_file, array('db_object' => $result)));
+		Backend::addContent(Render::file($template_file, array('db_object' => $result)));
 		return $result;
 	}
-	
+
 	public static function define_create() {
 		$result = array(
 			'description' => 'Create a new record. Data for the new record should be passed as POST data.',
@@ -402,7 +402,7 @@ class TableCtl extends AreaCtl {
 		Backend::add('obj_values', $data);
 		return $result;
 	}
-	
+
 	/**
 	 * Output a form to create a record in HTML
 	 *
@@ -428,7 +428,7 @@ class TableCtl extends AreaCtl {
 				}
 				$template_file = $object->getArea() . '.form.tpl.php';
 				if (Render::checkTemplateFile($template_file)) {
-					Backend::addContent(Render::renderFile($template_file, array('db_object' => $object)));
+					Backend::addContent(Render::file($template_file, array('db_object' => $object)));
 				} else {
 					if (Render::createTemplate($template_file, 'std_form.tpl.php', array('db_object' => $object))) {
 						Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
@@ -438,11 +438,11 @@ class TableCtl extends AreaCtl {
 					}
 				}
 			}
-			break;		
+			break;
 		}
 		return $result;
 	}
-	
+
 	public static function define_replace() {
 		$result = array(
 			'description' => 'Create a new record or replace it if it already exists. Data for the new record should be passed as POST data.',
@@ -504,11 +504,11 @@ class TableCtl extends AreaCtl {
 		Backend::add('obj_values', $data);
 		return $result;
 	}
-	
+
 	public function html_replace($result) {
 		return $this->html_create($result);
 	}
-	
+
 	public static function define_read() {
 		return array(
 			'description' => 'Read the specified record.',
@@ -538,7 +538,7 @@ class TableCtl extends AreaCtl {
 	public function action_read($id, $mode = 'array') {
 		return call_user_func_array(array(class_name(Controller::$area), 'retrieve'), array($id, $mode));
 	}
-	
+
 	public static function define_update() {
 		$result = array(
 			'description' => 'Update a record. The update data for the record should be passed as POST data.',
@@ -614,7 +614,7 @@ class TableCtl extends AreaCtl {
 		Backend::add('obj_values', $data);
 		return $result;
 	}
-	
+
 	/**
 	 * Output a form to update a record in HTML
 	 *
@@ -635,7 +635,7 @@ class TableCtl extends AreaCtl {
 				}
 				$template_file = $object->getArea() . '.form.tpl.php';
 				if (Render::checkTemplateFile($template_file)) {
-					Backend::addContent(Render::renderFile($template_file, array('db_object' => $object)));
+					Backend::addContent(Render::file($template_file, array('db_object' => $object)));
 				} else {
 					Render::createTemplate($template_file, 'std_form.tpl.php', array('db_object' => $object));
 					Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
@@ -648,7 +648,7 @@ class TableCtl extends AreaCtl {
 		}
 		return $result;
 	}
-	
+
 	public static function define_delete() {
 		return array(
 			'description' => 'Delete the specified record.',
@@ -688,7 +688,7 @@ class TableCtl extends AreaCtl {
 		}
 		Controller::redirect('?q=' . Controller::$area . '/list');
 	}
-	
+
 	public static function define_toggle() {
 		return array(
 			'description' => 'Toggle a boolean field on the specified record.',
@@ -732,14 +732,14 @@ class TableCtl extends AreaCtl {
 		}
 		return false;
 	}
-	
+
 	public function html_toggle($result) {
 		if ($result instanceof DBObject) {
 			Controller::redirect('?q=' . Controller::$area . '/' . $result->getMeta('id'));
 		}
 		return $result;
 	}
-	
+
 	/**
 	 * Action for importing records in an area
 	 */
@@ -805,7 +805,7 @@ class TableCtl extends AreaCtl {
 		}
 		return false;
 	}
-	
+
 	public function html_import($result) {
 		switch (true) {
 		case $result instanceof DBObject:
@@ -817,7 +817,7 @@ class TableCtl extends AreaCtl {
 			if (!Render::checkTemplateFile($template_file)) {
 				$template_file = 'std_import.tpl.php';
 			}
-			Backend::addContent(Render::renderFile($template_file, array('db_object' => $result)));
+			Backend::addContent(Render::file($template_file, array('db_object' => $result)));
 			break;
 		case is_numeric($result) && $result >= 0:
 			Backend::addSuccess($result . ' records imported');
@@ -829,7 +829,7 @@ class TableCtl extends AreaCtl {
 		}
 		return $result;
 	}
-	
+
 	public static function retrieve($parameter = false, $return = 'array', array $options = array()) {
 		if (is_null($parameter)) {
 			return null;
@@ -892,7 +892,7 @@ class TableCtl extends AreaCtl {
 		}
 		return $toret;
 	}
-	
+
 	/**
 	 * Use this function to set default parameters for specific actions
 	 *
@@ -954,7 +954,7 @@ class TableCtl extends AreaCtl {
 		}
 		return $parameters;
 	}
-	
+
 	public static function getObject($obj_name = false, $id = false) {
 		$toret = false;
 		$obj_name = $obj_name ? class_name($obj_name) : class_name(get_called_class());
@@ -968,7 +968,7 @@ class TableCtl extends AreaCtl {
 		}
 		return $toret;
 	}
-	
+
 	public static function define_install() {
 		return array(
 			'description' => 'Install the component',
@@ -988,7 +988,7 @@ class TableCtl extends AreaCtl {
 			),
 		);
 	}
-	
+
 	public static function install(array $options = array()) {
 		if (!Backend::getDB('default')) {
 			return true;
@@ -1020,4 +1020,3 @@ class TableCtl extends AreaCtl {
 		return $toret;
 	}
 }
-

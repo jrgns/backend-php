@@ -10,7 +10,7 @@
  * @license http://www.eclipse.org/legal/epl-v10.html Eclipse Public License v1.0
  * @package Core
  */
- 
+
 /**
  * Default class to handle Area specific functions
  */
@@ -30,11 +30,11 @@ class AreaCtl {
 		if (Controller::$debug) {
 			Backend::addNotice('Checking Method ' . Controller::$action . ' for ' . get_class($this));
 		}
-		
+
 		$request_method = strtolower(array_key_exists('REQUEST_METHOD', $_SERVER) ? $_SERVER['REQUEST_METHOD'] : 'GET') . '_' . Controller::$action;
 		$action_method  = 'action_' . Controller::$action;
 		$view_method    = Controller::$view->mode . '_' . Controller::$action;
-		
+
 		//Determine / check method
 		$method = false;
 		if (method_exists($this, $request_method)) {
@@ -56,7 +56,7 @@ class AreaCtl {
 			Controller::whoops('Permission Denied', array('message' => 'You do not have permission to ' . Controller::$action . ' ' . get_class($this)));
 			return null;
 		}
-		
+
 		if ($method === true) {
 			//View method, return null;
 			return null;
@@ -67,7 +67,7 @@ class AreaCtl {
 		}
 		return call_user_func_array(array($this, $method), Controller::$parameters);
 	}
-	
+
 	/**
 	 * Return a area specific error
 	 *
@@ -82,7 +82,7 @@ class AreaCtl {
 		}
 		return $msg;
 	}
-	
+
 	/**
 	 * Return Tab Links for this area
 	 *
@@ -92,14 +92,14 @@ class AreaCtl {
 		$links = array();
 		return $links;
 	}
-	
+
 	/**
 	 * Return the human friendly name for the controller
 	 */
 	public function getHumanName() {
 		return get_class($this);
 	}
-	
+
 	/**
 	 * Check permissions for this area
 	 *
@@ -119,7 +119,7 @@ class AreaCtl {
 		} else {
 			$subject_id = 0;
 		}
-		
+
 		if (ConfigValue::get('AdminInstalled', false)) {
 			return Permission::check($action, $subject, $subject_id);
 		} else if (!($subject == 'admin' && in_array($action, array('pre_install', 'check_install', 'install')))) {
@@ -131,7 +131,7 @@ class AreaCtl {
 	public static function checkParameters($parameters) {
 		return $parameters;
 	}
-	
+
 	public static function define_install() {
 		return array(
 			'description' => 'Install the component',
@@ -141,11 +141,11 @@ class AreaCtl {
 			),
 		);
 	}
-	
+
 	public function action_install() {
 		return call_user_func(array(get_class($this), 'install'));
 	}
-	
+
 	public static function install(array $options = array()) {
 		if (!Backend::getDB('default')) {
 			return true;
@@ -164,22 +164,22 @@ class AreaCtl {
 		$methods = get_class_methods($class);
 		$methods = array_filter($methods, create_function('$var', '$temp = explode(\'_\', $var, 2); return count($temp) == 2 && in_array(strtolower($temp[0]), array(\'action\', \'get\', \'post\', \'put\', \'delete\'));'));
 		$methods = array_map(create_function('$var', 'return preg_replace(\'/^(action|get|post|put|delete)_/\', \'\', $var);'), $methods);
-		
+
 		$result = true;
 		foreach($methods as $action) {
 			$result = Permission::add('nobody', $action, class_for_url($class)) && $result;
 		}
 		return $result;
 	}
-	
+
 	public function get_home() {
 		return $this->getHomeMethods();
 	}
-	
+
 	public function html_home($methods) {
-		Backend::addContent(Render::renderFile('std_home.tpl.php', array('methods' => $methods)));
+		Backend::addContent(Render::file('std_home.tpl.php', array('methods' => $methods)));
 	}
-	
+
 	public function getHomeMethods() {
 		$class = get_called_class();
 		if (!$class || !class_exists($class, true)) {
