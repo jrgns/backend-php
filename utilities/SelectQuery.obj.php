@@ -19,7 +19,7 @@ class SelectQuery extends Query {
 	function __construct($table, array $options = array()) {
 		parent::__construct('SELECT', $table, $options);
 	}
-	
+
 	protected function buildTable() {
 		$query = 'SELECT';
 		if ($this->distinct) {
@@ -28,7 +28,7 @@ class SelectQuery extends Query {
 		if (empty($this->fields)) {
 			$query .= ' *';
 		} else {
-			$query .= ' ' . implode(', ', $this->fields);
+			$query .= PHP_EOL . "\t" . implode(',' . PHP_EOL . "\t", $this->fields);
 		}
 		$query .= PHP_EOL . 'FROM ' . $this->table;
 		if (!empty($this->joins)) {
@@ -50,11 +50,11 @@ class SelectQuery extends Query {
 		}
 		return $query;
 	}
-	
+
 	function leftJoin($table, $conditions, array $options = array()) {
 		return $this->join('LEFT', $table, $conditions, $options);
 	}
-	
+
 	function rightJoin($table, $conditions, array $options = array()) {
 		return $this->join('RIGHT', $table, $conditions, $options);
 	}
@@ -99,7 +99,7 @@ class SelectQuery extends Query {
 		}
 		return $this;
 	}
-	
+
 	function joinArray(array $array) {
 		if (count($array) == 3) {
 			if (array_key_exists('type', $array) && array_key_exists('table', $array) && array_key_exists('conditions', $array)) {
@@ -112,7 +112,7 @@ class SelectQuery extends Query {
 		//Maybe add a warning or exception?
 		return $this;
 	}
-	
+
 	function getCount($parameters) {
 		$this->buildTable();
 		$count_query = clone($this);
@@ -123,4 +123,3 @@ class SelectQuery extends Query {
 		return $count_query->fetchColumn($parameters);
 	}
 }
-
