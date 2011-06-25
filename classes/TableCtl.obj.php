@@ -95,11 +95,20 @@ class TableCtl extends AreaCtl {
 		}
 		Backend::add('TabLinks', $this->getTabLinks('display'));
 		if (!Backend::get('Sub Title')) {
-			Backend::add('Sub Title', $result->getMeta('name'));
+			if ($result->array && array_key_exists('name', $result->getMeta('fields'))) {
+				Backend::add('Sub Title', $result->getMeta('name') . ': ' . $result->array['name']);
+			} else {
+				Backend::add('Sub Title', $result->getMeta('name'));
+			}
 		}
-		$template_file = $result->getArea() . '.display.tpl.php';
-		if (Render::checkTemplateFile($template_file)) {
-			Backend::addContent(Render::file($template_file, array('db_object' => $result)));
+		$template_file = array(
+			$result->getArea() . '.display.tpl.php',
+			$result->getArea() . '/display.tpl.php',
+		);
+		if (Render::checkTemplateFile($template_file[0])) {
+			Backend::addContent(Render::file($template_file[0], array('db_object' => $result)));
+		} else if (Render::checkTemplateFile($template_file[1])) {
+			Backend::addContent(Render::file($template_file[1], array('db_object' => $result)));
 		} else {
 			if (Render::createTemplate($template_file, 'std_display.tpl.php', array('db_object' => $result))) {
 				Backend::addSuccess('Created template for ' . $result->getMeta('name') . ' display');
@@ -220,9 +229,14 @@ class TableCtl extends AreaCtl {
 
 		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
 		Backend::addScript(SITE_LINK . 'scripts/table_list.js');
-		$template_file = $result->getArea() . '.list.tpl.php';
-		if (Render::checkTemplateFile($template_file)) {
-			Backend::addContent(Render::file($template_file, array('db_object' => $result)));
+		$template_file = array(
+			$result->getArea() . '.list.tpl.php',
+			$result->getArea() . '/list.tpl.php',
+		);
+		if (Render::checkTemplateFile($template_file[0])) {
+			Backend::addContent(Render::file($template_file[0], array('db_object' => $result)));
+		} else if (Render::checkTemplateFile($template_file[1])) {
+			Backend::addContent(Render::file($template_file[1], array('db_object' => $result)));
 		} else {
 			//TODO Check and finish this
 			//if (Render::createTemplate($template_file, 'std_list.tpl.php', array('db_object' => $result))) {
@@ -327,8 +341,11 @@ class TableCtl extends AreaCtl {
 		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
 		Backend::addScript(SITE_LINK . 'scripts/table_list.js');
 
-		$template_file = $result->getArea() . '.search_results.tpl.php';
-		if (!Render::checkTemplateFile($template_file)) {
+		$template_file = array(
+			$result->getArea() . '.search_results.tpl.php',
+			$result->getArea() . '/search_results.tpl.php',
+		);
+		if (!Render::checkTemplateFile($template_file[0]) && !Render::checkTemplateFile($template_file[1])) {
 			$template_file = 'std_search_results.tpl.php';
 		}
 		Backend::addContent(Render::file($template_file, array('db_object' => $result)));
@@ -426,9 +443,14 @@ class TableCtl extends AreaCtl {
 				if (!Backend::get('Sub Title')) {
 					Backend::add('Sub Title', 'Add ' . $object->getMeta('name'));
 				}
-				$template_file = $object->getArea() . '.form.tpl.php';
-				if (Render::checkTemplateFile($template_file)) {
-					Backend::addContent(Render::file($template_file, array('db_object' => $object)));
+				$template_file = array(
+					$object->getArea() . '.form.tpl.php',
+					$object->getArea() . '/form.tpl.php',
+				);
+				if (Render::checkTemplateFile($template_file[0])) {
+					Backend::addContent(Render::file($template_file[0], array('db_object' => $object)));
+				} else if (Render::checkTemplateFile($template_file[1])) {
+					Backend::addContent(Render::file($template_file[1], array('db_object' => $object)));
 				} else {
 					if (Render::createTemplate($template_file, 'std_form.tpl.php', array('db_object' => $object))) {
 						Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
@@ -633,9 +655,14 @@ class TableCtl extends AreaCtl {
 				if (!Backend::get('Sub Title')) {
 					Backend::add('Sub Title', 'Update ' . $object->getMeta('name'));
 				}
-				$template_file = $object->getArea() . '.form.tpl.php';
-				if (Render::checkTemplateFile($template_file)) {
-					Backend::addContent(Render::file($template_file, array('db_object' => $object)));
+				$template_file = array(
+					$object->getArea() . '.form.tpl.php',
+					$object->getArea() . '/form.tpl.php',
+				);
+				if (Render::checkTemplateFile($template_file[0])) {
+					Backend::addContent(Render::file($template_file[0], array('db_object' => $object)));
+				} else if (Render::checkTemplateFile($template_file[1])) {
+					Backend::addContent(Render::file($template_file[1], array('db_object' => $object)));
 				} else {
 					Render::createTemplate($template_file, 'std_form.tpl.php', array('db_object' => $object));
 					Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
@@ -813,8 +840,11 @@ class TableCtl extends AreaCtl {
 				Backend::add('Sub Title', 'Import');
 				Backend::add('Sub Title', 'Import ' . $result->getMeta('name'));
 			}
-			$template_file = singularize(computerize(class_name(Controller::$area))) . '.import.tpl.php';
-			if (!Render::checkTemplateFile($template_file)) {
+			$template_file = array(
+				$object->getArea() . '.import.tpl.php',
+				$object->getArea() . '/import.tpl.php',
+			);
+			if (!Render::checkTemplateFile($template_file[0]) && !Render::checkTemplateFile($template_file[1])) {
 				$template_file = 'std_import.tpl.php';
 			}
 			Backend::addContent(Render::file($template_file, array('db_object' => $result)));

@@ -765,7 +765,7 @@ class DBObject {
 				) {
 					if (array_key_exists('default', $field_options)) {
 						$ret_data[$name] = $field_options['default'];
-					} else {
+					} else if (!in_array($type, array('lastmodified'))) {
 						$this->error_msg = 'Validation Failed';
 						Backend::addError('Missing ' . $name);
 						$toret = false;

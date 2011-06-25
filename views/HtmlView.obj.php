@@ -10,7 +10,7 @@
  * @license http://www.eclipse.org/legal/epl-v10.html Eclipse Public License v1.0
  * @package View
  */
- 
+
 /**
  * Default class to handle HtmlView specific functions
  */
@@ -24,7 +24,7 @@ class HtmlView extends View {
 		self::$ob_level  = ob_get_level();
 		ob_start();
 	}
-	
+
 	/**
 	 * See if there's a template file that can be automatically added.
 	 *
@@ -43,12 +43,9 @@ class HtmlView extends View {
 			}
 		}
 		$sub_title = Backend::get('Sub Title');
-		if (empty($sub_title)) {
-			Backend::add('Sub Title', $controller->getHumanName());
-		}
 		return $results;
 	}
-	
+
 	public static function hook_output($to_print) {
 		Backend::add('BackendErrors', Backend::getError());
 		Backend::add('BackendSuccess', Backend::getSuccess());
@@ -56,7 +53,7 @@ class HtmlView extends View {
 		Backend::setError();
 		Backend::setSuccess();
 		Backend::setNotice();
-		
+
 		$content = Backend::getContent();
 		if (empty($content)) {
 			ob_start();
@@ -81,7 +78,7 @@ class HtmlView extends View {
 			$BEFilter = new BEFilterObj();
 			$BEFilter->read();
 			$filters = $BEFilter->list ? $BEFilter->list : array();
-		
+
 			foreach($filters as $row) {
 				if (class_exists($row['class'], true) && is_callable(array($row['class'], $row['function']))) {
 					$to_print = call_user_func(array($row['class'], $row['function']), $to_print);
@@ -90,7 +87,7 @@ class HtmlView extends View {
 		}
 		return $to_print;
 	}
-	
+
 	/**
 	 * This function adds all styles and scripts to the HTML. It also retrieves primary and secondary links from the App
 	 *
@@ -126,7 +123,7 @@ class HtmlView extends View {
 			$against[] = SITE_LINK . 'scripts/backend.js';
 		}
 		$scripts = array_unique(array_merge($against, $scripts));
-		
+
 		Backend::add('Styles', array_unique(array_filter(Backend::getStyles())));
 		Backend::add('Scripts', $scripts);
 		Backend::add('ScriptContent', array_unique(array_filter(Backend::getScriptContent())));
@@ -153,11 +150,11 @@ class HtmlView extends View {
 
 	public static function replace($content) {
 		$toret = $content;
-	
+
 		$vars = Backend::getAll();
 		$search = array();
 		$replace = array();
-		
+
 		if ($vars) {
 			foreach($vars as $name => $value) {
 				if (!(is_object($name) || is_array($name) || is_null($name)) && !(is_object($value)  || is_array($value))) {
@@ -180,7 +177,7 @@ class HtmlView extends View {
 		}
 		return $toret;
 	}
-	
+
 	public static function addLastContent($to_print) {
 		//Checking for ob_level > $this->ob_level, so we'll exit on the same number we started on
 		$last = '';
@@ -194,7 +191,7 @@ class HtmlView extends View {
 		$to_print = str_replace('#Last Content#', $last, $to_print);
 		return $to_print;
 	}
-	
+
 	public static function addLinks($to_print) {
 		parse_str($_SERVER['QUERY_STRING'], $vars);
 		$new_vars = array();
@@ -213,7 +210,7 @@ class HtmlView extends View {
 		$to_print = update_links($to_print, $new_vars);
 		return $to_print;
 	}
-	
+
 	public static function rewriteLinks($to_print) {
 		if (ConfigValue::get('CleanURLs', false)) {
 			preg_match_all('/(<a\s+.*?href=[\'\"]|<form\s+.*?action=[\'"]|<link\s+.*?href=[\'"])(|.*?[\?&]q=.*?&?.*?)[\'"]/', $to_print, $matches);
@@ -242,14 +239,14 @@ class HtmlView extends View {
 					if (array_key_exists('scheme', $query)) {
 						$query['scheme'] = $query['scheme'] . '://';
 					}
-					
+
 					//Get the old vars
 					if (array_key_exists('query', $query)) {
 						parse_str($query['query'], $vars);
 					} else {
 						$vars = array();
 					}
-					
+
 					//append q to the URL
 					if (array_key_exists('q', $vars)) {
 						$query['path'] .= $vars['q'];
@@ -258,7 +255,7 @@ class HtmlView extends View {
 							$query['path'] .= '/';
 						}
 					}
-					
+
 					//Create query string
 					if (count($vars)) {
 						$query['query'] = '?' . http_build_query($vars);
@@ -273,11 +270,11 @@ class HtmlView extends View {
 		}
 		return $to_print;
 	}
-	
+
 	public static function formsAcceptCharset($content, $charset = 'utf-8') {
 		return str_replace('<form ', '<form accept-charset="' . $charset . '" ', $content);
 	}
-	
+
 	public function whoops($title, $message, $code_hint = false) {
 		Backend::add('Sub Title', $title);
 		Backend::addContent('<ht>' . $message . '<hr>');
@@ -294,4 +291,3 @@ class HtmlView extends View {
 		return $result;
 	}
 }
-
