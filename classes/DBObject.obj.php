@@ -251,6 +251,7 @@ class DBObject {
 						}
 					}
 					$this->array = (array)$this->object;
+					array_walk_recursive($this->array,create_function('&$input, $key', 'if (is_object($input)) { $input = (array)$input; } else { return $input[$key]; }'));
 				} else {
 					$this->object = null;
 				}
