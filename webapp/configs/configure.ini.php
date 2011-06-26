@@ -7,8 +7,8 @@ TemplateLocation = "templates"
 ConfigValueSet = "1"
 [application]
 Title = "Backend"
-Moto = 
-HelpBoxContent = 
+Moto = "PHP MVC Framework. Simple. Easy. Awesome."
+HelpBoxContent = "Your website is ready to be set up!"
 Description = 
 LogToFile = 
 AdminInstalled = "2011-06-26 04:56:07"
