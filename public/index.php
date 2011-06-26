@@ -10,7 +10,7 @@
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
 
-define('BACKEND_FOLDER', '/var/www/Jrgn5/backend');
+define('BACKEND_FOLDER', dirname(getcwd()));
 define('APP_FOLDER', BACKEND_FOLDER . '/webapp');
 define('WEB_FOLDER', BACKEND_FOLDER . '/public');
 //define('SITE_FOLDER', APP_FOLDER . '/sites/liveserver.com');
