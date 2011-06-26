@@ -10,7 +10,7 @@
  * @license http://www.eclipse.org/legal/epl-v10.html
  * @package ControllerFiles
  */
- 
+
 /**
  * This is the controller for the Admin area
  * @package Controllers
@@ -57,7 +57,7 @@ class Admin extends AreaCtl {
 
 		return $can_install;
 	}
-	
+
 	public function html_check_install($result) {
 		Backend::add('Sub Title', 'Pre Installation Check');
 		Backend::addNotice('This application has not been installed yet');
@@ -76,7 +76,7 @@ class Admin extends AreaCtl {
 
 		return self::installComponents();
 	}
-	
+
 	public function html_install($result) {
 		if (is_post() && $result) {
 			Backend::addSuccess('Backend Install Successful');
@@ -90,7 +90,7 @@ class Admin extends AreaCtl {
 		Backend::add('Sub Title', 'Install Backend Application');
 		Backend::addContent('<p class="large loud">Something went wrong with the installation</p>');
 	}
-	
+
 	/**
 	 * Get and save the database settings
 	 */
@@ -104,7 +104,7 @@ class Admin extends AreaCtl {
 				|| empty($hostname)) {
 			return self::ERR_DB_INSUFFICIENT_INFO;
 		}
-		
+
 		//Connect to the DB
 		$dsn = array();
 		$driver = 'mysql';
@@ -129,7 +129,7 @@ class Admin extends AreaCtl {
 		Backend::setConfig('database.username', $username);
 		Backend::setConfig('database.password', $password);
 		Backend::setConfig('database.hostname', $hostname);
-		
+
 		//Add the DB settings to the Backend
 		Backend::addDB('default', array(
 			'alias'    => 'default',
@@ -138,11 +138,11 @@ class Admin extends AreaCtl {
 			'password' => $password,
 			'hostname' => $hostname,
 		));
-		
+
 		//Reinstall the components
 		return self::installComponents(true);
 	}
-	
+
 	public function html_install_db($result) {
 		if ($result === true) {
 			ConfigValue::set('DatabaseInstalled', date('Y-m-d H:i:s'));
@@ -196,7 +196,7 @@ class Admin extends AreaCtl {
 		}
 		return $result;
 	}
-	
+
 	public function json_daily($result) {
 		if ($result) {
 			//Exit without outputting anything. To be used in crons
@@ -219,7 +219,7 @@ class Admin extends AreaCtl {
 		}
 		return $result;
 	}
-	
+
 	public function json_weekly($result) {
 		if ($result) {
 			//Exit without outputting anything. To be used in crons
@@ -227,7 +227,7 @@ class Admin extends AreaCtl {
 		}
 		return $result;
 	}
-	
+
 	function html_index($result) {
 		Backend::add('Sub Title', 'Manage Application');
 		Backend::add('result', $result);
@@ -253,7 +253,7 @@ class Admin extends AreaCtl {
 		}
 		return $data;
 	}
-	
+
 	public function get_scaffold() {
 		if (SITE_STATE == 'live') {
 			Backend::addError('Cannot run scaffold on a live site');
@@ -268,13 +268,13 @@ class Admin extends AreaCtl {
 			//TODO Return list of tables that are not under the framework
 		);
 	}
-	
+
 	public function post_scaffold($table, $database = false) {
 		if (SITE_STATE == 'live') {
 			Backend::addError('Cannot run scaffold on a live site');
 			return false;
 		}
-		
+
 		if (empty($database)) {
 			$db = Backend::getDB('default', true);
 		} else {
@@ -292,10 +292,10 @@ class Admin extends AreaCtl {
 			|| !is_writable($destination . '/models')
 			|| !is_writable($destination . '/templates')
 		) {
-			Backend::addError('Destinations aren\'t writable');
+			Backend::addError('Destinations aren\'t writable: ' . $destination);
 			return false;
 		}
-		
+
 		$variables = array(
 			'table_name' => $table,
 			'class_name' => class_name($table),
@@ -305,16 +305,18 @@ class Admin extends AreaCtl {
 		);
 		return Scaffold::generate($variables, $connection, $destination);
 	}
-	
+
 	public function html_scaffold($result) {
 		if (is_post() && $result) {
 			Backend::addSuccess('Scaffolds created for ' . class_name(Controller::$parameters[0]));
+			Controller::redirect();
+		} else if (!$result) {
 			Controller::redirect();
 		}
 		Backend::addContent(Render::file('admin.scaffold.tpl.php', $result));
 		return $result;
 	}
-	
+
 	private static function installComponents($with_db = false) {
 		$components = Component::getCoreComponents($with_db);
 		if (!$components) {
@@ -339,7 +341,7 @@ class Admin extends AreaCtl {
 				}
 			}
 		}
-		
+
 		//Install Components
 		foreach($components as $component) {
 			if (class_exists($component, true) && method_exists($component, 'install')) {
@@ -355,7 +357,7 @@ class Admin extends AreaCtl {
 		ConfigValue::set('LogToFile', $original);
 		return true;
 	}
-	
+
 	public static function checkParameters($parameters) {
 		$parameters = parent::checkParameters($parameters);
 		switch (Controller::$action) {
@@ -370,13 +372,13 @@ class Admin extends AreaCtl {
 		}
 		return $parameters;
 	}
-	
+
 	public static function adminLinks() {
 		$result = array();
 		if (!($user = BackendUser::check())) {
 			return false;
 		}
-		
+
 		if (!ConfigValue::get('AdminInstalled', false) && in_array('superadmin', $user->roles)) {
 			$result[] = array('text' => 'Install Application', 'href' => '?q=admin/install');
 		}
@@ -407,4 +409,3 @@ class Admin extends AreaCtl {
 		return $result;
 	}
 }
-
