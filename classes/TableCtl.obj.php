@@ -110,7 +110,7 @@ class TableCtl extends AreaCtl {
 		} else if (Render::checkTemplateFile($template_file[1])) {
 			Backend::addContent(Render::file($template_file[1], array('db_object' => $result)));
 		} else {
-			if (Render::createTemplate($template_file, 'std_display.tpl.php', array('db_object' => $result))) {
+			if (Render::createTemplate($template_file[0], 'std_display.tpl.php', array('db_object' => $result))) {
 				Backend::addSuccess('Created template for ' . $result->getMeta('name') . ' display');
 				Controller::redirect();
 			} else {
@@ -239,7 +239,7 @@ class TableCtl extends AreaCtl {
 			Backend::addContent(Render::file($template_file[1], array('db_object' => $result)));
 		} else {
 			//TODO Check and finish this
-			//if (Render::createTemplate($template_file, 'std_list.tpl.php', array('db_object' => $result))) {
+			//if (Render::createTemplate($template_file[0], 'std_list.tpl.php', array('db_object' => $result))) {
 				//Backend::addSuccess('Created template for ' . $result->getMeta('name') . ' list');
 				//Controller::redirect();
 			//} else {
@@ -394,7 +394,7 @@ class TableCtl extends AreaCtl {
 		}
 		$data = $object->fromRequest();
 		Backend::add('values', $data);
-		return $result;
+		return true;
 	}
 
 	/**
@@ -463,7 +463,7 @@ class TableCtl extends AreaCtl {
 				} else if (Render::checkTemplateFile($template_file[1])) {
 					Backend::addContent(Render::file($template_file[1], array('db_object' => $object)));
 				} else {
-					if (Render::createTemplate($template_file, 'std_form.tpl.php', array('db_object' => $object))) {
+					if (Render::createTemplate($template_file[0], 'std_form.tpl.php', array('db_object' => $object))) {
 						Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
 						Controller::redirect();
 					} else {
@@ -673,7 +673,7 @@ class TableCtl extends AreaCtl {
 				} else if (Render::checkTemplateFile($template_file[1])) {
 					Backend::addContent(Render::file($template_file[1], array('db_object' => $object)));
 				} else {
-					Render::createTemplate($template_file, 'std_form.tpl.php', array('db_object' => $object));
+					Render::createTemplate($template_file[0], 'std_form.tpl.php', array('db_object' => $object));
 					Backend::addSuccess('Created template for ' . $object->getMeta('name') . ' form');
 					Controller::redirect();
 				}
