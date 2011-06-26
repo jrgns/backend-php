@@ -33,7 +33,9 @@ body {
 #maincol {
 	background-color: white;
 	border: 2px solid #CFDDA6;
-	width: 626px;
+	width: 670px; /* span-18 - span-1 (for padding 20 * 2), so span-17*/
+	float: left;
+	margin-right: 6px;
 	border-top-left-radius: 6px;
 	border-top-right-radius: 6px;
 	border-bottom-left-radius: 6px;
@@ -116,4 +118,3 @@ pre, code, tt {
 #maincol {
 	overflow: auto;
 }
-

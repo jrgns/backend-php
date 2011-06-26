@@ -13,7 +13,6 @@
 			<?php if (!empty($primary_links)): ?>
 				{tpl:topnav.tpl.php}
 			<?php endif; ?>
-			<hr class="space" style="color: #EFFFBF; background-color: #EFFFBF;">
 			<?php if (!empty($BackendNotices) || !empty($BackendErrors) || !empty($BackendSuccess) || !empty($Teaser)): ?>
 				<div id="teaser" class="span-24 last clear">
 					{tpl:backend_errors.tpl.php}
@@ -22,14 +21,13 @@
 					<?php if (!empty($Teaser)): ?><p class="bottom">#Teaser#</p><?php endif; ?>
 				</div>
 			<?php endif; ?>
-			<div id="maincol" class="span-16 clear">
+			<div id="maincol" class="clear">
 				{tpl:tab_links.tpl.php}
-				<?php if (!empty($Sub_Title)): ?><h2 class="quiet">#Sub Title#</h2><?php endif; ?>
 				<div id="content">
 					{tpl:maincontent.tpl.php}
 				</div>
 			</div>
-			<div id="rightcol" class="span-7 last">
+			<div id="rightcol" class="span-6 last">
 				{tpl:rightcol.tpl.php}
 			</div>
 			<?php if ($debug): ?>

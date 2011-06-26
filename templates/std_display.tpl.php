@@ -19,12 +19,12 @@
 		}
 		$odd = $odd ? false : true;
 ?>
-		<div class="<?php echo $class ?>">
-			<div class="span-3" style="text-align: right;">
-				<label><?php echo humanize($name) ?>:</label>
-			</div>
-			<span><?php echo $text ?></span>
-		</div>
+<div class="<?php echo $class ?>">
+	<div class="span-3" style="text-align: right;">
+		<label><?php echo humanize($name) ?>:</label>
+	</div>
+	<span><?php echo $text ?></span>
+</div>
 <?php }
 } else { ?>
 	No object
