@@ -27,7 +27,7 @@ $action_name = empty($action_name) ? ucwords(Controller::$action) : $action_name
 			$odd = $odd ? false : true;
 			$input_id    = 'value_' . $name;
 			$input_name  = $name;
-			$raw_value = '$obj_values[\'' . $name . '\']';
+			$raw_value = '$values[\'' . $name . '\']';
 			if (array_key_exists('default', $field)) {
 				$value = 'empty(' . $raw_value . ') ? \'' . $field['default'] . '\' : ' . $raw_value;
 			} else {

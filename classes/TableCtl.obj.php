@@ -386,6 +386,17 @@ class TableCtl extends AreaCtl {
 		return $result;
 	}
 
+	public function get_create() {
+		$object = self::getObject(get_class($this));
+		if (!$object instanceof DBObject) {
+			Controller::whoops('Invalid Object Returned');
+			return $object;
+		}
+		$data = $object->fromRequest();
+		Backend::add('values', $data);
+		return $result;
+	}
+
 	/**
 	 * Action for creating a record in an area
 	 */
@@ -397,7 +408,7 @@ class TableCtl extends AreaCtl {
 		}
 		$result = true;
 		//We need to check if the post data is valid in some way?
-		$data = $object->fromPost();
+		$data = $object->fromRequest();
 		if (is_post()) {
 			$data = Hook::run('create', 'pre', array($data, $object), array('toret' => $data));
 			if ($object->create($data)) {
@@ -416,7 +427,7 @@ class TableCtl extends AreaCtl {
 				Backend::addNotice($object->error_msg);
 			}
 		}
-		Backend::add('obj_values', $data);
+		Backend::add('values', $data);
 		return $result;
 	}
 
@@ -507,23 +518,21 @@ class TableCtl extends AreaCtl {
 		}
 		$result = true;
 		//We need to check if the post data is valid in some way?
-		$data = $object->fromPost();
-		if (is_post()) {
-			$data = Hook::run('replace', 'pre', array($data, $object), array('toret' => $data));
-			if ($object->replace($data)) {
-				Hook::run('replace', 'post', array($data, $object));
-				Backend::addSuccess($object->getMeta('name') . ' Added');
-				$result = $object;
+		$data = $object->fromRequest();
+		$data = Hook::run('replace', 'pre', array($data, $object), array('toret' => $data));
+		if ($object->replace($data)) {
+			Hook::run('replace', 'post', array($data, $object));
+			Backend::addSuccess($object->getMeta('name') . ' Added');
+			$result = $object;
+		} else {
+			if (Controller::$debug && !empty($object->error_msg)) {
+				Backend::addError('Could not replace ' . $object->getMeta('name') . ': ' . $object->error_msg);
 			} else {
-				if (Controller::$debug && !empty($object->error_msg)) {
-					Backend::addError('Could not replace ' . $object->getMeta('name') . ': ' . $object->error_msg);
-				} else {
-					Backend::addError('Could not replace ' . $object->getMeta('name'));
-				}
-				$result = false;
+				Backend::addError('Could not replace ' . $object->getMeta('name'));
 			}
+			$result = false;
 		}
-		Backend::add('obj_values', $data);
+		Backend::add('values', $data);
 		return $result;
 	}
 
@@ -617,7 +626,7 @@ class TableCtl extends AreaCtl {
 		$result = true;
 		//We need to check if the post data is valid in some way?
 		if (is_post()) {
-			$data = $object->fromPost();
+			$data = $object->fromRequest();
 			$data = Hook::run('update', 'pre', array($data, $object), array('toret' => $data));
 			if ($object->update($data) !== false) {
 				$result = $object;
@@ -633,7 +642,7 @@ class TableCtl extends AreaCtl {
 		} else {
 			$data = $object->array;
 		}
-		Backend::add('obj_values', $data);
+		Backend::add('values', $data);
 		return $result;
 	}
 

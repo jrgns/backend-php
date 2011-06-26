@@ -778,9 +778,8 @@ class DBObject {
 		return ($toret && count($ret_data)) ? $ret_data : false;
 	}
 
-	function fromPost() {
+	function fromRequest() {
 		$toret = array();
-		$data  = Controller::getVar('obj');
 		foreach($this->meta['fields'] as $name => $options) {
 			$options = is_array($options) ? $options : array('type' => $options);
 
@@ -789,9 +788,9 @@ class DBObject {
 			$filter_options = array_key_exists('filter_options', $options) ? $options['filter_options'] : array();
 			//Files
 			if (in_array($type, array('tiny_blob', 'blob', 'medium_blob', 'long_blob'))) {
-				if (!empty($_FILES['obj'])) {
-					if ($_FILES['obj']['error'][$name]) {
-						switch ($_FILES['obj']['error'][$name]) {
+				if (!empty($_FILES)) {
+					if ($_FILES['error'][$name]) {
+						switch ($_FILES['error'][$name]) {
 						case 1:
 						case 2:
 							$message = 'File too large to be uploaded';
@@ -812,29 +811,23 @@ class DBObject {
 							$message = 'Could not upload file. Invalid extension';
 							break;
 						default:
-							$message = 'Unknown file upload error (' . $_FILES['obj']['error'][$name] . ')';
+							$message = 'Unknown file upload error (' . $_FILES['error'][$name] . ')';
 							break;
 						}
 						Backend::addError($message);
 					} else {
 						$file = array();
-						$file['name']     = $_FILES['obj']['name'][$name];
-						$file['type']     = $_FILES['obj']['type'][$name];
-						$file['tmp_name'] = $_FILES['obj']['tmp_name'][$name];
-						$file['error']    = $_FILES['obj']['error'][$name];
-						$file['size']     = $_FILES['obj']['size'][$name];
+						$file['name']     = $_FILES['name'][$name];
+						$file['type']     = $_FILES['type'][$name];
+						$file['tmp_name'] = $_FILES['tmp_name'][$name];
+						$file['error']    = $_FILES['error'][$name];
+						$file['size']     = $_FILES['size'][$name];
 						$toret[$name] = $file;
 					}
 				} else {
 					$toret[$name] = null;
 				}
 			//Other Types
-			} else if ($data && array_key_exists($name, $data)) {
-				$toret[$name] = filter_var($data[$name], $filter, $filter_options);
-				if ($toret[$name] === false) {
-					$toret[$name] = null;
-					Backend::addError('Invalid input');
-				}
 			} else if ($value = Controller::getVar($name)) {
 				$toret[$name] = filter_var($value, $filter, $filter_options);
 				if ($toret[$name] === false) {
