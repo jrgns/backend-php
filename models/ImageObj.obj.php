@@ -44,8 +44,8 @@ class ImageObj extends FileObject {
 		return parent::__construct($meta, $options);
 	}
 
-	function fromPost() {
-		$data = parent::fromPost();
+	function fromRequest() {
+		$data = parent::fromRequest();
 		if (is_post() && array_key_exists('mime_type', $data)) {
 			if (!empty($data['meta_info']['mime']) && $data['mime_type'] != $data['meta_info']['mime']) {
 				$data['mime_type'] = $data['meta_info']['mime'];

@@ -10,7 +10,7 @@
  * @license http://www.eclipse.org/legal/epl-v10.html Eclipse Public License v1.0
  * @package View
  */
- 
+
 /**
  * Default class to handle FileView specific functions
  */
@@ -18,7 +18,7 @@ class FileView extends View {
 	function __construct() {
 		$this->mode = 'file';
 	}
-	
+
 	public static function hook_output($to_print) {
 		if ($to_print instanceof FileObject && $to_print->array && !headers_sent()) {
 			$mime_type = $to_print->getMimeType();
@@ -41,7 +41,7 @@ class FileView extends View {
 		}
 		return null;
 	}
-	
+
 	public static function hook_post_start() {
 		/*if (Controller::$area == $this->mode && Controller::$action == 'read' && !array_key_exists('mode', $_REQUEST)) {
 			$_REQUEST['mode'] = $this->mode;
@@ -54,4 +54,3 @@ class FileView extends View {
 		return $toret;
 	}
 }
-

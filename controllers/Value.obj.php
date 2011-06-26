@@ -56,7 +56,7 @@ class Value extends TableCtl {
 		$result->values = $query->fetchAll();
 
 		$value = new ValueObj();
-		$result->obj_values = $value->fromPost();
+		$result->obj_values = $value->fromRequest();
 		return $result;
 	}
 	

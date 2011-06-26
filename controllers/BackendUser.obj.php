@@ -251,7 +251,7 @@ class BackendUser extends TableCtl {
 			return false;
 		}
 		$object = self::getObject(get_class($this));
-		$data = $object->fromPost();
+		$data = $object->fromRequest();
 		if ($object->create($data)) {
 			Backend::addSuccess('Super User signed up!');
 			$this->postSignup($object);
@@ -276,7 +276,7 @@ class BackendUser extends TableCtl {
 
 	public function get_signup() {
 		$object = self::getObject(get_class($this));
-		$data = $object->fromPost();
+		$data = $object->fromRequest();
 		Backend::add('obj_values', $data);
 		return true;
 	}
@@ -284,7 +284,7 @@ class BackendUser extends TableCtl {
 	public function post_signup() {
 		$result = false;
 		$object = self::getObject(get_class($this));
-		$data = $object->fromPost();
+		$data = $object->fromRequest();
 		if ($object->create($data)) {
 			Backend::addSuccess('Signed up!');
 			$this->postSignup($object);

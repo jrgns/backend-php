@@ -53,7 +53,7 @@ class Comment extends TableCtl {
 		if (is_post()) {
 			$parameters = get_previous_parameters();
 			$object = new CommentObj();
-			$object = $object->fromPost();
+			$object = $object->fromRequest();
 			$object['foreign_id']    = empty($object['foreign_id'])    ? reset($parameters)              : $object['foreign_id'];
 			$object['foreign_table'] = empty($object['foreign_table']) ? table_name(get_previous_area()) : $object['foreign_table'];
 			//If we don't have a logged in user, create a dummy account

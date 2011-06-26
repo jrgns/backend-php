@@ -13,7 +13,7 @@
  * Contributors:
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  *
- * Generated with class_gen on 2009-07-02 20:40:57 
+ * Generated with class_gen on 2009-07-02 20:40:57
  */
 
 /**
@@ -22,7 +22,7 @@
  */
 class FileObject extends DBObject {
 	public $default_type = 'text/plain';
-	
+
 	function __construct($meta = array(), array $options = array()) {
 		$fields = $meta['fields'];
 		$fields['mime_type'] = array_key_exists('mime_type', $fields) ? $fields['mime_type'] : 'string';
@@ -32,11 +32,11 @@ class FileObject extends DBObject {
 		$meta['fields'] = $fields;
 		return parent::__construct($meta, $options);
 	}
-	
+
 	function getMetaInfo($filename) {
 		return null;
 	}
-	
+
 	function getMimeType() {
 		if (!empty($this->data['mime_type'])) {
 			return $this->data['mime_type'];
@@ -44,8 +44,8 @@ class FileObject extends DBObject {
 		return $this->default_type;
 	}
 
-	function fromPost() {
-		$data = parent::fromPost();
+	function fromRequest() {
+		$data = parent::fromRequest();
 		$fields = $this->meta['fields'];
 		if (array_key_exists('mime_type', $fields) && array_key_exists('from_db', $fields) && array_key_exists('content', $fields)) {
 			switch (true) {
@@ -83,7 +83,7 @@ class FileObject extends DBObject {
 		}
 		return $data;
 	}
-	
+
 	private static function checkUploadFolder($sub_folder = false) {
 		$folder = Backend::getConfig('backend.application.file_store', SITE_FOLDER . '/files/');
 		if ($sub_folder) {
@@ -116,4 +116,3 @@ class FileObject extends DBObject {
 		return $toret ? $data : false;
 	}
 }
-
