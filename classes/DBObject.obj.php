@@ -251,7 +251,7 @@ class DBObject {
 						}
 					}
 					$this->array = (array)$this->object;
-					array_walk_recursive($this->array,create_function('&$input, $key', 'if (is_object($input)) { $input = (array)$input; } else { return $input[$key]; }'));
+					array_walk_recursive($this->array,create_function('&$input, $key', 'if (is_object($input)) { $input = (array)$input; } else { return $input; }'));
 				} else {
 					$this->object = null;
 				}
@@ -789,8 +789,8 @@ class DBObject {
 			//Files
 			if (in_array($type, array('tiny_blob', 'blob', 'medium_blob', 'long_blob'))) {
 				if (!empty($_FILES)) {
-					if ($_FILES['error'][$name]) {
-						switch ($_FILES['error'][$name]) {
+					if ($_FILES[$name]['error']) {
+						switch ($_FILES[$name]['error']) {
 						case 1:
 						case 2:
 							$message = 'File too large to be uploaded';
@@ -811,18 +811,12 @@ class DBObject {
 							$message = 'Could not upload file. Invalid extension';
 							break;
 						default:
-							$message = 'Unknown file upload error (' . $_FILES['error'][$name] . ')';
+							$message = 'Unknown file upload error (' . $_FILES[$name]['error'] . ')';
 							break;
 						}
 						Backend::addError($message);
 					} else {
-						$file = array();
-						$file['name']     = $_FILES['name'][$name];
-						$file['type']     = $_FILES['type'][$name];
-						$file['tmp_name'] = $_FILES['tmp_name'][$name];
-						$file['error']    = $_FILES['error'][$name];
-						$file['size']     = $_FILES['size'][$name];
-						$toret[$name] = $file;
+						$toret[$name] = $_FILES[$name];
 					}
 				} else {
 					$toret[$name] = null;
