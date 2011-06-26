@@ -32,14 +32,14 @@ class Component extends TableCtl {
 		}
 		return $result;
 	}
-	
+
 	public function json_toggle($result) {
 		if ($result instanceof ComponentObj) {
 			Controller::redirect('?q=' . Controller::$area . '/read/' . $result->array['id']);
 		}
 		return $result;
 	}
-	
+
 	public static function fromFolder() {
 		$toret = array();
 		$base_c = self::getCoreComponents(true);
@@ -49,7 +49,7 @@ class Component extends TableCtl {
 		$toret  = array_merge($toret, files_from_folder(BACKEND_FOLDER . '/views/', array('prepend_folder' => true)));
 		$toret  = array_merge($toret, files_from_folder(APP_FOLDER . '/views/', array('prepend_folder' => true)));
 		$toret  = array_merge($toret, files_from_folder(APP_FOLDER . '/classes/', array('prepend_folder' => true)));
-		
+
 		$backend = str_replace(array('\\', '/'), array('\\\\', '\/'), BACKEND_FOLDER);
 		$app     = str_replace(array('\\', '/'), array('\\\\', '\/'), APP_FOLDER);
 		$search = '/(' . $backend . '\/|' . $backend . '\\\\|' . $app . '\/|' . $app . '\\\\)/';
@@ -57,10 +57,10 @@ class Component extends TableCtl {
 
 		$toret  = array_unique(array_merge(array_values($base_c), $toret));
 		$toret  = array_filter($toret, array('Component', 'checkFile'));
-		
+
 		return $toret;
 	}
-	
+
 	private static function checkFile($file) {
 		if (substr($file, -4) != '.php') {
 			return false;
@@ -76,7 +76,7 @@ class Component extends TableCtl {
 		$result = array_merge($result, include(BACKEND_FOLDER . '/stuph/core_db_classes.inc.php'));
 		return $result;
 	}
-	
+
 	public static function getActive($refresh = false) {
 		if (!defined('BACKEND_WITH_DATABASE') || !BACKEND_WITH_DATABASE) {
 			//Return the core components
@@ -95,7 +95,7 @@ class Component extends TableCtl {
 		}
 		return $result;
 	}
-	
+
 	public static function isActive($name) {
 		//No DB, so we use files to determine if it's active or not
 		if (!Backend::getDB('default')) {
@@ -114,14 +114,14 @@ class Component extends TableCtl {
 		}
 		return false;
 	}
-	
+
 	public static function hook_init() {
 		self::getActive();
 	}
-	
+
 	/**
 	 * This installs a default list of components.
-	 * 
+	 *
 	 * It needs to be pre_installed so that the rest of the components can be installed from there
 	 */
 	public static function pre_install() {
@@ -144,11 +144,11 @@ class Component extends TableCtl {
 		}
 		return $result;
 	}
-	
+
 	private static function add($filename) {
 		$name = preg_replace('/\.obj\.php$/', '', basename($filename));
 		$active = in_array($name, array_flatten(self::getCoreComponents(true), null, 'name')) ||
-				  $name == Backend::getConfig('backend.application.class');
+				  $name == ConfigValue::get('settings.Class');
 
 		$data = array(
 			'name'     => $name,
@@ -159,7 +159,7 @@ class Component extends TableCtl {
 		$component = new ComponentObj();
 		return $component->create($data, array('load' => false));
 	}
-		
+
 	public static function install(array $options = array()) {
 		$options['install_model'] = array_key_exists('install_model', $options) ? $options['install_model'] : false;
 		$result = parent::install($options);
@@ -170,7 +170,7 @@ class Component extends TableCtl {
 		Hook::add('init', 'pre', get_called_class()) && $result;
 		return $result;
 	}
-	
+
 	public function action_check() {
 		$toret = 0;
 		$files = self::fromFolder();
@@ -186,14 +186,14 @@ class Component extends TableCtl {
 		}
 		return $toret;
 	}
-	
+
 	public function html_check() {
 		Controller::redirect('?q=component/manage');
 	}
 
 	function action_manage() {
 		$toret = array();
-		
+
 		$component = new ComponentObj();
 		$component->read(array('order' => '`filename`'));
 		$toret = $component->list;
@@ -202,7 +202,7 @@ class Component extends TableCtl {
 		}
 		return $toret;
 	}
-	
+
 	function html_manage($result) {
 		Backend::add('Sub Title', 'Manage Components');
 		Backend::add('result', $result);
@@ -211,7 +211,7 @@ class Component extends TableCtl {
 		Backend::addScript(SITE_LINK . 'scripts/component.manage.js');
 		Backend::addContent(Render::renderFile('component.manage.tpl.php'));
 	}
-	
+
 	public static function adminLinks() {
 		if (!Backend::getDB('default')) {
 			return false;
@@ -222,4 +222,3 @@ class Component extends TableCtl {
 		);
 	}
 }
-

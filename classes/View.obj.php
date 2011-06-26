@@ -10,7 +10,7 @@
  * @license http://www.eclipse.org/legal/epl-v10.html Eclipse Public License v1.0
  * @package Core
  */
- 
+
 /**
  * Default class to handle View specific functions.
  *
@@ -20,14 +20,14 @@ class View {
 	public $mode       = false;
 	public $mime_type  = false;
 	public $charset    = false;
-	
+
 	private static $instance  = false;
-	
+
 	function __construct() {
 		trigger_error('Instansiated Factory Class. Use View::getInstance instead');
 		return false;
 	}
-	
+
 	/**
 	 * The factory method. Decide on which view to use
 	 *
@@ -44,7 +44,7 @@ class View {
 		if (self::$instance instanceof View) {
 			return self::$instance;
 		}
-		
+
 		$view_name = $view_name ? $view_name : self::getViewName();
 		//Last chance to get a View / Modify the view
 		$view_name = Hook::run('view_name', 'pre', array($view_name));
@@ -60,7 +60,7 @@ class View {
 		}
 		return $view;
 	}
-	
+
 	private static function getViewName() {
 		//Check the mode parameter
 		$query_vars = Controller::getQueryVars();
@@ -68,7 +68,7 @@ class View {
 			$view_name = ucwords($query_vars['mode']) . 'View';
 			return $view_name;
 		}
-		
+
 		//No View found, check the accept header
 		$default_precedence = array(
 			'text/html' => (float)1,
@@ -114,7 +114,7 @@ class View {
 		}
 		return $view_name;
 	}
-	
+
 	public function getTemplateLocation($filename) {
 		$folders = $this->getTemplateFolders();
 		foreach($folders as $folder) {
@@ -124,13 +124,13 @@ class View {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Override / extend this function to provide extra folders to check in for templates.
 	 * Usefull to do themes in
 	 */
 	protected static function getTemplateFolders() {
-		$template_loc = Backend::getConfig('settings.TemplateLocation', 'templates');
+		$template_loc = ConfigValue::get('settings.TemplateLocation', 'templates');
 		$folders      = array();
 		//SITE FOLDER
 		if (defined('SITE_FOLDER') && is_readable(SITE_FOLDER . '/' . $template_loc)) {
@@ -171,14 +171,14 @@ class View {
 				$data = $controller->$mode_method($data);
 			}
 			//Application->view
-			$app_class = Backend::getConfig('settings.Class', 'Application');
+			$app_class = ConfigValue::get('settings.Class', 'Application');
 			if (is_callable(array($app_class, $mode_method))) {
 				if (Controller::$debug) {
 					Backend::addNotice('Running ' . $app_class . '::' . $mode_method);
 				}
 				$data = call_user_func(array($app_class, $mode_method), $data);
 			}
-			
+
 			if (Controller::$debug) {
 				Backend::addNotice('Checking ' . get_class($controller) . '::' . $display_method . ' and then ' . get_class($this) . '::' . $view_method);
 			}
@@ -194,7 +194,7 @@ class View {
 				}
 				$data = $this->$view_method($data);
 			}
-		
+
 		}
 		$data = Hook::run('display', 'post', array($data, $controller), array('toret' => $data));
 		if (method_exists($this, 'hook_post_display')) {
@@ -224,14 +224,14 @@ class View {
 		$to_print = Hook::run('output', 'pre', array($to_print), array('toret' => $to_print));
 
 		echo $to_print;
-		
+
 		//Run the View first, so that the other hooks have the output to work on
 		if (method_exists($this, 'hook_post_output')) {
 			$to_print = $this->hook_post_output($to_print);
 		}
 		$to_print = Hook::run('output', 'post', array($to_print), array('toret' => $to_print));
 	}
-	
+
 	public function whoops($title, $message, $code_hint = false) {
 		$version = '1.1';
 		$header  = $message;

@@ -11,7 +11,7 @@
  * Contributors:
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
- 
+
  /**
   * The Render class renders HTML template files.
   *
@@ -20,18 +20,18 @@ class Render {
 	public static $do_cache = true;
 	private static $init = false;
 	private static $cache_folder = false;
-	
+
 	private static function init() {
 		if (!self::$init) {
-			self::$do_cache = Backend::getConfig('settings.UseCache', true);
-			
+			self::$do_cache = ConfigValue::get('settings.UseCache', true);
+
 			if (self::$do_cache) {
 				self::$do_cache = self::checkCacheFolder();
 			}
 			self::$init = true;
 		}
 	}
-	
+
 	private static function checkCacheFolder() {
 		if (defined('SITE_FOLDER')) {
 			self::$cache_folder = SITE_FOLDER . '/cache/';
@@ -63,14 +63,14 @@ class Render {
 
 	public static function createTemplate($destination, $origin, array $variables = array()) {
 		self::init();
-		
+
 		$template_content = self::buildTemplate($origin);
 		$template_content = self::evalContent($origin, $template_content, $variables);
 		if (!$template_content) {
 			Backend::addError('Could not generate template');
 			return false;
 		}
-		$template_loc     = Backend::getConfig('settings.TemplateLocation', 'templates');
+		$template_loc     = ConfigValue::get('settings.TemplateLocation', 'templates');
 		if (defined('SITE_FOLDER')) {
 			$dest_file = SITE_FOLDER . '/' . $template_loc . '/' . $destination;
 		} else {
@@ -93,7 +93,7 @@ class Render {
 		}
 		return false;
 	}
-	
+
 	public static function renderFile($template_name, array $values = array()) {
 		trigger_error('Render::renderFile deprecated, use Render::file instead', E_USER_NOTICE);
 		return self::file($template_name, $values);
@@ -112,7 +112,7 @@ class Render {
 		}
 		return $content;
 	}
-	
+
 	/**
 	 * This function retrieves the absolute location of a template file
 	 *
@@ -141,7 +141,7 @@ class Render {
 		if (empty($template_file)) {
 			return false;
 		}
-		
+
 		$content = false;
 		if (self::$do_cache) {
 			//Check Cache
@@ -176,7 +176,7 @@ class Render {
 		}
 		return $content;
 	}
-	
+
 	/**
 	 * Get the cache name of a template file.
 	 *
@@ -226,7 +226,7 @@ class Render {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * This function translates all #Variables# into their Backend values
 	 */
@@ -286,7 +286,7 @@ class Render {
 	public static function getTemplateVarName($name) {
 		return '#' . $name . '#';
 	}
-	
+
 	public static function install_check() {
 		if (!self::checkCacheFolder()) {
 			if (function_exists('posix_getgrgid') && function_exists('posix_getegid')) {
@@ -304,4 +304,3 @@ class Render {
 		return true;
 	}
 }
-

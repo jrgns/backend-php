@@ -105,7 +105,7 @@ class HtmlView extends View {
 		if (file_exists(WEB_FOLDER . $comp_style)) {
 			Backend::addStyle(SITE_LINK . $comp_style);
 		}
-		$app_class = Backend::getConfig('backend.application.class', 'Application');
+		$app_class = ConfigValue::get('settings.Class', 'Application');
 		if (is_callable(array($app_class, 'getScripts')) && $app_scripts = call_user_func(array($app_class, 'getScripts'))) {
 			Backend::addScript($app_scripts);
 		}
