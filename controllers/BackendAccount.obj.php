@@ -19,39 +19,39 @@ class BackendAccount extends TableCtl {
 		self::ERR_UNMATCHED_USERNAME_PASSWORD => 'Username and password does not match',
 		self::ERR_MISSING_USERNAME_PASSWORD   => 'Please supply a username and password',
 	);
-	
+
 	protected static $name = false;
-	
+
 	protected static $current_user = false;
-	
+
 	public static function getName() {
 		if (empty(self::$name)) {
 			self::$name = Value::get('BackendAccount', 'Account');
 		}
 		return self::$name;
 	}
-	
+
 	public static function getTable() {
 		$obj_name = self::getName() . 'Obj';
 		$obj = new $obj_name();
 		return $obj->getMeta('table');
 	}
-	
+
 	public static function getCurrentUser() {
 		return self::$current_user;
 	}
-	
+
 	public static function getCurrentUserID() {
 		if (self::$current_user) {
 			return self::$current_user->id;
 		}
 		return false;
 	}
-	
+
 	public static function authenticate_user($username, $password) {
-		
+
 	}
-	
+
 	public static function getQuery() {
 		$query = new SelectQuery(BackendAccount::getName());
 		$query
@@ -96,7 +96,7 @@ class BackendAccount extends TableCtl {
 			return 3;
 		}
 	}
-	
+
 	function html_login($result) {
 		switch (true) {
 		case $result instanceof DBObject:
@@ -120,26 +120,26 @@ class BackendAccount extends TableCtl {
 		}
 		Backend::addContent(Render::renderFile('loginout.tpl.php'));
 	}
-	
+
 	function action_logout() {
 		if (is_post()) {
 			self::$current_user = false;
 			if (array_key_exists('BackendUser', $_SESSION)) {
-				
+
 				if (Component::isActive('PersistUser')) {
 					PersistUser::forget($_SESSION['BackendUser']);
 				}
 				$_SESSION = array();
 				if (isset($_COOKIE[session_name()])) {
 					setcookie(session_name(), '', time() - 42000, '/');
-				}			
+				}
 				session_destroy();
 			}
 		}
 		Controller::redirect('?q=');
 		return true;
 	}
-	
+
 	public function action_update_old($id) {
 		$toret = false;
 		if (self::checkUser()) {
@@ -164,11 +164,11 @@ class BackendAccount extends TableCtl {
 		Backend::add('obj_values', $data);
 		return $toret ? $User : false;
 	}
-	
+
 	public function action_list($start, $count, array $options = array()) {
 		return parent::action_list($start, $count, $options);
 	}
-	
+
 	public function html_display($result) {
 		parent::html_display($result);
 		if ($result instanceof DBObject) {
@@ -180,7 +180,7 @@ class BackendAccount extends TableCtl {
 			}
 		}
 	}
-	
+
 	public function html_update($result) {
 		parent::html_update($result);
 		if ($result instanceof DBObject) {
@@ -213,11 +213,11 @@ class BackendAccount extends TableCtl {
 			$toret = true;
 			$data['username'] = 'admin';
 		}
-		
+
 		Backend::add('obj_values', $data);
 		return $toret;
 	}
-	
+
 	public function html_signup($result) {
 		Backend::add('Sub Title', 'Signup to ' . Backend::getConfig('application.Title'));
 		switch (true) {
@@ -264,7 +264,7 @@ class BackendAccount extends TableCtl {
 		}
 		return false;
 	}
-	
+
 	public function html_confirm($result) {
 		if ($result) {
 			Backend::addSuccess('Your user account has been confirmed. Please login.');
@@ -273,7 +273,7 @@ class BackendAccount extends TableCtl {
 		Backend::addError('Could not confirm your account at the moment. Please try again later');
 		Controller::redirect('?q=');
 	}
-	
+
 	public static function hook_post_init() {
 		if (Controller::$mode == Controller::MODE_EXECUTE) {
 			if ($user = self::checkExecuteUser()) {
@@ -294,26 +294,26 @@ class BackendAccount extends TableCtl {
 			}
 		}
 	}
-	
+
 	public static function hook_start() {
 		$user = self::checkUser();
-		if ($user && in_array('superadmin', $user->roles)) {
+		if ($user && in_array('superadmin', $user->roles) && !Backend::getConfig('application.no_super_warning')) {
 			Backend::addNotice('You are the super user. Be carefull, careless clicking costs lives...');
 		}
 		self::$current_user = $user;
 		Backend::add('BackendAccount', $user);
 	}
-	
+
 	public static function hook_post_finish() {
 		$_SESSION['cookie_is_working'] = true;
 	}
-	
+
 	public function postSignup($object, array $options = array()) {
 		if (Backend::getConfig('backend.application.user.confirm') && empty($object->array['confirmed'])) {
 			$this->confirmUser($object);
 		}
 	}
-	
+
 	public static function getHTTPAuth() {
 		$query = new SelectQuery('User');
 		$query->field('password')->filter('`username` = ?');
@@ -321,7 +321,7 @@ class BackendAccount extends TableCtl {
 		//jrgns: 98884858b06963be03b23f679aac9bf3
 		return DigestAuthentication::getInstance(array($query, 'fetchColumn'));
 	}
-	
+
 	public static function processHTTPAuth() {
 		$auth = BackendAccount::getHTTPAuth();
 
@@ -339,7 +339,7 @@ class BackendAccount extends TableCtl {
 		}
 		return false;
 	}
-	
+
 	public static function checkExecuteUser() {
 		$username = Backend::get('ExecuteUser');
 		$query = BackendAccount::getQuery();
@@ -351,7 +351,7 @@ class BackendAccount extends TableCtl {
 			return $User->object;
 		}
 	}
-	
+
 	protected function confirmUser($object) {
 		$url = SITE_LINK . '?q=' . class_for_url(self::getName()) . '/confirm/' . $object->array['salt'];
 		$app_name = Backend::getConfig('application.Title');
@@ -385,7 +385,7 @@ END;
 		$_SESSION['BackendUser']->roles = array('anonymous');
 		return $_SESSION['BackendUser'];
 	}
-	
+
 	public static function checkUser($user = false) {
 		if (!empty(self::$current_user)) {
 			return self::$current_user;
@@ -397,7 +397,7 @@ END;
 		//Return false as the user is obviously anonymous
 		return false;
 	}
-	
+
 	/**
 	 * Return all users within a specific role
 	 */
@@ -422,12 +422,12 @@ END;
 			->filter('`role_id` IN (' . implode(', ', array_pad(array(), count($role_ids), '?')) . ')');
 		return $query->fetchAll($role_ids);
 	}
-	
+
 	public static function getGravatar($email, $size = 120, $default = false) {
 		$default = $default ? $default : Value::get('default_gravatar', 'identicon');
 		return 'http://www.gravatar.com/avatar.php?gravatar_id=' . md5(strtolower($email)) . '&size=' . $size . '&d=' . $default;
 	}
-	
+
 	public function checkPermissions(array $options = array()) {
 		$toret = parent::checkPermissions($options);
 		if (!$toret && in_array(Controller::$action, array('update', 'display'))) {
@@ -445,14 +445,14 @@ END;
 			return self::purgeUnconfirmed();
 		}
 	}
-	
+
 	public function weekly(array $options = array()) {
 		if (get_class($this) == BackendAccount::getName()) {
 			$result = self::userStats();
 		}
 		return true;
 	}
-	
+
 	public static function purgeUnconfirmed() {
 		$query = new DeleteQuery(BackendAccount::getName());
 		$query
@@ -473,7 +473,7 @@ Site Admin
 		}
 		return true;
 	}
-	
+
 	public static function userStats() {
 		$msg = array();
 		$query = new SelectQuery(BackendAccount::getName());
@@ -540,7 +540,7 @@ Site Admin
 		$toret = Hook::add('init', 'post', self::getName(), array('global' => true, 'sequence' => 0)) && $toret;
 		$toret = Hook::add('start', 'pre', self::getName(), array('global' => true)) && $toret;
 		$toret = Hook::add('finish', 'post', self::getName(), array('global' => true)) && $toret;
-		
+
 		$toret = Permission::add('anonymous', 'signup', self::getName()) && $toret;
 		$toret = Permission::add('anonymous', 'confirm', self::getName()) && $toret;
 
@@ -550,4 +550,3 @@ Site Admin
 		return $toret;
 	}
 }
-
