@@ -137,6 +137,7 @@ class Render {
 	 * @return string The expanded template.
 	 */
 	private static function buildTemplate($template) {
+		//Get the template file location
 		$template_file = self::checkTemplateFile($template);
 		if (empty($template_file)) {
 			return false;
@@ -151,11 +152,17 @@ class Render {
 		if (!$content) {
 			$content = file_get_contents($template_file);
 			//Check for other templates within the template
-			while (preg_match_all('/{tpl:(.*\.tpl.php)}/', $content, $templates, PREG_SET_ORDER) && is_array($templates) && count($templates) > 0) {
+			while (preg_match_all('/{tpl:(.*\.tpl.php)(|.*)?}/', $content, $templates, PREG_SET_ORDER) && is_array($templates) && count($templates) > 0) {
 				foreach ($templates as $temp_arr) {
 					$temp_file = $temp_arr[1];
 					$inner_content = self::buildTemplate($temp_file);
 					if ($inner_content) {
+						//Prepend Variables (if any)
+						if (!empty($temp_arr[2])) {
+							$variable_str  = substr($temp_arr[2], 1);
+							$inner_content = '{var:|' . $variable_str . '|}' . $inner_content;
+						}
+						//Add debugging info and template names
 						if (Controller::$debug) {
 							 if (!empty($_REQUEST['debug']) && $_REQUEST['debug'] == 'templates') {
 								$inner_content = '<code class="template_name">{' . basename($temp_file) . '}</code>' . $inner_content;
@@ -164,6 +171,7 @@ class Render {
 							}
 						}
 					}
+					//Place the inner content in the original template file
 					$content = str_replace($temp_arr[0], $inner_content, $content);
 				}
 			}
@@ -254,6 +262,7 @@ class Render {
 
 		$vars = array_merge(Backend::getAll(), $vars);
 		$keys = array_keys($vars);
+		//Convert spaces to underscores in Backend Variables
 		$keys = array_map(create_function('$elm', "return str_replace(' ', '_', \$elm);"), $keys);
 
 		extract(array_combine($keys, array_values($vars)));
@@ -266,11 +275,42 @@ class Render {
 	 * @todo get a better way to report warnings and errors in eval code
 	 */
 	private static function evalContent($be_template_name, $be_content, array $be_vars = array()) {
+		//Prepare Variables
 		$be_vars = array_merge(Backend::getAll(), $be_vars);
 		$be_keys = array_keys($be_vars);
+		//Convert spaces to underscores in Backend Variables
 		$be_keys = array_map(create_function('$elm', "return str_replace(' ', '_', \$elm);"), $be_keys);
-
 		extract(array_combine($be_keys, array_values($be_vars)));
+
+		//Evaluate Extra Variables in Templates
+		if (preg_match_all('/{var:\|(.*)\|}/', $be_content, $variable_strings, PREG_SET_ORDER)) {
+			foreach($variable_strings as $var_string) {
+				//Eval any PHP in the variables
+				ob_start();
+				eval('?>' . $var_string[1]);
+				$variable_string = ob_get_clean();
+				$variables = @json_decode($variable_string, true);
+				if (is_null($variables)) {
+					if (SITE_STATE != 'production') {
+						Backend::addError('Invalid Variables passed in ' . $be_template_name);
+						if (Controller::$debug) {
+							echo 'Invalid Variable String: ' . PHP_EOL . $var_string[1];
+						}
+					}
+				} else {
+					$var_content = array();
+					foreach($variables as $name => $value) {
+						$var_content[] = "\$$name = " . var_export($value, true) . ';';
+					}
+					$var_content = '<?php' . PHP_EOL . implode($var_content, PHP_EOL) . PHP_EOL . '?>' . PHP_EOL;
+					$be_content = $var_content . $be_content;
+				}
+				//Remove the variable string
+				$be_content = str_replace('{var:|' . $var_string[1] . '|}', '', $be_content);
+			}
+		}
+
+		//Evaluate PHP in Templates
 		ob_start();
 		if (Controller::$debug) {
 			$be_result = eval('?>' . $be_content);
@@ -280,7 +320,9 @@ class Render {
 		if ($be_result === false) {
 			Backend::addError('Error evaluating template ' . $be_template_name);
 		}
-		return ob_get_clean();
+		$result = ob_get_clean();
+
+		return $result;
 	}
 
 	public static function getTemplateVarName($name) {
