@@ -19,7 +19,7 @@ function print_stacktrace($return = false) {
 		$to_print = '<ol>';
 		foreach($bt as $item) {
 			if ($return) {
-			
+
 			} else {
 				$to_print .= '<li>';
 				if (isset($item['file'])) $to_print .= $item['file'];
@@ -69,6 +69,16 @@ function update_links($content, $new_vars) {
 			$replacements = array();
 			foreach ($urls as $key => $url) {
 				if ($query = @parse_url($url)) {
+					switch (true) {
+					//Skip all mailto links
+					case !empty($query['scheme']) && $query['scheme'] == 'mailto':
+					//Skip all external links
+					case !empty($query['host']) && $query['host'] != $_SERVER['SERVER_NAME']:
+						continue 2;
+						break;
+					default:
+						break;
+					}
 					$matched[] = $matches[0][$key];
 					if (array_key_exists('scheme', $query)) {
 						$query['scheme'] = $query['scheme'] . '://';
@@ -406,11 +416,11 @@ function curl_request($url, array $parameters = array(), array $options = array(
 		$cache = false;
 	}
 	$ch = curl_init($url);
-	
+
 	if (!empty($options['debug'])) {
 		var_dump('cURL Request:', $url);
 	}
-	
+
 	curl_setopt($ch, CURLOPT_USERAGENT, 'Backend / PHP');
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
     curl_setopt($ch, CURLOPT_TIMEOUT, 30);
@@ -440,7 +450,7 @@ function curl_request($url, array $parameters = array(), array $options = array(
 	if (!empty($options['headers']) && is_array($options['headers'])) {
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $options['headers']);
 	}
-	
+
 	if (!empty($options['username']) && !empty($options['password'])) {
 		curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
 		curl_setopt($ch, CURLOPT_USERPWD, $options['username'] . ':' . $options['password']);
@@ -766,4 +776,3 @@ function write_ini_file($assoc_arr, $path, $has_sections=FALSE) {
     fclose($handle);
     return true;
 }
-

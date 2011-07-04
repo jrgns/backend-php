@@ -255,8 +255,8 @@ class Admin extends AreaCtl {
 	}
 
 	public function get_scaffold() {
-		if (SITE_STATE == 'live') {
-			Backend::addError('Cannot run scaffold on a live site');
+		if (SITE_STATE == 'production') {
+			Backend::addError('Cannot run scaffold on a production site');
 			return false;
 		}
 		$databases = Backend::getDBNames();
@@ -270,8 +270,8 @@ class Admin extends AreaCtl {
 	}
 
 	public function post_scaffold($table, $database = false) {
-		if (SITE_STATE == 'live') {
-			Backend::addError('Cannot run scaffold on a live site');
+		if (SITE_STATE == 'production') {
+			Backend::addError('Cannot run scaffold on a production site');
 			return false;
 		}
 
@@ -385,7 +385,7 @@ class Admin extends AreaCtl {
 		if (!BACKEND_WITH_DATABASE) {
 			$result[] = array('text' => 'Install Database', 'href' => '?q=admin/install_db');
 		}
-		if (SITE_STATE != 'live') {
+		if (SITE_STATE != 'production') {
 			$result[] = array('text' => 'Scaffold', 'href' => '?q=admin/scaffold');
 		}
 		return count($result) ? $result : false;
