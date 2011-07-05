@@ -23,11 +23,15 @@ class Admin extends AreaCtl {
 		self::ERR_DB_CANT_CONNECT      => 'Could not connect to the DB. Please check the information supplied and that the DB exists.',
 	);
 
+	public function action_pre_install() {
+		Backend::addNotice('This application has not been installed yet');
+	}
+
 	/**
 	 * Simple page to notify the user that the app has not been installed yet
 	 */
 	public function html_pre_install($result) {
-		Backend::add('Sub Title', 'This application has not been installed yet.');
+		Backend::add('Sub Title', 'Pre Installation');
 		Backend::addContent(Render::file('admin.pre_install.tpl.php'));
 		return $result;
 	}
