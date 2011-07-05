@@ -20,9 +20,9 @@ class Controller {
 	const MODE_EXECUTE = 'execute';
 
 	public static $debug;
-	
+
 	public static $mode = self::MODE_REQUEST;
-	
+
 	protected static $query_string = false;
 	protected static $query_vars   = array();
 	protected static $method       = null;
@@ -32,18 +32,18 @@ class Controller {
 	public static $action = 'index';
 
 	public static $parameters = array();
-	
+
 	public static $salt = false;
 	public static $view = false;
-		
+
 	protected static $started = false;
 	protected static $init    = false;
-	
+
 	public static $firephp    = false;
-	
+
 	private static $whoopsed  = false;
 	private static $ob_level  = 0;
-	
+
 	public static function serve($query_string = false, $method = null, $payload = null) {
 		if ($query_string) {
 			self::$mode         = self::MODE_EXECUTE;
@@ -68,7 +68,7 @@ class Controller {
 			}
 		}
 		self::$ob_level = ob_get_level();
-	
+
 		parse_str(self::$query_string, self::$query_vars);
 		if (empty(self::$payload) && !is_array(self::$payload)) {
 			self::$payload = array();
@@ -91,22 +91,24 @@ class Controller {
 
 	public static function init() {
 		if (!self::$init) {
-			if ($_SERVER['SERVER_PORT'] == 443 || (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on')) {
-				$secure = true;
-			} else {
-				$secure = false;
-			}
-			if (WEB_SUB_FOLDER == '/') {
-				//WTF?
-				//print_stacktrace(); die;
-			}
-			if (session_id() == '') {
-				session_set_cookie_params(0, WEB_SUB_FOLDER, null, $secure, true);
-				session_name('Controller');
-				@session_start();
-			}
+			if (self::$mode == self::MODE_REQUEST) {
+				if ($_SERVER['SERVER_PORT'] == 443 || (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on')) {
+					$secure = true;
+				} else {
+					$secure = false;
+				}
+				if (WEB_SUB_FOLDER == '/') {
+					//WTF?
+					//print_stacktrace(); die;
+				}
+				if (session_id() == '') {
+					session_set_cookie_params(0, WEB_SUB_FOLDER, null, $secure, true);
+					session_name('Controller');
+					@session_start();
+				}
 
-			date_default_timezone_set(ConfigValue::get('Timezone', 'Africa/Johannesburg'));
+				date_default_timezone_set(ConfigValue::get('Timezone', 'Africa/Johannesburg'));
+			}
 
 			self::check_quotes();
 			self::$salt = ConfigValue::get('Salt', 'Change this to something random!');
@@ -117,10 +119,10 @@ class Controller {
 			self::$debug = false;
 			if (SITE_STATE != 'production' || ($user && in_array('superadmin', $user->roles))) {
 				switch (true) {
-					case array_key_exists('debug', $_REQUEST):
-						//Default to lowest level
-						self::$debug = is_numeric($_REQUEST['debug']) ? (int)$_REQUEST['debug'] : 1;
-						break;
+				case array_key_exists('debug', self::$query_vars):
+					//Default to lowest level
+					self::$debug = is_numeric(self::$query_vars['debug']) ? (int)self::$query_vars['debug'] : 1;
+					break;
 				}
 			}
 			if ($config_debug = ConfigValue::get('Debug', false)) {
@@ -140,7 +142,7 @@ class Controller {
 
 			$query = Hook::run('init', 'pre', array($query));
 			self::parseQuery($query);
-			
+
 			//View
 			self::$view = View::getInstance();
 			if (!(self::$view instanceof View)) {
@@ -162,7 +164,7 @@ class Controller {
 			if (array_key_exists('success', $_SESSION)) {
 				Backend::addSuccess($_SESSION['success']);
 			}
-			
+
 			Hook::run('init', 'post');
 			self::$init = true;
 		}
@@ -172,7 +174,7 @@ class Controller {
 	 * Startup the application by parsing the query, etc
 	 *
 	 * @todo Maybe prepend something to the variables tht get added
-	 */	
+	 */
 	public static function start() {
 		if (!self::$started) {
 			Hook::run('start', 'pre');
@@ -181,7 +183,7 @@ class Controller {
 			self::$started = true;
 		}
 	}
-	
+
 	public static function action() {
 		if (self::$whoopsed) {
 			return array(null, null);
@@ -203,7 +205,7 @@ class Controller {
 			Controller::whoops('Invalid Error Area Controller', 'The DefaultErrorController is invalid or inactive.');
 			return null;
 		}
-		
+
 		Backend::add('Area', self::$area);
 		Backend::add('Action', self::$action);
 		if (Controller::$debug) {
@@ -218,7 +220,7 @@ class Controller {
 		Hook::run('action', 'post');
 		return array($controller, $result);
 	}
-	
+
 	public static function display(AreaCtl $controller, $result) {
 		if (!(self::$view instanceof View)) {
 			Controller::whoops('Invalid View', array('message' => 'The requested mode doesn\'t have a valid associated View.', 'code_hint' => 406));
@@ -229,9 +231,9 @@ class Controller {
 		self::$view->display($result, $controller);
 		Hook::run('action_display', 'post', array($result));
 	}
-	
+
 	/**
-	 * This function get's called via register_shutdown_function when the script finishes or exit is called 
+	 * This function get's called via register_shutdown_function when the script finishes or exit is called
 	 */
 	public static function finish() {
 		if (self::$init) {
@@ -244,7 +246,9 @@ class Controller {
 				if (empty($_SESSION['previous_url']) || !is_array($_SESSION['previous_url'])) {
 					$_SESSION['previous_url'] = array();
 				}
-				$_SESSION['previous_url'][self::$view->mode] = $_SERVER['REQUEST_URI'];
+				if (array_key_exists('REQUEST_URI', $_SERVER)) {
+					$_SESSION['previous_url'][self::$view->mode] = $_SERVER['REQUEST_URI'];
+				}
 
 				if (empty($_SESSION['previous_area']) || !is_array($_SESSION['previous_area'])) {
 					$_SESSION['previous_area'] = array();
@@ -255,13 +259,13 @@ class Controller {
 					$_SESSION['previous_action'] = array();
 				}
 				$_SESSION['previous_action'][self::$view->mode] = self::$action;
-		
+
 				if (empty($_SESSION['previous_parameters']) || !is_array($_SESSION['previous_parameters'])) {
 					$_SESSION['previous_parameters'] = array();
 				}
 				$_SESSION['previous_parameters'][self::$view->mode] = self::$parameters;
 			}
-			
+
 			//Check if we encountered a fatal error
 			if ($last_error = error_get_last()) {
 				if ($last_error['type'] === E_ERROR) {
@@ -285,15 +289,15 @@ class Controller {
 			self::$action = 'index';
 
 			self::$parameters = array();
-	
+
 			self::$salt = false;
 			self::$view = false;
-		
+
 			self::$started = false;
 			self::$init    = false;
-	
+
 			self::$firephp    = false;
-	
+
 			self::$whoopsed  = false;
 
 			Backend::shutdown();
@@ -306,23 +310,23 @@ class Controller {
 		}
 		self::$init = false;
 	}
-	
+
 	public static function getPayload() {
 		return self::$payload;
 	}
-	
+
 	public static function getQueryVars() {
 		return self::$query_vars;
 	}
-	
+
 	public static function getQueryString() {
 		return self::$query_string;
 	}
-	
+
 	public static function getInit() {
 		return self::$init;
 	}
-	
+
 	public static function getVar($name, $filter = FILTER_DEFAULT, $options = null) {
 		if (!array_key_exists($name, self::$payload)) {
 			return null;
@@ -333,10 +337,10 @@ class Controller {
 			return filter_var(self::$payload[$name], (int)$filter, $options);
 		}
 	}
-	
+
 	public static function setVar($name, $value) {
 		self::$payload[$name] = $value;
-	}	
+	}
 
 	private static function check_quotes() {
 		if (get_magic_quotes_gpc()) {
@@ -345,7 +349,7 @@ class Controller {
 			$_REQUEST = array_map('stripslashes_deep', $_REQUEST);
 		}
 	}
-	
+
 	public static function setArea($area) {
 		if (!self::$started) {
 			self::$area = $area;
@@ -361,7 +365,7 @@ class Controller {
 			trigger_error('Application already started, can\'t set action', E_USER_ERROR);
 		}
 	}
-	
+
 	protected static function checkQuery($query) {
 		$extension = explode('.', $query);
 		if (count($extension) > 1) {
@@ -394,7 +398,7 @@ class Controller {
 				break;
 			}
 			if ($mode) {
-				if (!array_key_exists('mode', $_REQUEST)) {
+				if (!array_key_exists('mode', self::$query_vars)) {
 					self::$query_vars['mode'] = $mode;
 				}
 				if (substr($query, 0 - strlen($extension) - 1) == '.' . $extension) {
@@ -404,7 +408,7 @@ class Controller {
 		}
 		return $query;
 	}
-	
+
 	protected static function parseQuery($query) {
 		if (!ConfigValue::get('AdminInstalled', false) && !in_array($query, array('admin/pre_install', 'admin/check_install', 'admin/install'))) {
 			$query = 'admin/pre_install';
@@ -417,7 +421,7 @@ class Controller {
 		}
 		//We want to now what a parameter was, even if it's empty, so don't filter
 		//$terms = array_filter($terms);
-		
+
 		self::$area   = count($terms) ? array_shift($terms) : ConfigValue::get('DefaultController', 'home');
 		if (count($terms)) {
 			self::$action = array_shift($terms);
@@ -426,14 +430,14 @@ class Controller {
 		} else {
 			self::$action = ConfigValue::get('DefaultAction', 'index');
 		}
-		
+
 		self::$parameters = !empty($terms) ? $terms : array();
 		if (Component::isActive(class_name(self::$area)) && method_exists(class_name(self::$area), 'checkParameters')) {
 			self::$parameters = call_user_func(array(class_name(self::$area), 'checkParameters'), self::$parameters);
 		}
 		return self::$parameters;
 	}
-	
+
 	/**
 	 * Dont know if this will be usefull, might just use get_current_url()
 	 */
@@ -459,12 +463,12 @@ class Controller {
 		}
 		return $value;
 	}
-	
+
 	/**
 	 * Redirect to a specified location.
 	 *
 	 * If the location is omitted, go to the current URL. If $location == 'previous', go the previous URL for the current mode.
-	 */	
+	 */
 	public static function redirect($location = false) {
 		if (self::$mode == self::MODE_REQUEST) {
 			switch ($location) {
@@ -483,7 +487,7 @@ class Controller {
 			if (!$location) {
 				$location = $_SERVER['REQUEST_URI'];
 			}
-			
+
 			//The following is only for on site redirects
 			if (substr($location, 0, 7) != 'http://' || substr($location, 0, strlen(SITE_LINK)) == SITE_LINK) {
 				//This should fix most redirects, but it may happen that location == '?debug=true&q=something/or/another' or something similiar
@@ -522,7 +526,7 @@ class Controller {
 					$location = build_url($url);
 				}
 			}
-			
+
 			try {
 				if (self::$debug) {
 					Backend::addSuccess('The script should now redirect to <a href="' . $location . '">here</a>');
@@ -537,7 +541,7 @@ class Controller {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Redirect to the current URL
 	 */
@@ -549,11 +553,11 @@ class Controller {
 		}
 		return true;
 	}
-	
+
 	public static function whoops($title = 'Whoops!', $extra = 'Looks like something went wrong...') {
 		self::$whoopsed = true;
-		
-		
+
+
 		if (is_array($extra)) {
 			$code_hint = array_key_exists('code_hint', $extra) ? $extra['code_hint'] : false;
 			$message   = array_key_exists('message', $extra)   ? $extra['message']   : false;
@@ -574,7 +578,7 @@ class Controller {
 		} else if (self::$view instanceof View) {
 			self::$view->whoops($title, $message, $code_hint);
 		}
-		if (array_key_exists('debug', $_REQUEST)) {
+		if (array_key_exists('debug', self::$query_vars)) {
 			var_dump($title, $message);
 			print_stacktrace();
 		}
