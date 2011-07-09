@@ -264,7 +264,7 @@ if (!function_exists('send_email')) {
 	function send_email($recipient, $subject, $message, array $headers = array()) {
 		$headers = array_change_key_case($headers);
 		if (!array_key_exists('from', $headers)) {
-			$headers['from'] = Value::get('site_email', 'info@' . SITE_DOMAIN);
+			$headers['from'] = ConfigValue::get('site_email', 'info@' . SITE_DOMAIN);
 		}
 		foreach($headers as $name => $value) {
 			$headers[$name] = ucwords($name) . ': ' . $value;
@@ -486,7 +486,7 @@ function curl_request($url, array $parameters = array(), array $options = array(
 		}
 		break;
 	}
-	if ($filename = Value::get('log_curl_requests', false)) {
+	if ($filename = ConfigValue::get('log_curl_requests', false)) {
 		$fp = fopen($filename, 'a');
 		if ($method == 'post') {
 			fwrite($fp, date('Y-m-d H:i:s') . "\t" . $method . "\t" . $url . "\t" . http_build_query($parameters) . PHP_EOL);
@@ -778,4 +778,32 @@ function write_ini_file($assoc_arr, $path, $has_sections=FALSE) {
     }
     fclose($handle);
     return true;
+}
+
+/**
+ * Compare two arrays or objects on their weight elements. Heigher weights float down
+ */
+function compare_weights($elm1, $elm2) {
+	$elm1 = is_object($elm1) ? (array)$elm1 : $elm1;
+	$elm2 = is_object($elm2) ? (array)$elm2 : $elm2;
+	if (!array_key_exists('weight', $elm1) || !array_key_exists('weight', $elm2)) {
+		return null;
+	}
+	$weight_1 = array_key_exists('weight', $elm1) ? $elm1['weight'] : 0;
+	$weight_2 = array_key_exists('weight', $elm2) ? $elm2['weight'] : 0;
+	if (empty($weight_1) && empty($weight_2)) {
+		return 0;
+	}
+	if (empty($weight_1)) {
+		return -1;
+	} else if (empty($weight_2)) {
+		return 1;
+	}
+	if ($weight_1 < $weight_2) {
+		return -1;
+	} else if ($weight_1 > $weight_2) {
+		return 1;
+	} else {
+		return 0;
+	}
 }
