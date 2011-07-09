@@ -5,7 +5,7 @@ class TwitterAPI {
 	private static $auth_token  = false;
 	private static $auth_secret = false;
 	private static $oauth       = false;
-	
+
 	public static function init($token = false, $secret = false) {
 		if (!$token || !$secret) {
 			$_SESSION['TwitterRedirect'] = get_current_url();
@@ -19,7 +19,7 @@ class TwitterAPI {
 			return true;
 		}
 	}
-	
+
 	public static function started() {
 		if (!self::$started) {
 			self::init(false, false);
@@ -27,11 +27,15 @@ class TwitterAPI {
 		return self::$started;
 	}
 
-	public static function search($parameter) {
+	public static function search($parameter, $encoded = false) {
 		self::$error_msg = false;
+		$parameter = $encoded ? $parameter : urlencode($parameter);
 		$returned = curl_request('http://search.twitter.com/search.json?q=' . $parameter);
 		if (!$returned) {
 			self::$error_msg = 'Invalid Twitter API request';
+			if (Controller::$debug) {
+				var_dump('http://search.twitter.com/search.json?q=' . $parameter);
+			}
 			return false;
 		} else if (!($result = json_decode($returned))) {
 			self::$error_msg = 'Invalid JSON returned: ' . $returned;
@@ -44,7 +48,12 @@ class TwitterAPI {
 		}
 		return false;
 	}
-	
+
+	public static function searchNear($terms, $location, $radius, $units = 'km') {
+		$parameter = urlencode($terms) . '&geocode=' . urlencode($location . ',' . $radius . $units);
+		return self::search($parameter, true);
+	}
+
 	public static function mentions() {
 		self::$error_msg = false;
 		if (!self::started()) {
@@ -92,7 +101,7 @@ class TwitterAPI {
 		}
 		return false;
 	}
-	
+
 	public static function lists($username) {
 		self::$error_msg = false;
 		if (!self::started()) {
@@ -115,7 +124,7 @@ class TwitterAPI {
 		}
 		return false;
 	}
-	
+
 	public static function tweets($username) {
 		self::$error_msg = false;
 		if (!self::started()) {
