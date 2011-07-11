@@ -19,7 +19,7 @@ function print_stacktrace($return = false) {
 		$to_print = '<ol>';
 		foreach($bt as $item) {
 			if ($return) {
-			
+
 			} else {
 				$to_print .= '<li>';
 				if (isset($item['file'])) $to_print .= $item['file'];
@@ -406,11 +406,11 @@ function curl_request($url, array $parameters = array(), array $options = array(
 		$cache = false;
 	}
 	$ch = curl_init($url);
-	
+
 	if (!empty($options['debug'])) {
 		var_dump('cURL Request:', $url);
 	}
-	
+
 	curl_setopt($ch, CURLOPT_USERAGENT, 'Backend / PHP');
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
     curl_setopt($ch, CURLOPT_TIMEOUT, 30);
@@ -440,7 +440,7 @@ function curl_request($url, array $parameters = array(), array $options = array(
 	if (!empty($options['headers']) && is_array($options['headers'])) {
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $options['headers']);
 	}
-	
+
 	if (!empty($options['username']) && !empty($options['password'])) {
 		curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
 		curl_setopt($ch, CURLOPT_USERPWD, $options['username'] . ':' . $options['password']);
@@ -718,4 +718,28 @@ function check_memory_limit($range = 512, $log = false, $user_message = false, $
 		return true;
 	}
 	return false;
+}
+
+/**
+ * Check if an object or an array has a recursive dependency
+ *
+ * From http://noteslog.com/post/detecting-recursive-dependencies-in-php-composite-values/ on 2011-07-11
+ */
+function has_recursive_dependency($value) {
+	//if PHP detects recursion in a $value, then a printed $value
+	//will contain at least one match for the pattern /\*RECURSION\*/
+	$printed = print_r($value, true);
+	$recursionMetaUser = preg_match_all('@\*RECURSION\*@', $printed, $matches);
+	if ($recursionMetaUser == 0) {
+		return false;
+	}
+	//if PHP detects recursion in a $value, then a serialized $value
+	//will contain matches for the pattern /\*RECURSION\*/ never because
+	//of metadata of the serialized $value, but only because of user data
+	$serialized = serialize($value);
+	$recursionUser = preg_match_all('@\*RECURSION\*@', $serialized, $matches);
+	//all the matches that are user data instead of metadata of the
+	//printed $value must be ignored
+	$result = $recursionMetaUser > $recursionUser;
+	return $result;
 }
