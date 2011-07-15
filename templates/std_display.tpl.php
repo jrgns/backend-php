@@ -2,30 +2,59 @@
 	$fields = $db_object->getMeta('fields');
 	$odd = false;
 	foreach($fields as $name => $field) {
-		if (in_array($field, array('primarykey'))) {
+		$field = is_array($field) ? $field : array('type' => $field);
+		if (
+			in_array($field['type'], array('primarykey', 'dateadded'))
+		) {
 			continue;
 		}
 		$text  = '<?php echo empty($db_object->array[\'' . $name . '\']) ? \'&nbsp;\' : plain($db_object->array[\'' . $name . '\']) ?>';
-		switch ($field) {
-		case 'title';
+		$label = humanize($name);
+		$class = '';
+		switch (true) {
+		case $field['type'] == 'title' || $name == 'title';
 			$class = 'large bottom';
 			break;
-		case 'boolean':
+		case $field['type'] == 'boolean':
 			$text  = '<?php echo empty($db_object->array[\'' . $name . '\']) ? \'No\' : \'Yes\' ?>';
 			break;
+		case $field['type'] == 'lastmodified':
+			$class = 'quiet';
+			$value = 'date(\'H:i:s, d F Y\', strtotime($db_object->array[\'' . $name . '\']))';
+			$text  = 'Last modified on <?php echo empty($db_object->array[\'' . $name . '\']) ? \'Unknown\' : ' . $value . ' ?>';
+			break;
+		case $name == 'description':
+			$class = 'large';
+			break;
 		default:
-			$class = '';
 			break;
 		}
 		$odd = $odd ? false : true;
-?>
-<div class="<?php echo $class ?>">
+		switch(true) {
+			case $field['type'] == 'lastmodified'; ?><div class="<?php echo $class ?>">
+	<?php echo $text ?>
+
+</div>
+<?php break;
+case $field['type'] == 'title' || $name == 'title'; ?><div class="<?php echo $class ?>">
+	<?php echo $text ?>
+
+</div>
+<?php break;
+case $name == 'description'; ?><div class="<?php echo $class ?>">
+	<?php echo $text ?>
+
+</div>
+<?php break;
+			default: ?><div class="<?php echo $class ?>">
 	<div class="span-3" style="text-align: right;">
-		<label><?php echo humanize($name) ?>:</label>
+		<label><?php echo $label ?>:</label>
 	</div>
 	<span><?php echo $text ?></span>
 </div>
-<?php }
+<?php break;
+		}
+	}
 } else { ?>
 	No object
-<?php } ?>
+<?php }

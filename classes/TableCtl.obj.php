@@ -95,7 +95,9 @@ class TableCtl extends AreaCtl {
 		}
 		Backend::add('TabLinks', $this->getTabLinks('display'));
 		if (!Backend::get('Sub Title')) {
-			if ($result->array && array_key_exists('name', $result->getMeta('fields'))) {
+			if ($result->array && array_key_exists('title', $result->getMeta('fields'))) {
+				Backend::add('Sub Title', $result->getMeta('name') . ': ' . $result->array['title']);
+			} else if ($result->array && array_key_exists('name', $result->getMeta('fields'))) {
 				Backend::add('Sub Title', $result->getMeta('name') . ': ' . $result->array['name']);
 			} else {
 				Backend::add('Sub Title', $result->getMeta('name'));
@@ -400,7 +402,7 @@ class TableCtl extends AreaCtl {
 	/**
 	 * Action for creating a record in an area
 	 */
-	public function action_create() {
+	public function post_create() {
 		$object = self::getObject(get_class($this));
 		if (!$object instanceof DBObject) {
 			Controller::whoops('Invalid Object Returned');
@@ -409,23 +411,21 @@ class TableCtl extends AreaCtl {
 		$result = true;
 		//We need to check if the post data is valid in some way?
 		$data = $object->fromRequest();
-		if (is_post()) {
-			$data = Hook::run('create', 'pre', array($data, $object), array('toret' => $data));
-			if ($object->create($data)) {
-				Hook::run('create', 'post', array($data, $object));
-				Backend::addSuccess($object->getMeta('name') . ' Added');
-				$result = $object;
+		$data = Hook::run('create', 'pre', array($data, $object), array('toret' => $data));
+		if ($object->create($data)) {
+			Hook::run('create', 'post', array($data, $object));
+			Backend::addSuccess($object->getMeta('name') . ' Added');
+			$result = $object;
+		} else {
+			if (Controller::$debug && !empty($object->error_msg)) {
+				Backend::addError('Could not add ' . $object->getMeta('name') . ': ' . $object->error_msg);
 			} else {
-				if (Controller::$debug && !empty($object->error_msg)) {
-					Backend::addError('Could not add ' . $object->getMeta('name') . ': ' . $object->error_msg);
-				} else {
-					Backend::addError('Could not add ' . $object->getMeta('name'));
-				}
-				$result = false;
+				Backend::addError('Could not add ' . $object->getMeta('name'));
 			}
-			if (!empty($object->error_msg)) {
-				Backend::addNotice($object->error_msg);
-			}
+			$result = false;
+		}
+		if (!empty($object->error_msg)) {
+			Backend::addNotice($object->error_msg);
 		}
 		Backend::add('values', $data);
 		return $result;
@@ -873,7 +873,7 @@ class TableCtl extends AreaCtl {
 		if (is_null($parameter)) {
 			return null;
 		}
-		//jrgns 2011-02-17 Why is this here? It's Dodgy...
+		//If no parameters are returned, fetch an empty DBObject
 		if ($parameter === false && $return == 'array') {
 			$return = 'dbobject';
 		}
