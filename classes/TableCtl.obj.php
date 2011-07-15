@@ -75,7 +75,7 @@ class TableCtl extends AreaCtl {
 	/**
 	 * Display does nothing but display (hahaha) the content fetched by action_read
 	 */
-	public function action_display($id) {
+	public function get_display($id) {
 		$id = Hook::run('table_display', 'pre', array($id), array('toret' => $id));
 		$object = $this->action_read($id, 'dbobject');
 		$object = Hook::run('table_display', 'post', array($object), array('toret' => $object));
