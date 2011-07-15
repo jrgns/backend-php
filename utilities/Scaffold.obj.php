@@ -156,7 +156,7 @@ END;
 				if (!in_array($definition['type'], array('primarykey', 'dateadded', 'lastmodified'))) {
 					$definition['required'] = true;
 				}
-				if (is_null($definition['default'])) {
+				if (array_key_exists('default', $definition) && is_null($definition['default'])) {
 					unset($definition['default']);
 				}
 			}

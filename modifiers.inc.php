@@ -50,8 +50,8 @@ function pluralize($string) {
 					array( 'person', 'people'   )
 	);
 
-	$uncountable = array( 
-					'sheep', 
+	$uncountable = array(
+					'sheep',
 					'fish',
 					'series',
 					'species',
@@ -79,7 +79,7 @@ function pluralize($string) {
 		if ( preg_match( $pattern[0], $string ) )
 			return preg_replace( $pattern[0], $pattern[1], $string );
 	}
-	
+
 	return $string;
 }
 
@@ -132,8 +132,8 @@ function singularize($string) {
 					array( 'person', 'people'   )
 	);
 
-	$uncountable = array( 
-					'sheep', 
+	$uncountable = array(
+					'sheep',
 					'fish',
 					'series',
 					'species',
@@ -162,7 +162,7 @@ function singularize($string) {
 			return preg_replace( $pattern[0], $pattern[1], $string );
 		}
 	}
-	
+
 	return $string;
 }
 
@@ -176,7 +176,7 @@ function humanize($string) {
 }
 
 /**
- * Return computer safe strings. 
+ * Return computer safe strings.
 *
 * Can't find the original site. New implementation from http://blog.charlvn.za.net/2007/11/php-camelcase-explode-20.html
 */
@@ -186,6 +186,13 @@ function computerize($string, $separator = '_') {
 		$array = array_map('trim', array_map('strtolower', $array));
 		$string = implode($separator, $array);
 	}
+	return $string;
+}
+
+function url_friendly($string) {
+	$string = computerize($string, '-');
+	$string = preg_replace('/[^A-Za-z-]/', '', $string);
+	$string = preg_replace('/-+/', '-', $string);
 	return $string;
 }
 
@@ -243,7 +250,7 @@ function simple($string) {
 		$string
 	);
 	$string = trim(strip_tags($string, '<p><a><img><b><i><strong><em><ul><ol><li><dl><dt><dd><code><pre><h1><h2><h3><h4><h5><h6><del><strike><table><tr><th><td><tbody><thead>'));
-	
+
 	//TODO $string = strip_attributes($string);
 	return $string;
 }
@@ -330,7 +337,7 @@ if (!function_exists('filter_input')) {
 /**
  * This function will take a string in the format of a single item or
  * multiple items in the format 1,2,3,4,5 or an array of items.
- * The output will be a readable set of items with the last two items 
+ * The output will be a readable set of items with the last two items
  * separated by " and ".
  *
  * Retrieved from http://www.hashbangcode.com/blog/format-list-items-php-449.html on 30/07/2010
@@ -343,12 +350,12 @@ function and_items($numbers) {
         // If numbers is an array then implode it into a comma separated string.
         $numbers = implode(',', $numbers);
     }
- 
+
     if (is_string($numbers)) {
         // Make sure all commas have a single space character after them.
         $numbers = preg_replace("/(\s*?,\s*)/", ", ", $numbers);
         // Remove any spare commas
-        $numbers = preg_replace("/(,\s)+/", ", ", $numbers);        
+        $numbers = preg_replace("/(,\s)+/", ", ", $numbers);
         // The string contains commas, find the last comma in the string.
         $lastCommaPos = strrpos($numbers, ',') - strlen($numbers);
         // Replace the last ocurrance of a comma with " and "
