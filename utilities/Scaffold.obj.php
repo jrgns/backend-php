@@ -163,6 +163,11 @@ END;
 
 			$fields[$row['Field']] = $definition;
 		}
+		if (count($fields) == 0) {
+			Backend::addError('Could not find table');
+			return false;
+		}
+
 		foreach($fields as $name => $definition) {
 			$tmp = array();
 			foreach($definition as $key => $value) {

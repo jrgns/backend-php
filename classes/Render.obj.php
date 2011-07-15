@@ -303,10 +303,9 @@ class Render {
 						$var_content[] = "\$$name = " . var_export($value, true) . ';';
 					}
 					$var_content = '<?php' . PHP_EOL . implode($var_content, PHP_EOL) . PHP_EOL . '?>' . PHP_EOL;
-					$be_content = $var_content . $be_content;
+					$be_content = str_replace('{var:|' . $var_string[1] . '|}', $var_content, $be_content);
+					$did_something = true;
 				}
-				//Remove the variable string
-				$be_content = str_replace('{var:|' . $var_string[1] . '|}', '', $be_content);
 			}
 		}
 
