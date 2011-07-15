@@ -85,8 +85,8 @@ END;
  */
 class {$class_name}Obj extends DBObject {
 	function __construct(\$meta = array(), array \$options = array()) {
-		if (!is_array(\$meta) && is_numeric(\$meta)) {
-			\$meta = array('id' => \$meta);
+		if (!is_array(\$meta)) {
+			\$meta = is_numeric(\$meta) ? array('id' => \$meta) : array();
 		}
 		\$meta['database'] = '$db_name';
 		\$meta['table'] = '$table_name';
