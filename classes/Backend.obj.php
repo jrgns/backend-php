@@ -227,6 +227,9 @@ class Backend {
 				return false;
 			}
 		}
+		if (file_exists(self::$config_file) && is_writable(self::$config_file)) {
+			return true;
+		}
 		if (!is_writable($folder)) {
 			if (SITE_STATE != 'production') {
 				Backend::addError('Backend::Config file folder unwritable (' . $folder . ')');

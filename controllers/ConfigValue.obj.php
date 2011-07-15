@@ -28,7 +28,7 @@ class ConfigValue extends Value {
 		//Check the config file
 		return Backend::getConfig($name, $default);
 	}
-	
+
 	public static function set($name, $value) {
 		if (Component::isActive('Value')) {
 			return Value::set($name, $value);
@@ -53,6 +53,16 @@ class ConfigValue extends Value {
 	public static function install_check() {
 		//Check the cache folder
 		if (!Backend::checkConfigFile()) {
+			if (function_exists('posix_getgrgid') && function_exists('posix_getegid')) {
+				if ($group = posix_getgrgid(posix_getegid())) {
+					$group = $group['name'];
+				}
+			}
+			$values = array(
+				'file' => Backend::getConfigFileLocation(),
+				'group'  => isset($group) ? $group : false,
+			);
+			Backend::addContent(Render::renderFile('config_value.fix_config.tpl.php', $values));
 			return false;
 		}
 
@@ -78,9 +88,8 @@ class ConfigValue extends Value {
 		Backend::addContent(Render::renderFile('config_value.values.tpl.php'));
 		return false;
 	}
-	
+
 	public static function installModel($model, array $options = array()) {
 		return parent::installModel('Value', $options);
 	}
 }
-
