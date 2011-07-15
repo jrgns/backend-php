@@ -41,10 +41,12 @@ class Controller {
 
 	public static $firephp    = false;
 
-	private static $whoopsed  = false;
-	private static $ob_level  = 0;
+	private static $whoopsed    = false;
+	private static $ob_level    = 0;
+	//Only check permissions if this is tue
+	private static $check_perms = true;
 
-	public static function serve($query_string = false, $method = null, $payload = null) {
+	public static function serve($query_string = false, $method = null, $payload = null, $check_perms = true) {
 		if ($query_string) {
 			self::$mode         = self::MODE_EXECUTE;
 			self::$query_string = $query_string;
@@ -67,7 +69,8 @@ class Controller {
 				break;
 			}
 		}
-		self::$ob_level = ob_get_level();
+		self::$check_perms = $check_perms;
+		self::$ob_level    = ob_get_level();
 
 		parse_str(self::$query_string, self::$query_vars);
 		if (empty(self::$payload) && !is_array(self::$payload)) {
@@ -309,6 +312,14 @@ class Controller {
 			}
 		}
 		self::$init = false;
+	}
+
+	public static function getMethod() {
+		return self::$method;
+	}
+
+	public static function getCheckPermissions() {
+		return self::$check_perms;
 	}
 
 	public static function getPayload() {

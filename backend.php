@@ -10,6 +10,7 @@ if ($_SERVER['argc'] <= 2) {
 }
 
 //Check and define BACKEND_ and APP_FOLDER
+define('SITE_STATE', 'local');
 if (empty($_SERVER['BACKEND_FOLDER'])) {
 	define('BACKEND_FOLDER', getcwd());
 	define('APP_FOLDER', BACKEND_FOLDER . '/webapp');
@@ -69,6 +70,6 @@ if (DEBUG) {
 $start = microtime(true);
 include(BACKEND_FOLDER . '/classes/Backend.obj.php');
 \Backend::add('start', $start);
-\Controller::serve($path, $method, $data);
+\Controller::serve($path, $method, $data, false);
 
 echo PHP_EOL;

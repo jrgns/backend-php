@@ -31,7 +31,7 @@ class AreaCtl {
 			Backend::addNotice('Checking Method ' . Controller::$action . ' for ' . get_class($this));
 		}
 
-		$request_method = strtolower(array_key_exists('REQUEST_METHOD', $_SERVER) ? $_SERVER['REQUEST_METHOD'] : 'GET') . '_' . Controller::$action;
+		$request_method = strtolower(Controller::getMethod()) . '_' . Controller::$action;
 		$action_method  = 'action_' . Controller::$action;
 		$view_method    = Controller::$view->mode . '_' . Controller::$action;
 
@@ -51,7 +51,8 @@ class AreaCtl {
 		}
 
 		//Check permissions on existing method
-		if (!$this->checkPermissions()) {
+
+		if (Controller::getCheckPermissions() && !$this->checkPermissions()) {
 			//TODO Add a permission denied hook to give the controller a chance to handle the permission denied
 			Controller::whoops('Permission Denied', array('message' => 'You do not have permission to ' . Controller::$action . ' ' . get_class($this)));
 			return null;
