@@ -23,12 +23,12 @@ class WMD extends AreaCtl {
 		}
 		return $data;
 	}
-	
+
 	public static function enable() {
-		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
-		Backend::addScript(SITE_LINK . 'scripts/wmd.component.js');
-		Backend::addScript(SITE_LINK . 'scripts/wmd/wmd.js');
-		Backend::addStyle(SITE_LINK . 'styles/wmd.css');
+		Backend::addScript(SITE_LINK . 'js/jquery.js');
+		Backend::addScript(SITE_LINK . 'js/wmd.component.js');
+		Backend::addScript(SITE_LINK . 'js/wmd/wmd.js');
+		Backend::addStyle(SITE_LINK . 'css/wmd.css');
 	}
 
 	public static function install(array $options = array()) {
@@ -37,4 +37,3 @@ class WMD extends AreaCtl {
 		return $toret;
 	}
 }
-

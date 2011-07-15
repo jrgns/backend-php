@@ -1,8 +1,8 @@
 User-agent: *
 Crawl-delay: 10
 #folders
-Disallow: /scripts/
-Disallow: /styles/
+Disallow: /js/
+Disallow: /css/
 Disallow: /webapp/ #On the off chance that its in the web folder
 Disallow: /cache/
 Disallow: /images/

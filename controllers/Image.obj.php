@@ -32,16 +32,16 @@ class Image extends File {
 			Controller::whoops();
 		}
 	}
-	
+
 	public function html_list($result) {
 		Backend::add('Sub Title', $result->getMeta('name'));
 		Backend::add('TabLinks', $this->getTabLinks(Controller::$action));
-		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
-		Backend::addScript(SITE_LINK . 'scripts/image_list.js');
-		Backend::addStyle(SITE_LINK . 'styles/image_list.css');
+		Backend::addScript(SITE_LINK . 'js/jquery.js');
+		Backend::addScript(SITE_LINK . 'js/image_list.js');
+		Backend::addStyle(SITE_LINK . 'css/image_list.css');
 		Backend::addContent(Render::renderFile('image.list.tpl.php', array('db_object' => $result)));
 	}
-	
+
 	private function feed_list($result, $mode) {
 		if ($result instanceof DBObject) {
 			Backend::add('title', ConfigValue::get('Title'));
@@ -61,7 +61,7 @@ class Image extends File {
 		}
 		return $result;
 	}
-	
+
 	function rss_list($result) {
 		return $this->feed_list($result, 'rss');
 	}

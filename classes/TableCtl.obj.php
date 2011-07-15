@@ -229,8 +229,8 @@ class TableCtl extends AreaCtl {
 			Backend::add('Sub Title', $result->getMeta('name'));
 		}
 
-		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
-		Backend::addScript(SITE_LINK . 'scripts/table_list.js');
+		Backend::addScript(SITE_LINK . 'js/jquery.js');
+		Backend::addScript(SITE_LINK . 'js/table_list.js');
 		$template_file = array(
 			$result->getArea() . '.list.tpl.php',
 			$result->getArea() . '/list.tpl.php',
@@ -340,8 +340,8 @@ class TableCtl extends AreaCtl {
 		}
 		Backend::add('term', Controller::$parameters[0]);
 
-		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
-		Backend::addScript(SITE_LINK . 'scripts/table_list.js');
+		Backend::addScript(SITE_LINK . 'js/jquery.js');
+		Backend::addScript(SITE_LINK . 'js/table_list.js');
 
 		$template_file = array(
 			$result->getArea() . '.search_results.tpl.php',

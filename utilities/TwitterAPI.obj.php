@@ -49,6 +49,15 @@ class TwitterAPI {
 		return false;
 	}
 
+	public static function searchTag($tag, $terms = false) {
+		$search = 'tag=' . $tag;
+		if ($terms) {
+			$search .= '&q=' . $terms;
+		}
+		$returned = curl_request('http://search.twitter.com/search.json?' . $search);
+		die('YODO' . __FILE__ . ' , ' . __LINE__);
+	}
+
 	public static function searchNear($terms, $location, $radius, $units = 'km') {
 		$parameter = urlencode($terms) . '&geocode=' . urlencode($location . ',' . $radius . $units);
 		return self::search($parameter, true);
