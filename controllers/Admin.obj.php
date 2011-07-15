@@ -161,7 +161,9 @@ class Admin extends AreaCtl {
 				'database' => Controller::getVar('database'),
 			);
 			Backend::addContent(Render::file('admin.install_db.tpl.php', $vars));
-			Backend::addError(self::getError($result));
+			if (is_numeric($result)) {
+				Backend::addError(self::getError($result));
+			}
 		}
 	}
 
@@ -274,6 +276,7 @@ class Admin extends AreaCtl {
 	}
 
 	public function post_scaffold($table, $database = false) {
+		//TODO Also create the templates
 		if (SITE_STATE == 'production') {
 			Backend::addError('Cannot run scaffold on a production site');
 			return false;

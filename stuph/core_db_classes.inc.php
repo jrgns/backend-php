@@ -47,6 +47,21 @@ $result = array(
 		'name'     => 'BackendUser',
 		'filename' => '/controllers/BackendUser.obj.php',
 	),
+	'Home' => array(
+		'id'       => 21,
+		'name'     => 'Home',
+		'filename' => '/controllers/Home.obj.php',
+	),
+	//Views
+	'HtmlView' => array(
+		'id'       => 22,
+		'name'     => 'HtmlView',
+		'filename' => '/views/HtmlView.obj.php',
+	),
+	'JsonView' => array(
+		'id'       => 23,
+		'name'     => 'JsonView',
+		'filename' => '/views/JsonView.obj.php',
+	),
 );
 return $result;
-

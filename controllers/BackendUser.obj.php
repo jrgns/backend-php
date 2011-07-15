@@ -239,9 +239,9 @@ class BackendUser extends TableCtl {
 		//Check if a super user already exists
 		if (self::hasSuperUser()) {
 			Backend::addError('Super User already created');
-			return false;
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 	public function post_super_signup() {
@@ -257,7 +257,7 @@ class BackendUser extends TableCtl {
 			$this->postSignup($object);
 			return $object;
 		} else {
-			Backend::addError('Could not sign up the Super User.');
+			Backend::addError('Could not sign up the Super User: ' . $object->error_msg);
 		}
 		return false;
 	}
@@ -267,7 +267,7 @@ class BackendUser extends TableCtl {
 			//Give option after successful signup to edit details
 			Backend::addNotice('You can edit the details of the super user <a href="?q=backend_user/edit/1">here</a>');
 			Controller::redirect('?q=home');
-		} else if ($result) {
+		} else if (!$result) {
 			Backend::addContent(Render::renderFile('backend_user.super_signup.tpl.php'));
 		} else {
 			Controller::redirect('?q=home');
@@ -476,6 +476,9 @@ END;
 	}
 
 	public static function hasSuperUser() {
+		if (!Backend::getDB('default')) {
+			return false;
+		}
 		$query = new SelectQuery('BackendUser');
 		$query
 			->filter('`id` = 1');

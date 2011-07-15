@@ -30,13 +30,13 @@ class Query {
 
 	protected $last_stmt   = false;
 	protected $last_params = array();
-	
+
 	public $error_msg  = false;
 	public $error_code = 0;
-	
+
 	/**
 	 * @param The type of query this is. Must be one of SELECT, INSERT, DELETE, UPDATE or SHOW.
-	 * @param 
+	 * @param
 	 */
 	function __construct($action, $table, array $options = array()) {
 		$action = strtoupper($action);
@@ -62,7 +62,7 @@ class Query {
 		}
 		return ($this->connection instanceof PDO);
 	}
-	
+
 	public function execute(array $parameters = array(), array $options = array()) {
 		$toret = false;
 		$this->error_msg  = false;
@@ -89,7 +89,7 @@ class Query {
 						$toret             = $stmt;
 					} else {
 						$error_info = $stmt->errorInfo();
-						
+
 						$verbose_error = array('Query::execute Error:');
 						if (!empty($error_info[2])) {
 							$verbose_error[] = $error_info[2];
@@ -127,7 +127,7 @@ class Query {
 		}
 		return $toret;
 	}
-	
+
 	function distinct() {
 		$this->query = false;
 		$this->distinct = true;
@@ -143,17 +143,17 @@ class Query {
 		}
 		return $this;
 	}
-	
+
 	public function setFields(array $fields = array()) {
 		$this->query = false;
 		$this->fields = $fields;
 		return $this;
 	}
-	
+
 	public function getFields() {
 		return $this->fields;
 	}
-	
+
 	public function filter($condition) {
 		$this->query = false;
 		if (is_array($condition)) {
@@ -164,17 +164,17 @@ class Query {
 		$this->conditions = array_filter(array_unique($this->conditions));
 		return $this;
 	}
-	
+
 	public function setFilter(array $filters = array()) {
 		$this->query = false;
 		$this->conditions = array_filter(array_unique($filters));
 		return $this;
 	}
-	
+
 	public function getFilters() {
 		return $this->conditions;
 	}
-	
+
 	public function parameter($name, $value) {
 		if (!empty($name)) {
 			$this->parameters[$name] = $value;
@@ -188,18 +188,18 @@ class Query {
 		$this->parameters = $parameters;
 		return $this;
 	}
-	
+
 	public function getParameter($name) {
 		if (array_key_exists($name, $this->parameters)) {
 			return $this->parameters[$name];
 		}
 		return null;
 	}
-	
+
 	public function getParameters() {
 		return $this->parameters;
 	}
-	
+
 	public function group($group_field) {
 		$this->query = false;
 		if (is_array($group_field)) {
@@ -209,17 +209,17 @@ class Query {
 		}
 		return $this;
 	}
-	
+
 	public function setGroup(array $group = array()) {
 		$this->query = false;
 		$this->group = $group;
 		return $this;
 	}
-	
+
 	public function getGroup() {
 		return $this->group;
 	}
-	
+
 	public function order($order_field) {
 		$this->query = false;
 		if (is_array($order_field)) {
@@ -229,17 +229,17 @@ class Query {
 		}
 		return $this;
 	}
-	
+
 	public function setOrder(array $order = array()) {
 		$this->query = false;
 		$this->order = $order;
 		return $this;
 	}
-	
+
 	public function getOrder() {
 		return $this->order;
 	}
-	
+
 	public function having($condition) {
 		$this->query = false;
 		if (is_array($condition)) {
@@ -250,13 +250,13 @@ class Query {
 		$this->having = array_filter(array_unique($this->having));
 		return $this;
 	}
-	
+
 	public function setHaving(array $having = array()) {
 		$this->query  = false;
 		$this->having = array_filter(array_unique($having));
 		return $this;
 	}
-	
+
 	public function limit($one, $two = false) {
 		$this->query = false;
 		if ($two !== false) {
@@ -277,7 +277,7 @@ class Query {
 		}
 		return $this;
 	}
-	
+
 	public function fetchAssoc(array $parameters = array(), array $options = array()) {
 		$toret = $this->execute($parameters);
 		if ($toret) {
@@ -285,7 +285,7 @@ class Query {
 		}
 		return $toret;
 	}
-	
+
 	/**
 	 * Return all the matching records
 	 *
@@ -317,7 +317,7 @@ class Query {
 		}
 		return $results;
 	}
-	
+
 	public function fetchColumn(array $parameters = array(), $column = null, array $options = array()) {
 		$column = is_null($column) ? 0 : $column;
 		$toret = $this->execute($parameters);
@@ -326,7 +326,7 @@ class Query {
 		}
 		return $toret;
 	}
-	
+
 	public function fetchCSV(array $parameters = array(), array $options = array()) {
 		$result = false;
 		if ($stmt = $this->execute($parameters)) {
@@ -370,9 +370,9 @@ class Query {
 		}
 		return $this;
 	}
-	
+
 	protected function buildQuery() {
-		$query = $this->buildTable();		
+		$query = $this->buildTable();
 		if (!empty($this->conditions)) {
 			$query .= PHP_EOL . 'WHERE (' . implode(') AND (', $this->conditions) . ')';
 		}
@@ -394,12 +394,12 @@ class Query {
 		}
 		return $query;
 	}
-	
+
 	protected function buildTable() {
 		$query = '';
 		return $query;
 	}
-	
+
 	public static function enclose($element) {
 		if (strpos($element, '.')) {
 			$toret = array();
@@ -408,7 +408,7 @@ class Query {
 			}
 			return implode('.', $toret);
 		} else if (
-			substr($element, 0, 1) != '`' && 
+			substr($element, 0, 1) != '`' &&
 			substr($element, 0, -1) != '`' &&
 			$element != '*'
 		) {
@@ -416,7 +416,7 @@ class Query {
 		}
 		return $element;
 	}
-	
+
 	public static function getTable($table) {
 		if ($table instanceof DBObject) {
 			$table = $table->getSource();
@@ -446,7 +446,7 @@ class Query {
 		}
 		return self::enclose($table);
 	}
-	
+
 	public static function getConnection($table) {
 		if ($table instanceof DBObject) {
 			return $table->getConnection();
@@ -466,7 +466,7 @@ class Query {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Get the error info of the last executed statement
 	 *
