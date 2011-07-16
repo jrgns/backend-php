@@ -145,6 +145,15 @@ class Backend {
 
 		//Init DBs
 		$with_database = self::initDBs();
+		//Check if we can connect to the default DB
+		if ($with_database) {
+			try {
+				$def = self::getDB();
+			} catch (Exception $e) {
+				$with_database = false;
+			}
+		}
+
 		define('BACKEND_WITH_DATABASE', $with_database);
 	}
 
@@ -207,8 +216,9 @@ class Backend {
 	}
 
 	static function getConfig($name, $default = null) {
-		$toret = self::$config->getValue($name);
-		return is_null($toret) ? $default : $toret;
+		//Check for a site specific setting first
+		$result = self::$config->getValue($name);
+		return is_null($result) ? $default : $result;
 	}
 
 	static function setConfig($name, $value) {
