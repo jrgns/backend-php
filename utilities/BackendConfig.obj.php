@@ -43,7 +43,7 @@ class BackendConfig {
 			);
 		}
 	}
-	
+
 	public function getValue($names, $default = null) {
 		$toret = true;
 		if (is_string($names)) {
@@ -54,19 +54,34 @@ class BackendConfig {
 		}
 		if (count($names) == 1) {
 			$section = reset($names);
-			if (array_key_exists($section, $this->config)) {
+			//Check site specific first
+			if (array_key_exists(SITE_STATE . ':' . $section, $this->config)) {
+				return $this->config[SITE_STATE . ':' . $section];
+			} else if (array_key_exists($section, $this->config)) {
 				return $this->config[$section];
 			}
 		} else {
 			list($section, $name) = $names;
-			if (array_key_exists($section, $this->config)
+			//Check site specific section and name
+			if (array_key_exists(SITE_STATE . ':' . $section, $this->config)
+				&& array_key_exists(SITE_STATE . ':' . $name, $this->config[SITE_STATE . ':' . $section])) {
+					return $this->config[SITE_STATE . ':' . $section][SITE_STATE . ':' . $name];
+			//Check site specific section
+			} else if (array_key_exists(SITE_STATE . ':' . $section, $this->config)
+				&& array_key_exists($name, $this->config[SITE_STATE . ':' . $section])) {
+					return $this->config[SITE_STATE . ':' . $section][$name];
+			//Check site specific name
+			} else if (array_key_exists($section, $this->config)
+				&& array_key_exists(SITE_STATE . ':' . $name, $this->config[$section])) {
+					return $this->config[$section][SITE_STATE . ':' . $name];
+			} else if (array_key_exists($section, $this->config)
 				&& array_key_exists($name, $this->config[$section])) {
 					return $this->config[$section][$name];
 			}
 		}
 		return $default;
 	}
-	
+
 	public function setValue($names, $value, $write_file = true) {
 		if (is_string($names)) {
 			$names = explode('.', $names);
@@ -87,7 +102,7 @@ class BackendConfig {
 		}
 		return true;
 	}
-	
+
 	public function writeFile() {
 		$location = Backend::getConfigFileLocation();
 		if ($result = write_ini_file($this->config, $location, true)) {
@@ -98,7 +113,7 @@ class BackendConfig {
 		}
 		return $result;
 	}
-	
+
 	public static function asArray() {
 		return self::$config;
 	}
