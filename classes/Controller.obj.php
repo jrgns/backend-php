@@ -140,8 +140,16 @@ class Controller {
 				ini_set('display_errors', 0);
 			}
 
-			$query = Request::getQuery(array_key_exists('q', self::$query_vars) ? self::$query_vars['q'] : '');
-			$query = self::checkQuery($query);
+			//q in the payload overrides the q in the query string
+			$query = array_key_exists('q', self::$payload) ?
+						self::$payload['q'] :
+						(
+							array_key_exists('q', self::$query_vars) ?
+							self::$query_vars['q'] :
+							''
+						)
+			;
+			$query = self::checkQuery(Request::getQuery($query));
 
 			$query = Hook::run('init', 'pre', array($query));
 			self::parseQuery($query);
