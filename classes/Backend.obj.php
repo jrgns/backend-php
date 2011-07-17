@@ -123,6 +123,7 @@ class Backend {
 		$scheme = !empty($_SERVER['HTTPS']) ? 'https://' : 'http://';
 		$url = SITE_DOMAIN . WEB_SUB_FOLDER;
 		define('SITE_LINK', $scheme . $url);
+		Backend::add('SITE_LINK', SITE_LINK);
 
 		//Application Values
 		$values = self::$config->getValue('application');
