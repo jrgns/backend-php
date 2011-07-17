@@ -890,9 +890,9 @@ class DBObject {
 			case 'object':
 			case 'array':
 			case 'full_object':
-				if ($id) {
-					$query->filter("`$table`.`$id_field` = :{$table}_id");
-					$q_params[":{$table}_id"] = $id;
+				if (!empty($this->meta['id'])) {
+					$query->filter("`{$this->meta['table']}`.`{$this->meta['id_field']}` = :{$this->meta['table']}_id");
+					$q_params[":{$this->meta['table']}_id"] = $this->meta['id'];
 				} else {
 					$query->limit(empty($limit) ? 1 : $limit);
 				}
