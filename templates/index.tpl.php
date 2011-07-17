@@ -2,7 +2,7 @@
    "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 	<head>
-		<title>#Title#<?php if (!empty($Sub_Title)): ?> - #Sub Title#<?php endif; ?></title>
+		<title><?php echo strip_tags($Title); if (!empty($Sub_Title)): ?> - <?php echo strip_tags($Sub_Title); endif; ?></title>
 		{tpl:head.tpl.php}
 		{tpl:styles.tpl.php}
 		<link rel="shortcut icon" type="image/x-icon" href="#SITE_LINK#favicon.ico">
@@ -13,16 +13,14 @@
 			<?php if (!empty($primary_links)): ?>
 				{tpl:topnav.tpl.php}
 			<?php endif; ?>
-			<?php if (!empty($BackendNotices) || !empty($BackendErrors) || !empty($BackendSuccess) || !empty($Teaser)): ?>
-				<div id="teaser" class="span-24 last clear">
+			<div id="maincol" class="clear">
+				<?php if (!empty($Sub_Title)): ?><h2 class="quiet">#Sub Title#</h2><?php endif; ?>
+				{tpl:tab_links.tpl.php}
+				<?php if (!empty($BackendNotices) || !empty($BackendErrors) || !empty($BackendSuccess) || !empty($Teaser)): ?>
 					{tpl:backend_errors.tpl.php}
 					{tpl:backend_success.tpl.php}
 					{tpl:backend_notices.tpl.php}
-					<?php if (!empty($Teaser)): ?><p class="bottom">#Teaser#</p><?php endif; ?>
-				</div>
-			<?php endif; ?>
-			<div id="maincol" class="clear">
-				{tpl:tab_links.tpl.php}
+				<?php endif; ?>
 				<div id="content">
 					{tpl:maincontent.tpl.php}
 				</div>
