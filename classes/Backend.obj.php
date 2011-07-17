@@ -120,20 +120,9 @@ class Backend {
 		define('SITE_DOMAIN', $domain);
 		Backend::add('SITE_DOMAIN', SITE_DOMAIN);
 
+		$scheme = !empty($_SERVER['HTTPS']) ? 'https://' : 'http://';
 		$url = SITE_DOMAIN . WEB_SUB_FOLDER;
-		if (ConfigValue::get('settings.ProtocolLessSiteLinks', true)) {
-			define('SITE_LINK', '//' . $url);
-			define('S_SITE_LINK', '//' . $url);
-		} else {
-			define('SITE_LINK', 'http://' . $url);
-			if (ConfigValue::get('settings.UseSSL', false)) {
-				define('S_SITE_LINK', 'https://' . $url);
-			} else {
-				define('SITE_LINK', 'http://' . $url);
-			}
-		}
-		Backend::add('SITE_LINK', SITE_LINK);
-		Backend::add('S_SITE_LINK', S_SITE_LINK);
+		define('SITE_LINK', $scheme . $url);
 
 		//Application Values
 		$values = self::$config->getValue('application');
