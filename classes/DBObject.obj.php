@@ -908,9 +908,13 @@ class DBObject {
 		if (array_key_exists('owner_id', $this->meta['fields'])) {
 			$user = BackendUser::check();
 			//Check ownership for all but superadmin and admin users
-			if ($user && !count(array_intersect(array('superadmin', 'admin'), $user->roles))) {
-				$query->filter('`owner_id` = :owner_id');
-				$q_params[':owner_id'] = $user->id;
+			if ($user) {
+				if (!count(array_intersect(array('superadmin', 'admin'), $user->roles))) {
+					$query->filter('`owner_id` = :owner_id');
+					$q_params[':owner_id'] = $user->id;
+				}
+			} else {
+				$query->filter('IFNULL(`owner_id`, 0) = 0');
 			}
 		}
 
