@@ -230,14 +230,11 @@ class HtmlView extends View {
 					} else {
 						$query = parse_url($url);
 					}
-					if (!array_key_exists('path', $query)) {
-						$query['path'] = dirname($_SERVER['SCRIPT_NAME']);
+					if (empty($query['path'])) {
+						$query['path'] = SITE_LINK;
 					}
 					if (substr($query['path'], -1) != '/') {
 						$query['path'] .= '/';
-					}
-					if (array_key_exists('scheme', $query)) {
-						$query['scheme'] = $query['scheme'] . '://';
 					}
 
 					//Get the old vars
