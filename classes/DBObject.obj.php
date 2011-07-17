@@ -297,7 +297,7 @@ class DBObject {
 		return $result;
 	}
 
-	function process($data, $direction) {
+	public function process($data, $direction) {
 		foreach($data as $name => $value) {
 			if (array_key_exists($name, $this->meta['fields'])) {
 				$options = $this->meta['fields'][$name];
@@ -487,7 +487,7 @@ class DBObject {
 		return false;
 	}
 
-	function delete(array $options = array()) {
+	public function delete(array $options = array()) {
 		$this->error_msg = false;
 		if (!$this->checkConnection()) {
 			if (class_exists('BackendError', false)) {
@@ -507,7 +507,7 @@ class DBObject {
 		return false;
 	}
 
-	function truncate(array $options = array()) {
+	public function truncate(array $options = array()) {
 		$toret = false;
 		$this->error_msg = false;
 		if (!$this->checkConnection()) {
@@ -778,7 +778,7 @@ class DBObject {
 		return ($toret && count($ret_data)) ? $ret_data : false;
 	}
 
-	function fromRequest() {
+	public function fromRequest() {
 		$toret = array();
 		foreach($this->meta['fields'] as $name => $options) {
 			$options = is_array($options) ? $options : array('type' => $options);
@@ -858,15 +858,13 @@ class DBObject {
 			return false;
 		}
 
-		extract($this->meta);
-
 		$mode = array_key_exists('mode', $options) ? $options['mode'] : 'list';
 
 		$query = new SelectQuery($this, array('connection' => $this->db));
 		//Fields
 		$fields = array_key_exists('fields', $options) ? $options['fields'] : array();
 		if (empty($fields)) {
-			$query->field("`$table`.*");
+			$query->field("`{$this->meta['table']}`.*");
 		} else {
 			$query->field($fields);
 		}
@@ -886,6 +884,7 @@ class DBObject {
 			$query->filter($options['conditions']);
 		}
 
+		//Mode specific
 		$limit = false;
 		switch ($mode) {
 			case 'object':
@@ -905,43 +904,57 @@ class DBObject {
 				break;
 		}
 
+		//Check ownership
+		if (array_key_exists('owner_id', $this->meta['fields'])) {
+			$user = BackendUser::check();
+			//Check ownership for all but superadmin and admin users
+			if ($user && !count(array_intersect(array('superadmin', 'admin'), $user->roles))) {
+				$query->filter('`owner_id` = :owner_id');
+				$q_params[':owner_id'] = $user->id;
+			}
+		}
+
+		//Parameters
 		if (array_key_exists('parameters', $options)) {
 			if (is_array($options['parameters'])) {
 				$q_params = array_merge($q_params, $options['parameters']);
 			} else {
 				$q_params[] = $options['parameters'];
 			}
-		} else if (!empty($parameters)) {
-			if (is_array($parameters)) {
-				$q_params = array_merge($q_params, $parameters);
+		} else if (!empty($this->meta['parameters'])) {
+			if (is_array($this->meta['parameters'])) {
+				$q_params = array_merge($q_params, $this->meta['parameters']);
 			} else {
 				$q_params[] = $parameters;
 			}
 		}
 
+		//Filters
 		if (array_key_exists('filters', $options)) {
 			$query->filter($options['filters']);
-		} else if (!empty($filters)) {
-			$query->filter($filters);
+		} else if (!empty($this->meta['filters'])) {
+			$query->filter($this->meta['filters']);
 		}
+
+		//Order
 		if (array_key_exists('order', $options)) {
 			$query->order($options['order']);
-		} else if (!empty($order)) {
-			$query->order($order);
+		} else if (!empty($this->meta['order'])) {
+			$query->order($this->meta['order']);
 		}
+
+		//Group
 		if (array_key_exists('group', $options)) {
 			$query->group($options['group']);
-		} else if (!empty($group)) {
-			$query->group($group);
-		}
-		if (get_class($this) == 'ContactObj') {
-			//die("<pre>$query");
+		} else if (!empty($this->meta['group'])) {
+			$query->group($this->meta['group']);
 		}
 		return array($query, $q_params);
 	}
 
 	public function getRetrieveSQL() {
-		$query  = new SelectQuery($this);
+		list($query, $parameters)  = $this->getSelectSQL();
+
 		$filter = '`' . $this->getMeta('id_field') . '` = :parameter';
 		if (array_key_exists('name', $this->meta['fields'])) {
 			$filter .= ' OR `name` = :parameter';
@@ -1268,7 +1281,7 @@ class DBObject {
 				$field_arr[] = 'NOT NULL';
 			}
 			if (!is_null($default)) {
-				$field_arr[] = 'DEFAULT ' . $default;
+				$field_arr[] = 'DEFAULT "' . $default . '"';
 			}
 			$query_fields[] = implode(' ', array_map('trim', $field_arr));
 		}
@@ -1336,6 +1349,29 @@ class DBObject {
 
 	public function getArea() {
 		return class_for_url(get_class($this));
+	}
+
+	/**
+	 * If the object has an owner_id field, check that against the current user
+	 *
+	 * We ignore the action so that it checks every action. You can customize
+	 * this per action by overriding this function in the model
+	 */
+	public function checkOwnership($action) {
+		$data = $this->array ? $this->array : ($this->object ? (array)$this->object : false);
+        if (!$data) {
+        	//Return true, otherwise invalid objects trigger permission errors
+			return true;
+        }
+		if (!array_key_exists('owner_id', $data)) {
+			//No Owner defined
+			return true;
+		}
+		$user = BackendUser::check();
+		if ($user && $user->id == $data['owner_id']) {
+			return true;
+		}
+		return false;
 	}
 
 	public function __toString() {

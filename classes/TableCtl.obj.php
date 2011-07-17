@@ -394,6 +394,10 @@ class TableCtl extends AreaCtl {
 			Controller::whoops('Invalid Object Returned');
 			return $object;
 		}
+		if (!$object->checkOwnership('create')) {
+			Backend::addError('Permission Denied');
+			return false;
+		}
 		$data = $object->fromRequest();
 		Backend::add('values', $data);
 		return true;
@@ -407,6 +411,10 @@ class TableCtl extends AreaCtl {
 		if (!$object instanceof DBObject) {
 			Controller::whoops('Invalid Object Returned');
 			return $object;
+		}
+		if (!$object->checkOwnership('create')) {
+			Backend::addError('Permission Denied');
+			return false;
 		}
 		$result = true;
 		//We need to check if the post data is valid in some way?
@@ -516,6 +524,10 @@ class TableCtl extends AreaCtl {
 			Controller::whoops('Invalid Object Returned');
 			return $object;
 		}
+		if (!$object->checkOwnership('replace')) {
+			Backend::addError('Permission Denied');
+			return false;
+		}
 		$result = true;
 		//We need to check if the post data is valid in some way?
 		$data = $object->fromRequest();
@@ -567,7 +579,16 @@ class TableCtl extends AreaCtl {
 	 * Action for reading a record in an area
 	 */
 	public function action_read($id, $mode = 'array') {
-		return call_user_func_array(array(class_name(Controller::$area), 'retrieve'), array($id, $mode));
+		$object = call_user_func_array(array(class_name(Controller::$area), 'retrieve'), array($id, $mode));
+		if (!($object instanceof DBObject)) {
+			Controller::whoops('Invalid Object Returned');
+			return $object;
+		}
+		if (!$object->checkOwnership('read')) {
+			Backend::addError('Permission Denied');
+			return false;
+		}
+		return $object;
 	}
 
 	public static function define_update() {
@@ -617,6 +638,10 @@ class TableCtl extends AreaCtl {
 		if (!($object instanceof DBObject)) {
 			Controller::whoops('Invalid Object Returned');
 			return $object;
+		}
+		if (!$object->checkOwnership('update')) {
+			Backend::addError('Permission Denied');
+			return false;
 		}
 		if (!$object->array) {
 			Backend::addError('The ' . $object->getMeta('name') . ' does not exist');
@@ -707,6 +732,10 @@ class TableCtl extends AreaCtl {
 		if (!($object instanceof DBObject)) {
 			Controller::whoops('Invalid Object Returned');
 			return $object;
+		}
+		if (!$object->checkOwnership('delete')) {
+			Backend::addError('Permission Denied');
+			return false;
 		}
 		if ($object->array) {
 			if ($object->delete()) {
