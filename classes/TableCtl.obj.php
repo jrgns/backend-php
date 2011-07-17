@@ -1024,17 +1024,15 @@ class TableCtl extends AreaCtl {
 	}
 
 	public static function getObject($obj_name = false, $id = false) {
-		$toret = false;
 		$obj_name = $obj_name ? class_name($obj_name) : class_name(get_called_class());
-		$obj_name .= 'Obj';
-		if (Component::isActive($obj_name)) {
-			if ($id) {
-				$toret = new $obj_name($id);
-			} else {
-				$toret = new $obj_name();
-			}
+		if (!Component::isActive($obj_name)) {
+			return null;
 		}
-		return $toret;
+		if ($id) {
+			return call_user_func(array($obj_name, 'retrieve'), $id, 'dbobject');
+		} else {
+			return call_user_func(array($obj_name, 'retrieve'));
+		}
 	}
 
 	public static function define_install() {
