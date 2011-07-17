@@ -24,7 +24,7 @@ class Content extends CommentedController {
 		}
 		return $result;
 	}
-	
+
 	private function feed_list($result, $mode) {
 		if ($result instanceof DBObject) {
 			Backend::add('title', ConfigValue::get('Title'));
@@ -107,7 +107,7 @@ class Content extends CommentedController {
 		$object = Hook::run('table_display', 'post', array($toret), array('toret' => $toret));
 		return $toret;
 	}
-	
+
 	function html_display($content) {
 		if ($content instanceof DBObject) {
 			Backend::add('Sub Title', $content->array['title']);
@@ -139,7 +139,7 @@ class Content extends CommentedController {
 		$content = parent::html_display($content);
 		return $content;
 	}
-	
+
 	public function action_search_index() {
 		if (Component::isActive('BackendSearch')) {
 			return BackendSearch::doIndex($this, array('title', 'markdown'));
@@ -148,7 +148,7 @@ class Content extends CommentedController {
 			return false;
 		}
 	}
-	
+
 	public function action_search($start, $count, $term, array $options = array()) {
 		if (Component::isActive('BackendSearch')) {
 			$result = array('term' => $term);
@@ -161,14 +161,14 @@ class Content extends CommentedController {
 		}
 		return false;
 	}
-	
+
 	public function html_search($result) {
 		foreach($result as $name => $value) {
 			Backend::add($name, $value);
 		}
 		Backend::addContent(Render::renderFile('backend_search.tpl.php'));
 	}
-	
+
 	public static function createPreview($content, $ellips = true) {
 		$pattern = '/(<br\/?><br\/?>|<!--break-->)/';
 		$preview = current(preg_split($pattern, $content, 2));
@@ -176,7 +176,7 @@ class Content extends CommentedController {
 			$preview = preg_split("/\n\n|\r\n\r\n|\n\r\n\r/", $content);
 			$preview = reset($preview);
 		}
-		
+
 		if (is_string($ellips)) {
 			return $preview . $ellips;
 		} else if ($ellips) {
@@ -201,9 +201,9 @@ class Content extends CommentedController {
 				$content .= '&hellip;';
 			}
 		}
-		return $content;		
+		return $content;
 	}
-	
+
 	public static function show($id) {
 		$content = Content::retrieve($id);
 		if ($content) {
@@ -211,11 +211,7 @@ class Content extends CommentedController {
 			Backend::addContent($content);
 		}
 	}
-	
-	public static function hook_table_display($id) {
-		return $id;
-	}
-	
+
 	/**
 	 * We check if there's any content of the name ?q=:name
 	 */
@@ -231,10 +227,10 @@ class Content extends CommentedController {
 		$select->filter('`name` = :query');
 		$row = $select->fetchAssoc(array(':query' => $query));
 		if ($row) {
-			$_REQUEST['q'] = 'content/' . $row['id'];
+			Controller::setVar('q', 'content/' . $row['id']);
 		}
 	}
-	
+
 	public static function install(array $options = array()) {
 		$toret = parent::install($options);
 
@@ -253,13 +249,15 @@ class Content extends CommentedController {
 		return array();
 	}
 
-	/*
-	 * @todo This isn't entirely accurate. If you want to create a random action_something, it need's to be
-	 * added to the array below... This isn't optimal. Either get the array dynamically (get_class_methods) or refactor.
-	 */
 	public static function checkParameters($parameters) {
 		$parameters = parent::checkParameters($parameters);
-		if (!method_exists(get_called_class(), 'action_' . Controller::$action)) {
+		if (
+			   !method_exists(get_called_class(), 'action_' . Controller::$action)
+			&& !method_exists(get_called_class(), 'get_' . Controller::$action)
+			&& !method_exists(get_called_class(), 'post_' . Controller::$action)
+			&& !method_exists(get_called_class(), 'put_' . Controller::$action)
+			&& !method_exists(get_called_class(), 'delete_' . Controller::$action)
+		) {
 			$parameters[0] = Controller::$action;
 			Controller::setAction('display');
 		}
