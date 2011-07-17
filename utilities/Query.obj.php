@@ -89,6 +89,10 @@ class Query {
 						$toret             = $stmt;
 					} else {
 						$error_info = $stmt->errorInfo();
+						if ($error_info[0] == 'HY093') {
+							$error_info[1] = 'HY093';
+							$error_info[2] = 'Invalid Parameters passed to statement';
+						}
 
 						$verbose_error = array('Query::execute Error:');
 						if (!empty($error_info[2])) {
@@ -490,6 +494,10 @@ class Query {
 		$error_info = $this->getError($statement);
 		if (!$error_info) {
 			return $error_info;
+		}
+		if ($error_info[0] == 'HY093') {
+			$error_info[1] = 'HY093';
+			$error_info[2] = 'Invalid Parameters passed to statement';
 		}
 		$error = array('Error executing Statement');
 		if (!empty($error_info[1])) {
