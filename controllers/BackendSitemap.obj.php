@@ -1,7 +1,7 @@
 <?php
 class BackendSitemap extends AreaCtl {
 	protected $areas = array();
-	
+
 	public function action_index() {
 		return $this->action_generate();
 	}
@@ -24,12 +24,12 @@ class BackendSitemap extends AreaCtl {
 		}
 		return false;
 	}
-	
+
 	public function notifyGoogle($url) {
 		$data = array('sitemap' => $url);
 		return curl_request('www.google.com/webmasters/tools/ping', $data);
 	}
-	
+
 	private function generateSitemap($area, $options) {
 		$class = class_name($area);
 		if (!Component::isActive(class_name($area))) {
@@ -68,10 +68,11 @@ class BackendSitemap extends AreaCtl {
 		fwrite($fp, '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . PHP_EOL);
 		foreach($object->list as $row) {
 			$last_date = strtotime($row['modified']) > $last_date ? strtotime($row['modified']) : $last_date;
+			$id        = array_key_exists('name', $row) ? $row['name'] : $row[$$object->getMeta('id')];
 			if (Value::get('clean_urls', false)) {
-				$url = SITE_LINK . class_for_url($object) . '/' . $row['id'];
+				$url = SITE_LINK . class_for_url($object) . '/' . $id;
 			} else {
-				$url = SITE_LINK . '?q=' . class_for_url($object) . '/' . $row['id'];
+				$url = SITE_LINK . '?q=' . class_for_url($object) . '/' . $id;
 			}
 			$row['url'] = $url;
 			fwrite($fp, Render::renderFile('sitemap_link.tpl.php', array('link' => $row)));
@@ -86,7 +87,7 @@ class BackendSitemap extends AreaCtl {
 		fwrite($fp, '</urlset>' . PHP_EOL);
 		return $filename;
 	}
-	
+
 	public function weekly(array $options = array()) {
 		$url = $this->action_generate();
 		if ($url && SITE_STATE == 'production') {

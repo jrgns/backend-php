@@ -912,9 +912,6 @@ class DBObject {
 		} else if (!empty($group)) {
 			$query->group($group);
 		}
-		if (get_class($this) == 'ContactObj') {
-			//die("<pre>$query");
-		}
 		return array($query, $q_params);
 	}
 
