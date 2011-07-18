@@ -95,9 +95,9 @@ class TableCtl extends AreaCtl {
 		}
 		Backend::add('TabLinks', $this->getTabLinks('display'));
 		if (!Backend::get('Sub Title')) {
-			if ($result->array && array_key_exists('title', $result->getMeta('fields'))) {
+			if ($result->array && array_key_exists('title', $result->array)) {
 				Backend::add('Sub Title', $result->getMeta('name') . ': ' . $result->array['title']);
-			} else if ($result->array && array_key_exists('name', $result->getMeta('fields'))) {
+			} else if ($result->array && array_key_exists('name', $result->array)) {
 				Backend::add('Sub Title', $result->getMeta('name') . ': ' . $result->array['name']);
 			} else {
 				Backend::add('Sub Title', $result->getMeta('name'));
