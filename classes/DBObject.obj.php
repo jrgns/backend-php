@@ -40,11 +40,7 @@ class DBObject {
 	 */
 	function __construct($meta = array(), array $options = array()) {
 		if (!is_array($meta)) {
-			if (is_numeric($meta)) {
-				$meta = array('id' => $meta);
-			} else {
-				$meta = array();
-			}
+			$meta = is_numeric($meta) ? array('id' => $meta) : array();
 		}
 		$meta['id']        = array_key_exists('id', $meta)        ? $meta['id']        : false;
 		$meta['id_field']  = array_key_exists('id_field', $meta)  ? $meta['id_field']  : 'id';

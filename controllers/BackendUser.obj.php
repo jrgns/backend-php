@@ -109,7 +109,7 @@ class BackendUser extends TableCtl {
 		Backend::addContent(Render::renderFile('loginout.tpl.php'));
 	}
 
-	function post_logout() {
+	public function post_logout() {
 		self::$current_user = false;
 		if (array_key_exists('BackendUser', $_SESSION)) {
 			if (Component::isActive('PersistUser')) {
@@ -375,7 +375,7 @@ class BackendUser extends TableCtl {
 
 	public static function hook_start() {
 		$user = self::check();
-		if ($user && in_array('superadmin', $user->roles)) {
+		if ($user && in_array('superadmin', $user->roles) && !Backend::getConfig('application.NoSuperWarning')) {
 			Backend::addNotice('You are the super user. Be carefull, careless clicking costs lives...');
 		}
 		self::$current_user = $user;

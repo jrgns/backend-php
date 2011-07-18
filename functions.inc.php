@@ -807,3 +807,27 @@ function compare_weights($elm1, $elm2) {
 		return 0;
 	}
 }
+
+/**
+ * Check if an object or an array has a recursive dependency
+ *
+ * From http://noteslog.com/post/detecting-recursive-dependencies-in-php-composite-values/ on 2011-07-11
+ */
+function has_recursive_dependency($value) {
+	//if PHP detects recursion in a $value, then a printed $value
+	//will contain at least one match for the pattern /\*RECURSION\*/
+	$printed = print_r($value, true);
+	$recursionMetaUser = preg_match_all('@\*RECURSION\*@', $printed, $matches);
+	if ($recursionMetaUser == 0) {
+		return false;
+	}
+	//if PHP detects recursion in a $value, then a serialized $value
+	//will contain matches for the pattern /\*RECURSION\*/ never because
+	//of metadata of the serialized $value, but only because of user data
+	$serialized = serialize($value);
+	$recursionUser = preg_match_all('@\*RECURSION\*@', $serialized, $matches);
+	//all the matches that are user data instead of metadata of the
+	//printed $value must be ignored
+	$result = $recursionMetaUser > $recursionUser;
+	return $result;
+}

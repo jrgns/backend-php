@@ -10,7 +10,7 @@
  * @license http://www.eclipse.org/legal/epl-v10.html Eclipse Public License v1.0
  * @package View
  */
- 
+
 /**
  * Default class to handle GChartView specific functions
  */
@@ -22,7 +22,7 @@ class GChartView extends View {
 		$this->mode = 'gchart';
 		$this->mime_type = 'image/png';
 	}
-	
+
 	private static function simple_line($output, &$params) {
 		$data = $output['data'];
 		if (array_depth($data) == 1) {
@@ -79,10 +79,10 @@ class GChartView extends View {
 				$params['chdl'] = implode('|', $output['series']);
 			}
 		}
-		
+
 		return self::$url . '?' . http_build_query($params);
 	}
-	
+
 	public static function hook_output($output) {
 		//TODO Attach HTTP Error codes and descriptions to these errors
 		if (!is_array($output)) {
@@ -121,6 +121,7 @@ class GChartView extends View {
 			}
 		}
 		$recache = Controller::getVar('recache') ? true : false;
+		debug_header('Recache - ' . $recache);
 		$image = curl_request($url, array(), array('cache' => $recache ? 1 : 60 * 60, 'bypass_ssl' => 1));
 		if (Controller::$debug) {
 			var_dump('Image:', $image);
@@ -142,10 +143,9 @@ class GChartView extends View {
 		header('Content-Disposition: inline; filename="' . $filename . '.png"');
 		return $image;
 	}
-	
+
 	public static function install() {
 		$toret = true;
 		return $toret;
 	}
 }
-
