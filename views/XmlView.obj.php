@@ -1,0 +1,74 @@
+<?php
+/**
+ * The file that defines the JsonView class.
+ *
+ * @author J Jurgens du Toit (JadeIT cc) <jurgens.dutoit@gmail.com> - initial API and implementation
+ * @copyright Copyright (c) 2009 JadeIT cc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available {@link http://www.eclipse.org/legal/epl-v10.html here}
+ * @license http://www.eclipse.org/legal/epl-v10.html Eclipse Public License v1.0
+ * @package View
+ */
+
+/**
+ * Default class to handle XmlView specific functions
+ *
+ * We use the PEAR XML_Serializer class to do this.
+ */
+class XmlView extends TextView {
+	private static $ob_level = 0;
+
+	function __construct() {
+		parent::__construct();
+		$this->mode     = 'xml';
+		$this->mime_type = 'application/xml';
+		self::$ob_level = ob_get_level();
+		ob_start();
+	}
+
+	public static function hook_output($to_print) {
+		//Construct the object to output
+		$object = new XmlResult();
+		$object->result  = $to_print;
+		$object->error   = Backend::getError();
+		$object->notice  = Backend::getNotice();
+		$object->success = Backend::getSuccess();
+		$object->content = Backend::getContent();
+		$last = '';
+		while (ob_get_level() > self::$ob_level) {
+			//Ending the ob_start from __construct
+			$last .= ob_get_clean();
+		}
+		$object->output  = $last;
+
+		//Clean up
+		Backend::setError();
+		Backend::setNotice();
+		Backend::setSuccess();
+
+		//Return the XML
+		$serializer = new XML_Serializer();
+		if (@$serializer->serialize($object)) {
+			return $serializer->getSerializedData();
+		} else {
+			return null;
+		}
+	}
+
+	public static function install() {
+		$toret = true;
+		return $toret;
+	}
+}
+require('XML/Serializer.php');
+
+//Define the output class
+class XmlResult {
+	public $result;
+	public $error;
+	public $notice;
+	public $success;
+	public $content;
+	public $output;
+}
