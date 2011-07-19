@@ -20,16 +20,19 @@ class XmlView extends TextView {
 	private static $ob_level = 0;
 
 	function __construct() {
+		require('XML/Serializer.php');
+
 		parent::__construct();
-		$this->mode     = 'xml';
+		$this->mode      = 'xml';
 		$this->mime_type = 'application/xml';
-		self::$ob_level = ob_get_level();
+		$this->charset   = 'utf-8';
+		self::$ob_level  = ob_get_level();
 		ob_start();
 	}
 
 	public static function hook_output($to_print) {
 		//Construct the object to output
-		$object = new XmlResult();
+		$object = new StdClass();
 		$object->result  = $to_print;
 		$object->error   = Backend::getError();
 		$object->notice  = Backend::getNotice();
@@ -48,9 +51,18 @@ class XmlView extends TextView {
 		Backend::setSuccess();
 
 		//Return the XML
-		$serializer = new XML_Serializer();
-		if (@$serializer->serialize($object)) {
-			return $serializer->getSerializedData();
+		$options = array(
+			XML_SERIALIZER_OPTION_INDENT           => "\t",
+			XML_SERIALIZER_OPTION_RETURN_RESULT    => true,
+			XML_SERIALIZER_OPTION_DEFAULT_TAG      => 'item',
+			XML_SERIALIZER_OPTION_XML_DECL_ENABLED => true,
+			//This is a very awkward way of saying $this
+			XML_SERIALIZER_OPTION_XML_ENCODING     => Controller::$view->charset,
+			XML_SERIALIZER_OPTION_ROOT_NAME        => 'XmlResult',
+		);
+		$serializer = new XML_Serializer($options);
+		if ($result = @$serializer->serialize($object)) {
+			return $result;
 		} else {
 			return null;
 		}
@@ -60,15 +72,4 @@ class XmlView extends TextView {
 		$toret = true;
 		return $toret;
 	}
-}
-require('XML/Serializer.php');
-
-//Define the output class
-class XmlResult {
-	public $result;
-	public $error;
-	public $notice;
-	public $success;
-	public $content;
-	public $output;
 }
