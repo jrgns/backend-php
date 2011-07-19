@@ -55,7 +55,7 @@ class BackendError extends TableCtl {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Add an error.
 	 *
@@ -75,7 +75,7 @@ class BackendError extends TableCtl {
 			self::$adding = false;
 		}
 	}
-	
+
 	public static function addPHP($number, $string, $file, $line, $context) {
 		$bt = array_reverse(debug_backtrace());
 		//Remove the call to BackendError::add :)
@@ -87,13 +87,17 @@ class BackendError extends TableCtl {
 			'string'     => $string,
 			'file'       => $file,
 			'line'       => $line,
-			'context'    => is_string($context) ? $context : var_export($context, true),
+			'context'    => is_string($context) ? $context : (
+				has_recursive_dependency($context) ?
+				print_r($context, true) :
+				var_export($context, true)
+			),
 			'stacktrace' => var_export($bt, true),
 		);
 		$BE = new BackendErrorObj();
 		return $BE->create($data, array('load' => false));
 	}
-	
+
 	public static function addBE($string, $context = false) {
 		$bt = array_reverse(debug_backtrace());
 		array_pop($bt);
@@ -101,21 +105,21 @@ class BackendError extends TableCtl {
 		$info    = reset($bt);
 		if (!$context) {
 			$context = next($bt);
-			$context = var_export($context['args'], true);
+			$context = has_recursive_dependency($context['args']) ? print_r($context, true) : var_export($context['args'], true);
 		}
 		$file = array_key_exists('file', $info) ? basename($info['file']) : 'unknown';
 		$line = array_key_exists('line', $info) ? $info['line'] : 0;
 		self::addPHP(0, $string, basename($file), $line, $context);
 	}
-	
+
 	public function action_filter ($pageId = 1)
 	{
-		
+
 		$query = new SelectQuery('BackendError');
-		
+
 		$query->setFields(array('string', 'request', 'number', 'file', 'mode', 'query', 'user_id', 'COUNT(id) AS `occured`', 'MAX(`added`) AS `last_occured`'));
 		$query->setGroup(array('string', 'request', 'number', 'file', 'mode', 'query', 'user_id'));
-		
+
 		$params = $queryFilter = array();
 		$parameters = Controller::getVar('params');
 		$sort = Controller::getVar('sort');
@@ -134,14 +138,14 @@ class BackendError extends TableCtl {
 			$params[':number'] = $parameters['number'];
 		}
 		$query->filter($queryFilter);
-		
+
 		$count = 10;
-		
+
 		if (!empty($sort['field']))
 		{
 			$query->setOrder(array($sort['field'] . '  ' . $sort['order']));
 		}
-		
+
 		if ($pageId == 1)
 		{
 			$start = 0;
@@ -153,10 +157,10 @@ class BackendError extends TableCtl {
 		{
 			$start = floor(($pageId - 1) * $count);
 		}
-		
-		
+
+
 		$pager = array();
-		
+
 		if ($start === 'all') {
 			$limit = 'all';
 		} else if ($start || $count) {
@@ -164,17 +168,17 @@ class BackendError extends TableCtl {
 		} else {
 			$limit = false;
 		}
-		
+
 		$query->limit($limit);
-		
-		
+
+
 		$items = $query->fetchAll($params);
-		
+
 		$totalItems = $query->getCount($params);
-		
+
 		$pager = '';
-		
-		if ($start || $count) 
+
+		if ($start || $count)
 		{
 			$pager = array (
 						'currentPage'	=> $pageId,
@@ -183,22 +187,22 @@ class BackendError extends TableCtl {
 						'totalPages'	=> round(($totalItems - 1) / $count, 0)
 						);
 		}
-		
+
 		$retArray['pager'] = $pager;
 		$retArray['data'] = $items;
 		$retArray['params'] = $parameters;
 		$retArray['sort'] = $sort;
-		
+
 
 		return $retArray;
 	}
-	
+
 	public function html_filter ($resultArray)
 	{
 		//backend_error.filter.tpl.php
 		Backend::addContent(Render::renderFile('backend_error.filter.tpl.php', array(
-																					'data' => $resultArray['data'], 
-																					'params' => $resultArray['params'], 
+																					'data' => $resultArray['data'],
+																					'params' => $resultArray['params'],
 																					'pager' => $resultArray['pager'],
 																					'sort' => $resultArray['sort'],
 																					)));
