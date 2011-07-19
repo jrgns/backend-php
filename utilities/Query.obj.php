@@ -171,7 +171,7 @@ class Query {
 		return $this;
 	}
 
-	public function getFilterd() {
+	public function getFilters() {
 		return $this->conditions;
 	}
 
