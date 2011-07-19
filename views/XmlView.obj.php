@@ -59,6 +59,7 @@ class XmlView extends TextView {
 			//This is a very awkward way of saying $this
 			XML_SERIALIZER_OPTION_XML_ENCODING     => Controller::$view->charset,
 			XML_SERIALIZER_OPTION_ROOT_NAME        => 'XmlResult',
+			XML_SERIALIZER_OPTION_TYPEHINTS        => true,
 		);
 		$serializer = new XML_Serializer($options);
 		if ($result = @$serializer->serialize($object)) {
