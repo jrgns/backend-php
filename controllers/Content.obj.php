@@ -249,6 +249,14 @@ class Content extends CommentedController {
 		return array();
 	}
 
+	public static function getSitemap() {
+		$query = new SelectQuery('Trend');
+		$query
+			->filter('`active` = 1');
+		$list = $query->fetchAll();
+		return array('list' => $list, 'options' => $options);
+	}
+
 	public static function checkParameters($parameters) {
 		$parameters = parent::checkParameters($parameters);
 		if (
