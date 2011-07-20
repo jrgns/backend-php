@@ -580,11 +580,7 @@ class TableCtl extends AreaCtl {
 	 */
 	public function action_read($id, $mode = 'array') {
 		$object = call_user_func_array(array(class_name(Controller::$area), 'retrieve'), array($id, $mode));
-		if (!($object instanceof DBObject)) {
-			Controller::whoops('Invalid Object Returned');
-			return $object;
-		}
-		if (!$object->checkOwnership('read')) {
+		if ($object instanceof DBObject && !$object->checkOwnership('read')) {
 			Backend::addError('Permission Denied');
 			return false;
 		}
