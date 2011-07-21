@@ -777,8 +777,9 @@ class DBObject {
 	public function fromRequest() {
 		$toret = array();
 		foreach($this->meta['fields'] as $name => $options) {
-			$options = is_array($options) ? $options : array('type' => $options);
+			$toret[$name] = null;
 
+			$options        = is_array($options) ? $options : array('type' => $options);
 			$type           = array_key_exists('type', $options) ? $options['type'] : 'string';
 			$filter         = array_key_exists('filter', $options) ? $options['filter'] : FILTER_DEFAULT;
 			$filter_options = array_key_exists('filter_options', $options) ? $options['filter_options'] : array();
@@ -814,18 +815,17 @@ class DBObject {
 					} else {
 						$toret[$name] = $_FILES[$name];
 					}
-				} else {
-					$toret[$name] = null;
 				}
 			//Other Types
-			} else if ($value = Controller::getVar($name)) {
-				$toret[$name] = filter_var($value, $filter, $filter_options);
-				if ($toret[$name] === false) {
-					$toret[$name] = null;
-					Backend::addError('Invalid input');
-				}
 			} else {
-				$toret[$name] = null;
+			    $value = Controller::getVar($name);
+			    if (!is_null($value)) {
+				    $toret[$name] = filter_var($value, $filter, $filter_options);
+				    if ($toret[$name] === false) {
+					    $toret[$name] = null;
+					    Backend::addError('Invalid input');
+				    }
+				}
 			}
 		}
 		return $toret;
