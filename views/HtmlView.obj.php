@@ -248,8 +248,8 @@ class HtmlView extends View {
 					if (array_key_exists('q', $vars)) {
 						$query['path'] .= $vars['q'];
 						unset($vars['q']);
-						if (substr($query['path'], -1) != '/') {
-							$query['path'] .= '/';
+						if (substr($query['path'], -1) == '/') {
+						    $query['path'] = substr($query['path'], 0, strlen($query['path']) - 1);
 						}
 					}
 
