@@ -1267,7 +1267,10 @@ class DBObject {
 				$field_arr[] = 'NOT NULL';
 			}
 			if (!is_null($default)) {
-				$field_arr[] = 'DEFAULT "' . $default . '"';
+			    if (!in_array($default, array('NULL', 'CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))) {
+			        $default = '"' . $default . '"';
+			    }
+				$field_arr[] = 'DEFAULT ' . $default;
 			}
 			$query_fields[] = implode(' ', array_map('trim', $field_arr));
 		}
