@@ -6,13 +6,16 @@
 	$title_width = 2;
 	$input_width = $row_width - $title_width - 1;
 echo '<?php
-$action_url = empty($action_url) ? Controller::$area . \'/\' . Controller::$action . (empty(Controller::$parameters[0]) ? \'\' : \'/\' . Controller::$parameters[0]) : $action_url;
-$action_name = empty($action_name) ? ucwords(Controller::$action) : $action_name;
+$action_url     = empty($action_url) ?
+    Controller::$area . \'/\' . Controller::$action . (empty(Controller::$parameters[0]) ? \'\':
+    \'/\' . Controller::$parameters[0]) : $action_url;
+$action_name    = empty($action_name)    ? ucwords(Controller::$action) : $action_name;
+$action_subject = empty($action_subject) ? $db_object->getMeta(\'name\')  : $action_subject;
 ?>
 ';
 ?>
 <form method="post" action="?q=<?php echo '<?php echo $action_url ?>' ?>" enctype="multipart/form-data">
-<?php 
+<?php
 		foreach($fields as $name => $field):
 			if (!is_array($field)) {
 				$field = array('type' => $field);
@@ -94,7 +97,7 @@ $action_name = empty($action_name) ? ucwords(Controller::$action) : $action_name
 	//TODO Sort this out
 		Hook::run('form', 'post', array($db_object));
 ?>
-	<input type="submit" value="<?php echo '<?php echo $action_name ?>' ?> <?php echo $db_object->getMeta('name') ?>" class=""/>
+	<input type="submit" value="<?php echo '<?php echo $action_name ?> <?php echo $action_subject ?>' ?>" class=""/>
 </form>
 <?php else: ?>
 	No object
