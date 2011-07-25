@@ -10,7 +10,7 @@
  * @license http://www.eclipse.org/legal/epl-v10.html Eclipse Public License v1.0
  * @package View
  */
- 
+
 /**
  * Default class to handle ChunkView specific functions
  *
@@ -22,9 +22,11 @@ class ChunkView extends HtmlView {
 		Backend::add('BackendErrors', Backend::getError());
 		Backend::add('BackendSuccess', Backend::getSuccess());
 		Backend::add('BackendNotices', Backend::getNotice());
+		Backend::add('BackendInfo', Backend::getInfo());
 		Backend::setError();
 		Backend::setSuccess();
 		Backend::setNotice();
+		Backend::setInfo();
 
 		$content = Backend::getContent();
 		if (empty($content)) {
@@ -51,7 +53,7 @@ class ChunkView extends HtmlView {
 			$BEFilter = new BEFilterObj();
 			$BEFilter->read();
 			$filters = $BEFilter->list ? $BEFilter->list : array();
-		
+
 			foreach($filters as $row) {
 				if (class_exists($row['class'], true) && is_callable(array($row['class'], $row['function']))) {
 					$to_print = call_user_func(array($row['class'], $row['function']), $to_print);
@@ -61,11 +63,11 @@ class ChunkView extends HtmlView {
 
 		return $to_print;
 	}
-	
+
 	public static function hook_display($results, $controller) {
 		return $results;
 	}
-	
+
 	/**
 	 * This function adds all styles and scripts to the HTML. It also retrieves primary and secondary links from the App
 	 *
@@ -76,4 +78,3 @@ class ChunkView extends HtmlView {
 		return $data;
 	}
 }
-

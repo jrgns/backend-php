@@ -50,9 +50,11 @@ class HtmlView extends View {
 		Backend::add('BackendErrors', Backend::getError());
 		Backend::add('BackendSuccess', Backend::getSuccess());
 		Backend::add('BackendNotices', Backend::getNotice());
+		Backend::add('BackendInfo', Backend::getInfo());
 		Backend::setError();
 		Backend::setSuccess();
 		Backend::setNotice();
+		Backend::setInfo();
 
 		$content = Backend::getContent();
 		if (empty($content)) {

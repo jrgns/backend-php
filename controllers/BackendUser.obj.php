@@ -376,7 +376,7 @@ class BackendUser extends TableCtl {
 	public static function hook_start() {
 		$user = self::check();
 		if ($user && in_array('superadmin', $user->roles) && !Backend::getConfig('application.NoSuperWarning')) {
-			Backend::addNotice('You are the super user. Be carefull, careless clicking costs lives...');
+			Backend::addInfo('You are the super user. Be carefull, careless clicking costs lives...');
 		}
 		self::$current_user = $user;
 		Backend::add('BackendUser', $user);

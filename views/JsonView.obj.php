@@ -10,7 +10,7 @@
  * @license http://www.eclipse.org/legal/epl-v10.html Eclipse Public License v1.0
  * @package View
  */
- 
+
 /**
  * Default class to handle JsonView specific functions
  */
@@ -22,7 +22,7 @@ class JsonView extends TextView {
 		self::$ob_level = ob_get_level();
 		ob_start();
 	}
-	
+
 	public static function hook_output($to_print) {
 		$result_only = Controller::getVar('result_only');
 		if (!empty($result_only)) {
@@ -37,6 +37,7 @@ class JsonView extends TextView {
 		$object->error   = Backend::getError();
 		$object->notice  = Backend::getNotice();
 		$object->success = Backend::getSuccess();
+		$object->info    = Backend::getInfo();
 		$object->content = Backend::getContent();
 		$last = '';
 		while (ob_get_level() > self::$ob_level) {
@@ -47,6 +48,7 @@ class JsonView extends TextView {
 		Backend::setError();
 		Backend::setNotice();
 		Backend::setSuccess();
+		Backend::setInfo();
 		$result_only = Controller::getVar('result_only');
 		return json_encode($object);
 	}
