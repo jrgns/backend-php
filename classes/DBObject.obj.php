@@ -1357,7 +1357,10 @@ class DBObject {
 			return true;
 		}
 		$user = BackendUser::check();
-		if ($user && $user->id == $data['owner_id']) {
+		if (
+		    ($user && $user->id == $data['owner_id'])
+		    || in_array('superadmin', $user->roles)
+		) {
 			return true;
 		}
 		return false;
