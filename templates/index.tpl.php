@@ -1,5 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
-   "http://www.w3.org/TR/html4/strict.dtd">
+<!DOCTYPE html>
 <html>
 	<head>
 		<title><?php echo strip_tags($Title); if (!empty($Sub_Title)): ?> - <?php echo strip_tags($Sub_Title); endif; ?></title>
@@ -9,18 +8,20 @@
 	</head>
 	<body>
 		<div class="container">
-			{tpl:header.tpl.php}
-			<?php if (!empty($primary_links)): ?>
-				{tpl:topnav.tpl.php}
-			<?php endif; ?>
-			<div id="maincol" class="clear">
-				<?php if (!empty($Sub_Title)): ?><h2 class="quiet">#Sub Title#</h2><?php endif; ?>
+		    {tpl:header.tpl.php}
+		    <?php if (!empty($primary_links)): ?>
+			    {tpl:topnav.tpl.php}
+		    <?php endif; ?>
+		    <div id="sub_title">
+			    <?php if (!empty($Sub_Title)): ?><h2 class="quiet">#Sub Title#</h2><?php endif; ?>
+		    </div>
+			{tpl:backend_errors.tpl.php}
+			{tpl:backend_success.tpl.php}
+			{tpl:backend_notices.tpl.php}
+			{tpl:backend_info.tpl.php}
+			<div id="maincol" class="span-18">
+				<hr class="space">
 				{tpl:tab_links.tpl.php}
-				<?php if (!empty($BackendNotices) || !empty($BackendErrors) || !empty($BackendSuccess) || !empty($Teaser)): ?>
-					{tpl:backend_errors.tpl.php}
-					{tpl:backend_success.tpl.php}
-					{tpl:backend_notices.tpl.php}
-				<?php endif; ?>
 				<div id="content">
 					{tpl:maincontent.tpl.php}
 				</div>
@@ -33,11 +34,12 @@
 					#Last Content#
 				</div>
 			<?php endif; ?>
-			{tpl:footer.tpl.php}
+    		{tpl:footer.tpl.php}
 		</div>
 		{tpl:scripts.tpl.php}
 		<?php if (SITE_STATE == 'production'): ?>
 			{tpl:tracking.tpl.php}
 		<?php endif; ?>
+		<script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
 	</body>
 </html>
