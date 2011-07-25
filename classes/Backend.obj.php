@@ -25,6 +25,7 @@ class Backend {
 	protected static $error     = array();
 	protected static $notice    = array();
 	protected static $success   = array();
+	protected static $info      = array();
 
 	protected static $content   = array();
 	protected static $scripts   = array();
@@ -529,6 +530,32 @@ class Backend {
 
 	static public function setSuccess(array $successes = array()) {
 		self::$success = $successes;
+	}
+
+	static public function addInfo($content, $options = array()) {
+		return self::addSomething('info', $content, $options);
+	}
+
+	static public function getInfo() {
+		if (is_string(self::$info)) {
+			self::$info = array(self::$info);
+		}
+		if (!is_array(self::$info)) {
+			return array();
+		}
+		$counts = array_count_values(array_filter(self::$info));
+		$result = array();
+		foreach($counts as $value => $count) {
+			if ($count > 1) {
+				$value .= ' (' . $count . ')';
+			}
+			$result[] = $value;
+		}
+		return $result;
+	}
+
+	static public function setInfo(array $info = array()) {
+		self::$info = $info;
 	}
 
 	public static function __error_handler($number, $string, $file = false, $line = false, $context = false) {
