@@ -15,12 +15,12 @@
 		    <div id="sub_title">
 			    <?php if (!empty($Sub_Title)): ?><h2 class="quiet">#Sub Title#</h2><?php endif; ?>
 		    </div>
+		    <div class="clear"></div>
 			{tpl:backend_errors.tpl.php}
 			{tpl:backend_success.tpl.php}
 			{tpl:backend_notices.tpl.php}
 			{tpl:backend_info.tpl.php}
 			<div id="maincol" class="span-18">
-				<hr class="space">
 				{tpl:tab_links.tpl.php}
 				<div id="content">
 					{tpl:maincontent.tpl.php}
