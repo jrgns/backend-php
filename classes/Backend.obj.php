@@ -194,16 +194,11 @@ class Backend {
 	}
 
 	public static function getConfigFileLocation() {
-		return self::$config_file;
+		return defined('SITE_FOLDER') ? SITE_FOLDER . '/configs/configure.ini.php' : APP_FOLDER . '/configs/configure.ini.php';
 	}
 
 	private static function initConfigs() {
-		if (array_key_exists('config_file', self::$options)) {
-			self::$config_file = self::$options['config_file'];
-		} else {
-			self::$config_file = defined('SITE_FOLDER') ? SITE_FOLDER . '/configs/configure.ini.php' : APP_FOLDER . '/configs/configure.ini.php';
-		}
-		self::$config = new BackendConfig(self::$config_file, SITE_STATE);
+		self::$config = new BackendConfig(self::getConfigFileLocation(), SITE_STATE);
 	}
 
 	static function getConfig($name, $default = null) {

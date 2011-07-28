@@ -250,11 +250,11 @@ class Content extends CommentedController {
 	}
 
 	public static function getSitemap() {
-		$query = new SelectQuery('Trend');
+		$query = new SelectQuery('Content');
 		$query
 			->filter('`active` = 1');
 		$list = $query->fetchAll();
-		return array('list' => $list, 'options' => $options);
+		return array('list' => $list, 'options' => array());
 	}
 
 	public static function checkParameters($parameters) {
