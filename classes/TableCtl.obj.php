@@ -629,7 +629,28 @@ class TableCtl extends AreaCtl {
 	/**
 	 * Action for updating a record in an area
 	 */
-	public function action_update($id) {
+	public function get_update($id) {
+		$object = self::getObject(get_class($this), $id);
+		if (!($object instanceof DBObject)) {
+			Controller::whoops('Invalid Object Returned');
+			return $object;
+		}
+		if (!$object->checkOwnership('update')) {
+			Backend::addError('Permission Denied');
+			return false;
+		}
+		if (!$object->array) {
+			Backend::addError('The ' . $object->getMeta('name') . ' does not exist');
+			return false;
+		}
+
+		$result = true;
+		$data = $object->array;
+		Backend::add('values', $data);
+		return $result;
+	}
+
+	public function post_update($id) {
 		$object = self::getObject(get_class($this), $id);
 		if (!($object instanceof DBObject)) {
 			Controller::whoops('Invalid Object Returned');
@@ -646,22 +667,18 @@ class TableCtl extends AreaCtl {
 
 		$result = true;
 		//We need to check if the post data is valid in some way?
-		if (is_post()) {
-			$data = $object->fromRequest();
-			$data = Hook::run('update', 'pre', array($data, $object), array('toret' => $data));
-			if ($object->update($data) !== false) {
-				$result = $object;
-				Backend::addSuccess($object->getMeta('name') . ' Modified');
-			} else {
-				if (Controller::$debug && !empty($object->error_msg)) {
-					Backend::addError('Could not update ' . $object->getMeta('name') . ': ' . $object->error_msg);
-				} else {
-					Backend::addError('Could not update ' . $object->getMeta('name'));
-				}
-				$result = false;
-			}
+		$data = $object->fromRequest();
+		$data = Hook::run('update', 'pre', array($data, $object), array('toret' => $data));
+		if ($object->update($data) !== false) {
+			$result = $object;
+			Backend::addSuccess($object->getMeta('name') . ' Modified');
 		} else {
-			$data = $object->array;
+			if (Controller::$debug && !empty($object->error_msg)) {
+				Backend::addError('Could not update ' . $object->getMeta('name') . ': ' . $object->error_msg);
+			} else {
+				Backend::addError('Could not update ' . $object->getMeta('name'));
+			}
+			$result = false;
 		}
 		Backend::add('values', $data);
 		return $result;

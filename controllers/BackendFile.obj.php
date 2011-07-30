@@ -24,6 +24,7 @@
 class BackendFile extends TableCtl {
 	/**
 	 * @todo We need to find a way to tag files with it's revision
+	 * @todo update overrides TableCtl::update
 	 */
 	function action_update() {
 		$location = Backend::getConfig('application.file_provider.location', false);
@@ -45,21 +46,21 @@ class BackendFile extends TableCtl {
 			}
 		}
 	}
-	
+
 	public static function getRevisionFromFile($file) {
 		return 10;
 	}
-	
+
 	public static function addRevisionToFile($file) {
 		$rev_id = bzr_get_file_revision($file);
-		
+
 	}
-	
+
 	function action_read($file, $mode = 'array') {
 		$file = urldecode($file);
 		return parent::action_read($file, $mode);
 	}
-	
+
 	function action_check() {
 		if (!Backend::getConfig('application.file_provider', false)) {
 			return false;
@@ -98,4 +99,3 @@ class BackendFile extends TableCtl {
 		return $count;
 	}
 }
-
