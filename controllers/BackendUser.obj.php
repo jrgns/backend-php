@@ -65,7 +65,7 @@ class BackendUser extends TableCtl {
 		if ($username && $password) {
 			list($query, $params) = self::authenticate($username, $password, true);
 
-			$User = self::getObject(get_called_class());
+			$User = self::getObject();
 			$User->read(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
 			if ($User->object) {
 				session_regenerate_id();
@@ -106,7 +106,7 @@ class BackendUser extends TableCtl {
 		default:
 			break;
 		}
-		Backend::addContent(Render::renderFile('loginout.tpl.php'));
+		Backend::addContent(Render::file('loginout.tpl.php'));
 	}
 
 	public function post_logout() {
@@ -130,7 +130,7 @@ class BackendUser extends TableCtl {
 		if ($result instanceof DBObject) {
 			if ($_SESSION['BackendUser']->id == $result->array['id']) {
 				Backend::add('Sub Title', 'My Account');
-				Backend::addContent(Render::renderFile('loginout.tpl.php'));
+				Backend::addContent(Render::file('loginout.tpl.php'));
 			} else {
 				Backend::add('Sub Title', 'User: ' . $result->array['username']);
 			}
@@ -194,7 +194,7 @@ class BackendUser extends TableCtl {
 			Backend::addSuccess('Password updated');
 			Controller::redirect('?q=backend_user/display');
 		}
-		Backend::addContent(Render::renderfile('backend_user.change_password.tpl.php'));
+		Backend::addContent(Render::file('backend_user.change_password.tpl.php'));
 		return $result;
 	}
 
@@ -268,7 +268,7 @@ class BackendUser extends TableCtl {
 			Backend::addNotice('You can edit the details of the super user <a href="?q=backend_user/edit/1">here</a>');
 			Controller::redirect('?q=home');
 		} else if (!$result) {
-			Backend::addContent(Render::renderFile('backend_user.super_signup.tpl.php'));
+			Backend::addContent(Render::file('backend_user.super_signup.tpl.php'));
 		} else {
 			Controller::redirect('?q=home');
 		}
@@ -306,7 +306,7 @@ class BackendUser extends TableCtl {
 		case ($result):
 		default:
 			Backend::add('Object', $result);
-			Backend::addContent(Render::renderFile('backend_user.signup.tpl.php'));
+			Backend::addContent(Render::file('backend_user.signup.tpl.php'));
 			break;
 		}
 	}
