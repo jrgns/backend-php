@@ -30,7 +30,7 @@ class DBObject {
 	//If you set $error_msg in a function, reset it in the beginning of the function as well.
 	public $error_msg = false;
 
-	private static $top_class = false;
+	private static $class_stack = array();
 	/**
 	 * Construct a DB Object
 	 *
@@ -101,11 +101,13 @@ class DBObject {
 					$operator = '=';
 				}
 
-				if ($load_mode == 'array') {
+                if ($this->array) {
 					$value = array_key_exists($name, $this->array) ? $this->array[$name] : $name;
-				} else if ($load_mode == 'object') {
+                } else if ($this->object) {
 					$value = array_key_exists($name, $this->object) ? $this->object->$name : $name;
-				}
+                } else {
+                    continue;
+                }
 				switch ($operator) {
 				case '=':
 					$conds[] = '`' . $field . '` = :' . $name;
@@ -135,30 +137,33 @@ class DBObject {
 	}
 
 	private function loadDeep($mode = 'array') {
-		if (in_array($mode, array('array', 'object')) && $this->$mode) {
-			foreach ($this->meta['relations'] as $name => $options) {
-				$class = array_key_exists('class', $options) ? $options['class'] : $name;
-				if (!in_array(self::$top_class, array($class, $class . 'Obj'))) {
-					$type  = array_key_exists('type', $options)  ? $options['type']  : 'single';
-					if ($relation = $this->loadRelation($class, $options, $mode)) {
-						switch ($type) {
-						case 'multiple':
-							if ($mode == 'array') {
-								$this->array[$name]  = $relation->list ? $relation->list : array();
-							} else if ($mode == 'object') {
-								$this->object->$name = $relation->list ? $relation->list : array();
-							}
-							break;
-						default:
-						case 'single':
-							if ($mode == 'array') {
-								$this->array[$name]  = $relation->array  ? $relation->array  : false;
-							} else if ($mode == 'object') {
-								$this->object->$name = $relation->object ? $relation->object : false;
-							}
-							break;
-						}
+		if (!in_array($mode, array('array', 'object')) && $this->$mode) {
+		    return null;
+		}
+		foreach ($this->meta['relations'] as $name => $options) {
+			$class = array_key_exists('class', $options) ? $options['class'] : $name;
+			$count = array_intersect(self::$class_stack, array($class, $class . 'Obj'));
+			if ($count) {
+			    continue;
+		    }
+			$type  = array_key_exists('type', $options)  ? $options['type']  : 'single';
+			if ($relation = $this->loadRelation($class, $options, $mode)) {
+				switch ($type) {
+				case 'multiple':
+					if ($mode == 'array') {
+						$this->array[$name]  = $relation->list ? $relation->list : array();
+					} else if ($mode == 'object') {
+						$this->object->$name = $relation->list ? $relation->list : array();
 					}
+					break;
+				default:
+				case 'single':
+					if ($mode == 'array') {
+						$this->array[$name]  = $relation->array  ? $relation->array  : false;
+					} else if ($mode == 'object') {
+						$this->object->$name = $relation->object ? $relation->object : false;
+					}
+					break;
 				}
 			}
 		}
@@ -181,8 +186,8 @@ class DBObject {
 	}
 
 	public function read($options = array()) {
-		if (!self::$top_class) {
-			self::$top_class = get_class($this);
+		if (!in_array(get_class($this), self::$class_stack)) {
+			array_push(self::$class_stack, get_class($this));
 		}
 
 		if (is_string($options)) {
@@ -282,8 +287,9 @@ class DBObject {
 			}
 			$this->error_msg = 'DB Connection Error';
 		}
-		if (get_class($this) == self::$top_class) {
-			self::$top_class = false;
+		//Reset the stack once we get back to the initial class
+		if (get_class($this) == reset(self::$class_stack)) {
+		    self::$class_stack = array();
 		}
 		return $result;
 	}
