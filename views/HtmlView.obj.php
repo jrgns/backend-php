@@ -136,9 +136,9 @@ class HtmlView extends View {
 			$app_sec = false;
 			$app_tri = false;
 		}
-		$primary   = array_merge($primary, is_array($app_pri) ? $app_pri : array());
+		$primary   = array_merge($primary, is_array($app_pri)   ? $app_pri : array());
 		$secondary = array_merge($secondary, is_array($app_sec) ? $app_sec : array());
-		$tertiary  = array_merge($tertiary, is_array($app_tri) ? $app_tri : array());
+		$tertiary  = array_merge($tertiary, is_array($app_tri)  ? $app_tri : array());
 		Backend::add('primary_links', $primary);
 		Backend::add('secondary_links', $secondary);
 		Backend::add('tertiary_links', $tertiary);

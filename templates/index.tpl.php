@@ -12,7 +12,7 @@
 		    <?php if (!empty($primary_links)): ?>
 			    {tpl:topnav.tpl.php}
 		    <?php endif; ?>
-		    <div id="sub_title">
+		    <div id="sub_title" class="clear">
 			    <?php if (!empty($Sub_Title)): ?><h2 class="quiet">#Sub Title#</h2><?php endif; ?>
 		    </div>
 		    <div class="clear"></div>
@@ -40,6 +40,5 @@
 		<?php if (SITE_STATE == 'production'): ?>
 			{tpl:tracking.tpl.php}
 		<?php endif; ?>
-		<script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
 	</body>
 </html>

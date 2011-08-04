@@ -1,4 +1,3 @@
-<div class="clear">&nbsp;</div>
 <?php if(!empty($secondary_links)): ?>
 	{tpl:secondary_links.tpl.php}
 <?php endif; ?>
