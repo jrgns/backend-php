@@ -125,6 +125,8 @@ class HtmlView extends View {
 		$primary = Links::get('primary');
 		$secondary = Links::get('secondary');
 		$tertiary = Links::get('tertiary');
+
+		$app_class = ConfigValue::get('settings.Class', 'Application');
 		if (class_exists($app_class, true) && method_exists($app_class, 'getLinks')) {
 			$app_pri = call_user_func(array($app_class, 'getLinks'), 'primary');
 			$app_sec = call_user_func(array($app_class, 'getLinks'), 'secondary');

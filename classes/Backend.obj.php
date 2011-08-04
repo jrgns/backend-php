@@ -198,7 +198,8 @@ class Backend {
 	}
 
 	private static function initConfigs() {
-		self::$config = new BackendConfig(self::getConfigFileLocation(), SITE_STATE);
+	    self::$config_file = self::getConfigFileLocation();
+		self::$config = new BackendConfig(self::$config_file, SITE_STATE);
 	}
 
 	static function getConfig($name, $default = null) {
