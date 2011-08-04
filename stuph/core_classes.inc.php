@@ -47,17 +47,21 @@ $result = array(
 		'name'     => 'Home',
 		'filename' => '/controllers/Home.obj.php',
 	),
+	'Content' => array(
+		'id'       => 10,
+		'name'     => 'Content',
+		'filename' => '/controllers/Content.obj.php',
+	),
 	//Views
 	'HtmlView' => array(
-		'id'       => 10,
+		'id'       => 11,
 		'name'     => 'HtmlView',
 		'filename' => '/views/HtmlView.obj.php',
 	),
 	'JsonView' => array(
-		'id'       => 11,
+		'id'       => 12,
 		'name'     => 'JsonView',
 		'filename' => '/views/JsonView.obj.php',
 	),
 );
 return $result;
-

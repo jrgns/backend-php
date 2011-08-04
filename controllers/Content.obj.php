@@ -57,18 +57,20 @@ class Content extends CommentedController {
 		return $this->feed_list($result, 'atom');
 	}
 
-	public function action_create($id = false) {
-		if (is_get()) {
-			$obj = Controller::getVar('obj');
-			$obj = $obj ? $obj : array();
-			if (!empty($id)) {
-				$obj['name']   = $id;
-				$obj['title']  = humanize($id);
-			}
-			$obj['active'] = 1;
-			Controller::setVar('obj', $obj);
+	public function get_create($id = false) {
+		$obj = Controller::getVar('obj');
+		$obj = $obj ? $obj : array();
+		if (!empty($id)) {
+			$obj['name']   = $id;
+			$obj['title']  = humanize($id);
 		}
-		$result = parent::action_create();
+		$obj['active'] = 1;
+		Controller::setVar('obj', $obj);
+		return parent::get_create();
+	}
+
+	public function post_create($id = false) {
+		$result = parent::post_create();
 		if ($result instanceof ContentObj) {
 			/* TODO This can easily "overwrite" existing urls */
 			if (is_post() && Component::isActive('BackendQuery')) {
@@ -78,34 +80,51 @@ class Content extends CommentedController {
 		return $result;
 	}
 
-	public function action_display($id) {
-		$id = Hook::run('table_display', 'pre', array($id), array('toret' => $id));
+	public function get_display($id) {
+		if (Backend::getDB('default')) {
+		    $id = Hook::run('table_display', 'pre', array($id), array('toret' => $id));
 
-		$toret = Content::retrieve($id, 'dbobject');
-		if ($toret instanceof DBObject && !empty($toret->object)) {
-			if (!$this->checkPermissions(array('subject_id' => $toret->object->id, 'subject' => 'content'))) {
-				Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to display ' . $toret->object->title));
-				$toret = false;
-			}
-		} else if ($toret instanceof DBObject && $id == 'last') {
-			$toret->read(array('limit' => 1, 'conditions' => array('`active` = 1'), 'order' => '`added` DESC', 'mode' => 'object'));
-			if (!$toret->object) {
-				$toret = false;
-			}
-		} else if (Permission::check('create', 'content')) {
-			Backend::addNotice('The content does not exist, but you can create it now');
-			Controller::redirect('?q=content/create/' . $id);
-			$toret = false;
-		} else {
-			Controller::whoops(array('title' => 'Unknown Content', 'message' => 'The page you requested could not be found.'));
-			$toret = false;
-		}
-		if ($toret && Controller::$debug) {
-			Backend::addNotice('Content ID: ' . $toret->object->id);
-		}
+		    $result = Content::retrieve($id, 'dbobject');
+		    if ($result instanceof DBObject && !empty($result->object)) {
+			    if (!$this->checkPermissions(array('subject_id' => $result->object->id, 'subject' => 'content'))) {
+				    Controller::whoops(array('title' => 'Permission Denied', 'message' => 'You do not have permission to display ' . $result->object->title));
+				    $result = false;
+			    }
+		    } else if ($result instanceof DBObject && $id == 'last') {
+			    $result->read(array('limit' => 1, 'conditions' => array('`active` = 1'), 'order' => '`added` DESC', 'mode' => 'object'));
+			    if (!$result->object) {
+				    $result = false;
+			    }
+		    } else if (Permission::check('create', 'content')) {
+			    Backend::addNotice('The content does not exist, but you can create it now');
+			    Controller::redirect('?q=content/create/' . $id);
+			    $result = false;
+		    } else {
+			    Controller::whoops(array('title' => 'Unknown Content', 'message' => 'The page you requested could not be found.'));
+			    $result = false;
+		    }
+		    if ($result && Controller::$debug) {
+			    Backend::addNotice('Content ID: ' . $result->object->id);
+		    }
 
-		$object = Hook::run('table_display', 'post', array($toret), array('toret' => $toret));
-		return $toret;
+		    $object = Hook::run('table_display', 'post', array($toret), array('toret' => $result));
+		    return $result;
+	    } else {
+	        //DB less content
+	        $template_file = array(
+	            $id . '.tpl.php',
+	            str_replace('/', '.', $id) . '.tpl.php',
+	        );
+		    if (Render::checkTemplateFile($template_file[0])) {
+			    Backend::addContent(Render::file($template_file[0]));
+
+		    } else if (Render::checkTemplateFile($template_file[1])) {
+			    Backend::addContent(Render::file($template_file[1]));
+		    } else {
+		        Backend::addContent('Could not find file');
+		    }
+		    return true;
+	    }
 	}
 
 	function html_display($content) {
@@ -136,7 +155,9 @@ class Content extends CommentedController {
 				header('Pragma: cache');
 			}
 		}
-		$content = parent::html_display($content);
+		if (Backend::getDB('default')) {
+    		$content = parent::html_display($content);
+		}
 		return $content;
 	}
 

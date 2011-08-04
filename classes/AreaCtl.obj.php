@@ -51,7 +51,6 @@ class AreaCtl {
 		}
 
 		//Check permissions on existing method
-
 		if (Controller::getCheckPermissions() && !$this->checkPermissions()) {
 			//TODO Add a permission denied hook to give the controller a chance to handle the permission denied
 			Controller::whoops('Permission Denied', array('message' => 'You do not have permission to ' . Controller::$action . ' ' . get_class($this)));

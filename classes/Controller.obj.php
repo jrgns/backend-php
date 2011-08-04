@@ -205,10 +205,28 @@ class Controller {
 		}
 		$controller = class_exists($control_name, true) ? new $control_name() : false;
 		if (!($controller instanceof AreaCtl && Component::isActive($control_name))) {
-			Controller::whoops('Component ' . $control_name . ' is Inactive or Invalid', array('message' => 'The requested component doesn\'t exist or is inactive.', 'code_hint' => 404));
-			self::$area   = ConfigValue::get('DefaultErrorController', 'home');
-			self::$action = ConfigValue::get('DefaultErrorAction', 'error');
-			$control_name = class_name(self::$area);
+    		if (Backend::getDB('default')) {
+    		    //We have a DB
+			    Controller::whoops(
+			        'Component ' . $control_name . ' is Inactive or Invalid',
+			        array(
+			            'message' => 'The requested component doesn\'t exist or is inactive.',
+			            'code_hint' => 404
+		            )
+	            );
+			    self::$area   = ConfigValue::get('DefaultErrorController', 'home');
+			    self::$action = ConfigValue::get('DefaultErrorAction', 'error');
+			    $control_name = class_name(self::$area);
+		    } else {
+		        //No DB, allow Content to check if the template exists
+			    self::$parameters[0] = self::$area . '/' . self::$action;
+			    if (count(self::$parameters[0]) > 1) {
+			        self::$parameters = array(self::$parameters[0]);
+			    }
+			    self::$area   = ConfigValue::get('DefaultErrorController', 'content');
+			    self::$action = ConfigValue::get('DefaultErrorAction', 'display');
+			    $control_name = class_name(self::$area);
+		    }
 		}
 
 		$controller = class_exists($control_name, true) ? new $control_name() : false;
