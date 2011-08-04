@@ -62,7 +62,7 @@ class ConfigValue extends Value {
 				'file' => Backend::getConfigFileLocation(),
 				'group'  => isset($group) ? $group : false,
 			);
-			Backend::addContent(Render::renderFile('config_value.fix_config.tpl.php', $values));
+			Backend::addContent(Render::file('config_value.fix_config.tpl.php', $values));
 			return false;
 		}
 
@@ -83,9 +83,9 @@ class ConfigValue extends Value {
 				}
 			}
 			self::set('settings.ConfigValueSet', $result);
-			return $result;
+			Controller::redirect();
 		}
-		Backend::addContent(Render::renderFile('config_value.values.tpl.php'));
+		Backend::addContent(Render::file('config_value.values.tpl.php'));
 		return false;
 	}
 

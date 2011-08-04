@@ -1,5 +1,5 @@
 <form method="post">
-	<input type="hidden" name="q" value="admin/pre_install">
+	<input type="hidden" name="q" value="admin/check_install">
 	<label>Application Name</label><br>
 	<input class="title" name="application.Title"><br>
 	<label>Moto</label><br>
@@ -15,7 +15,7 @@
 	<input class="text" name="author.Email"><br>
 	<label>Owner Website</label><br>
 	<input class="text" name="author.Website"><br>
-	
+
 	<input type="submit" value="Set Values">
 </form>
 <hr class="space">
