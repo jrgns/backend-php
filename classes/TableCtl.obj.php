@@ -1045,7 +1045,8 @@ class TableCtl extends AreaCtl {
 		if ($id) {
 			return call_user_func(array($obj_name, 'retrieve'), $id, 'dbobject');
 		} else {
-			return call_user_func(array($obj_name, 'retrieve'));
+		    $obj_name .= 'Obj';
+		    return new $obj_name();
 		}
 	}
 
