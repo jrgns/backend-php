@@ -419,9 +419,9 @@ class TableCtl extends AreaCtl {
 		$result = true;
 		//We need to check if the post data is valid in some way?
 		$data = $object->fromRequest();
-		$data = Hook::run('create', 'pre', array($data, $object), array('toret' => $data));
+		$data = Hook::run('table_create', 'pre', array($data, $object), array('toret' => $data));
 		if ($object->create($data)) {
-			Hook::run('create', 'post', array($data, $object));
+			Hook::run('table_create', 'post', array($data, $object));
 			Backend::addSuccess($object->getMeta('name') . ' Added');
 			$result = $object;
 		} else {
@@ -531,9 +531,9 @@ class TableCtl extends AreaCtl {
 		$result = true;
 		//We need to check if the post data is valid in some way?
 		$data = $object->fromRequest();
-		$data = Hook::run('replace', 'pre', array($data, $object), array('toret' => $data));
+		$data = Hook::run('table_replace', 'pre', array($data, $object), array('toret' => $data));
 		if ($object->replace($data)) {
-			Hook::run('replace', 'post', array($data, $object));
+			Hook::run('table_replace', 'post', array($data, $object));
 			Backend::addSuccess($object->getMeta('name') . ' Added');
 			$result = $object;
 		} else {
@@ -644,10 +644,10 @@ class TableCtl extends AreaCtl {
 			return false;
 		}
 
-		$result = true;
 		$data = $object->array;
+		$data = Hook::run('table_update', 'pre', array($data, $object), array('toret' => $data));
 		Backend::add('values', $data);
-		return $result;
+		return true;
 	}
 
 	public function post_update($id) {
@@ -668,8 +668,9 @@ class TableCtl extends AreaCtl {
 		$result = true;
 		//We need to check if the post data is valid in some way?
 		$data = $object->fromRequest();
-		$data = Hook::run('update', 'pre', array($data, $object), array('toret' => $data));
+		$data = Hook::run('table_update', 'pre', array($data, $object), array('toret' => $data));
 		if ($object->update($data) !== false) {
+    		$data = Hook::run('table_update', 'post', array($data, $object), array('toret' => $data));
 			$result = $object;
 			Backend::addSuccess($object->getMeta('name') . ' Modified');
 		} else {

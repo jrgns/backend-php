@@ -15,7 +15,7 @@ class Tag extends TableCtl {
 		$links = $action == 'display' ? array() : parent::getTabLinks($action);
 		return $links;
 	}
-	
+
 	public static function getTags($table, $table_id = null) {
 		if (is_null($table_id)) {
 			if (!$table instanceof DBObject) {
@@ -31,8 +31,15 @@ class Tag extends TableCtl {
 			->filter('`tag_links`.`foreign_id` = :id');
 		return $query->fetchAll(array(':table' => $table, ':id' => $table_id));
 	}
-	
-	public static function getTagNames($table, $table_id) {
+
+	public static function getTagNames($table, $table_id = null) {
+		if (is_null($table_id)) {
+			if (!$table instanceof DBObject) {
+				return false;
+			}
+			$table_id = $table->getMeta('id');
+			$table    = $table->getMeta('table');
+		}
 		$query = new SelectQuery('Tag');
 		$query
 			->field('`tags`.`id`, `tags`.`name`')
@@ -48,7 +55,7 @@ class Tag extends TableCtl {
 		}
 		return $result;
 	}
-	
+
 	public static function removeTags($table, $table_id) {
 		/* TODO
 		$query = new SelectQuery('Tag');
@@ -58,7 +65,7 @@ class Tag extends TableCtl {
 			->filter('`tag_links`.`foreign_id` = :id');
 		return $query->fetchAll(array(':table' => $table, ':id' => $table_id));*/
 	}
-	
+
 	/**
 	 * Tag a data record with one or multiple tags
 	 *
@@ -82,7 +89,7 @@ class Tag extends TableCtl {
 		}
 		return $result;
 	}
-	
+
 	/**
 	 * Check if a tag exists for a specified Area, add it if it doesn't
 	 */
@@ -90,7 +97,7 @@ class Tag extends TableCtl {
 		if ($area instanceof DBObject) {
 			$area = $area->getMeta('table');
 		}
-		
+
 		//Check if tag exists
 		$query = new SelectQuery('Tag');
 		$query
@@ -99,7 +106,7 @@ class Tag extends TableCtl {
 		if ($tag = $query->fetchAssoc(array(':tag' => $name, ':table' => $area))) {
 			return $tag;
 		}
-		
+
 		//Tag doesn't already exist
 		$data = array(
 			'name'          => $name,
@@ -112,13 +119,14 @@ class Tag extends TableCtl {
 		}
 		return false;
 	}
-	
-	public function action_display($id, $start = 0, $count = false) {
+
+	public function get_display($id, $start = 0, $count = false) {
 		$options['start'] = $start;
 		$options['count'] = $count === false ? Value::get('list_length', 5) : $count;
-		return self::get($id, $options);
+		$object = self::get($id, $options);
+		return $object;
 	}
-	
+
 	public static function get($id, array $options = array()) {
 		$tag = Tag::retrieve($id, 'dbobject');
 		if (!$tag || !$tag->array) {
@@ -142,28 +150,29 @@ class Tag extends TableCtl {
 			->limit("$start, $count");
 
 		$params = array(
-			':tag_id' => $tag->array['id']
+			':tag_id' => $tag->getMeta('id')
 		);
 		$links->load(array('mode' => 'list', 'query' => $query, 'parameters' => $params));
 		$tag->array['list'] = $links->list;
 		$tag->array['list_count'] = $links->list_count;
 		return $tag;
 	}
-	
+
 	public function html_display($result) {
-		$result = parent::html_display($result);
 		if (!($result instanceof DBObject)) {
-			return $result;
+			return parent::html_display($result);
 		}
+
 		Backend::add('Sub Title', $result->array['name']);
-		if (Render::checkTemplateFile('tag.' . $result->array['foreign_table'] . '.list.tpl.php')) {
-			Backend::addContent(Render::renderFile('tag.' . $result->array['foreign_table'] . '.list.tpl.php'));
-		} else {
-			Backend::addContent(Render::renderFile('tag.display.list.tpl.php'));
+		$foreign_template = 'tag.' . class_for_url($result->array['foreign_table']);
+		$foreign_template .= '.list.tpl.php';
+		if (!Render::checkTemplateFile($foreign_template)) {
+			$foreign_template = 'tag.display.list.tpl.php';
 		}
-		return $result;
+		Backend::add('tag_list_template', $foreign_template);
+		return parent::html_display($result);
 	}
-	
+
 	private function feed_display($result, $mode) {
 		if (!($result instanceof DBObject)) {
 			return $result;
@@ -204,18 +213,6 @@ class Tag extends TableCtl {
 		return $this->feed_display($result, 'atom');
 	}
 
-	/*
-	public static function hook_form($object) {
-		if (Controller::$area == 'content' && in_array(Controller::$action, array('create', 'update'))) {
-			$tags = self::getTags($object->array['id']);
-			//Don't add Content, only render it.
-			Backend::add('obj_tags', $tags);
-			echo Render::renderFile('tags_form.tpl.php');
-		}
-		return $object;
-	}
-	*/
-
 	public static function hook_post_table_display($object) {
 		if (!($object instanceof DBObject)) {
 			return $object;
@@ -223,13 +220,12 @@ class Tag extends TableCtl {
 		if ($object instanceof DBObject && Controller::$area == 'content' && in_array(Controller::$action, array('display'))) {
 			$tags = self::getTags($object);
 			//Don't add Content, only render it.
-			Backend::add('obj_tags', $tags);
-			Backend::addContent(Render::renderFile('tags.tpl.php'));
+			Backend::add('tags', $tags);
 		}
 		return $object;
 	}
 
-	public static function hook_post_create($data, $object) {
+	public static function hook_post_table_create($data, $object) {
 		if (!($object instanceof DBObject) || !is_post()) {
 			return $data;
 		}
@@ -240,7 +236,14 @@ class Tag extends TableCtl {
 		return $data;
 	}
 
-	public static function hook_post_update($data, $object) {
+	public static function hook_table_update($data, $object) {
+	    $tags = self::getTagNames($object);
+	    $tags = implode(', ', $tags);
+	    Backend::add('tags', $tags);
+	    return $data;
+	}
+
+	public static function hook_post_table_update($data, $object) {
 		if (!($object instanceof DBObject) || !is_post()) {
 			return true;
 		}
@@ -251,7 +254,7 @@ class Tag extends TableCtl {
 		}
 		return true;
 	}
-	
+
 	public static function checkParameters($parameters) {
 		$parameters = parent::checkParameters($parameters);
 		if (Controller::$action == 'display') {
@@ -271,15 +274,15 @@ class Tag extends TableCtl {
 	public static function install(array $options = array()) {
 		$toret = parent::install($options);
 
-		$toret = Permission::add('anonymous', 'display', __CLASS__) && $toret;
-		$toret = Permission::add('authenticated', 'display', __CLASS__) && $toret;
-		$toret = Permission::add('anonymous', 'list', __CLASS__) && $toret;
-		$toret = Permission::add('authenticated', 'list', __CLASS__) && $toret;
-		
-		$toret = Hook::add('form',    'pre',  __CLASS__, array('global' => 1)) && $toret;
-		$toret = Hook::add('table_display', 'post', __CLASS__, array('global' => 1)) && $toret;
-		$toret = Hook::add('update',  'post', __CLASS__, array('global' => 1)) && $toret;
-		$toret = Hook::add('create',  'post', __CLASS__, array('global' => 1)) && $toret;
+		$toret = Permission::add('anonymous', 'display', get_called_class()) && $toret;
+		$toret = Permission::add('authenticated', 'display', get_called_class()) && $toret;
+		$toret = Permission::add('anonymous', 'list', get_called_class()) && $toret;
+		$toret = Permission::add('authenticated', 'list', get_called_class()) && $toret;
+
+		$toret = Hook::add('table_display', 'post', get_called_class(), array('global' => 1)) && $toret;
+		$toret = Hook::add('table_update',  'pre',  get_called_class(), array('global' => 1)) && $toret;
+		$toret = Hook::add('table_update',  'post', get_called_class(), array('global' => 1)) && $toret;
+		$toret = Hook::add('table_create',  'post', get_called_class(), array('global' => 1)) && $toret;
 
 		return $toret;
 	}

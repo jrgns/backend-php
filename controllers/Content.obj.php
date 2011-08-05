@@ -108,7 +108,7 @@ class Content extends CommentedController {
 			    Backend::addNotice('Content ID: ' . $result->object->id);
 		    }
 
-		    $object = Hook::run('table_display', 'post', array($toret), array('toret' => $result));
+		    $object = Hook::run('table_display', 'post', array($result), array('toret' => $result));
 		    return $result;
 	    } else {
 	        //DB less content

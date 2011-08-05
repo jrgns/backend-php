@@ -4,5 +4,6 @@
 			<?php echo $db_object->array['description'] ?>
 		</div>
 		<hr/>
-	<?php endif;
-endif; ?>
+	<?php endif; ?>
+<?php endif; ?>
+<?php echo Render::file($tag_list_template, array('db_object' => $db_object)) ?>
