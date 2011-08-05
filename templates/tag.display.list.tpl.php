@@ -26,6 +26,7 @@ if (!empty($db_object->array['list']) && is_array($db_object->array['list'])):
 		    <?php endif; ?>
 	    </div>
 	<?php endforeach; ?>
+	{tpl:tag.list_paging.tpl.php}
 <?php else: ?>
     <p>No items to display</p>
 <?php endif; ?>
