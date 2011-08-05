@@ -40,7 +40,7 @@ class PersistUser extends TableCtl {
 		}
 		return false;
 	}
-	
+
 	public static function check() {
 		if (!empty($_COOKIE['remembered'])) {
 			$query = new SelectQuery('PersistUser');
@@ -50,13 +50,16 @@ class PersistUser extends TableCtl {
 			if ($persist) {
 				//Get User
 				$User = self::getObject('BackendUser');
+				if (!($User instanceof DBObject)) {
+				    return false;
+				}
 
 				$query = BackendUser::getQuery();
 				$query->filter('`users`.`id` = :id');
 				$params = array(':id' => $persist['user_id']);
 
 				$User->read(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
-				
+
 				if ($User->object) {
 					$_SESSION['BackendUser'] = $User->object;
 					//Remove, and reremember
@@ -76,8 +79,8 @@ class PersistUser extends TableCtl {
 			}
 		}
 		return false;
-	}	
-	
+	}
+
 	public static function forget($user) {
 		$query = new DeleteQuery('PersistUser');
 		$query->filter('`user_id` = :id');
