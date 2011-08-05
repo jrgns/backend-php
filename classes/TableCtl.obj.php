@@ -893,8 +893,8 @@ class TableCtl extends AreaCtl {
 				Backend::add('Sub Title', 'Import ' . $result->getMeta('name'));
 			}
 			$template_file = array(
-				$object->getArea() . '.import.tpl.php',
-				$object->getArea() . '/import.tpl.php',
+				$result->getArea() . '.import.tpl.php',
+				$result->getArea() . '/import.tpl.php',
 			);
 			if (!Render::checkTemplateFile($template_file[0]) && !Render::checkTemplateFile($template_file[1])) {
 				$template_file = 'std_import.tpl.php';
