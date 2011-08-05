@@ -170,7 +170,7 @@ function singularize($string) {
 *
 */
 function humanize($string) {
-	$string = str_replace('_', ' ', $string);
+	$string = str_replace(array('-', '_'), ' ', $string);
 	$string = ucwords($string);
 	return $string;
 }

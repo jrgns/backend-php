@@ -58,15 +58,16 @@ class Content extends CommentedController {
 	}
 
 	public function get_create($id = false) {
-		$obj = Controller::getVar('obj');
-		$obj = $obj ? $obj : array();
+		$result = parent::get_create();
+		$values = Backend::get('values');
+		$values = $values ? $values : array();
 		if (!empty($id)) {
-			$obj['name']   = $id;
-			$obj['title']  = humanize($id);
+			$values['name']   = $id;
+			$values['title']  = humanize($id);
 		}
-		$obj['active'] = 1;
-		Controller::setVar('obj', $obj);
-		return parent::get_create();
+		$values['active'] = 1;
+		Backend::add('values', $values);
+		return $result;
 	}
 
 	public function post_create($id = false) {
@@ -117,7 +118,6 @@ class Content extends CommentedController {
 	        );
 		    if (Render::checkTemplateFile($template_file[0])) {
 			    Backend::addContent(Render::file($template_file[0]));
-
 		    } else if (Render::checkTemplateFile($template_file[1])) {
 			    Backend::addContent(Render::file($template_file[1]));
 		    } else {
