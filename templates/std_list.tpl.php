@@ -8,6 +8,9 @@
 		$fields   = $db_object->getMeta('fields');
 	}
 	$fields       = array_keys($fields);
+	if ($desc_index = array_search('description', $fields)) {
+	    unset($fields[$desc_index]);
+	}
 	$area         = empty($area)         ? Controller::$area          : $area;
 	$action       = empty($action)       ? Controller::$action        : $action;
 	$list_start   = !isset($list_start)  ? Controller::$parameters[0] : $list_start;
@@ -43,6 +46,9 @@
 			<?php if ($list): ?>
 				<?php foreach($list as $row):
 					$odd = !$odd;
+					if (array_key_exists('description', $row)) {
+					    unset($row['description']);
+					}
 					?>
 					<tr class="<?php echo $odd ? '' : 'even' ?>">
 						<td><?php echo implode('</td><td>', $row) ?></td>
