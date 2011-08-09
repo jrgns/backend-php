@@ -372,5 +372,5 @@ if (!function_exists('lcfirst')) {
 }
 
 function inline_markdown($string) {
-	return function_exists('markdown') ? preg_replace('/^<p>(.*)<\/p>$/', '$1', markdown($string)) : $string;
+	return function_exists('markdown') ? preg_replace('/<p>(.*?)<\/p>$/', '<p class="bottom">$1</p>', markdown($string)) : $string;
 }
