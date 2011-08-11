@@ -67,7 +67,14 @@ class HtmlView extends View {
 			Backend::addContent($content);
 		}
 
-		$to_print = Render::file('index.tpl.php');
+		$layout   = Backend::get('HTMLLayout', 'index');
+		if (!Render::checkTemplateFile($layout . '.tpl.php')) {
+		    if (SITE_STATE != 'production') {
+		        Backend::addError('Missing Layout ' . $layout);
+		    }
+		    $layout = 'index';
+		}
+		$to_print = Render::file($layout . '.tpl.php');
 
 		$to_print = self::addLastContent($to_print);
 		$to_print = self::replace($to_print);
