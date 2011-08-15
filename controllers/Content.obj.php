@@ -28,15 +28,15 @@ class Content extends CommentedController {
 	private function feed_list($result, $mode) {
 		if ($result instanceof DBObject) {
 			Backend::add('title', Backend::getConfig('application.Title'));
-			Backend::add('link', SITE_LINK . '?q=content');
+			Backend::add('link', SITE_LINK . '/?q=content');
 			Backend::add('description', Backend::getConfig('application.description'));
 			if (!empty($result->list) && is_array($result->list)) {
 				$list = array();
 				foreach($result->list as $item) {
 					if (Value::get('clean_urls', false)) {
-						$item['link'] = SITE_LINK . 'content/' . $item['id'];
+						$item['link'] = SITE_LINK . '/content/' . $item['id'];
 					} else {
-						$item['link'] = SITE_LINK . '?q=content/' . $item['id'];
+						$item['link'] = SITE_LINK . '/?q=content/' . $item['id'];
 					}
 					$item['body'] = Content::createPreview($item['body'], false);
 					$list[] = $item;

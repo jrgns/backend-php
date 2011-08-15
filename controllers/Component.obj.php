@@ -209,8 +209,8 @@ class Component extends TableCtl {
 		Backend::add('Sub Title', 'Manage Components');
 		Backend::add('result', $result);
 		Links::add('Admin', '?q=admin/index', 'secondary');
-		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
-		Backend::addScript(SITE_LINK . 'scripts/component.manage.js');
+		Backend::addScript(SITE_LINK . '/scripts/jquery.js');
+		Backend::addScript(SITE_LINK . '/scripts/component.manage.js');
 		Backend::addContent(Render::renderFile('component.manage.tpl.php'));
 	}
 	

@@ -20,29 +20,29 @@ class Image extends File {
 		$extension = end($extension);
 		Backend::add('TabLinks', $this->getTabLinks(Controller::$action));
 		Backend::add('Sub Title', $image->array['name']);
-		Backend::addContent('<div class="image_container"><img src="' . SITE_LINK . '?q=image/read/' . $image->array['id'] . '.' . $extension . '" title="' . $image->array['title'] . '" alt="' . $image->array['title'] . '" /></div>');
+		Backend::addContent('<div class="image_container"><img src="' . SITE_LINK . '/?q=image/read/' . $image->array['id'] . '.' . $extension . '" title="' . $image->array['title'] . '" alt="' . $image->array['title'] . '" /></div>');
 	}
 	
 	public function html_list($content) {
 		Backend::add('Sub Title', $content->getMeta('name'));
 		Backend::add('TabLinks', $this->getTabLinks(Controller::$action));
 		Backend::add('Object', $content);
-		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
-		Backend::addScript(SITE_LINK . 'scripts/image_list.js');
-		Backend::addStyle(SITE_LINK . 'styles/image_list.css');
+		Backend::addScript(SITE_LINK . '/scripts/jquery.js');
+		Backend::addScript(SITE_LINK . '/scripts/image_list.js');
+		Backend::addStyle(SITE_LINK . '/styles/image_list.css');
 		Backend::addContent(Render::renderFile('image.list.tpl.php'));
 	}
 	
 	private function feed_list($result, $mode) {
 		if ($result instanceof DBObject) {
 			Backend::add('title', Backend::getConfig('application.Title'));
-			Backend::add('link', SITE_LINK . '?q=content');
+			Backend::add('link', SITE_LINK . '/?q=content');
 			Backend::add('description', Backend::getConfig('application.description'));
 			if (!empty($result->list) && is_array($result->list)) {
 				$list = array();
 				foreach($result->list as $item) {
-					$item['link'] = SITE_LINK . '?q=image/' . $item['id'];
-					$item['body'] = '<img src="' . SITE_LINK . '?q=image/' . $item['id'] . '">';
+					$item['link'] = SITE_LINK . '/?q=image/' . $item['id'];
+					$item['body'] = '<img src="' . SITE_LINK . '/?q=image/' . $item['id'] . '">';
 					$list[] = $item;
 				}
 			} else {

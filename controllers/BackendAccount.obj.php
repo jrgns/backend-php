@@ -353,7 +353,7 @@ class BackendAccount extends TableCtl {
 	}
 
 	protected function confirmUser($object) {
-		$url = SITE_LINK . '?q=' . class_for_url(self::getName()) . '/confirm/' . $object->array['salt'];
+		$url = SITE_LINK . '/?q=' . class_for_url(self::getName()) . '/confirm/' . $object->array['salt'];
 		$app_name = Backend::getConfig('application.Title');
 		$message = <<< END
 Hi {$object->array['name']}!

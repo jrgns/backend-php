@@ -72,7 +72,7 @@ class BackendSitemap extends AreaCtl {
 			if (Value::get('clean_urls', false)) {
 				$url = SITE_LINK . class_for_url($object) . '/' . $id;
 			} else {
-				$url = SITE_LINK . '?q=' . class_for_url($object) . '/' . $id;
+				$url = SITE_LINK . '/?q=' . class_for_url($object) . '/' . $id;
 			}
 			$row['url'] = $url;
 			fwrite($fp, Render::renderFile('sitemap_link.tpl.php', array('link' => $row)));
@@ -80,7 +80,7 @@ class BackendSitemap extends AreaCtl {
 		if (Value::get('clean_urls', false)) {
 			$url = SITE_LINK . class_for_url($object) . '/';
 		} else {
-			$url = SITE_LINK . '?q=' . class_for_url($object) . '/';
+			$url = SITE_LINK . '/?q=' . class_for_url($object) . '/';
 		}
 		$link = array('url' => $url, 'modified' => date('Y-m-d H:i:s', $last_date), 'priority' => 0.8, 'frequency' => 'daily');
 		fwrite($fp, Render::renderFile('sitemap_link.tpl.php', array('link' => $link)));

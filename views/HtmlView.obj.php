@@ -97,7 +97,7 @@ class HtmlView extends View {
 	 *
 	 */
 	public static function hook_post_display($data, $controller) {
-		Backend::addScript(SITE_LINK . 'scripts/backend.js');
+		Backend::addScript(SITE_LINK . '/scripts/backend.js');
 		//TODO Add site_link, and other vars, as JS vars
 		Backend::addScriptContent('var site_link = \'' . SITE_LINK . '\';');
 		//TODO if someone can land a script file in the correct place, he can insert JS at will...
@@ -120,11 +120,11 @@ class HtmlView extends View {
 		//Make sure that jquery and backend is right at the top
 		$scripts = array_unique(array_filter(Backend::getScripts()));
 		$against = array();
-		if (in_array(SITE_LINK . 'scripts/jquery.js', $scripts)) {
-			$against[] = SITE_LINK . 'scripts/jquery.js';
+		if (in_array(SITE_LINK . '/scripts/jquery.js', $scripts)) {
+			$against[] = SITE_LINK . '/scripts/jquery.js';
 		}
-		if (in_array(SITE_LINK . 'scripts/backend.js', $scripts)) {
-			$against[] = SITE_LINK . 'scripts/backend.js';
+		if (in_array(SITE_LINK . '/scripts/backend.js', $scripts)) {
+			$against[] = SITE_LINK . '/scripts/backend.js';
 		}
 		$scripts = array_unique(array_merge($against, $scripts));
 		

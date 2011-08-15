@@ -221,8 +221,8 @@ class TableCtl extends AreaCtl {
 			Backend::add('Sub Title', $object->getMeta('name'));
 		}
 
-		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
-		Backend::addScript(SITE_LINK . 'scripts/table_list.js');
+		Backend::addScript(SITE_LINK . '/scripts/jquery.js');
+		Backend::addScript(SITE_LINK . '/scripts/table_list.js');
 		$template_file = $object->getArea() . '.list.tpl.php';
 		if (Render::checkTemplateFile($template_file)) {
 			Backend::addContent(Render::renderFile($template_file));
@@ -343,8 +343,8 @@ class TableCtl extends AreaCtl {
 		}
 		Backend::add('term', Controller::$parameters[0]);
 
-		Backend::addScript(SITE_LINK . 'scripts/jquery.js');
-		Backend::addScript(SITE_LINK . 'scripts/table_list.js');
+		Backend::addScript(SITE_LINK . '/scripts/jquery.js');
+		Backend::addScript(SITE_LINK . '/scripts/table_list.js');
 
 		$template_file = $object->getArea() . '.search_results.tpl.php';
 		if (!Render::checkTemplateFile($template_file)) {
