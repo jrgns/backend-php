@@ -1004,17 +1004,18 @@ class TableCtl extends AreaCtl {
 		if (Controller::$action == 'index') {
 			Controller::setAction('list');
 		}
-		//Defaults for List
-		if (Controller::$action == 'list') {
+		switch (Controller::$action) {
+		case 'list':
+		    //Defaults for List
 			if (!isset(Controller::$parameters[0])) {
 				$parameters[0] = 0;
 			}
 			if (!isset(Controller::$parameters[1])) {
 				$parameters[1] = Value::get('list_length', 5);
 			}
-		}
-		//Defaults for Search
-		if (Controller::$action == 'search') {
+			break;
+		case 'search':
+    		//Defaults for Search
 			//Get the search term from the request variable. It's always the first parameter
 			if ($term = Controller::getVar('term')) {
 				array_unshift($parameters, $term);
@@ -1029,6 +1030,7 @@ class TableCtl extends AreaCtl {
 				$count = Controller::getVar('count', FILTER_VALIDATE_INT);
 				$parameters[2] = is_null($count) ? Value::get('list_length', 5) : $count;
 			}
+			break;
 		}
 		//Get the delete_id from the request variable
 		if (Controller::$action == 'delete' && empty($parameters[0]) && ($delete_id = Controller::getVar('delete_id', FILTER_VALIDATE_INT))) {

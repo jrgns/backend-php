@@ -131,11 +131,13 @@ class Content extends CommentedController {
 		if ($content instanceof DBObject) {
 			Backend::add('Sub Title', $content->array['title']);
 			if ($content->array['from_file']) {
-				//Move this to the object
+				//Move this to the object ??
 				$filename = 'content/static/' . $content->array['name'] . '.html';
 				$template = 'content/' . $content->array['name'] . '.tpl.php';
 				if (Render::checkTemplateFile($template)) {
 					$content->object->body = Render::renderFile($template);
+				} else if (file_exists(SITE_FOLDER . '/' . $filename)) {
+					$content->object->body = file_get_contents(APP_FOLDER . '/' . $filename);
 				} else if (file_exists(APP_FOLDER . '/' . $filename)) {
 					$content->object->body = file_get_contents(APP_FOLDER . '/' . $filename);
 				} else if (file_exists(BACKEND_FOLDER . '/' . $filename)) {
@@ -170,7 +172,7 @@ class Content extends CommentedController {
 		}
 	}
 
-	public function action_search($start, $count, $term, array $options = array()) {
+	public function action_search($term, $start, $count, array $options = array()) {
 		if (Component::isActive('BackendSearch')) {
 			$result = array('term' => $term);
 			if ($term) {
@@ -276,6 +278,13 @@ class Content extends CommentedController {
 			->filter('`active` = 1');
 		$list = $query->fetchAll();
 		return array('list' => $list, 'options' => array());
+	}
+
+	public function daily($options) {
+	    if (Component::isActive('BackendSearch')) {
+	        BackendSearch::doIndex($this, array('name', 'title', 'markdown'));
+	    }
+	    return true;
 	}
 
 	public static function checkParameters($parameters) {
