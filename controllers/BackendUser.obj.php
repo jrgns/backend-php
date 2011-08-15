@@ -464,7 +464,7 @@ END;
 	}
 
 	public static function check() {
-		if (!empty(self::$current_user)) {
+		if (!empty(self::$current_user) && is_object(self::$current_user)) {
 			return self::$current_user;
 		}
 		if (!empty($_SESSION['BackendUser']) && is_object($_SESSION['BackendUser']) && $_SESSION['BackendUser']->id > 0) {

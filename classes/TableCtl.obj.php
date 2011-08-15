@@ -822,67 +822,73 @@ class TableCtl extends AreaCtl {
 	/**
 	 * Action for importing records in an area
 	 */
-	public function action_import($data = false) {
+
+	public function get_import() {
 		$obj_name = (class_name(Controller::$area) . 'Obj');
-		if (class_exists($obj_name, true)) {
-			$object = new $obj_name();
-			if (is_post()) {
-				if (empty($_FILES) || !array_key_exists('import_file', $_FILES)) {
-					Backend::addError('There is a problem with the HTML Form');
-					return false;
-				}
-				$file = $_FILES['import_file'];
-				if ($file['error']) {
-					switch($file['error']) {
-					case UPLOAD_ERR_INI_SIZE:
-						$msg = 'File exceeds PHP size limit';
-						break;
-					case UPLOAD_ERR_FORM_SIZE:
-						$msg = 'File exceeds form size limit';
-						break;
-					case UPLOAD_ERR_PARTIAL:
-						$msg = 'File unload partially uploaded';
-						break;
-					case UPLOAD_ERR_NO_FILE:
-						$msg = 'No file uploaded';
-						break;
-					case UPLOAD_ERR_NO_TMP_DIR:
-						$msg = 'Temporary folder doesn\'t exist';
-						break;
-					case UPLOAD_ERR_CANT_WRITE:
-						$msg = 'Can\'t create temporary file';
-						break;
-					case UPLOAD_ERR_EXTENSION:
-						$msg = 'File upload prohibited by PHP extension';
-						break;
-					}
-					Backend::addError('Could not upload file: ' . $msg);
-					return false;
-				}
-				if (!in_array($file['type'], array('text/csv', 'application/octet-stream'))) {
-					Backend::addError('This import can only handle CSV files. The uploaded file is ' . $file['type']);
-					return false;
-				}
-				$importer_name = get_class($this) . 'Importer';
-				if (!class_exists($importer_name, true)) {
-					$importer_name = 'GenericImporter';
-				}
-				$count = call_user_func_array(array($importer_name, 'import'), array($this, $file['tmp_name'], $data));
-				$error = call_user_func(array($importer_name, 'getLastError'));
-				if (!empty($error)) {
-					if (!$count) {
-						Backend::addError($error);
-					} else {
-						Backend::addNotice($error);
-					}
-				}
-				return $count;
-			}
-			return $object;
-		} else {
+		if (!class_exists($obj_name, true)) {
 			Controller::whoops();
+    		return false;
 		}
-		return false;
+		$object = new $obj_name();
+		return $object;
+	}
+	public function post_import($data = false) {
+		$obj_name = (class_name(Controller::$area) . 'Obj');
+		if (!class_exists($obj_name, true)) {
+			Controller::whoops();
+    		return false;
+		}
+		$object = new $obj_name();
+		if (empty($_FILES) || !array_key_exists('import_file', $_FILES)) {
+			Backend::addError('There is a problem with the HTML Form');
+			return false;
+		}
+		$file = $_FILES['import_file'];
+		if ($file['error']) {
+			switch($file['error']) {
+			case UPLOAD_ERR_INI_SIZE:
+				$msg = 'File exceeds PHP size limit';
+				break;
+			case UPLOAD_ERR_FORM_SIZE:
+				$msg = 'File exceeds form size limit';
+				break;
+			case UPLOAD_ERR_PARTIAL:
+				$msg = 'File unload partially uploaded';
+				break;
+			case UPLOAD_ERR_NO_FILE:
+				$msg = 'No file uploaded';
+				break;
+			case UPLOAD_ERR_NO_TMP_DIR:
+				$msg = 'Temporary folder doesn\'t exist';
+				break;
+			case UPLOAD_ERR_CANT_WRITE:
+				$msg = 'Can\'t create temporary file';
+				break;
+			case UPLOAD_ERR_EXTENSION:
+				$msg = 'File upload prohibited by PHP extension';
+				break;
+			}
+			Backend::addError('Could not upload file: ' . $msg);
+			return false;
+		}
+		if (!in_array($file['type'], array('text/csv', 'application/octet-stream'))) {
+			Backend::addError('This import can only handle CSV files. The uploaded file is ' . $file['type']);
+			return false;
+		}
+		$importer_name = get_class($this) . 'Importer';
+		if (!class_exists($importer_name, true)) {
+			$importer_name = 'GenericImporter';
+		}
+		$count = call_user_func_array(array($importer_name, 'import'), array($this, $file['tmp_name'], $data));
+		$error = call_user_func(array($importer_name, 'getLastError'));
+		if (!empty($error)) {
+			if (!$count) {
+				Backend::addError($error);
+			} else {
+				Backend::addNotice($error);
+			}
+		}
+		return $count;
 	}
 
 	public function html_import($result) {
