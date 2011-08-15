@@ -176,7 +176,7 @@ class Admin extends AreaCtl {
 		foreach($components as $component) {
 			if (is_callable(array($component['name'], 'continual'))) {
 				$object = new $component['name']();
-				$result = call_user_func_array(array($object, 'continual'), $options) && $result;
+				$result = call_user_func(array($object, 'continual'), $options) && $result;
 			}
 		}
 		return $result;
@@ -197,7 +197,7 @@ class Admin extends AreaCtl {
 		foreach($components as $component) {
 			if (is_callable(array($component['name'], 'daily'))) {
 				$object = new $component['name']();
-				$result = call_user_func_array(array($object, 'daily'), $options) && $result;
+				$result = call_user_func(array($object, 'daily'), $options) && $result;
 			}
 		}
 		return $result;
@@ -220,7 +220,7 @@ class Admin extends AreaCtl {
 		foreach($components as $component) {
 			if (is_callable(array($component['name'], 'weekly'))) {
 				$object = new $component['name']();
-				$result = call_user_func_array(array($object, 'weekly'), $options) && $result;
+				$result = call_user_func(array($object, 'weekly'), $options) && $result;
 			}
 		}
 		return $result;
