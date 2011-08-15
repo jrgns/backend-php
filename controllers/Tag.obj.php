@@ -238,7 +238,6 @@ class Tag extends TableCtl {
 
 	public static function hook_table_update($data, $object) {
 	    $tags = self::getTagNames($object);
-	    $tags = implode(', ', $tags);
 	    Backend::add('tags', $tags);
 	    return $data;
 	}
