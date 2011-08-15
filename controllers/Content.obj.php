@@ -254,17 +254,6 @@ class Content extends CommentedController {
 		}
 	}
 
-	public static function install(array $options = array()) {
-		$toret = parent::install($options);
-
-		$toret = Hook::add('init', 'pre', get_called_class(), array('global' => true)) && $toret;
-		$toret = Hook::add('table_display', 'pre', get_called_class()) && $toret;
-
-		$toret = Permission::add('anonymous', 'display', 'content') && $toret;
-		$toret = Permission::add('anonymous', 'list', 'content') && $toret;
-		return $toret;
-	}
-
 	protected function getTabLinks($action) {
 		if ($action != 'display') {
 			return parent::getTabLinks($action);
@@ -300,5 +289,16 @@ class Content extends CommentedController {
 			Controller::setAction('display');
 		}
 		return $parameters;
+	}
+
+	public static function install(array $options = array()) {
+		$toret = parent::install($options);
+
+		$toret = Hook::add('init', 'pre', get_called_class(), array('global' => true)) && $toret;
+		$toret = Hook::add('table_display', 'pre', get_called_class()) && $toret;
+
+		$toret = Permission::add('anonymous', TableCtl::$P_READONLY, get_called_class()) && $toret;
+		$toret = Permission::add('authenticated', TableCtl::$P_READONLY, get_called_class()) && $toret;
+		return $toret;
 	}
 }
