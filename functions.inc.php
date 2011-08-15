@@ -97,6 +97,7 @@ function update_links($content, $new_vars) {
 
 function redirect($where_to = false, $dont_die = false) {
 	if (!headers_sent()) {
+		header('X-Redirector: Controller-' . __LINE__);
 		if ($where_to) {
 			header('Location: ' . $where_to);
 		} else {

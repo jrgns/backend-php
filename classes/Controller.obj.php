@@ -604,6 +604,7 @@ class Controller {
 					Backend::addSuccess('The script should now redirect to <a href="' . $location . '">here</a>');
 				} else {
 					//Redirect
+					header('X-Redirector: Controller-' . __LINE__);
 					header('Location: ' . $location);
 					die('redirecting to <a href="' . $location . '">');
 				}
