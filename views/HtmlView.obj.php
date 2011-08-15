@@ -286,9 +286,7 @@ class HtmlView extends View {
 		if (!Backend::getDB('default')) {
 			return true;
 		}
-
 		$result = true;
-		Hook::add('init', 'post', __CLASS__, array('global' => 1, 'mode' => 'html')) && $result;
 		return $result;
 	}
 }

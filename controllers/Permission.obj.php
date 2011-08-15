@@ -55,7 +55,7 @@ class Permission extends TableCtl {
 		}
 		$control = array_key_exists('control', $options) ? $options['control'] : '100';
 		$system  = array_key_exists('system',  $options) ? $options['system']  : 0;
-		
+
 		$data = array(
 			'role'       => $role,
 			'action'     => $action,
@@ -76,7 +76,7 @@ class Permission extends TableCtl {
 		}
 		return $toret;
 	}
-	
+
 	public static function check($action = '*', $subject = '*', $subject_id = 0) {
 		if (!BACKEND_WITH_DATABASE) {
 			return true;
@@ -86,12 +86,12 @@ class Permission extends TableCtl {
 		if (is_object($subject)) {
 			$subject = get_class($subject);
 		}
-		
+
 		$key = serialize(array($action, $subject, $subject_id));
 		if (array_key_exists($key, $cache)) {
 			//return $cache[$key];
 		}
-		
+
 		$roles = GateKeeper::permittedRoles($action, class_for_url($subject), $subject_id);
 		$user  = BackendUser::check();
 		$user  = (!$user && !empty($_SESSION['BackendUser'])) ? $_SESSION['BackendUser'] : $user;
@@ -132,12 +132,12 @@ class Permission extends TableCtl {
 		);
 		return $toret;
 	}
-	
+
 	public static function pre_install() {
 		$toret = self::installModel(__CLASS__ . 'Obj', array('drop_table' => true));
 		return $toret;
 	}
-	
+
 	public static function install(array $options = array()) {
 		$options['install_model'] = array_key_exists('install_model', $options) ? $options['install_model'] : false;
 		$toret = parent::install($options);
@@ -151,4 +151,3 @@ class Permission extends TableCtl {
 		return $toret;
 	}
 }
-

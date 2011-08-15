@@ -22,12 +22,12 @@ class Hook extends TableCtl {
 		$method      = array_key_exists('method', $options)      ? $options['method'] : 'hook_' . ($type == 'post' ? 'post_' : '') . strtolower($hook);
 		$global      = array_key_exists('global', $options)      ? $options['global'] : 0;
 		$sequence    = array_key_exists('sequence', $options)    ? $options['sequence'] : 0;
-		
+
 		//Certain hooks should be global
 		if (in_array($hook, array('init'))) {
 			$global = 1;
 		}
-		
+
 		$data = array(
 			'class'       => $class,
 			'hook'        => $hook,
@@ -74,7 +74,7 @@ class Hook extends TableCtl {
 		$query->order('`sequence`');
 		return $query->fetchAll($params);
 	}
-	
+
 	public static function run($hook_name, $type, array $parameters = array(), array $options = array()) {
 		$result       = array_key_exists('toret', $options) ? $options['toret'] : null;
 		//Specify what should be returned if the result of the hook is NULL
@@ -110,7 +110,7 @@ class Hook extends TableCtl {
 		}
 		return $result;
 	}
-	
+
 	public static function install(array $options = array()) {
 		$options['drop_table']    = array_key_exists('drop_table', $options) ? $options['drop_table'] : true;
 		$options['install_model'] = array_key_exists('install_model', $options) ? $options['install_model'] : false;
@@ -130,4 +130,3 @@ class Hook extends TableCtl {
 		return $result;
 	}
 }
-
