@@ -353,6 +353,11 @@ class Backend {
 				if (self::getConfig('backend.dsn_header', false)) {
 					header('X-DB-' . computerize($name) . '-DSN: ' . self::$DB[$name]['dsn']);
 				}
+				//Default to UTF8 encoding if none is set
+				$encoding = array_key_exists('encoding', self::$DB[$name]) ?
+				    self::$DB[$name]['encoding'] :
+				    'utf8';
+				self::$DB[$name]['connection']->setAttribute(PDO::MYSQL_ATTR_INIT_COMMAND, "SET NAMES '$encoding'");
 			} catch (Exception $e) {
 				if (array_key_exists('debug', $_REQUEST)) {
 					throw new ConnectToDBException($e->getMessage());
