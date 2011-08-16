@@ -290,6 +290,14 @@ class Query {
 		return $toret;
 	}
 
+	public function fetchObj(array $parameters = array(), array $options = array()) {
+		$toret = $this->execute($parameters);
+		if ($toret) {
+			$toret = $toret->fetch(PDO::FETCH_OBJ);
+		}
+		return $toret;
+	}
+
 	/**
 	 * Return all the matching records
 	 *
