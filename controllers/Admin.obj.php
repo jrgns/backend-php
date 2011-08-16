@@ -128,11 +128,17 @@ class Admin extends AreaCtl {
 			return self::ERR_DB_CANT_CONNECT;
 		}
 		//Set the values
-		Backend::setConfig('database.alias', 'default');
-		Backend::setConfig('database.database', $database);
-		Backend::setConfig('database.username', $username);
-		Backend::setConfig('database.password', $password);
-		Backend::setConfig('database.hostname', $hostname);
+		$result = true;
+		$result = Backend::setConfig('database.alias', 'default') && $result;
+		$result = Backend::setConfig('database.database', $database) && $result;
+		$result = Backend::setConfig('database.username', $username) && $result;
+		$result = Backend::setConfig('database.password', $password) && $result;
+		$result = Backend::setConfig('database.hostname', $hostname) && $result;
+
+		if (!$result) {
+		    Backend::addError('Could not save DB Settings');
+		    return false;
+		}
 
 		//Add the DB settings to the Backend
 		Backend::addDB('default', array(
