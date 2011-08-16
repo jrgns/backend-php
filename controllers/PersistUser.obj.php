@@ -55,7 +55,7 @@ class PersistUser extends TableCtl {
 				}
 
 				$query = BackendUser::getQuery();
-				$query->filter('`users`.`id` = :id');
+				$query->filter('`backend_users`.`id` = :id');
 				$params = array(':id' => $persist['user_id']);
 
 				$User->read(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
