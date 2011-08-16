@@ -8,16 +8,24 @@
  * configuration file if no value exists.
  */
 class ConfigValue extends Value {
+    private static $cache = array();
 	/**
 	 * Get a configuration value.
 	 *
 	 * Config Value names should be CamelCase
 	 */
 	public static function get($name, $default = null) {
+	    if (array_key_exists($name, self::$cache)) {
+	        return self::$cache[$name];
+	    }
+	    if (array_key_exists('application.' . $name, self::$cache)) {
+	        return self::$cache['application.' . $name];
+	    }
 		if (defined('BACKEND_WITH_DATABASE') && BACKEND_WITH_DATABASE) {
 			$value = Value::get($name, null);
 			//Retrieved from the DB
 			if (!is_null($value)) {
+        		self::$cache[$name] = $result;
 				return $value;
 			}
 		}
@@ -26,10 +34,13 @@ class ConfigValue extends Value {
 			array_unshift($name, 'application');
 		}
 		//Check the config file
-		return Backend::getConfig($name, $default);
+		$result = Backend::getConfig($name, $default);
+		self::$cache[implode('.', $name)] = $result;
+		return $result;
 	}
 
 	public static function set($name, $value) {
+	    self::$cache[$name] = $value;
 		if (Component::isActive('Value')) {
 			return Value::set($name, $value);
 		}
