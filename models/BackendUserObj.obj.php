@@ -73,7 +73,7 @@ class BackendUserObj extends DBObject {
 		}
 		return $result;
 	}
-	
+
 	function validate($data, $action, $options = array()) {
 		$data = parent::validate($data, $action, $options);
 		if (!$data) {
@@ -105,5 +105,14 @@ class BackendUserObj extends DBObject {
 			break;
 		}
 		return $data;
+	}
+
+	public function getRetrieveSQL() {
+		list($query, $parameters)  = $this->getSelectSQL();
+
+		$filter = '`' . $this->getMeta('id_field') . '` = :parameter';
+		$filter .= ' OR `username` = :parameter';
+		$query->filter($filter);
+		return $query;
 	}
 }
