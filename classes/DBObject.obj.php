@@ -142,9 +142,12 @@ class DBObject {
 		}
 		foreach ($this->meta['relations'] as $name => $options) {
 			$class = array_key_exists('class', $options) ? $options['class'] : $name;
-			$count = array_intersect(self::$class_stack, array($class, $class . 'Obj'));
+			$count = array_intersect(self::$class_stack, array($name, $name . 'Obj'));
 			if ($count) {
 			    continue;
+		    } else {
+		        //Add the alias to the stack to prevent it from loading again
+		        array_push(self::$class_stack, $name . 'Obj');
 		    }
 			$type  = array_key_exists('type', $options)  ? $options['type']  : 'single';
 			if ($relation = $this->loadRelation($class, $options, $mode)) {
