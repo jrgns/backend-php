@@ -25,10 +25,10 @@ class WMD extends AreaCtl {
 	}
 
 	public static function enable() {
-		Backend::addScript(SITE_LINK . 'js/jquery.js');
-		Backend::addScript(SITE_LINK . 'js/wmd.component.js');
-		Backend::addScript(SITE_LINK . 'js/wmd/wmd.js');
-		Backend::addStyle(SITE_LINK . 'css/wmd.css');
+		Backend::addScript(SITE_LINK . '/js/jquery.js');
+		Backend::addScript(SITE_LINK . '/js/wmd.component.js');
+		Backend::addScript(SITE_LINK . '/js/wmd/wmd.js');
+		Backend::addStyle(SITE_LINK . '/css/wmd.css');
 	}
 
 	public static function install(array $options = array()) {

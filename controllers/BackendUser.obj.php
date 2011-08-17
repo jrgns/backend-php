@@ -38,7 +38,7 @@ class BackendUser extends TableCtl {
 	public static function authenticate($username, $password, $return_query = false) {
 		$query = self::getQuery();
 		$query
-			->filter('`backend_users`.`Username` = :username OR `backend_users`.`Mobile` = :username OR `backend_users`.`Email` = :username')
+			->filter('`backend_users`.`username` = :username OR `backend_users`.`Mobile` = :username OR `backend_users`.`Email` = :username')
 			->filter('`backend_users`.`password` = MD5(CONCAT(`backend_users`.`salt`, :password, :salt))')
 			->limit(1);
 		$parameters = array(
