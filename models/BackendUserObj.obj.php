@@ -124,6 +124,19 @@ class BackendUserObj extends DBObject {
 		return $data;
 	}
 
+	public function getUsername() {
+	    if (!empty($this->array['username'])) {
+	        return $this->array['username'];
+        }
+	    if (!empty($this->array['email'])) {
+	        return $this->array['email'];
+        }
+	    if (!empty($this->array['mobile'])) {
+	        return $this->array['mobile'];
+        }
+        return false;
+	}
+
 	public function getRetrieveSQL() {
 		list($query, $parameters)  = $this->getSelectSQL();
 
