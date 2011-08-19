@@ -55,11 +55,14 @@ class BackendConfig {
 		if (count($names) == 1) {
 			$section = reset($names);
 			//Check site specific first
+			$result = array();
 			if (array_key_exists(SITE_STATE . ':' . $section, $this->config)) {
-				return $this->config[SITE_STATE . ':' . $section];
-			} else if (array_key_exists($section, $this->config)) {
-				return $this->config[$section];
+				$result = array_merge($result, $this->config[SITE_STATE . ':' . $section]);
 			}
+			if (array_key_exists($section, $this->config)) {
+				$result = array_merge($result, $this->config[$section]);
+			}
+			return $result;
 		} else {
 			list($section, $name) = $names;
 			//Check site specific section and name
