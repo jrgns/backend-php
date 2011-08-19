@@ -366,6 +366,23 @@ class Admin extends AreaCtl {
 			}
 		}
 
+		//Install Application Components
+		if (is_callable(array('Application', 'getComponents'))) {
+    		$app_components = Application::getComponents();
+    		if (is_array($app_components)) {
+		        foreach($components as $component) {
+			        if (class_exists($component, true) && method_exists($component, 'install')) {
+				        Backend::addNotice('Installing ' . $component);
+				        if (!call_user_func_array(array($component, 'install'), array())) {
+					        Backend::addError('Error on installing ' . $component);
+					        return false;
+				        }
+				    }
+			    }
+		    }
+        }
+
+
 		//Restore Original
 		ConfigValue::set('LogToFile', $original);
 		return true;

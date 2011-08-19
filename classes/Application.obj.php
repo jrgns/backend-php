@@ -17,13 +17,21 @@
 class Application {
 	public static function getLinks($type = 'primary') {
 	}
-	
+
 	/**
 	 * Display hook
 	 *
 	 * Add Global stylesheets and scripts here
 	 */
 	public static function display_html() {
+	}
+
+	/**
+	 * Add the names of Components to install in the array
+	 */
+	public static function getComponents() {
+	    return array(
+	    );
 	}
 
 	public static function install(array $options = array()) {
