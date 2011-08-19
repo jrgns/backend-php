@@ -25,7 +25,7 @@ class ConfigValue extends Value {
 			$value = Value::get($name, null);
 			//Retrieved from the DB
 			if (!is_null($value)) {
-        		self::$cache[$name] = $result;
+        		self::$cache[$name] = $value;
 				return $value;
 			}
 		}
