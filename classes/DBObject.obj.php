@@ -88,7 +88,7 @@ class DBObject {
 		}
 		$conds = array();
 		$params = array();
-		$relation = new $class_name();
+		$relation = new $class_name(array('name' => $options['name']));
 		$conditions = array_key_exists('conditions', $options) ? $options['conditions'] : false;
 		$type       = array_key_exists('type', $options)       ? $options['type']       : 'single';
 		$order      = array_key_exists('order', $options)      ? $options['order']      : $relation->getMeta('order');
@@ -132,7 +132,6 @@ class DBObject {
 			var_dump(get_class($relation), $mode, $conds, $params, $order);
 		}
 		$relation->read(array('mode' => $mode, 'conditions' => $conds, 'parameters' => $params, 'order' => $order));
-		$relation->loadDeep($mode);
 		return $relation;
 	}
 
@@ -142,14 +141,16 @@ class DBObject {
 		}
 		foreach ($this->meta['relations'] as $name => $options) {
 			$class = array_key_exists('class', $options) ? $options['class'] : $name;
-			$count = array_intersect(self::$class_stack, array($name, $name . 'Obj'));
-			if ($count) {
+			if (in_array($name, self::$class_stack)) {
+			    //If the Class / Alias has already been loaded, skip it
 			    continue;
 		    } else {
 		        //Add the alias to the stack to prevent it from loading again
-		        array_push(self::$class_stack, $name . 'Obj');
+		        array_push(self::$class_stack, $name);
 		    }
 			$type  = array_key_exists('type', $options)  ? $options['type']  : 'single';
+
+			$options['name'] = $name;
 			if ($relation = $this->loadRelation($class, $options, $mode)) {
 				switch ($type) {
 				case 'multiple':
@@ -189,110 +190,131 @@ class DBObject {
 	}
 
 	public function read($options = array()) {
-		if (!in_array(get_class($this), self::$class_stack)) {
-			array_push(self::$class_stack, get_class($this));
-		}
-
+        //Setup and Init
 		if (is_string($options)) {
 			$options = array('mode' => $options);
 		}
 		$result = false;
 		$this->error_msg = false;
-		if ($this->checkConnection()) {
-			if (!array_key_exists('mode', $options)) {
-				if (empty($this->meta['id'])) {
-					$options['mode'] = 'list';
-				} else {
-					$options['mode'] = $this->load_mode;
-				}
-			}
-
-			if (array_key_exists('query', $options)) {
-				$query = $options['query'];
-				$params = array_key_exists('parameters', $options) ? $options['parameters'] : array();
-			} else {
-				list ($query, $params) = $this->getSelectSQL($options);
-			}
-			if (Controller::$debug >= 2) {
-				var_dump('Options:', $options);
-				echo 'Query:<br/><pre>';
-				echo $query . '</pre>';
-				var_dump('Params:', $params);
-			}
-			if (!empty($query)) {
-				if (!($query instanceof Query)) {
-					$query = new CustomQuery($query, array('connection' => $this->db));
-				}
-				if ($result = $query->execute($params)) {
-					switch ($options['mode']) {
-					case 'object':
-					case 'full_object':
-						$this->object = $result->fetch(PDO::FETCH_OBJ);
-						if ($this->object) {
-							$this->loadDeep('object');
-							if (empty($this->meta['id'])) {
-								if (property_exists($this->object, $this->meta['id_field'])) {
-									$id_field_name = $this->meta['id_field'];
-									$this->meta['id'] = $this->object->$id_field_name;
-								} else {
-									BackendError::add('Non existant ID Field', get_class($this));
-								}
-							}
-							$this->array = (array)$this->object;
-						} else {
-							$this->object = null;
-						}
-						break;
-					case 'array':
-						$this->array = $result->fetch(PDO::FETCH_ASSOC);
-						if ($this->array) {
-							$this->loadDeep('array');
-							if (empty($this->meta['id'])) {
-								if (array_key_exists($this->meta['id_field'], $this->array)) {
-									$this->meta['id'] = $this->array[$this->meta['id_field']];
-								} else {
-									BackendError::add('Non existant ID Field', get_class($this));
-								}
-							}
-						} else {
-							$this->array = null;
-						}
-						break;
-					case 'list':
-					default:
-						$this->list = $result->fetchAll(PDO::FETCH_ASSOC);
-						if ($query instanceof Query) {
-							$this->list_count = $query->getCount($params);
-						} else {
-							$count_query = new CustomQuery(preg_replace(REGEX_MAKE_COUNT_QUERY, '$1 COUNT(*) $3', $query));
-							$this->list_count = $count_query->fetchColumn($params);
-						}
-						break;
-					}
-					if ($this->object) {
-						$this->object = $this->process($this->object, 'out');
-					}
-					if ($this->array) {
-						$this->array = $this->process($this->array, 'out');
-					}
-				} else if (!empty($query->error_msg)) {
-					$this->error_msg = $query->error_msg;
-				}
-			} else {
-				if (class_exists('BackendError', false)) {
-					BackendError::add(get_class($this) . ': No Query to Load', 'load');
-				}
-				$this->error_msg = 'No Query to Load';
-			}
-		} else {
+		//Check the Connection
+		if (!$this->checkConnection()) {
 			if (class_exists('BackendError', false)) {
 				BackendError::add(get_class($this) . ': DB Connection Error', 'load');
 			}
 			$this->error_msg = 'DB Connection Error';
+			return false;
 		}
-		//Reset the stack once we get back to the initial class
-		if (get_class($this) == reset(self::$class_stack)) {
-		    self::$class_stack = array();
+
+		//Default Mode
+		if (!array_key_exists('mode', $options)) {
+			if (empty($this->meta['id'])) {
+				$options['mode'] = 'list';
+			} else {
+				$options['mode'] = $this->load_mode;
+			}
+		}
+
+        //Get the Query
+		if (array_key_exists('query', $options)) {
+			$query = $options['query'];
+			$params = array_key_exists('parameters', $options) ? $options['parameters'] : array();
+		} else {
+			list ($query, $params) = $this->getSelectSQL($options);
+		}
+		if (empty($query)) {
+			if (class_exists('BackendError', false)) {
+				BackendError::add(get_class($this) . ': No Query to Load', 'load');
+			}
+			$this->error_msg = 'No Query to Load';
+			return false;
+		}
+		if (Controller::$debug >= 2) {
+			var_dump('Options:', $options);
+			echo 'Query:<br/><pre>';
+			echo $query . '</pre>';
+			var_dump('Params:', $params);
+		}
+		if (!($query instanceof Query)) {
+			$query = new CustomQuery($query, array('connection' => $this->db));
+		}
+
+		//Execute and Process
+		$result = $query->execute($params);
+		if (!$result) {
+            if (!empty($query->error_msg)) {
+			    $this->error_msg = $query->error_msg;
+		    }
+		    return false;
+	    }
+
+		switch ($options['mode']) {
+		case 'object':
+		case 'full_object':
+			$this->object = $result->fetch(PDO::FETCH_OBJ);
+			if ($this->object) {
+	            //Only push unique values
+		        if (!in_array($this->getMeta('name'), self::$class_stack)) {
+			        array_push(self::$class_stack, $this->getMeta('name'));
+		        }
+				$this->loadDeep('object');
+				if (empty($this->meta['id'])) {
+					if (property_exists($this->object, $this->meta['id_field'])) {
+						$id_field_name = $this->meta['id_field'];
+						$this->meta['id'] = $this->object->$id_field_name;
+					} else {
+						BackendError::add('Non existant ID Field', get_class($this));
+					}
+				}
+				$this->array = (array)$this->object;
+		        //Reset the stack once we get back to the initial class
+		        if ($this->getMeta('name') == reset(self::$class_stack)) {
+		            self::$class_stack = array();
+		        }
+			} else {
+				$this->object = null;
+			}
+			break;
+		case 'array':
+			$this->array = $result->fetch(PDO::FETCH_ASSOC);
+			if ($this->array) {
+	            //Only push unique values
+		        if (!in_array($this->getMeta('name'), self::$class_stack)) {
+			        array_push(self::$class_stack, $this->getMeta('name'));
+		        }
+				$this->loadDeep('array');
+				if (empty($this->meta['id'])) {
+					if (array_key_exists($this->meta['id_field'], $this->array)) {
+						$this->meta['id'] = $this->array[$this->meta['id_field']];
+					} else {
+						BackendError::add('Non existant ID Field', get_class($this));
+					}
+				}
+		        //Reset the stack once we get back to the initial class
+		        if ($this->getMeta('name') == reset(self::$class_stack)) {
+		            self::$class_stack = array();
+		        }
+			} else {
+				$this->array = null;
+			}
+			break;
+		case 'list':
+		default:
+			$this->list = $result->fetchAll(PDO::FETCH_ASSOC);
+			if ($query instanceof Query) {
+				$this->list_count = $query->getCount($params);
+			} else {
+				$count_query = new CustomQuery(preg_replace(REGEX_MAKE_COUNT_QUERY, '$1 COUNT(*) $3', $query));
+				$this->list_count = $count_query->fetchColumn($params);
+			}
+			break;
+		}
+
+		//Convert to Object and Array
+		if ($this->object) {
+			$this->object = $this->process($this->object, 'out');
+		}
+		if ($this->array) {
+			$this->array = $this->process($this->array, 'out');
 		}
 		return $result;
 	}
