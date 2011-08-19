@@ -135,7 +135,7 @@ class Content extends CommentedController {
 				$filename = 'content/static/' . $content->array['name'] . '.html';
 				$template = 'content/' . $content->array['name'] . '.tpl.php';
 				if (Render::checkTemplateFile($template)) {
-					$content->object->body = Render::renderFile($template);
+					$content->object->body = Render::file($template);
 				} else if (file_exists(SITE_FOLDER . '/' . $filename)) {
 					$content->object->body = file_get_contents(APP_FOLDER . '/' . $filename);
 				} else if (file_exists(APP_FOLDER . '/' . $filename)) {
@@ -189,7 +189,7 @@ class Content extends CommentedController {
 		foreach($result as $name => $value) {
 			Backend::add($name, $value);
 		}
-		Backend::addContent(Render::renderFile('backend_search.tpl.php'));
+		Backend::addContent(Render::file('backend_search.tpl.php'));
 	}
 
 	public static function createPreview($content, $ellips = true) {

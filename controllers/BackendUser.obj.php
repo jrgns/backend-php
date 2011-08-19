@@ -282,18 +282,17 @@ class BackendUser extends TableCtl {
 	}
 
 	public function post_signup() {
-		$result = false;
 		$object = self::getObject(get_class($this));
 		$data = $object->fromRequest();
 		if ($object->create($data)) {
 			Backend::addSuccess('Signed up!');
 			$this->postSignup($object);
-			$result = $object;
+			return $object;
 		} else {
 			Backend::addError('Could not sign you up. Please try again later!');
 		}
 		Backend::add('obj_values', $data);
-		return $result;
+		return false;
 	}
 
 	public function html_signup($result) {
