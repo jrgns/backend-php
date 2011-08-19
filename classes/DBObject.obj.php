@@ -652,6 +652,16 @@ class DBObject {
 						}
 					}
 					break;
+				case 'telnumber':
+				    if ($value !== null) {
+				        $value = filter_var($value, FILTER_SANITIZE_NUMBER_INT);
+    				    //Remove all spaces, dashes, etc
+    				    $plus = substr($value, 0, 1) == '+';
+				        $value = preg_replace('/[-+\s]?/', '', $value);
+				        $value = ($plus ? '+' : '') . $value;
+				        //The rest should just be numbers
+				    }
+				    break;
 				case 'website':
 					//No break;
 				case 'url':
