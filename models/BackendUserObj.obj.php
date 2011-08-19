@@ -30,7 +30,7 @@ class BackendUserObj extends DBObject {
 				'email'     => 'email',
 				'website'   => 'website',
 				'mobile'    => 'telnumber',
-				'username'  => array('type' => 'string', 'required' => true),
+				'username'  => array('type' => 'string'),
 				'password'  => array('type' => 'password', 'required' => true),
 				'salt'      => 'salt',
 				'confirmed' => 'boolean',
@@ -82,14 +82,31 @@ class BackendUserObj extends DBObject {
 		switch ($action) {
 		case 'create':
 			$data['active'] = array_key_exists('active', $data) ? $data['active'] : true;
+
+			//We need either an email, mobile number or username to register a user
 			//Lower ASCII only
-			$data['username'] = filter_var(trim($data['username']), FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH);
-			//TODO Make the banned usernames configurable
-			$banned_usernames = array('root', 'admin', 'superadmin', 'superuser', 'webadmin', 'postmaster', 'webdeveloper', 'webmaster', 'administrator', 'sysadmin');
-			if (in_array($data['username'], $banned_usernames) && BackendUser::hasSuperUser()) {
-				Backend::addError('Please choose a valid username');
-				return false;
-			}
+			if (!empty($data['username'])) {
+			    $data['username'] = filter_var(trim($data['username']), FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH);
+			    //TODO Make the banned usernames configurable
+			    $banned_usernames = array('root', 'admin', 'superadmin', 'superuser', 'webadmin', 'postmaster', 'webdeveloper', 'webmaster', 'administrator', 'sysadmin');
+			    if (in_array($data['username'], $banned_usernames) && BackendUser::hasSuperUser()) {
+				    Backend::addError('Please choose a valid username');
+				    return false;
+			    }
+		    }
+		    if (empty($data['username']) && empty($data['email']) && empty($data['mobile'])) {
+		        Backend::addError('Please provide a username');
+		    }
+		    //If the username is an email address, make it the email address
+		    if (!empty($data['username']) && filter_var($data['username'], FILTER_VALIDATE_EMAIL)) {
+		        if (!empty($data['email'])) {
+    		        list($data['username'], $data['email']) = array($data['email'], $data['username']);
+		        } else {
+		            $data['email'] = $data['username'];
+		            unset($data['username']);
+	            }
+		    }
+
 			$data['salt'] = get_random('numeric');
 			$data['password'] = md5($data['salt'] . $data['password'] . Controller::$salt);
 			if (ConfigValue::get('application.confirmUser')) {

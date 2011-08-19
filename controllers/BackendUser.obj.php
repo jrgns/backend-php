@@ -301,7 +301,14 @@ class BackendUser extends TableCtl {
 		switch (true) {
 		case ($result instanceof DBObject):
 			//Successful signup, redirect
-			Controller::redirect('?q=');
+			if (!empty($_SESSION['bookmark'])) {
+				$bookmark = $_SESSION['bookmark'];
+				unset($_SESSION['bookmark']);
+			} else {
+			    //TODO Make this configurable
+				$bookmark = '?q=';
+			}
+			Controller::redirect($bookmark);
 			break;
 		case ($result):
 		default:
