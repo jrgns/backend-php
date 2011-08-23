@@ -56,11 +56,11 @@ class BackendConfig {
 			$section = reset($names);
 			//Check site specific first
 			$result = array();
-			if (array_key_exists(SITE_STATE . ':' . $section, $this->config)) {
-				$result = array_merge($result, $this->config[SITE_STATE . ':' . $section]);
-			}
 			if (array_key_exists($section, $this->config)) {
 				$result = array_merge($result, $this->config[$section]);
+			}
+			if (array_key_exists(SITE_STATE . ':' . $section, $this->config)) {
+				$result = array_merge($result, $this->config[SITE_STATE . ':' . $section]);
 			}
 			return $result;
 		} else {
