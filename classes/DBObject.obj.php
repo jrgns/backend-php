@@ -1159,17 +1159,29 @@ class DBObject {
 			case 'previous_request':
 			case 'user_agent':
 				$field_arr[] = 'VARCHAR(1024)';
+    			if (!is_null($default)) {
+    			    $default = "'$default'";
+    			}
 				break;
 			case 'password':
 				$string_size = empty($field_options['string_size']) ? 32 : $field_options['string_size'];
 				$field_arr[] = 'VARCHAR(' . $string_size .')';
+    			if (!is_null($default)) {
+    			    $default = "'$default'";
+    			}
 				break;
 			case 'salt':
 				$field_arr[] = 'VARCHAR(32)';
+    			if (!is_null($default)) {
+    			    $default = "'$default'";
+    			}
 				break;
 			case 'ip_address':
 				//TODO think about storing this as a number
 				$field_arr[] = 'VARCHAR(15)';
+    			if (!is_null($default)) {
+    			    $default = "'$default'";
+    			}
 				break;
 			case 'website':
 				//No break;
@@ -1184,23 +1196,41 @@ class DBObject {
 			case 'string':
 				$string_size = empty($field_options['string_size']) ? 255 : $field_options['string_size'];
 				$field_arr[] = 'VARCHAR(' . $string_size .')';
+    			if (!is_null($default)) {
+    			    $default = "'$default'";
+    			}
 				break;
 			case 'large_string':
 				$field_arr[] = 'VARCHAR(1024)';
+    			if (!is_null($default)) {
+    			    $default = "'$default'";
+    			}
 				break;
 			case 'medium_string':
 				$field_arr[] = 'VARCHAR(100)';
+    			if (!is_null($default)) {
+    			    $default = "'$default'";
+    			}
 				break;
 			case 'small_string':
 				$field_arr[] = 'VARCHAR(30)';
+    			if (!is_null($default)) {
+    			    $default = "'$default'";
+    			}
 				break;
 			case 'character':
 				$field_arr[] = 'VARCHAR(1)';
+    			if (!is_null($default)) {
+    			    $default = "'$default'";
+    			}
 				break;
 			case 'serialized':
 				//No break;
 			case 'text':
 				$field_arr[] = 'TEXT';
+    			if (!is_null($default)) {
+    			    $default = "'$default'";
+    			}
 				break;
 			case 'tiny_integer':
 				$field_arr[] = 'TINYINT(4)';
@@ -1255,14 +1285,23 @@ class DBObject {
 				break;
 			case 'date':
 				$field_arr[] = 'DATE';
+    			if (!is_null($default)) {
+    			    $default = "'$default'";
+    			}
 				break;
 			case 'time':
 				$field_arr[] = 'TIME';
+    			if (!is_null($default)) {
+    			    $default = "'$default'";
+    			}
 				break;
 			case 'dateadded':
 				//No break;
 			case 'datetime':
 				$field_arr[] = 'DATETIME';
+    			if (!is_null($default)) {
+    			    $default = "'$default'";
+    			}
 				break;
 			default:
 				var_dump('InstallSQL Failure: ', $field, $field_options);
