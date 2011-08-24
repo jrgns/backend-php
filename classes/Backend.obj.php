@@ -112,6 +112,7 @@ class Backend {
 		define('SITE_LINK', $scheme . $url);
 		define('S_SITE_LINK', $scheme . $url);
 		Backend::add('SITE_LINK', SITE_LINK);
+		Backend::add('S_SITE_LINK', S_SITE_LINK);
 
 		//Application Values
 		$values = self::$config->getValue('application');
