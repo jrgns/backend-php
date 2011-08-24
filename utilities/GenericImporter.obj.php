@@ -50,7 +50,8 @@ class GenericImporter {
 					continue;
 				}
 				$result = $Object->create($n_line);
-				if ($result !== false) {
+
+				if ($result === false) {
 					if (empty($Object->error_msg)) {
 						$errors[] = 'Could not import line ' . $line_c;
 					} else {
