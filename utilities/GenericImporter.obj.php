@@ -49,7 +49,8 @@ class GenericImporter {
 				if (!$n_line) {
 					continue;
 				}
-				if (!$Object->create($n_line)) {
+				$result = $Object->create($n_line);
+				if ($result !== false) {
 					if (empty($Object->error_msg)) {
 						$errors[] = 'Could not import line ' . $line_c;
 					} else {
@@ -71,7 +72,7 @@ class GenericImporter {
 		self::$error_msg = count($errors) ? $errors : false;
 		return $count;
 	}
-	
+
 	public static function getLastError() {
 		return self::$error_msg;
 	}
