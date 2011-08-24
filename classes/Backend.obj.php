@@ -28,7 +28,7 @@ class Backend {
 	protected static $content = array();
 	protected static $scripts = array();
 	protected static $script_content = array();
-	protected static $styles = array();	
+	protected static $styles = array();
 
 	static private function checkSelf() {
 		$toret = false;
@@ -38,7 +38,7 @@ class Backend {
 		$toret = self::$initialized;
 		return $toret;
 	}
-	
+
 	static public function init(array $options = array()) {
 		if (ob_get_level() === 0) {
 			ob_start('ob_gzhandler');
@@ -83,7 +83,7 @@ class Backend {
 		set_error_handler    (array('Backend', '__error_handler'));
 		set_exception_handler(array('Backend', '__exception_handler'));
 		register_shutdown_function(array('Controller', 'finish'));
-		
+
 		//Configs
 		self::initConfigs();
 
@@ -102,26 +102,17 @@ class Backend {
 			define('WEB_SUB_FOLDER', '/');
 		}
 		Backend::add('WEB_SUB_FOLDER', WEB_SUB_FOLDER);
-		
+
 		$domain = !empty($url['host']) ? $url['host'] : 'localhost';
 		define('SITE_DOMAIN', $domain);
 		Backend::add('SITE_DOMAIN', SITE_DOMAIN);
 
+		$scheme = !empty($_SERVER['HTTPS']) ? 'https://' : 'http://';
 		$url = SITE_DOMAIN . WEB_SUB_FOLDER;
-		if (Backend::getConfig('backend.application.protocol_less_site_link', false)) {
-			define('SITE_LINK', '//' . $url);
-			define('S_SITE_LINK', '//' . $url);
-		} else {
-			define('SITE_LINK', 'http://' . $url);
-			if (Backend::getConfig('backend.application.use_ssl', false)) {
-				define('S_SITE_LINK', 'https://' . $url);
-			} else {
-				define('S_SITE_LINK', 'http://' . $url);
-			}
-		}
+		define('SITE_LINK', $scheme . $url);
+		define('S_SITE_LINK', $scheme . $url);
 		Backend::add('SITE_LINK', SITE_LINK);
-		Backend::add('S_SITE_LINK', S_SITE_LINK);
-		
+
 		//Application Values
 		$values = self::$config->getValue('application');
 		if ($values) {
@@ -137,7 +128,7 @@ class Backend {
 				self::add($name, $value);
 			}
 		}
-		
+
 		//DBs
 		$dbs = self::$config->getValue('backend.dbs');
 		if ($dbs) {
@@ -145,7 +136,7 @@ class Backend {
 		} else if (array_key_exists('debug', $_REQUEST)) {
 			Backend::addError('No DBs');
 		}
-		
+
 		//Dont use Value::get, because it might not be installed yet
 		$installed = false;
 		try {
@@ -168,7 +159,7 @@ class Backend {
 		}
 		define('BACKEND_INSTALLED', $installed);
 	}
-	
+
 	public static function shutdown() {
 		foreach(self::$DB as $connection) {
 			if (is_object($connection['connection']) && $connection['connection'] instanceof PDO) {
@@ -176,7 +167,7 @@ class Backend {
 			}
 		}
 	}
-	
+
 	static public function add($name, $value) {
 		$toret = false;
 		if (self::checkSelf()) {
@@ -185,7 +176,7 @@ class Backend {
 		}
 		return $toret;
 	}
-	
+
 	static function get($name, $default = null) {
 		$toret = $default;
 		if (self::checkSelf()) {
@@ -195,7 +186,7 @@ class Backend {
 		}
 		return $toret;
 	}
-	
+
 	static function clear($name) {
 		$toret = false;
 		if (self::checkSelf()) {
@@ -213,7 +204,7 @@ class Backend {
 		}
 		return $toret;
 	}
-	
+
 	static private function initConfigs() {
 		if (array_key_exists('config_file', self::$options)) {
 			$ini_file = self::$options['config_file'];
@@ -222,12 +213,12 @@ class Backend {
 		}
 		self::$config = new BackendConfig($ini_file, SITE_STATE);
 	}
-	
+
 	static function getConfig($name, $default = null) {
 		$toret = self::$config->getValue($name);
 		return is_null($toret) ? $default : $toret;
 	}
-	
+
 	static private function initDBs($dbs) {
 		if (is_array($dbs)) {
 			foreach($dbs as $name => $db) {
@@ -239,7 +230,7 @@ class Backend {
 	 * Add a DB definition to the Backend
 	 *
 	 * @param string A PDO DSN for the DB.
-	 * @param array Options for the DB Connection. Can include 
+	 * @param array Options for the DB Connection. Can include
 	 * + username, the username for the connection.
 	 * + password, the password for the connection.
 	 * + name, the name for the connection, defaults to 'default'.
@@ -290,7 +281,7 @@ class Backend {
 		}
 		return $toret;
 	}
-	
+
 	/**
 	 * Get a defined DB connection
 	 *
@@ -313,7 +304,7 @@ class Backend {
 		if (self::$DB instanceof PDO || empty(self::$DB)) {
 			return self::$DB;
 		}
-		
+
 		$name = $name ? $name : 'default';
 		if (!array_key_exists($name, self::$DB)) {
 			if ($name == 'default' && current(self::$DB) instanceof PDO) {
@@ -390,32 +381,32 @@ class Backend {
 		}
 		return false;
 	}
-	
+
 	static public function addContent($content, $options = array()) {
 		$options['log_to_file'] = array_key_exists('log_to_file', $options) ? $options['log_to_file'] : true;
 		return self::addSomething('content', $content, $options);
 	}
-	
+
 	static public function getContent() {
 		return self::$content;
 	}
-	
+
 	static public function addScript($script, $options = array()) {
 		return self::addSomething('scripts', $script, $options);
 	}
-	
+
 	static public function getScripts() {
 		return self::$scripts;
 	}
-	
+
 	static public function setScript(array $scripts = array()) {
 		self::$scripts = $scripts;
 	}
-	
+
 	static public function addScriptContent($content, $options = array()) {
 		return self::addSomething('script_content', $content, $options);
 	}
-	
+
 	static public function getScriptContent() {
 		return self::$script_content;
 	}
@@ -427,15 +418,15 @@ class Backend {
 	static public function addStyle($style, $options = array()) {
 		return self::addSomething('styles', $style, $options);
 	}
-	
+
 	static public function getStyles() {
 		return self::$styles;
 	}
-	
+
 	static public function addError($content, $options = array()) {
 		return self::addSomething('error', $content, $options);
 	}
-	
+
 	static public function getError() {
 		if (is_string(self::$error)) {
 			self::$error = array(self::$error);
@@ -453,15 +444,15 @@ class Backend {
 		}
 		return $result;
 	}
-	
+
 	static public function setError(array $errors = array()) {
 		self::$error = $errors;
 	}
-	
+
 	static public function addNotice($content, $options = array()) {
 		return self::addSomething('notice', $content, $options);
 	}
-	
+
 	static public function getNotice() {
 		if (is_string(self::$notice)) {
 			self::$notice = array(self::$notice);
@@ -483,11 +474,11 @@ class Backend {
 	static public function setNotice(array $notices = array()) {
 		self::$notice = $notices;
 	}
-	
+
 	static public function addSuccess($content, $options = array()) {
 		return self::addSomething('success', $content, $options);
 	}
-	
+
 	static public function getSuccess() {
 		if (is_string(self::$success)) {
 			self::$success = array(self::$success);
@@ -509,7 +500,7 @@ class Backend {
 	static public function setSuccess(array $successes = array()) {
 		self::$success = $successes;
 	}
-	
+
 	public static function __error_handler($number, $string, $file = false, $line = false, $context = false) {
 		if (!class_exists('Component', false)) {
 			self::__autoload('Component');
@@ -588,11 +579,11 @@ class Backend {
 		}
 		return false;
 	}
-	
+
 	public static function __exception_handler($exception) {
 		echo "Uncaught exception: " , $exception->getMessage(), "\n";
 	}
-	
+
 	private static function loadCoreClass($classname) {
 		$code = false;
 		if (file_exists(BACKEND_FOLDER . '/controllers/' . $classname . '.obj.php')) {
