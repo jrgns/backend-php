@@ -832,6 +832,7 @@ class TableCtl extends AreaCtl {
 		$object = new $obj_name();
 		return $object;
 	}
+
 	public function post_import($data = false) {
 		$obj_name = (class_name(Controller::$area) . 'Obj');
 		if (!class_exists($obj_name, true)) {
@@ -875,11 +876,15 @@ class TableCtl extends AreaCtl {
 			Backend::addError('This import can only handle CSV files. The uploaded file is ' . $file['type']);
 			return false;
 		}
+		return $this->import($file['tmp_name'], $data);
+	}
+
+	public function import($file_name, $data = false) {
 		$importer_name = get_class($this) . 'Importer';
 		if (!class_exists($importer_name, true)) {
 			$importer_name = 'GenericImporter';
 		}
-		$count = call_user_func_array(array($importer_name, 'import'), array($this, $file['tmp_name'], $data));
+		$count = call_user_func(array($importer_name, 'import'), $this, $file_name, $data);
 		$error = call_user_func(array($importer_name, 'getLastError'));
 		if (!empty($error)) {
 			if (!$count) {
