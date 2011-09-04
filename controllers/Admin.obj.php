@@ -429,11 +429,12 @@ class Admin extends AreaCtl {
 
 		$result = Hook::add('display', 'post', __CLASS__, array('global' => true, 'mode' => 'html')) && $result;
 
-		$result = Permission::add('nobody', 'daily', 'admin') && $result;
+		$result = Permission::add('anonymous', 'continual', 'admin') && $result;
 		$result = Permission::add('anonymous', 'daily', 'admin') && $result;
-		$result = Permission::add('authenticated', 'daily', 'admin') && $result;
-		$result = Permission::add('nobody', 'weekly', 'admin') && $result;
 		$result = Permission::add('anonymous', 'weekly', 'admin') && $result;
+
+		$result = Permission::add('authenticated', 'continual', 'admin') && $result;
+		$result = Permission::add('authenticated', 'daily', 'admin') && $result;
 		$result = Permission::add('authenticated', 'weekly', 'admin') && $result;
 
 		return $result;
