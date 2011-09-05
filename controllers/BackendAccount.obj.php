@@ -274,6 +274,58 @@ class BackendAccount extends TableCtl {
 		Controller::redirect('?q=');
 	}
 
+	public function action_change_password($user_id, $password) {
+		$user = self::checkUser();
+		if (!$user || !in_array('superadmin', $user->roles)) {
+		    return false;
+		}
+		/*$current  = Controller::getVar('current_password');
+		$password = Controller::getVar('password');
+		$confirm  = Controller::getVar('confirm_password');
+		if ($confirm != $password) {
+			Backend::addError('New password doesn\'t match');
+			return false;
+		}
+		if (!($user = self::check())) {
+			Backend::addError('Invalid User (Anonymous)');
+			return false;
+		}
+		$user_obj = self::getObject(get_class($this), $user->id);*/
+		$user_obj = TableCtl::getObject(BackendAccount::getName(), $user_id);
+		if (!$user_obj->array) {
+			Backend::addError('Invalid User');
+			return false;
+		}
+		/*list($query, $params) = self::authenticate($user->username, $current, true);
+		if (!$query->fetchAssoc($params)) {
+			Backend::addError('Incorrect current password provided');
+			return false;
+		}*/
+		if (!$user_obj->update(array('password' => $password))) {
+			Backend::addError('Could not update password');
+			return false;
+		}
+		//Reread the user
+		/*$user_obj->read(array('query' => $query, 'parameters' => $params, 'mode' => 'object'));
+		if ($User->object) {
+			session_regenerate_id();
+			$_SESSION['BackendUser'] = $user_obj->object;
+			if (Component::isActive('PersistUser')) {
+				PersistUser::remember($user_obj->object);
+			}
+		}*/
+		return true;
+	}
+
+	/*public function html_change_password($result) {
+		if (is_post() && $result) {
+			Backend::addSuccess('Password updated');
+			Controller::redirect('?q=backend_user/display');
+		}
+		Backend::addContent(Render::file('backend_user.change_password.tpl.php'));
+		return $result;
+	}*/
+
 	public static function hook_post_init() {
 		if (Controller::$mode == Controller::MODE_EXECUTE) {
 			if ($user = self::checkExecuteUser()) {
