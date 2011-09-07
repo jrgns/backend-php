@@ -583,7 +583,7 @@ class DBObject {
 				case 'primarykey':
 					if (empty($field_options['non_automatic'])) {
 						$value = null;
-					} else if (is_null($value)) {
+					} else if ($action == 'create' && is_null($value)) {
 						Backend::addError('Missing Primary Key ' . $name);
 						$toret = false;
 					}

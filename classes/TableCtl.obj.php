@@ -844,6 +844,7 @@ class TableCtl extends AreaCtl {
 			Backend::addError('There is a problem with the HTML Form');
 			return false;
 		}
+		//TODO Move this to a generic utility
 		$file = $_FILES['import_file'];
 		if ($file['error']) {
 			switch($file['error']) {
