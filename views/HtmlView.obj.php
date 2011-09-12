@@ -94,6 +94,12 @@ class HtmlView extends View {
 				}
 			}
 		}
+
+		//TODO Make this configurable
+		if (function_exists('tidy_repair_string')) {
+		    $to_print = tidy_repair_string($to_print);
+	    }
+
 		return $to_print;
 	}
 
