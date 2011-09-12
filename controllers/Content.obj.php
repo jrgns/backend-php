@@ -292,13 +292,16 @@ class Content extends CommentedController {
 	}
 
 	public static function install(array $options = array()) {
-		$toret = parent::install($options);
+		$result = parent::install($options);
 
-		$toret = Hook::add('init', 'pre', get_called_class(), array('global' => true)) && $toret;
-		$toret = Hook::add('table_display', 'pre', get_called_class()) && $toret;
+		if (!Backend::getDB('default')) {
+			return $result;
+		}
+		$result = Hook::add('init', 'pre', get_called_class(), array('global' => true)) && $result;
+		$result = Hook::add('table_display', 'pre', get_called_class()) && $result;
 
-		$toret = Permission::add('anonymous', TableCtl::$P_READONLY, get_called_class()) && $toret;
-		$toret = Permission::add('authenticated', TableCtl::$P_READONLY, get_called_class()) && $toret;
-		return $toret;
+		$result = Permission::add('anonymous', TableCtl::$P_READONLY, get_called_class()) && $result;
+		$result = Permission::add('authenticated', TableCtl::$P_READONLY, get_called_class()) && $result;
+		return $result;
 	}
 }
