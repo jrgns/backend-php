@@ -449,6 +449,14 @@ function curl_request($url, array $parameters = array(), array $options = array(
 	if (!empty($options['headers']) && is_array($options['headers'])) {
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $options['headers']);
 	}
+	if (!empty($options['cookie_jar'])) {
+	    curl_setopt($ch, CURLOPT_COOKIEJAR, $options['cookie_jar']);
+	    curl_setopt($ch, CURLOPT_COOKIEFILE, $options['cookie_jar']);
+	}
+	//Use this carefully...
+	if (!empty($options['interface'])) {
+	    curl_setopt($ch, CURLOPT_INTERFACE, $options['interface']);
+	}
 
 	if (!empty($options['username']) && !empty($options['password'])) {
 		curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
