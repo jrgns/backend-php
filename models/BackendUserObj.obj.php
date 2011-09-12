@@ -27,10 +27,10 @@ class BackendUserObj extends DBObject {
 				'id'        => 'primarykey',
 				'name'      => 'string',
 				'surname'   => 'string',
-				'email'     => 'email',
+				'email'     => array('type' => 'email', 'string_size' => 255),
 				'website'   => 'website',
-				'mobile'    => 'telnumber',
-				'username'  => array('type' => 'string'),
+				'mobile'    => array('type' => 'telnumber', 'string_size' => 15),
+				'username'  => array('type' => 'string', 'string_size' => 60),
 				'password'  => array('type' => 'password', 'required' => true),
 				'salt'      => 'salt',
 				'confirmed' => 'boolean',
@@ -41,8 +41,10 @@ class BackendUserObj extends DBObject {
 		}
 		if (!array_key_exists('keys', $meta)) {
 			$meta['keys'] = array(
-				'username' => 'unique',
-				'email'    => 'unique',
+				'user' => array('type' => 'unique', 'fields' => array(
+	                        'email', 'username', 'mobile'
+	                    )
+                    ),
 			);
 		}
 		if (!array_key_exists('order', $meta)) {
@@ -140,8 +142,10 @@ class BackendUserObj extends DBObject {
 	public function getRetrieveSQL() {
 		list($query, $parameters)  = $this->getSelectSQL();
 
-		$filter = '`' . $this->getMeta('id_field') . '` = :parameter';
+		$filter = 'BINARY `' . $this->getMeta('id_field') . '` = :parameter';
 		$filter .= ' OR `username` = :parameter';
+		$filter .= ' OR `email` = :parameter';
+		$filter .= ' OR `mobile` = :parameter';
 		$query->filter($filter);
 		return $query;
 	}
