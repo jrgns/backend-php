@@ -393,7 +393,7 @@ class BackendUser extends TableCtl {
 	}
 
 	public function postSignup($object, array $options = array()) {
-		if (Backend::getConfig('backend.application.user.confirm') && empty($object->array['confirmed'])) {
+		if (ConfigValue::get('application.confirmUser') && empty($object->array['confirmed'])) {
 			$this->confirmUser($object);
 		}
 	}
