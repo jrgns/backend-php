@@ -84,7 +84,10 @@ class Hook extends TableCtl
         $result = null;
         if (count($parameters)) {
             $returnIndex = array_key_exists('return_index', $options) ? $options['return_index'] : null;
-            if (!is_null($returnIndex)) {
+            if (is_null($returnIndex)) {
+                //Default to the first parameter passed
+                $result = reset($parameters);
+            } else {
                 $result = $parameters[$returnIndex];
             }
         }
