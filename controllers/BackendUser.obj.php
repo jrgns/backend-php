@@ -44,7 +44,7 @@ class BackendUser extends TableCtl {
 		$parameters = array(
 			':username' => $username,
 			':password' => $password,
-			':salt' => Controller::$salt
+			':salt'     => Controller::$salt
 		);
 		return $return_query ? array($query, $parameters) : $query->fetchAssoc($parameters);
 	}
@@ -315,6 +315,7 @@ class BackendUser extends TableCtl {
 			Backend::addContent(Render::file('backend_user.signup.tpl.php'));
 			break;
 		}
+		return $result;
 	}
 
 	/**
@@ -322,34 +323,44 @@ class BackendUser extends TableCtl {
 	 *
 	 * @TODO Find a way to disable an account permanently, in other words, prevent this code from working in some way
 	 */
-	public function action_confirm($salt) {
+	public function get_confirm($salt) {
+	    return $this->post_confirm($salt);
+	}
+
+	public function post_confirm($salt) {
 		$result = false;
 		$account = self::getObject('BackendUser');
 		$query = new SelectQuery('BackendUser');
 		$query
-			->filter('`salt` = :salt')
+			->filter('MD5(CONCAT(:app_salt, `salt`)) = :salt')
 			->filter('`confirmed` = 0')
 			->filter('`active` = 1');
-		$user = $query->fetchAssoc(array(':salt' => $salt));
+		$user = $query->fetchAssoc(array(
+		    ':salt'     => $salt,
+		    ':app_salt' => Controller::$salt
+	    ));
 		if (!$user) {
 			return false;
 		}
-		send_email(
-			ConfigValue::get('author.Email', ConfigValue::get('application.Email', 'info@' . SITE_DOMAIN)),
-			'New User: ' . $user['username'],
-			var_export($user, true)
-		);
+		$user = self::getObject(get_class($this), $user['id']);
+		if (!$user->array) {
+		    return false;
+		}
+
 		$data = array(
 			'confirmed' => true,
 		);
-		$user = self::getObject(get_class($this), $user['id']);
-		if ($user->update($data)) {
-			return true;
+		$data = Hook::run('user_confirm', 'pre', array($user, $data), array('toret' => $data));
+		if (!$data) {
+		    return false;
 		}
-		return false;
-	}
 
-	protected static function confirm(BackendUserObj $user) {
+		if ($user->update($data) === false) {
+			return false;
+		}
+
+		Hook::run('user_confirm', 'post', array($user), array('toret' => true));
+		return true;
 	}
 
 	public function html_confirm($result) {
@@ -359,6 +370,16 @@ class BackendUser extends TableCtl {
 		}
 		Backend::addError('Could not confirm your account at the moment. Please try again later');
 		Controller::redirect('?q=');
+		return $result;
+	}
+
+	public static function hook_post_user_confirm(BackendUserObj $user) {
+		send_email(
+			ConfigValue::get('author.Email', ConfigValue::get('application.Email', 'info@' . SITE_DOMAIN)),
+			'New User: ' . $user['username'],
+			var_export($user, true)
+		);
+		return true;
 	}
 
 	public static function hook_post_init() {
@@ -439,7 +460,8 @@ class BackendUser extends TableCtl {
 	}
 
 	protected function confirmUser($object) {
-		$url = SITE_LINK . '?q=' . class_for_url(get_called_class()) . '/confirm/' . $object->array['salt'];
+		$url = SITE_LINK . '?q=' . class_for_url(get_called_class()) . '/confirm/'
+		        . md5(Controller::$salt . $object->array['salt']);
 		$app_name = ConfigValue::get('Title');
 		$message = <<< END
 Hi {$object->array['name']}!
@@ -452,8 +474,17 @@ Please note that this account will be deleted if it isn't confirmed in a weeks t
 
 Regards
 END;
-		Backend::addSuccess('A confirmation email as been sent to your email address. Please click on the link in the email to confirm your account');
-		send_email($object->array['email'], 'Confirmation Email', $message);
+		if (Controller::$debug) {
+		    var_dump('Confirm Link: ' . $url);
+		    var_dump('Confirm Email:');
+		    echo "<pre>$message</pre>";
+		}
+		$result = send_email($object->array['email'], 'Confirmation Email', $message);
+		if ($result) {
+    		Backend::addSuccess('A confirmation email as been sent to your email address.
+Please click on the link in the email to confirm your account');
+        }
+        return $result;
 	}
 
 	public static function setupAnonymous() {
@@ -608,6 +639,10 @@ Site Admin
 				$parameters[1] = Controller::getVar('password');
 			}
 			break;
+		case 'confirm':
+		    if (empty($parameters[0])) {
+				$parameters[0] = Controller::getVar('salt');
+		    }
 		case 'signup':
 			if (array_key_exists('user', $_SESSION) && $_SESSION['BackendUser']->id > 0) {
 				Controller::setAction('display');
