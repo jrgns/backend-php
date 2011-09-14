@@ -330,25 +330,7 @@ OR `backend_users`.`Email` = :username')
     }
 
     public function post_confirm($salt) {
-        $result = false;
-        $account = self::getObject('BackendUser');
-        $query = new SelectQuery('BackendUser');
-        $query
-            ->filter('MD5(CONCAT(:app_salt, `salt`)) = :salt')
-            ->filter('`confirmed` = 0')
-            ->filter('`active` = 1');
-        $user = $query->fetchAssoc(array(
-            ':salt'     => $salt,
-            ':app_salt' => Controller::$salt
-        ));
-        if (!$user) {
-            return false;
-        }
-        $user = self::getObject(get_class($this), $user['id']);
-        if (!$user->array) {
-            return false;
-        }
-
+        $user = self::checkSalt($salt);
         $data = array(
             'confirmed' => true,
         );
@@ -365,13 +347,34 @@ OR `backend_users`.`Email` = :username')
         return true;
     }
 
+    public static function checkSalt($salt) {
+        $query = new SelectQuery('BackendUser');
+        $query
+            ->filter('MD5(CONCAT(:app_salt, `salt`)) = :salt')
+            ->filter('`confirmed` = 0')
+            ->filter('`active` = 1');
+        $user = $query->fetchAssoc(array(
+            ':salt'     => $salt,
+            ':app_salt' => Controller::$salt
+        ));
+        if (!$user) {
+            return false;
+        }
+        $user = self::getObject(get_called_class(), $user['id']);
+        if (!$user->array) {
+            return false;
+        }
+        return $user;
+    }
+
     public function html_confirm($result) {
         if ($result) {
             Backend::addSuccess('Your user account has been confirmed. Please login.');
             Controller::redirect('?q=' . class_for_url(get_called_class()) . '/login');
+        } else {
+            Backend::addError('Could not confirm your account at the moment. Please try again later');
+            Controller::redirect('?q=');
         }
-        Backend::addError('Could not confirm your account at the moment. Please try again later');
-        Controller::redirect('?q=');
         return $result;
     }
 
@@ -422,7 +425,7 @@ OR `backend_users`.`Email` = :username')
 
     public function postSignup($object, array $options = array()) {
         if (ConfigValue::get('application.confirmUser') && empty($object->array['confirmed'])) {
-            $this->confirmUser($object);
+            $this->sendConfirmation($object);
         }
     }
 
@@ -466,7 +469,7 @@ OR `backend_users`.`Email` = :username')
         return false;
     }
 
-    protected function confirmUser($object) {
+    protected function sendConfirmation($object) {
         $url = SITE_LINK . '?q=' . class_for_url(get_called_class()) . '/confirm/'
                 . md5(Controller::$salt . $object->array['salt']);
         $appName = ConfigValue::get('Title');
