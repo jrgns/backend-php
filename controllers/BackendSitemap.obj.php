@@ -77,7 +77,7 @@ class BackendSitemap extends AreaCtl {
 		foreach($list as $row) {
 			$last_date = strtotime($row['modified']) > $last_date ? strtotime($row['modified']) : $last_date;
 			$id        = array_key_exists('name', $row) ? $row['name'] : $row[$$object->getMeta('id')];
-			if (Value::get('CleanURLs', false)) {
+			if (ConfigValue::get('CleanURLs', false)) {
 				$url = SITE_LINK . class_for_url($component) . '/' . $id;
 			} else {
 				$url = SITE_LINK . '?q=' . class_for_url($component) . '/' . $id;
@@ -88,7 +88,7 @@ class BackendSitemap extends AreaCtl {
 		}
 		//Add link to area
 		//TODO Make this configurable
-		if (Value::get('CleanURLs', false)) {
+		if (ConfigValue::get('CleanURLs', false)) {
 			$url = SITE_LINK . class_for_url($component);
 		} else {
 			$url = SITE_LINK . '?q=' . class_for_url($component);

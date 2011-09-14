@@ -1023,7 +1023,7 @@ class TableCtl extends AreaCtl {
 				$parameters[0] = 0;
 			}
 			if (!isset(Controller::$parameters[1])) {
-				$parameters[1] = Value::get('list_length', 5);
+				$parameters[1] = ConfigValue::get('table.ListLength', 5);
 			}
 			break;
 		case 'search':
@@ -1040,7 +1040,7 @@ class TableCtl extends AreaCtl {
 			}
 			if (!isset(Controller::$parameters[2])) {
 				$count = Controller::getVar('count', FILTER_VALIDATE_INT);
-				$parameters[2] = is_null($count) ? Value::get('list_length', 5) : $count;
+				$parameters[2] = is_null($count) ? ConfigValue::get('table.ListLength', 5) : $count;
 			}
 			break;
 		}

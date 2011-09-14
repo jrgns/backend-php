@@ -96,7 +96,7 @@ class Image extends File {
 			$parameters[0] = 0;
 		}
 		if (Controller::$action == 'list' && !isset(Controller::$parameters[1])) {
-			$parameters[1] = Value::get('list_length', 9);
+			$parameters[1] = ConfigValue::get('table.ListLength', 9);
 		}
 		return parent::checkParameters($parameters);
 	}

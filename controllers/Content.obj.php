@@ -33,7 +33,7 @@ class Content extends CommentedController {
 			if (!empty($result->list) && is_array($result->list)) {
 				$list = array();
 				foreach($result->list as $item) {
-					if (Value::get('clean_urls', false)) {
+					if (ConfigValue::get('CleanURLs', false)) {
 						$item['link'] = SITE_LINK . 'content/' . $item['id'];
 					} else {
 						$item['link'] = SITE_LINK . '?q=content/' . $item['id'];
@@ -150,7 +150,7 @@ class Content extends CommentedController {
 			$http_equiv['Last-Modified'] = $content->object->modified;
 			Backend::add('meta_http_equiv', $http_equiv);
 			if (!headers_sent()) {
-				$max_age = Value::get('ContentMaxAge', 86400);
+				$max_age = ConfigValue::get('content.MaxAge', 86400);
 				header('Last-Modified: ' . $content->object->modified);
 				header('Expires: ' . gmdate('r', strtotime('+1 day')));
 				header('Cache-Control: max-age=' . $max_age . ', must-revalidate');

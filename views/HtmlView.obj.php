@@ -96,7 +96,7 @@ class HtmlView extends View {
 		}
 
 		//TODO Make this configurable
-		if (function_exists('tidy_repair_string')) {
+		if (ConfigValue::get('html_view.TidyHTML') && function_exists('tidy_repair_string')) {
 		    $to_print = tidy_repair_string($to_print);
 	    }
 

@@ -264,7 +264,7 @@ if (!function_exists('send_email')) {
 	function send_email($recipient, $subject, $message, array $headers = array()) {
 		$headers = array_change_key_case($headers);
 		if (!array_key_exists('from', $headers)) {
-			$headers['from'] = ConfigValue::get('site_email', 'info@' . SITE_DOMAIN);
+			$headers['from'] = ConfigValue::get('application.Email', 'info@' . SITE_DOMAIN);
 		}
 		foreach($headers as $name => $value) {
 			$headers[$name] = ucwords($name) . ': ' . $value;
@@ -486,7 +486,7 @@ function curl_request($url, array $parameters = array(), array $options = array(
 		}
 		break;
 	}
-	if ($filename = ConfigValue::get('log_curl_requests', false)) {
+	if ($filename = ConfigValue::get('LogCurlRequests', false)) {
 		$fp = fopen($filename, 'a');
 		if ($method == 'post') {
 			fwrite($fp, date('Y-m-d H:i:s') . "\t" . $method . "\t" . $url . "\t" . http_build_query($parameters) . PHP_EOL);

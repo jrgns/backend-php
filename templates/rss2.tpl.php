@@ -10,9 +10,9 @@
 		<lastBuildDate><?php echo date('r') ?></lastBuildDate>
 		<docs>http://blogs.law.harvard.edu/tech/rss</docs>
 		<generator>Backend-PHP</generator>
-		<managingEditor><?php echo Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)) ?></managingEditor>
-		<webMaster><?php echo Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)) ?></webMaster>
-		
+		<managingEditor><?php echo ConfigValue::get('author.Email', ConfigValue::get('application.Email', 'info@' . SITE_DOMAIN)) ?></managingEditor>
+		<webMaster><?php echo ConfigValue::get('author.Email', ConfigValue::get('application.Email', 'info@' . SITE_DOMAIN)) ?></webMaster>
+
 		<?php if ($list) foreach($list as $item): ?>
 			<item>
 				<title><?php echo htmlspecialchars($item['title']) ?></title>

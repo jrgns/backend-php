@@ -26,7 +26,7 @@ class BackendSearch extends TableCtl {
 		}
 		return false;
 	}
-	
+
 	public static function doIndex(TableCtl $controller, $fields = array('content')) {
 		if (!is_array($fields)) {
 			$fields = array($fields);
@@ -52,7 +52,7 @@ class BackendSearch extends TableCtl {
 									'word'     => $word,
 									'count'    => $count,
 									'sequence' => $sequence++,
-								
+
 								);
 								$b_search = new BackendSearchObj();
 								if ($b_search->replace($data)) {
@@ -74,10 +74,10 @@ class BackendSearch extends TableCtl {
 		}
 		return $total;
 	}
-	
+
 	private static function filter($word, $count = null) {
 		$word = preg_replace('/[^A-Za-z0-9_\-]/', '', $word);
-		if (strlen($word) < Value::get('BackendSearch::MinimumWordLength', 4)) {
+		if (strlen($word) < ConfigValue::get('backend_search.MinimumWordLength', 4)) {
 			return false;
 		}
 		return strtolower($word);

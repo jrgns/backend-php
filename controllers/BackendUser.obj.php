@@ -335,7 +335,7 @@ class BackendUser extends TableCtl {
 			return false;
 		}
 		send_email(
-			Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)),
+			ConfigValue::get('author.Email', ConfigValue::get('application.Email', 'info@' . SITE_DOMAIN)),
 			'New User: ' . $user['username'],
 			var_export($user, true)
 		);
@@ -347,6 +347,9 @@ class BackendUser extends TableCtl {
 			return true;
 		}
 		return false;
+	}
+
+	protected static function confirm(BackendUserObj $user) {
 	}
 
 	public function html_confirm($result) {
@@ -369,7 +372,7 @@ class BackendUser extends TableCtl {
 			$id = count(Controller::$parameters) ? reset(Controller::$parameters) : 0;
 			$permission = Permission::check(Controller::$action, Controller::$area, $id);
 			//If not, and CheckHTTPAuth is true, send the HTTP headers
-			if (!$permission && Value::get('CheckHTTPAuth', false) && Value::get('CheckHTTPAuthIn:' . Controller::$view->mode, true)) {
+			if (!$permission && ConfigValue::get('CheckHTTPAuth', false) && ConfigValue::get('CheckHTTPAuthIn:' . Controller::$view->mode, true)) {
 				if ($user = self::processHTTPAuth()) {
 					session_regenerate_id();
 					$_SESSION['BackendUser']   = $user;
@@ -517,7 +520,7 @@ END;
 	}
 
 	public static function getGravatar($email, $size = 120, $default = false) {
-		$default = $default ? $default : Value::get('default_gravatar', 'identicon');
+		$default = $default ? $default : ConfigValue::get('DefaultGravatar', 'identicon');
 		return 'http://www.gravatar.com/avatar.php?gravatar_id=' . md5(strtolower($email)) . '&size=' . $size . '&d=' . $default;
 	}
 
@@ -555,7 +558,7 @@ END;
 		Backend::addSuccess($deleted . ' unconfirmed users deleted');
 		if ($deleted) {
 			send_email(
-				Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)),
+				ConfigValue::get('author.Email', ConfigValue::get('application.Email', 'info@' . SITE_DOMAIN)),
 				'Unconfirmed Users purged: ' . $deleted,
 			$deleted . ' users were deleted from the database.
 They were unconfirmed, and more than a week old
@@ -587,7 +590,7 @@ Site Admin
 		}
 		$msg = implode(PHP_EOL . PHP_EOL, $msg);
 		send_email(
-			Value::get('site_owner_email', Value::get('site_email', 'info@' . SITE_DOMAIN)),
+			ConfigValue::get('author.Email', ConfigValue::get('application.Email', 'info@' . SITE_DOMAIN)),
 			'User stats for ' . Backend::get('Title'),
 			$msg
 		);
