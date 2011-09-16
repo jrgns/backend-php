@@ -145,7 +145,10 @@ class Content extends CommentedController {
 				//SITE FOLDER too?
 				}
 			}
-			Backend::add('meta_description', plain(self::createPreview($content->object->body, false)));
+			$meta_desc = Backend::get('meta_description');
+			if (empty($meta_desc)) {
+    			Backend::add('meta_description', plain(self::createPreview($content->object->body, false)));
+			}
 			$http_equiv = Backend::get('meta_http_equiv', array());
 			$http_equiv['Last-Modified'] = $content->object->modified;
 			Backend::add('meta_http_equiv', $http_equiv);
