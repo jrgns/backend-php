@@ -671,14 +671,19 @@ of which ' . $stats['New'] . ' signed up in the last 7 days';
             break;
         case 'update':
         case 'display':
-            if (
-                    array_key_exists('BackendUser', $_SESSION)
-                    && $_SESSION['BackendUser']->id > 0
-                    && (empty($parameters['0']) || $parameters[0] != $_SESSION['BackendUser']->id)
+            if (array_key_exists('BackendUser', $_SESSION) && $_SESSION['BackendUser']->id > 0) {
+                //If empty, set it to the current user
+                if (empty($parameters['0'])) {
+                    $parameters[0] = $_SESSION['BackendUser']->id;
+                }
+                //If not set to current user, and user doesn't have permissions, set to current user
+                if (
+                    $parameters[0] != $_SESSION['BackendUser']->id
                     && !Permission::check('manage', class_for_url(get_called_class()))
                     && Permission::check(Controller::$action, class_for_url(get_called_class()))
-            ) {
-                $parameters[0] = $_SESSION['BackendUser']->id;
+                ) {
+                    $parameters[0] = $_SESSION['BackendUser']->id;
+                }
             }
             break;
         }
