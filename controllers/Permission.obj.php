@@ -67,14 +67,14 @@ class Permission extends TableCtl {
 		);
 
 		$permission = new PermissionObj();
-		if ($permission->replace($data)) {
+		if ($permission->replace($data) !== false) {
 			Backend::addSuccess('Added permission to ' . $action . ' for ' . $role);
-			$toret = true;
+			$result = true;
 		} else {
 			Backend::addError('Could not add permission to ' . $action . ' for ' . $role);
-			$toret = false;
+			$result = false;
 		}
-		return $toret;
+		return $result;
 	}
 
 	public static function check($action = '*', $subject = '*', $subject_id = 0) {
