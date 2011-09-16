@@ -603,15 +603,109 @@ class DBObject {
 							$toret = false;
 						}
 					}
+					//Enable required validation
+					if (empty($value)) {
+					    $value = null;
+					}
 					break;
 				case 'string':
 					if ($value !== null) {
 						//$value = plain($value);
 					}
+					//Enable required validation
+					if (empty($value)) {
+					    $value = null;
+					}
 					break;
 				case 'text':
 					if ($value !== null) {
 						//$value = simple($value);
+					}
+					//Enable required validation
+					if (empty($value)) {
+					    $value = null;
+					}
+					break;
+				case 'email':
+					if ($value !== null) {
+						if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
+							$value = filter_var($value, FILTER_VALIDATE_EMAIL);
+						} else if (!empty($value)) {
+							$this->error_msg = 'Validation Failed';
+							Backend::addError('Please supply a valid email address');
+							$toret = false;
+						}
+					}
+					//Enable required validation
+					if (empty($value)) {
+					    $value = null;
+					}
+					break;
+				case 'telnumber':
+				    if ($value !== null) {
+				        $value = filter_var($value, FILTER_SANITIZE_NUMBER_INT);
+    				    //Remove all spaces, dashes, etc
+    				    $plus = substr($value, 0, 1) == '+';
+				        $value = preg_replace('/[-+\s]?/', '', $value);
+				        $value = ($plus ? '+' : '') . $value;
+				        //The rest should just be numbers
+				    }
+					//Enable required validation
+					if (empty($value)) {
+					    $value = null;
+					}
+				    break;
+				case 'website':
+					//No break;
+				case 'url':
+					if ($value !== null && $value != '') {
+						$parts = parse_url($value);
+						//We need the scheme to validate the URL
+						if (empty($parts['scheme'])) {
+							$value = 'http://' . $value;
+						}
+						if (filter_var($value, FILTER_VALIDATE_URL, FILTER_FLAG_HOST_REQUIRED)) {
+							$value = explode('://', $value);
+							$value = end($value);
+						} else if (!empty($value)) {
+							$this->error_msg = 'Validation Failed';
+							Backend::addError('Please supply a valid URL');
+							$toret = false;
+						}
+					}
+					//Enable required validation
+					if (empty($value)) {
+					    $value = null;
+					}
+					break;
+				case 'url_with_scheme':
+					if ($value !== null) {
+						if (filter_var($value, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED)) {
+							$value = filter_var($value, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED);
+						} else if (!empty($value)) {
+							$this->error_msg = 'Validation Failed';
+							Backend::addError('Please supply a valid URL with a scheme');
+							$toret = false;
+						}
+					}
+					//Enable required validation
+					if (empty($value)) {
+					    $value = null;
+					}
+					break;
+				case 'ip_address':
+					if ($value !== null) {
+						if (!filter_var($value, FILTER_VALIDATE_IP)) {
+							$this->error_msg = 'Validation Failed';
+							Backend::addError('Please supply a valid URL with a scheme');
+							$toret = false;
+						}
+					} else if (!empty($_SERVER['REMOTE_ADDR'])) {
+						$value = $_SERVER['REMOTE_ADDR'];
+					}
+					//Enable required validation
+					if (empty($value)) {
+					    $value = null;
 					}
 					break;
 				case 'dateadded':
@@ -639,68 +733,6 @@ class DBObject {
 				case 'timestamp':
 					if (!is_null($value)) {
 						$value = is_numeric($value) ? $value : strtotime($value);
-					}
-					break;
-				case 'email':
-					if ($value !== null) {
-						if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
-							$value = filter_var($value, FILTER_VALIDATE_EMAIL);
-						} else if (!empty($value)) {
-							$this->error_msg = 'Validation Failed';
-							Backend::addError('Please supply a valid email address');
-							$toret = false;
-						}
-					}
-					break;
-				case 'telnumber':
-				    if ($value !== null) {
-				        $value = filter_var($value, FILTER_SANITIZE_NUMBER_INT);
-    				    //Remove all spaces, dashes, etc
-    				    $plus = substr($value, 0, 1) == '+';
-				        $value = preg_replace('/[-+\s]?/', '', $value);
-				        $value = ($plus ? '+' : '') . $value;
-				        //The rest should just be numbers
-				    }
-				    break;
-				case 'website':
-					//No break;
-				case 'url':
-					if ($value !== null && $value != '') {
-						$parts = parse_url($value);
-						//We need the scheme to validate the URL
-						if (empty($parts['scheme'])) {
-							$value = 'http://' . $value;
-						}
-						if (filter_var($value, FILTER_VALIDATE_URL, FILTER_FLAG_HOST_REQUIRED)) {
-							$value = explode('://', $value);
-							$value = end($value);
-						} else if (!empty($value)) {
-							$this->error_msg = 'Validation Failed';
-							Backend::addError('Please supply a valid URL');
-							$toret = false;
-						}
-					}
-					break;
-				case 'url_with_scheme':
-					if ($value !== null) {
-						if (filter_var($value, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED)) {
-							$value = filter_var($value, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED);
-						} else if (!empty($value)) {
-							$this->error_msg = 'Validation Failed';
-							Backend::addError('Please supply a valid URL with a scheme');
-							$toret = false;
-						}
-					}
-					break;
-				case 'ip_address':
-					if ($value !== null) {
-						if (!filter_var($value, FILTER_VALIDATE_IP)) {
-							$this->error_msg = 'Validation Failed';
-							Backend::addError('Please supply a valid URL with a scheme');
-							$toret = false;
-						}
-					} else if (!empty($_SERVER['REMOTE_ADDR'])) {
-						$value = $_SERVER['REMOTE_ADDR'];
 					}
 					break;
 				case 'current_user':
@@ -742,42 +774,69 @@ class DBObject {
 						$value = 'Unknown';
 					}
 					break;
+			    case 'tiny_integer':
+				    //No break;
+			    case 'small_integer':
+				    //No break;
+			    case 'medium_integer':
+				    //No break;
+			    case 'number':
+				    //No break;
+			    case 'numeric':
+				    //No break;
+			    case 'integer':
+				    //No break;
+			    case 'large_integer':
+					if ($value !== null) {
+						if (filter_var($value, FILTER_SANITIZE_NUMBER_INT) !== false) {
+							$value = filter_var($value, FILTER_SANITIZE_NUMBER_INT);
+						} else if (!empty($value)) {
+							$this->error_msg = 'Invalid Integer Supplied';
+							$toret = false;
+						}
+					}
+				    break;
+			    case 'currency':
+				    //No break;
+			    case 'float':
+				    //No break;
+					if ($value !== null) {
+						if (filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT) !== false) {
+							$value = filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT);
+						} else if (!empty($value)) {
+							$this->error_msg = 'Invalid Integer Supplied';
+							$toret = false;
+						}
+					}
+				    break;
 				default:
 					if ($value !== null) {
 					}
 					break;
 				}
 
-				if (!is_null($value)) {
-					if (
-						empty($value)
-						&& !empty($field_options['required'])
-						&& $type != 'primarykey'
-					) {
-						if (array_key_exists('default', $field_options)) {
-							$ret_data[$name] = $field_options['default'];
-						} else {
-							$this->error_msg = 'Validation Failed';
-							Backend::addError('Missing ' . $name);
-							$toret = false;
-							break;
-						}
-					} else {
-						$ret_data[$name] = $value;
-					}
-				} else if (
-					$action == 'create'
+				//Set default value
+				if (is_null($value) && array_key_exists('default', $field_options)) {
+				    $value = $field_options['default'];
+				}
+
+                //Check the required field option
+                if (
+                    is_null($value)
 					&& !empty($field_options['required'])
-					&& $type != 'primarykey'
+					&& $action == 'create' //Only when we're creating
+					&& $type != 'primarykey' //Not for primary keys
+					&& $type != 'lastmodified' //Not for lastmodified values
 				) {
-					if (array_key_exists('default', $field_options)) {
-						$ret_data[$name] = $field_options['default'];
-					} else if (!in_array($type, array('lastmodified'))) {
-						$this->error_msg = 'Validation Failed';
-						Backend::addError('Missing ' . $name);
-						$toret = false;
-						break;
-					}
+					$this->error_msg = 'Validation Failed';
+					Backend::addError('Missing ' . $name);
+					$toret = false;
+					break;
+				}
+
+				//Set the value
+				if (!is_null($value)) {
+    				$ret_data[$name] = $value;
 				}
 			}
 		}
