@@ -73,7 +73,7 @@ class BackendAccountObj extends DBObject {
 		}
 		return $result;
 	}
-	
+
 	function validate($data, $action, $options = array()) {
 		$toret = false;
 
@@ -98,7 +98,11 @@ class BackendAccountObj extends DBObject {
 				}
 			}
 		}
-		if ($toret && $action == 'create') {
+		if (!$toret) {
+		    return $toret;
+		}
+		switch ($action) {
+		case 'create':
 			$data['salt'] = get_random('numeric');
 			$data['password'] = md5($data['salt'] . $data['password'] . Controller::$salt);
 			if (Backend::getConfig('backend.application.user.confirm')) {
@@ -106,6 +110,12 @@ class BackendAccountObj extends DBObject {
 			} else {
 				$data['confirmed'] = array_key_exists('confirmed', $data) ? $data['confirmed'] : true;
 			}
+			break;
+	    case 'update':
+			if (!empty($data['password'])) {
+				$data['password'] = md5($this->array['salt'] . $data['password'] . Controller::$salt);
+			}
+			break;
 		}
 		return $toret ? $data : false;
 	}
