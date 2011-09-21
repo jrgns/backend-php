@@ -150,6 +150,9 @@ function get_previous_query($mode = 'html') {
 }
 
 function get_current_url() {
+	if (!array_key_exists('HTTP_HOST', $_SERVER)) {
+	    return $_SERVER['PHP_SELF'];
+	}
 	$protocol = 'http';
 	if ($_SERVER['SERVER_PORT'] == 443 || (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on')) {
 		$protocol .= 's';
