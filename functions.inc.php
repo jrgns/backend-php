@@ -107,6 +107,7 @@ function update_links($content, $new_vars) {
 
 function redirect($where_to = false, $dont_die = false) {
 	if (!headers_sent()) {
+		header('X-Redirector: Controller-' . __LINE__);
 		if ($where_to) {
 			header('Location: ' . $where_to);
 		} else {
@@ -399,6 +400,7 @@ if (!function_exists('get_called_class')) {
  * @param array An associative array with which to alter the behaviour of curl_request
  */
 function curl_request($url, array $parameters = array(), array $options = array()) {
+    $cache_file = false;
 	if (!empty($options['cache']) && $options['cache'] > 0) {
 		$cache = $options['cache'];
 		if (count($parameters)) {
@@ -424,7 +426,11 @@ function curl_request($url, array $parameters = array(), array $options = array(
 		var_dump('cURL Request:', $url);
 	}
 
-	curl_setopt($ch, CURLOPT_USERAGENT, 'Backend / PHP');
+    if (empty($options['user_agent'])) {
+    	curl_setopt($ch, CURLOPT_USERAGENT, 'Backend / PHP');
+	} else {
+    	curl_setopt($ch, CURLOPT_USERAGENT, $options['user_agent']);
+	}
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
     curl_setopt($ch, CURLOPT_TIMEOUT, 30);
     if (!empty($options['bypass_ssl'])) {
@@ -445,13 +451,24 @@ function curl_request($url, array $parameters = array(), array $options = array(
 	if (array_key_exists('header_function', $options) && is_callable($options['header_function'])) {
 		curl_setopt($ch, CURLOPT_HEADERFUNCTION, $options['header_function']);
 		curl_setopt($ch, CURLOPT_HEADER, false);
-	} else if (!empty($options['return_header'])) {
+	} else if (!empty($options['return_header']) || !empty($options['debug'])) {
 		curl_setopt($ch, CURLOPT_HEADER, true);
 	} else {
 		curl_setopt($ch, CURLOPT_HEADER, false);
 	}
+	if (!empty($options['referer'])) {
+	    curl_setopt($ch, CURLOPT_REFERER, $options['referer']);
+	}
 	if (!empty($options['headers']) && is_array($options['headers'])) {
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $options['headers']);
+	}
+	if (!empty($options['cookie_jar'])) {
+	    curl_setopt($ch, CURLOPT_COOKIEJAR, $options['cookie_jar']);
+	    curl_setopt($ch, CURLOPT_COOKIEFILE, $options['cookie_jar']);
+	}
+	//Use this carefully...
+	if (!empty($options['interface'])) {
+	    curl_setopt($ch, CURLOPT_INTERFACE, $options['interface']);
 	}
 
 	if (!empty($options['username']) && !empty($options['password'])) {
@@ -498,6 +515,9 @@ function curl_request($url, array $parameters = array(), array $options = array(
 	$toret = curl_exec($ch);
 
 	if (!empty($options['debug'])) {
+	    @list($headers, $toret) = preg_split("/\n\n|\n\r\n\r|\r\n\r\r/", $toret, 2);
+		var_dump('cURL Response Headers:');
+		echo "<pre>$headers</pre>";
 		var_dump('cURL Response:', $toret);
 	}
 

@@ -36,22 +36,22 @@ class Image extends File {
 	public function html_list($result) {
 		Backend::add('Sub Title', $result->getMeta('name'));
 		Backend::add('TabLinks', $this->getTabLinks(Controller::$action));
-		Backend::addScript(SITE_LINK . 'js/jquery.js');
-		Backend::addScript(SITE_LINK . 'js/image_list.js');
-		Backend::addStyle(SITE_LINK . 'css/image_list.css');
+		Backend::addScript(SITE_LINK . '/js/jquery.js');
+		Backend::addScript(SITE_LINK . '/js/image_list.js');
+		Backend::addStyle(SITE_LINK . '/css/image_list.css');
 		Backend::addContent(Render::renderFile('image.list.tpl.php', array('db_object' => $result)));
 	}
 
 	private function feed_list($result, $mode) {
 		if ($result instanceof DBObject) {
 			Backend::add('title', ConfigValue::get('Title'));
-			Backend::add('link', SITE_LINK . '?q=content');
+			Backend::add('link', SITE_LINK . '/?q=content');
 			Backend::add('description', ConfigValue::get('Description'));
 			if (!empty($result->list) && is_array($result->list)) {
 				$list = array();
 				foreach($result->list as $item) {
-					$item['link'] = SITE_LINK . '?q=image/' . $item['id'];
-					$item['body'] = '<img src="' . SITE_LINK . '?q=image/' . $item['id'] . '">';
+					$item['link'] = SITE_LINK . '/?q=image/' . $item['id'];
+					$item['body'] = '<img src="' . SITE_LINK . '/?q=image/' . $item['id'] . '">';
 					$list[] = $item;
 				}
 			} else {

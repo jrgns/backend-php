@@ -178,7 +178,7 @@ class Tag extends TableCtl {
 			return $result;
 		}
 		Backend::add('title', $result->array['name']);
-		Backend::add('link', SITE_LINK . '?q=tag/' . $result->array['id']);
+		Backend::add('link', SITE_LINK . '/?q=tag/' . $result->array['id']);
 		Backend::add('description', $result->array['description']);
 		if (!empty($result->array['list']) && is_array($result->array['list'])) {
 			$list = array();

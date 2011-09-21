@@ -91,7 +91,7 @@ class Comment extends TableCtl {
 					if ($user->create($user_data)) {
 						$object['user_id'] = $user->array['id'];
 
-						$url = SITE_LINK . '?q=backend_user/confirm/' . $user->array['salt'];
+						$url = SITE_LINK . '/?q=backend_user/confirm/' . $user->array['salt'];
 						$app_name = ConfigValue::get('Title');
 						$message = <<< END
 Hi {$user->array['name']}!

@@ -284,6 +284,13 @@ class TableCtl extends AreaCtl {
 					'type'        => 'array',
 				),
 			),
+			'optional' => array(
+				'field' => array(
+					'description' => 'Restrict the search to the specified fields. Can be specified multiple times, just use [].',
+					'type'        => 'mixed',
+					'default'     => false,
+				),
+			),
 			'return'      => array(
 				'description' => 'The DB Object searched',
 				'type'        => 'DBObject',
@@ -300,8 +307,16 @@ class TableCtl extends AreaCtl {
 			Controller::whoops('Invalid Object Returned');
 			return false;
 		}
-		$fields = $object->getSearchFields();
+		if ($fields = Controller::getVar('field')) {
+			if (!is_array($fields)) {
+				$fields = array($fields);
+			}
+			$fields = array_intersect($fields, array_keys($object->getMeta('fields')));
+		} else {
+			$fields = $object->getSearchFields();
+		}
 		if (!$fields || !is_array($fields)) {
+			Backend::addError('Invalid Search Fields');
 			return false;
 		}
 		if (empty($term)) {

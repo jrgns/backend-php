@@ -28,7 +28,7 @@ class GateKeeper {
 		$result = count($intersect) ? true : false;
 		return $result;
 	}
-	
+
 	public static function permit($role, $action, $subject, $subject_id, $control) {
 		$result = false;
 		$params = array(':role' => $role, ':control' => $control, ':action' => $action, ':subject' => $subject, ':subject_id' => $subject_id);
@@ -83,7 +83,7 @@ class GateKeeper {
 		return $result;
 	}
 
-	public static function dropPermissions($action, $subject, $subject_id) { 
+	public static function dropPermissions($action, $subject, $subject_id) {
 		$params = array(':action' => $action, ':subject' => $subject, ':subject_id' => $subject_id);
 		$query = new DeleteQuery('Permission');
 		$query
@@ -93,7 +93,7 @@ class GateKeeper {
 			->filter('system = 0');
 		return $query->execute($params);
 	}
-  
+
 	public static function permittedRoles($action = '*', $subject = '*', $subject_id = 0) {
 		if (Controller::$debug >= 2) {
 			Backend::addNotice('Checking action ' . $action . ' for ' . $subject . ' with id ' . $subject_id);
@@ -136,7 +136,7 @@ class GateKeeper {
 		}
 		return $result;
 	}
-	
+
 	public static function getRoles() {
 		$result = false;
 		$where = array();
@@ -157,7 +157,7 @@ class GateKeeper {
 		}
 		return $result;
 	}
-	
+
 	private static function permissionHolders($action = '*', $subject = '*', $subject_id = 0) {
 		$result = false;
 		$query = new SelectQuery('Permission');
@@ -170,34 +170,33 @@ class GateKeeper {
 			$query->filter("(`subject` = :subject OR `subject` = '*')");
 			$params[':subject'] = $subject;
 		}
-		if ($subject_id != '0') {			
+		if ($subject_id != '0') {
 			$query->filter("(`subject_id` = :subject_id OR `subject_id` = 0)");
 			$params[':subject_id'] = $subject_id;
 		}
 		$result = $query->fetchAll($params);
 		return $result;
 	}
-	
+
 	private static function barredRole($role) {
 		return in_array($role, array('anonymous', 'authorized', 'nobody'));
 	}
 
-	public static function dropAccess($access_type, $access_id) { 
-		$result = false;
+	public static function dropAccess($access_type, $access_id) {
 		$params = array(':access_type' => $access_type, ':access_id' => $access_id);
 		$query = new DeleteQuery('Assignment');
 		$query
 			->filter('`access_type` = :access_type')
 			->filter('`access_id` = :access_id');
-		$result = $query->execute($params) ? true : false;
+		$result = $query->execute($params) !== false ? true : false;
 		return $result;
 	}
 
-	public static function assignRoleSet($roleset, $access_type, $access_id) { 
+	public static function assignRoleSet($roleset, $access_type, $access_id) {
 		if (self::dropAccess($access_type, $access_id)) {
-			//$roleset = $this->authoriser->minimizeRoleSet($roleset); 
+			//$roleset = $this->authoriser->minimizeRoleSet($roleset);
 			foreach($roleset as $role) {
-				self::assign($role, $access_type, $access_id); 
+				self::assign($role, $access_type, $access_id);
 			}
 		}
 	}

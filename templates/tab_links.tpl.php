@@ -4,4 +4,5 @@
 		<li><a href="<?php echo $link['link'] ?>"><?php echo $link['text'] ?></a></li>
 	<?php endforeach; ?>
 	</ul>
+	<div class="clear"></div>
 <?php endif; ?>

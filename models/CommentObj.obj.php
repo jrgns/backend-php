@@ -37,7 +37,7 @@ class CommentObj extends DBObject {
 		$meta['parents'] = array();
 		return parent::__construct($meta, $options);
 	}
-	
+
 	function validate($data, $action, $options = array()) {
 		$toret = true;
 		$data = parent::validate($data, $action, $options);
@@ -54,4 +54,3 @@ class CommentObj extends DBObject {
 		return $toret ? $data : false;
 	}
 }
-

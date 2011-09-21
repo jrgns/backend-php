@@ -31,7 +31,7 @@ class DBObject
     //If you set $error_msg in a function, reset it in the beginning of the function as well.
     public $error_msg = false;
 
-    private static $top_class = false;
+    private static $class_stack = array();
     /**
      * Construct a DB Object
      *
@@ -89,7 +89,7 @@ class DBObject
         }
         $conds = array();
         $params = array();
-        $relation = new $class_name();
+        $relation = new $class_name(array('name' => $options['name']));
         $conditions = array_key_exists('conditions', $options) ? $options['conditions'] : false;
         $type       = array_key_exists('type', $options)       ? $options['type']       : 'single';
         $order      = array_key_exists('order', $options)      ? $options['order']      : $relation->getMeta('order');
@@ -102,10 +102,12 @@ class DBObject
                     $operator = '=';
                 }
 
-                if ($load_mode == 'array') {
+                if ($this->array) {
                     $value = array_key_exists($name, $this->array) ? $this->array[$name] : $name;
-                } else if ($load_mode == 'object') {
+                } else if ($this->object) {
                     $value = array_key_exists($name, $this->object) ? $this->object->$name : $name;
+                } else {
+                    continue;
                 }
                 switch ($operator) {
                 case '=':
@@ -131,35 +133,42 @@ class DBObject
             var_dump(get_class($relation), $mode, $conds, $params, $order);
         }
         $relation->read(array('mode' => $mode, 'conditions' => $conds, 'parameters' => $params, 'order' => $order));
-        $relation->loadDeep($mode);
         return $relation;
     }
 
     private function loadDeep($mode = 'array') {
-        if (in_array($mode, array('array', 'object')) && $this->$mode) {
-            foreach ($this->meta['relations'] as $name => $options) {
-                $class = array_key_exists('class', $options) ? $options['class'] : $name;
-                if (!in_array(self::$top_class, array($class, $class . 'Obj'))) {
-                    $type  = array_key_exists('type', $options)  ? $options['type']  : 'single';
-                    if ($relation = $this->loadRelation($class, $options, $mode)) {
-                        switch ($type) {
-                        case 'multiple':
-                            if ($mode == 'array') {
-                                $this->array[$name]  = $relation->list ? $relation->list : array();
-                            } else if ($mode == 'object') {
-                                $this->object->$name = $relation->list ? $relation->list : array();
-                            }
-                            break;
-                        default:
-                        case 'single':
-                            if ($mode == 'array') {
-                                $this->array[$name]  = $relation->array  ? $relation->array  : false;
-                            } else if ($mode == 'object') {
-                                $this->object->$name = $relation->object ? $relation->object : false;
-                            }
-                            break;
-                        }
+        if (!in_array($mode, array('array', 'object')) && $this->$mode) {
+            return null;
+        }
+        foreach ($this->meta['relations'] as $name => $options) {
+            $class = array_key_exists('class', $options) ? $options['class'] : $name;
+            if (in_array($name, self::$class_stack)) {
+                //If the Class / Alias has already been loaded, skip it
+                continue;
+            } else {
+                //Add the alias to the stack to prevent it from loading again
+                array_push(self::$class_stack, $name);
+            }
+            $type  = array_key_exists('type', $options)  ? $options['type']  : 'single';
+
+            $options['name'] = $name;
+            if ($relation = $this->loadRelation($class, $options, $mode)) {
+                switch ($type) {
+                case 'multiple':
+                    if ($mode == 'array') {
+                        $this->array[$name]  = $relation->list ? $relation->list : array();
+                    } else if ($mode == 'object') {
+                        $this->object->$name = $relation->list ? $relation->list : array();
                     }
+                    break;
+                default:
+                case 'single':
+                    if ($mode == 'array') {
+                        $this->array[$name]  = $relation->array  ? $relation->array  : false;
+                    } else if ($mode == 'object') {
+                        $this->object->$name = $relation->object ? $relation->object : false;
+                    }
+                    break;
                 }
             }
         }
@@ -182,16 +191,13 @@ class DBObject
     }
 
     public function read($options = array()) {
-        if (!self::$top_class) {
-            self::$top_class = get_class($this);
-        }
-
+        //Setup and Init
         if (is_string($options)) {
             $options = array('mode' => $options);
         }
+        $result = false;
         $this->error_msg = false;
-
-        //Check the DB Connection
+        //Check the Connection
         if (!$this->checkConnection()) {
             if (class_exists('BackendError', false)) {
                 BackendError::add(get_class($this) . ': DB Connection Error', 'load');
@@ -200,7 +206,7 @@ class DBObject
             return false;
         }
 
-        //Get the SQL Query
+        //Default Mode
         if (!array_key_exists('mode', $options)) {
             if (empty($this->meta['id'])) {
                 $options['mode'] = 'list';
@@ -208,6 +214,8 @@ class DBObject
                 $options['mode'] = $this->load_mode;
             }
         }
+
+        //Get the Query
         if (array_key_exists('query', $options)) {
             $query = $options['query'];
             $params = array_key_exists('parameters', $options) ? $options['parameters'] : array();
@@ -231,65 +239,86 @@ class DBObject
             $query = new CustomQuery($query, array('connection' => $this->db));
         }
 
-        //Execute
-        if ($result = $query->execute($params)) {
-            switch ($options['mode']) {
-            case 'object':
-            case 'full_object':
-                $this->object = $result->fetch(PDO::FETCH_OBJ);
-                if ($this->object) {
-                    $this->loadDeep('object');
-                    if (empty($this->meta['id'])) {
-                        if (property_exists($this->object, $this->meta['id_field'])) {
-                            $id_field_name = $this->meta['id_field'];
-                            $this->meta['id'] = $this->object->$id_field_name;
-                        } else {
-                            BackendError::add('Non existant ID Field', get_class($this));
-                        }
-                    }
-                    $this->array = (array)$this->object;
-                    array_walk_recursive($this->array,create_function('&$input, $key', 'if (is_object($input)) { $input = (array)$input; } else { return $input; }'));
-                } else {
-                    $this->object = null;
-                }
-                break;
-            case 'array':
-                $this->array = $result->fetch(PDO::FETCH_ASSOC);
-                if ($this->array) {
-                    $this->loadDeep('array');
-                    if (empty($this->meta['id'])) {
-                        if (array_key_exists($this->meta['id_field'], $this->array)) {
-                            $this->meta['id'] = $this->array[$this->meta['id_field']];
-                        } else {
-                            BackendError::add('Non existant ID Field', get_class($this));
-                        }
-                    }
-                } else {
-                    $this->array = null;
-                }
-                break;
-            case 'list':
-            default:
-                $this->list = $result->fetchAll(PDO::FETCH_ASSOC);
-                if ($query instanceof Query) {
-                    $this->list_count = $query->getCount($params);
-                } else {
-                    $count_query = new CustomQuery(preg_replace(REGEX_MAKE_COUNT_QUERY, '$1 COUNT(*) $3', $query));
-                    $this->list_count = $count_query->fetchColumn($params);
-                }
-                break;
+        //Execute and Process
+        $result = $query->execute($params);
+        if (!$result) {
+            if (!empty($query->error_msg)) {
+                $this->error_msg = $query->error_msg;
             }
-            if ($this->object) {
-                $this->object = $this->process($this->object, 'out');
-            }
-            if ($this->array) {
-                $this->array = $this->process($this->array, 'out');
-            }
-        } else if (!empty($query->error_msg)) {
-            $this->error_msg = $query->error_msg;
+            return false;
         }
-        if (get_class($this) == self::$top_class) {
-            self::$top_class = false;
+
+        switch ($options['mode']) {
+        case 'object':
+        case 'full_object':
+            $this->object = $result->fetch(PDO::FETCH_OBJ);
+            if ($this->object) {
+                //Only push unique values
+                if (!in_array($this->getMeta('name'), self::$class_stack)) {
+                    array_push(self::$class_stack, $this->getMeta('name'));
+                }
+                $this->loadDeep('object');
+                if (empty($this->meta['id'])) {
+                    if (property_exists($this->object, $this->meta['id_field'])) {
+                        $id_field_name = $this->meta['id_field'];
+                        $this->meta['id'] = $this->object->$id_field_name;
+                    } else {
+                        BackendError::add('Non existant ID Field', get_class($this));
+                    }
+                }
+                $this->array = (array)$this->object;
+                array_walk_recursive($this->array,
+                    create_function('&$input, $key', 'if (is_object($input)) {'
+                    .' $input = (array)$input; } else { return $input; }'));
+                //Reset the stack once we get back to the initial class
+                if ($this->getMeta('name') == reset(self::$class_stack)) {
+                    self::$class_stack = array();
+                }
+            } else {
+                $this->object = null;
+            }
+            break;
+        case 'array':
+            $this->array = $result->fetch(PDO::FETCH_ASSOC);
+            if ($this->array) {
+                //Only push unique values
+                if (!in_array($this->getMeta('name'), self::$class_stack)) {
+                    array_push(self::$class_stack, $this->getMeta('name'));
+                }
+                $this->loadDeep('array');
+                if (empty($this->meta['id'])) {
+                    if (array_key_exists($this->meta['id_field'], $this->array)) {
+                        $this->meta['id'] = $this->array[$this->meta['id_field']];
+                    } else {
+                        BackendError::add('Non existant ID Field', get_class($this));
+                    }
+                }
+                //Reset the stack once we get back to the initial class
+                if ($this->getMeta('name') == reset(self::$class_stack)) {
+                    self::$class_stack = array();
+                }
+            } else {
+                $this->array = null;
+            }
+            break;
+        case 'list':
+        default:
+            $this->list = $result->fetchAll(PDO::FETCH_ASSOC);
+            if ($query instanceof Query) {
+                $this->list_count = $query->getCount($params);
+            } else {
+                $count_query = new CustomQuery(preg_replace(REGEX_MAKE_COUNT_QUERY, '$1 COUNT(*) $3', $query));
+                $this->list_count = $count_query->fetchColumn($params);
+            }
+            break;
+        }
+
+        //Convert to Object and Array
+        if ($this->object) {
+            $this->object = $this->process($this->object, 'out');
+        }
+        if ($this->array) {
+            $this->array = $this->process($this->array, 'out');
         }
         return $result;
     }
@@ -1201,9 +1230,9 @@ class DBObject
             if (is_string($field_options)) {
                 $field_options = array('type' => $field_options);
             }
-            $type    = array_key_exists('type',    $field_options) ? $field_options['type']    : 'string';
+            $type    = array_key_exists('type',    $field_options) ? $field_options['type']        : 'string';
             $default = array_key_exists('default', $field_options) ? $field_options['default'] : null;
-            $null    = array_key_exists('null',    $field_options) ? $field_options['null']    : false;
+            $null    = array_key_exists('null',    $field_options) ? $field_options['null']        : false;
             $field_arr[] = '`' . $field . '`';
             switch($type) {
             case 'primarykey':
@@ -1222,17 +1251,29 @@ class DBObject
             case 'previous_request':
             case 'user_agent':
                 $field_arr[] = 'VARCHAR(1024)';
+                if (!is_null($default)) {
+                    $default = "'$default'";
+                }
                 break;
             case 'password':
                 $string_size = empty($field_options['string_size']) ? 32 : $field_options['string_size'];
                 $field_arr[] = 'VARCHAR(' . $string_size .')';
+                if (!is_null($default)) {
+                    $default = "'$default'";
+                }
                 break;
             case 'salt':
                 $field_arr[] = 'VARCHAR(32)';
+                if (!is_null($default)) {
+                    $default = "'$default'";
+                }
                 break;
             case 'ip_address':
                 //TODO think about storing this as a number
                 $field_arr[] = 'VARCHAR(15)';
+                if (!is_null($default)) {
+                    $default = "'$default'";
+                }
                 break;
             case 'website':
                 //No break;
@@ -1247,23 +1288,41 @@ class DBObject
             case 'string':
                 $string_size = empty($field_options['string_size']) ? 255 : $field_options['string_size'];
                 $field_arr[] = 'VARCHAR(' . $string_size .')';
+                if (!is_null($default)) {
+                    $default = "'$default'";
+                }
                 break;
             case 'large_string':
                 $field_arr[] = 'VARCHAR(1024)';
+                if (!is_null($default)) {
+                    $default = "'$default'";
+                }
                 break;
             case 'medium_string':
                 $field_arr[] = 'VARCHAR(100)';
+                if (!is_null($default)) {
+                    $default = "'$default'";
+                }
                 break;
             case 'small_string':
                 $field_arr[] = 'VARCHAR(30)';
+                if (!is_null($default)) {
+                    $default = "'$default'";
+                }
                 break;
             case 'character':
                 $field_arr[] = 'VARCHAR(1)';
+                if (!is_null($default)) {
+                    $default = "'$default'";
+                }
                 break;
             case 'serialized':
                 //No break;
             case 'text':
                 $field_arr[] = 'TEXT';
+                if (!is_null($default)) {
+                    $default = "'$default'";
+                }
                 break;
             case 'tiny_integer':
                 $field_arr[] = 'TINYINT(4)';
@@ -1318,14 +1377,23 @@ class DBObject
                 break;
             case 'date':
                 $field_arr[] = 'DATE';
+                if (!is_null($default)) {
+                    $default = "'$default'";
+                }
                 break;
             case 'time':
                 $field_arr[] = 'TIME';
+                if (!is_null($default)) {
+                    $default = "'$default'";
+                }
                 break;
             case 'dateadded':
                 //No break;
             case 'datetime':
                 $field_arr[] = 'DATETIME';
+                if (!is_null($default)) {
+                    $default = "'$default'";
+                }
                 break;
             default:
                 var_dump('InstallSQL Failure: ', $field, $field_options);
@@ -1337,9 +1405,6 @@ class DBObject
                 $field_arr[] = 'NOT NULL';
             }
             if (!is_null($default)) {
-                if (!in_array($default, array('NULL', 'CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))) {
-                    $default = '"' . $default . '"';
-                }
                 $field_arr[] = 'DEFAULT ' . $default;
             }
             $query_fields[] = implode(' ', array_map('trim', $field_arr));

@@ -297,7 +297,7 @@ class Controller {
 
 			//Check if we encountered a fatal error
 			if ($last_error = error_get_last()) {
-				if ($last_error['type'] === E_ERROR) {
+				if ($last_error['type'] === E_ERROR && SITE_STATE == 'production') {
 					$id = send_email(
 						ConfigValue::get('author.Email', ConfigValue::get('Email', 'info@' . SITE_DOMAIN)),
 						'Fatal PHP Error in ' . ConfigValue::get('Title', 'Application'),
@@ -569,6 +569,7 @@ class Controller {
 					Backend::addSuccess('The script should now redirect to <a href="' . $location . '">here</a>');
 				} else {
 					//Redirect
+					header('X-Redirector: Controller-' . __LINE__);
 					header('Location: ' . $location);
 					die('redirecting to <a href="' . $location . '">');
 				}

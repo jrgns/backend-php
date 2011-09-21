@@ -21,20 +21,20 @@
 				case 'xls':
 				case 'ods':
 				case 'csv':
-					$file_icon = SITE_LINK . 'icons/page_white_excel.png';
+					$file_icon = SITE_LINK . '/icons/page_white_excel.png';
 					break;
 				case 'pdf':
-					$file_icon = SITE_LINK . 'icons/page_white_acrobat.png';
+					$file_icon = SITE_LINK . '/icons/page_white_acrobat.png';
 					break;
 				case 'zip':
 				case 'gz':
 				case 'tar':
 				case 'bzip2':
-					$file_icon = SITE_LINK . 'icons/page_white_compressed.png';
+					$file_icon = SITE_LINK . '/icons/page_white_compressed.png';
 					break;
 				case 'unknown':
 				default:
-					$file_icon = SITE_LINK . 'icons/page_white.png';
+					$file_icon = SITE_LINK . '/icons/page_white.png';
 					break;
 				}
 				?>

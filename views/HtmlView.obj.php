@@ -43,6 +43,9 @@ class HtmlView extends View {
 			}
 		}
 		$sub_title = Backend::get('Sub Title');
+		if (empty($sub_title)) {
+			Backend::add('Sub Title', $controller->getHumanName());
+		}
 		return $results;
 	}
 
@@ -108,7 +111,7 @@ class HtmlView extends View {
 	 *
 	 */
 	public static function hook_post_display($data, $controller) {
-		Backend::addScript(SITE_LINK . 'js/backend.js');
+		Backend::addScript(SITE_LINK . '/js/backend.js');
 		//TODO Add site_link, and other vars, as JS vars
 		Backend::addScriptContent('var site_link = \'' . SITE_LINK . '\';');
 		//TODO if someone can land a script file in the correct place, he can insert JS at will...
@@ -124,11 +127,11 @@ class HtmlView extends View {
 		//Make sure that jquery and backend is right at the top
 		$scripts = array_unique(array_filter(Backend::getScripts()));
 		$against = array();
-		if (in_array(SITE_LINK . 'js/jquery.js', $scripts)) {
-			$against[] = SITE_LINK . 'js/jquery.js';
+		if (in_array(SITE_LINK . '/js/jquery.js', $scripts)) {
+			$against[] = SITE_LINK . '/js/jquery.js';
 		}
-		if (in_array(SITE_LINK . 'js/backend.js', $scripts)) {
-			$against[] = SITE_LINK . 'js/backend.js';
+		if (in_array(SITE_LINK . '/js/backend.js', $scripts)) {
+			$against[] = SITE_LINK . '/js/backend.js';
 		}
 		$scripts = array_unique(array_merge($against, $scripts));
 
@@ -245,6 +248,9 @@ class HtmlView extends View {
 					}
 					if (substr($query['path'], -1) != '/') {
 						$query['path'] .= '/';
+					}
+					if (array_key_exists('scheme', $query)) {
+						$query['scheme'] = $query['scheme'] . '://';
 					}
 
 					//Get the old vars

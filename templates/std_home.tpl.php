@@ -6,7 +6,7 @@
 				<?php if (method_exists(class_name(Controller::$area), 'define_' . $method)):
 					$definition = call_user_func(array(class_name(Controller::$area), 'define_' . $method));
 					if (!empty($definition['description'])): ?>
-						<p class="bottom"><?php echo $definition['description'] ?></p>
+						 <span class="quiet">- <?php echo $definition['description'] ?></span>
 					<?php endif; ?>
 				<?php endif; ?>
 			</li>

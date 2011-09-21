@@ -12,25 +12,31 @@
  */
 
 /**
- * Default class to handle JsonView specific functions
+ * Default class to handle XmlView specific functions
+ *
+ * We use the PEAR XML_Serializer class to do this.
  */
-class JsonView extends TextView {
+class XmlView extends TextView {
 	private static $ob_level = 0;
 
 	function __construct() {
-		$this->mode     = 'json';
-		self::$ob_level = ob_get_level();
+		require('XML/Serializer.php');
+
+		parent::__construct();
+		$this->mode      = 'xml';
+		$this->mime_type = 'application/xml';
+		$this->charset   = 'utf-8';
+		self::$ob_level  = ob_get_level();
 		ob_start();
 	}
 
 	public static function hook_output($to_print) {
 		//Construct the object to output
-		$object = new stdClass();
+		$object = new StdClass();
 		$object->result  = $to_print;
 		$object->error   = Backend::getError();
 		$object->notice  = Backend::getNotice();
 		$object->success = Backend::getSuccess();
-		$object->info    = Backend::getInfo();
 		$object->content = Backend::getContent();
 		$last = '';
 		while (ob_get_level() > self::$ob_level) {
@@ -43,9 +49,24 @@ class JsonView extends TextView {
 		Backend::setError();
 		Backend::setNotice();
 		Backend::setSuccess();
-		Backend::setInfo();
-		//$result_only = Controller::getVar('result_only');
-		return json_encode($object);
+
+		//Return the XML
+		$options = array(
+			XML_SERIALIZER_OPTION_INDENT           => "\t",
+			XML_SERIALIZER_OPTION_RETURN_RESULT    => true,
+			XML_SERIALIZER_OPTION_DEFAULT_TAG      => 'item',
+			XML_SERIALIZER_OPTION_XML_DECL_ENABLED => true,
+			//This is a very awkward way of saying $this
+			XML_SERIALIZER_OPTION_XML_ENCODING     => Controller::$view->charset,
+			XML_SERIALIZER_OPTION_ROOT_NAME        => 'XmlResult',
+			XML_SERIALIZER_OPTION_TYPEHINTS        => true,
+		);
+		$serializer = new XML_Serializer($options);
+		if ($result = @$serializer->serialize($object)) {
+			return $result;
+		} else {
+			return null;
+		}
 	}
 
 	public static function install() {

@@ -10,7 +10,7 @@
  * @license http://www.eclipse.org/legal/epl-v10.html Eclipse Public License v1.0
  * @package Models
  *
- * Generated with class_gen on 2009-08-07 09:55:19 
+ * Generated with class_gen on 2009-08-07 09:55:19
  */
 
 /**
@@ -45,4 +45,3 @@ class ValueObj extends DBObject {
 		return $toret ? $data : false;
 	}
 }
-

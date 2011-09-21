@@ -78,9 +78,9 @@ class BackendSitemap extends AreaCtl {
 			$last_date = strtotime($row['modified']) > $last_date ? strtotime($row['modified']) : $last_date;
 			$id        = array_key_exists('name', $row) ? $row['name'] : $row[$$object->getMeta('id')];
 			if (ConfigValue::get('CleanURLs', false)) {
-				$url = SITE_LINK . class_for_url($component) . '/' . $id;
+				$url = SITE_LINK . '/' . class_for_url($component) . '/' . $id;
 			} else {
-				$url = SITE_LINK . '?q=' . class_for_url($component) . '/' . $id;
+				$url = SITE_LINK . '/?q=' . class_for_url($component) . '/' . $id;
 			}
 			$row['url'] = $url;
 			$row = array_merge($row, $options);
@@ -89,9 +89,9 @@ class BackendSitemap extends AreaCtl {
 		//Add link to area
 		//TODO Make this configurable
 		if (ConfigValue::get('CleanURLs', false)) {
-			$url = SITE_LINK . class_for_url($component);
+			$url = SITE_LINK . '/' . class_for_url($component);
 		} else {
-			$url = SITE_LINK . '?q=' . class_for_url($component);
+			$url = SITE_LINK . '/?q=' . class_for_url($component);
 		}
 		$link = array('url' => $url, 'modified' => date('Y-m-d H:i:s', $last_date));
 		$link['priority']  = array_key_exists('area_priority', $options) ? $options['area_priority'] : 0.8;

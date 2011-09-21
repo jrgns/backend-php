@@ -19,4 +19,3 @@
 	</div>
 	<input type="submit" value="Change Password" class=""/>
 </form>
-
