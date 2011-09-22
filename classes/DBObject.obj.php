@@ -1092,7 +1092,20 @@ class DBObject
         if (array_key_exists('title', $this->meta['fields'])) {
             $filter .= ' OR `title` = :parameter';
         }
+
         $query->filter($filter);
+        //Check Ownership
+        /*
+        TODO
+        if (array_key_exists('owner_id', $this->meta['fields'])) {
+            if ($user = BackendUser::check()) {
+                if (!in_array('superadmin', $user->roles)) {
+                    $query->filter("`{$this->meta['table']}`.`owner_id` = :owner_id");
+                    $q_params[':owner_id'] = $user->id;
+                }
+            }
+        }
+        */
         return $query;
     }
 
@@ -1188,6 +1201,9 @@ class DBObject
         return array($query, count($parameters) ? $parameters : false);
     }
 
+    /**
+     * @todo Use the UpdateQuery class here
+     */
     public function getUpdateSQL($data, array $options = array())
     {
         extract($this->meta);
@@ -1256,17 +1272,43 @@ class DBObject
                 throw new Exception('Update Query Fields and Values don\'t match');
             }
         }
+
+        //Check Ownership
+        /*
+        TODO
+        if (array_key_exists('owner_id', $this->meta['fields'])) {
+            if ($user = BackendUser::check()) {
+                if (!in_array('superadmin', $user->roles)) {
+                    $query->filter("`{$this->meta['table']}`.`owner_id` = :owner_id");
+                    $q_params[':owner_id'] = $user->id;
+                }
+            }
+        }
+        */
         return array($query, count($parameters) ? $parameters : false);
     }
 
     public function getDeleteSQL()
     {
-        $query = false;
-        if ($id) {
-            extract($this->meta);
-            $query = new DeleteQuery($this);
-            $query->filter("`$table`.`$id_field` = :{$table}_id LIMIT 1");
+        if (!$id) {
+            return false;
         }
+        extract($this->meta);
+        $query = new DeleteQuery($this);
+        $query->filter("`$table`.`$id_field` = :{$table}_id LIMIT 1");
+        
+        //Check Ownership
+        /*
+        TODO
+        if (array_key_exists('owner_id', $this->meta['fields'])) {
+            if ($user = BackendUser::check()) {
+                if (!in_array('superadmin', $user->roles)) {
+                    $query->filter("`{$this->meta['table']}`.`owner_id` = :owner_id");
+                    $q_params[':owner_id'] = $user->id;
+                }
+            }
+        }
+        */
         return $query;
     }
 
