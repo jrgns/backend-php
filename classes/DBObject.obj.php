@@ -39,15 +39,18 @@ class DBObject
      * - conditions = array(ClassName => array(field_in_child => value | field_in_this_model))
      * - relation = single | multiple, defaults to single
      */
-    function __construct($meta = array(), array $options = array()) {
+    function __construct($meta = array(), array $options = array())
+    {
         if (!is_array($meta)) {
             $meta = is_numeric($meta) ? array('id' => $meta) : array();
         }
         $meta['id']        = array_key_exists('id', $meta)        ? $meta['id']        : false;
         $meta['id_field']  = array_key_exists('id_field', $meta)  ? $meta['id_field']  : 'id';
         $meta['table']     = array_key_exists('table', $meta)     ? $meta['table']     : table_name(get_class($this));
-        $meta['database']  = array_key_exists('database', $meta)  ? $meta['database']  : Backend::getConfig('backend.dbs.default.alias', 'default');
-        $meta['provider']  = array_key_exists('provider', $meta)  ? $meta['provider']  : Backend::getConfig('backend.provider', 'MySQL');
+        $meta['database']  = array_key_exists('database', $meta) 
+            ? $meta['database'] : Backend::getConfig('backend.dbs.default.alias', 'default');
+        $meta['provider']  = array_key_exists('provider', $meta)
+            ? $meta['provider']  : Backend::getConfig('backend.provider', 'MySQL');
         $meta['fields']    = array_key_exists('fields', $meta)    ? $meta['fields']    : array();
         $meta['keys']      = array_key_exists('keys', $meta)      ? $meta['keys']      : array();
         $meta['name']      = array_key_exists('name', $meta)      ? $meta['name']      : class_name(get_class($this));
@@ -63,7 +66,8 @@ class DBObject
         }
     }
 
-    private function checkConnection() {
+    private function checkConnection()
+    {
         $this->error_msg = false;
         if (!$this->db instanceof PDO) {
             try {
@@ -82,7 +86,8 @@ class DBObject
         return ($this->db instanceof PDO);
     }
 
-    private function loadRelation($class, $options, $load_mode) {
+    private function loadRelation($class, $options, $load_mode)
+    {
         $class_name = array_key_exists('model', $options) ? $options['model'] . 'Obj' : $class . 'Obj';
         if (!Component::isActive($class_name)) {
             return null;
@@ -94,7 +99,7 @@ class DBObject
         $type       = array_key_exists('type', $options)       ? $options['type']       : 'single';
         $order      = array_key_exists('order', $options)      ? $options['order']      : $relation->getMeta('order');
         if ($conditions) {
-            foreach($conditions as $field => $name) {
+            foreach ($conditions as $field => $name) {
                 if (is_array($name)) {
                     $operator = key($name);
                     $name     = current($name);
@@ -136,7 +141,8 @@ class DBObject
         return $relation;
     }
 
-    private function loadDeep($mode = 'array') {
+    private function loadDeep($mode = 'array')
+    {
         if (!in_array($mode, array('array', 'object')) && $this->$mode) {
             return null;
         }
@@ -174,23 +180,28 @@ class DBObject
         }
     }
 
-    public function loadArray(array $options = array()) {
+    public function loadArray(array $options = array())
+    {
         $this->read(array_merge($options, array('mode' => 'array')));
     }
 
-    public function loadObject(array $options = array()) {
+    public function loadObject(array $options = array())
+    {
         $this->read(array_merge($options, array('mode' => 'object')));
     }
 
-    public function loadList(array $options = array()) {
+    public function loadList(array $options = array())
+    {
         $this->read(array_merge($options, array('mode' => 'list')));
     }
 
-    public function load($options = array()) {
+    public function load($options = array())
+    {
         return $this->read($options);
     }
 
-    public function read($options = array()) {
+    public function read($options = array())
+    {
         //Setup and Init
         if (is_string($options)) {
             $options = array('mode' => $options);
@@ -267,9 +278,13 @@ class DBObject
                     }
                 }
                 $this->array = (array)$this->object;
-                array_walk_recursive($this->array,
-                    create_function('&$input, $key', 'if (is_object($input)) {'
-                    .' $input = (array)$input; } else { return $input; }'));
+                array_walk_recursive(
+                    $this->array,
+                    create_function(
+                        '&$input, $key', 'if (is_object($input)) {'
+                        .' $input = (array)$input; } else { return $input; }'
+                    )
+                );
                 //Reset the stack once we get back to the initial class
                 if ($this->getMeta('name') == reset(self::$class_stack)) {
                     self::$class_stack = array();
@@ -323,8 +338,9 @@ class DBObject
         return $result;
     }
 
-    public function process($data, $direction) {
-        foreach($data as $name => $value) {
+    public function process($data, $direction)
+    {
+        foreach ($data as $name => $value) {
             if (array_key_exists($name, $this->meta['fields'])) {
                 $options = $this->meta['fields'][$name];
                 if (!is_array($options)) {
@@ -370,7 +386,8 @@ class DBObject
         return $data;
     }
 
-    public function create($data, array $options = array()) {
+    public function create($data, array $options = array())
+    {
         $this->error_msg = false;
         if (!$this->checkConnection()) {
             if (class_exists('BackendError', false)) {
@@ -408,7 +425,8 @@ class DBObject
         return false;
     }
 
-    public function replace($data, array $options = array()) {
+    public function replace($data, array $options = array())
+    {
         $this->error_msg = false;
         if (!$this->checkConnection()) {
             if (class_exists('BackendError', false)) {
@@ -451,7 +469,8 @@ class DBObject
         return false;
     }
 
-    public function retrieve($parameter) {
+    public function retrieve($parameter)
+    {
         $this->error_msg = false;
         if (!$this->checkConnection()) {
             if (class_exists('BackendError', false)) {
@@ -478,7 +497,8 @@ class DBObject
         return null;
     }
 
-    public function update($data, array $options = array()) {
+    public function update($data, array $options = array())
+    {
         $this->error_msg = false;
         if (!$this->checkConnection()) {
             if (class_exists('BackendError', false)) {
@@ -513,7 +533,8 @@ class DBObject
         return false;
     }
 
-    public function delete(array $options = array()) {
+    public function delete(array $options = array())
+    {
         $this->error_msg = false;
         if (!$this->checkConnection()) {
             if (class_exists('BackendError', false)) {
@@ -523,7 +544,10 @@ class DBObject
             return false;
         }
         extract($this->meta);
-        $query = new CustomQuery("DELETE FROM `$table` WHERE `$id_field` = :id LIMIT 1", array('connection' => $this->db));
+        $query = new CustomQuery(
+            "DELETE FROM `$table` WHERE `$id_field` = :id LIMIT 1",
+            array('connection' => $this->db)
+        );
         if ($result = $query->execute(array(':id' => $this->meta['id']), $options)) {
             return $result;
         }
@@ -533,7 +557,8 @@ class DBObject
         return false;
     }
 
-    public function truncate(array $options = array()) {
+    public function truncate(array $options = array())
+    {
         $toret = false;
         $this->error_msg = false;
         if (!$this->checkConnection()) {
@@ -554,7 +579,8 @@ class DBObject
         return false;
     }
 
-    public function install(array $options = array()) {
+    public function install(array $options = array())
+    {
         $toret = false;
         $this->error_msg = false;
         if ($this->checkConnection()) {
@@ -563,7 +589,10 @@ class DBObject
             if ($query) {
                 if ($drop_table) {
                     $table = $this->getSource();
-                    $drop_query = new CustomQuery('DROP TABLE IF EXISTS ' . Query::getTable($this) . '', array('connection' => $this->db));
+                    $drop_query = new CustomQuery(
+                        'DROP TABLE IF EXISTS ' . Query::getTable($this) . '',
+                        array('connection' => $this->db)
+                    );
                     $drop_query->execute();
                     Backend::addNotice('Dropping table ' . $table);
                     if (!empty($drop_query->error_msg)) {
@@ -590,13 +619,14 @@ class DBObject
         return $toret;
     }
 
-    function validate($data, $action, $options = array()) {
+    function validate($data, $action, $options = array())
+    {
         //TODO Try to use $this->error_msg here
         $ret_data = array();
         $toret = true;
 
         if (is_array($data)) {
-            foreach($this->meta['fields'] as $name => $field_options) {
+            foreach ($this->meta['fields'] as $name => $field_options) {
                 $value = array_key_exists($name, $data) ? $data[$name] : null;
                 if (!empty($options['non_parameter'])
                         && is_array($options['non_parameter'])
@@ -747,7 +777,7 @@ class DBObject
                     break;
                 case 'date':
                     if (!is_null($value)) {
-                        $value = date('Y-m-d',       is_numeric($value) ? $value : strtotime($value));
+                        $value = date('Y-m-d', is_numeric($value) ? $value : strtotime($value));
                     }
                     break;
                 case 'datetime':
@@ -757,7 +787,7 @@ class DBObject
                     break;
                 case 'time':
                     if (!is_null($value)) {
-                        $value = date('H:i:s',       is_numeric($value) ? $value : strtotime($value));
+                        $value = date('H:i:s', is_numeric($value) ? $value : strtotime($value));
                     }
                     break;
                 case 'timestamp':
@@ -873,9 +903,10 @@ class DBObject
         return ($toret && count($ret_data)) ? $ret_data : false;
     }
 
-    public function fromRequest() {
+    public function fromRequest()
+    {
         $toret = array();
-        foreach($this->meta['fields'] as $name => $options) {
+        foreach ($this->meta['fields'] as $name => $options) {
             $toret[$name] = null;
 
             $options        = is_array($options) ? $options : array('type' => $options);
@@ -930,19 +961,22 @@ class DBObject
         return $toret;
     }
 
-    public function getSource() {
+    public function getSource()
+    {
         $database = Backend::getDBDefinition($this->meta['database']);
         return $database ? '`' . $database['database'] . '`.`' . $this->meta['table'] . '`' : false;
     }
 
-    public function getConnection() {
+    public function getConnection()
+    {
         if ($this->db instanceof PDO) {
             return $this->db;
         }
         return false;
     }
 
-    public function getSelectSQL($options = array()) {
+    public function getSelectSQL($options = array())
+    {
         //Check the DB Connection
         $this->error_msg = false;
         if (!$this->checkConnection()) {
@@ -966,7 +1000,7 @@ class DBObject
         //Joins
         $joins = array_key_exists('joins', $options) ? $options['joins'] : array();
         if (count($joins)) {
-            foreach($joins as $join) {
+            foreach ($joins as $join) {
                 if (is_array($join)) {
                     $query->joinArray($join);
                 }
@@ -1034,10 +1068,21 @@ class DBObject
         } else if (!empty($this->meta['group'])) {
             $query->group($this->meta['group']);
         }
+        
+        //Check Ownership
+        if (array_key_exists('owner_id', $this->meta['fields'])) {
+            if ($user = BackendUser::check()) {
+                if (!in_array('superadmin', $user->roles)) {
+                    $query->filter("`{$this->meta['table']}`.`owner_id` = :owner_id");
+                    $q_params[':owner_id'] = $user->id;
+                }
+            }
+        }
         return array($query, $q_params);
     }
 
-    public function getRetrieveSQL() {
+    public function getRetrieveSQL()
+    {
         list($query, $parameters)  = $this->getSelectSQL();
 
         $filter = '`' . $this->getMeta('id_field') . '` = :parameter';
@@ -1051,7 +1096,8 @@ class DBObject
         return $query;
     }
 
-    public function getCreateSQL($data, array $options = array()) {
+    public function getCreateSQL($data, array $options = array())
+    {
         extract($this->meta);
 
         $query = false;
@@ -1119,14 +1165,16 @@ class DBObject
                     if (is_array($options['on_duplicate'])) {
                         $temp = array();
                         //This is potentially buggy if name isn't a simple string...
-                        foreach($options['on_duplicate'] as $name => $value) {
+                        foreach ($options['on_duplicate'] as $name => $value) {
                             $parameters[':update_' . $name] = $value;
                             $temp[] = Query::enclose($name) . ' = :update_' . $name;
                         }
                         $query .= ' ON DUPLICATE KEY UPDATE ' . implode(', ', $temp);
                     //Use this for fields that get's changed in process();
                     } else if (array_key_exists($options['on_duplicate'], $fields)) {
-                        $query .= ' ON DUPLICATE KEY UPDATE ' . Query::enclose($options['on_duplicate']) . ' = :' . $options['on_duplicate'];
+                        $query .= ' ON DUPLICATE KEY UPDATE '
+                            . Query::enclose($options['on_duplicate'])
+                            . ' = :' . $options['on_duplicate'];
                     } else {
                         $query .= ' ON DUPLICATE KEY UPDATE ' . $options['on_duplicate'];
                     }
@@ -1140,7 +1188,8 @@ class DBObject
         return array($query, count($parameters) ? $parameters : false);
     }
 
-    public function getUpdateSQL($data, array $options = array()) {
+    public function getUpdateSQL($data, array $options = array())
+    {
         extract($this->meta);
 
         $query = false;
@@ -1210,7 +1259,8 @@ class DBObject
         return array($query, count($parameters) ? $parameters : false);
     }
 
-    public function getDeleteSQL() {
+    public function getDeleteSQL()
+    {
         $query = false;
         if ($id) {
             extract($this->meta);
@@ -1220,19 +1270,20 @@ class DBObject
         return $query;
     }
 
-    public function getInstallSQL() {
+    public function getInstallSQL()
+    {
         extract($this->meta);
         $query_fields = array();
         $query_keys = array();
         $keys = empty($keys) ? array() : $keys;
-        foreach($fields as $field => $field_options) {
+        foreach ($fields as $field => $field_options) {
             $field_arr = array();
             if (is_string($field_options)) {
                 $field_options = array('type' => $field_options);
             }
-            $type    = array_key_exists('type',    $field_options) ? $field_options['type']        : 'string';
+            $type    = array_key_exists('type', $field_options)    ? $field_options['type']    : 'string';
             $default = array_key_exists('default', $field_options) ? $field_options['default'] : null;
-            $null    = array_key_exists('null',    $field_options) ? $field_options['null']        : false;
+            $null    = array_key_exists('null', $field_options)    ? $field_options['null']    : false;
             $field_arr[] = '`' . $field . '`';
             switch($type) {
             case 'primarykey':
@@ -1410,7 +1461,7 @@ class DBObject
             $query_fields[] = implode(' ', array_map('trim', $field_arr));
         }
 
-        foreach($keys as $key => $key_options) {
+        foreach ($keys as $key => $key_options) {
             //Legacy
             if (is_string($key_options)) {
                 $fields = array_map('trim', explode(',', $key));
@@ -1454,7 +1505,8 @@ class DBObject
         return $query;
     }
 
-    public function getMeta($name = false) {
+    public function getMeta($name = false)
+    {
         if ($name) {
             $toret = array_key_exists($name, $this->meta) ? $this->meta[$name] : null;
         } else {
@@ -1463,15 +1515,18 @@ class DBObject
         return $toret;
     }
 
-    public function getObjectName() {
+    public function getObjectName()
+    {
         return $this->getMeta('name');
     }
 
-    public function getSearchFields() {
+    public function getSearchFields()
+    {
         return array_map(array('Query', 'enclose'), array_keys($this->getMeta('fields')));
     }
 
-    public function getArea() {
+    public function getArea()
+    {
         return class_for_url(get_class($this));
     }
 
@@ -1481,7 +1536,8 @@ class DBObject
      * We ignore the action so that it checks every action. You can customize
      * this per action by overriding this function in the model
      */
-    public function checkOwnership($action) {
+    public function checkOwnership($action)
+    {
         $data = $this->array ? $this->array : ($this->object ? (array)$this->object : false);
         if (!$data) {
             //Return true, otherwise invalid objects trigger permission errors
@@ -1501,7 +1557,8 @@ class DBObject
         return false;
     }
 
-    public function __toString() {
+    public function __toString()
+    {
         $class = get_called_class();
         if (!$class) {
             print_stacktrace();
