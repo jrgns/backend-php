@@ -479,7 +479,8 @@ class DBObject
             $this->error_msg = 'DB Connection Error';
             return null;
         }
-        if ($query = $this->getRetrieveSQL()) {
+        list($query, $parameters) = $this->getRetrieveSQL();
+        if ($query) {
             $stmt = $this->db->prepare($query);
             if ($stmt->execute(array(':parameter' => $parameter))) {
                 $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -1083,9 +1084,9 @@ class DBObject
 
     public function getRetrieveSQL()
     {
-        list($query, $parameters)  = $this->getSelectSQL();
+        list($query, $parameters) = $this->getSelectSQL();
 
-        $filter = '`' . $this->getMeta('id_field') . '` = :parameter';
+        $filter = 'BINARY `' . $this->getMeta('id_field') . '` = :parameter';
         if (array_key_exists('name', $this->meta['fields'])) {
             $filter .= ' OR `name` = :parameter';
         }
@@ -1094,19 +1095,7 @@ class DBObject
         }
 
         $query->filter($filter);
-        //Check Ownership
-        /*
-        TODO
-        if (array_key_exists('owner_id', $this->meta['fields'])) {
-            if ($user = BackendUser::check()) {
-                if (!in_array('superadmin', $user->roles)) {
-                    $query->filter("`{$this->meta['table']}`.`owner_id` = :owner_id");
-                    $q_params[':owner_id'] = $user->id;
-                }
-            }
-        }
-        */
-        return $query;
+        return array($query, $parameters);
     }
 
     public function getCreateSQL($data, array $options = array())

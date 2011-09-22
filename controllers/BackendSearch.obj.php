@@ -31,7 +31,7 @@ class BackendSearch extends TableCtl {
 		if (!is_array($fields)) {
 			$fields = array($fields);
 		}
-		$object = $controller->action_list('all', 0);
+		$object = $controller->get_list('all', 0);
 		$total = false;
 		if ($object->list) {
 			$total = 0;

@@ -70,7 +70,7 @@ class Image extends File {
 		return $this->feed_list($result, 'atom');
 	}
 
-	public function action_list($start, $count, array $options = array()) {
+	public function get_list($start, $count, array $options = array()) {
 		$toret = false;
 		Backend::add('Sub Title', 'List');
 		$obj_name = (class_name(Controller::$area) . 'Obj');

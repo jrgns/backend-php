@@ -175,7 +175,7 @@ class TableCtl extends AreaCtl {
 	/**
 	 * Action for listing an area's records
 	 */
-	public function action_list($start, $count, array $options = array()) {
+	public function get_list($start, $count, array $options = array()) {
 		$p_options = API::extract(call_user_func(array(get_called_class(), 'define_list')));
 		$options   = array_merge($options, $p_options);
 		return call_user_func(array(get_called_class(), 'do_list'), $start, $count, $options);
@@ -188,8 +188,8 @@ class TableCtl extends AreaCtl {
 			return false;
 		}
 		$toret = true;
-		if ($start === 'all') {
-			$limit = 'all';
+		if (strtolower($start) === 'all') {
+			$limit = false;
 		} else if ($start || $count) {
 			$limit = (int)$start . ', ' . (int)$count;
 		} else {
@@ -954,7 +954,7 @@ class TableCtl extends AreaCtl {
 		if ($obj_name && class_exists($obj_name, true)) {
 			$object = new $obj_name();
 			if ($parameter !== false) {
-				$query = $object->getRetrieveSQL();
+				list ($query, $parameters) = $object->getRetrieveSQL();
 				if ($query) {
 					if ($parameter == 'random') {
 						if ($query instanceof Query) {
@@ -966,10 +966,11 @@ class TableCtl extends AreaCtl {
 							$query .= ' ORDER BY RAND() LIMIT 1';
 						}
 					}
+					$parameters[':parameter'] = $parameter;
 					$object->read(
 						array(
 							'query'      => $query,
-							'parameters' => array(':parameter' => $parameter),
+							'parameters' => $parameters,
 							'mode'       => ($return == 'dbobject' ? 'object' : $return)
 						)
 					);

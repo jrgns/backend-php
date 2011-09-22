@@ -45,9 +45,9 @@ class BackendQueryObj extends DBObject {
 	}
 
 	public function getRetrieveSQL() {
-		$query = new SelectQuery(__CLASS__);
+        list($query, $parameters) = $this->getSelectSQL();
 		$query->filter('BINARY `id` = :parameter OR `alias` = :parameter');
-		return $query;
+		return array($query, $parameters);
 	}
 }
 

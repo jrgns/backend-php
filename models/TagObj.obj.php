@@ -61,12 +61,6 @@ class TagObj extends DBObject {
 		return parent::getSelectSQL($options);
 	}
 
-	public function getRetrieveSQL() {
-		$query = new SelectQuery(__CLASS__);
-		$query->filter('BINARY `id` = :parameter OR `name` = :parameter');
-		return $query;
-	}
-
 	function validate($data, $action, $options = array()) {
 		$toret = false;
 		$data = parent::validate($data, $action, $options);

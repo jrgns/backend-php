@@ -37,10 +37,10 @@ class BackendFileObj extends DBObject {
 		return parent::__construct($meta, $options);
 	}
 	
-	function getRetrieveSQL() {
-		$query = new SelectQuery(__CLASS__);
-		$query->filter('`id` = :parameter OR `file` = :parameter');
-		return $query;
+	public function getRetrieveSQL() {
+        list($query, $parameters) = $this->getSelectSQL();
+		$query->filter('BINARY `id` = :parameter OR `file` = :parameter');
+		return array($query, $parameters);
 	}
 	
 	function validate($data, $action, $options = array()) {

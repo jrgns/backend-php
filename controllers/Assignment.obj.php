@@ -11,7 +11,7 @@
  * @author J Jurgens du Toit (JadeIT cc) - initial API and implementation
  */
 class Assignment extends TableCtl {
-	function action_list($start, $count, array $options = array()) {
+	function get_list($start, $count, array $options = array()) {
 		$Assignments = new AssignmentObj();
 		if ($start === 'all') {
 			$limit = 'all';

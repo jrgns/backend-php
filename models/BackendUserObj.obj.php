@@ -147,6 +147,6 @@ class BackendUserObj extends DBObject {
 		$filter .= ' OR `email` = :parameter';
 		$filter .= ' OR `mobile` = :parameter';
 		$query->filter($filter);
-		return $query;
+		return array($query, $parameters);
 	}
 }
