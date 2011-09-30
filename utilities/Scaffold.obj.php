@@ -147,6 +147,17 @@ END;
 			case strtolower($row['Type']) == 'time':
 				$definition['type'] = strtolower($row['Type']);
 				break;
+			case strtolower($row['Type']) == 'tinyblob':
+			case strtolower($row['Type']) == 'mediumblob':
+			case strtolower($row['Type']) == 'blob':
+			case strtolower($row['Type']) == 'longblob':
+			    $pre = substr($row['Type'], 0, strlen($row['Type']) - 4);
+			    if ($pre == '') {
+    			    $definition['type'] = 'blob';
+			    } else {
+			        $definition['type'] = $pre . '_blob';
+		        }
+			    break;
 			default:
 				var_dump($row); die;
 				break;
