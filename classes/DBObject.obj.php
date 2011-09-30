@@ -47,7 +47,7 @@ class DBObject
         $meta['id']        = array_key_exists('id', $meta)        ? $meta['id']        : false;
         $meta['id_field']  = array_key_exists('id_field', $meta)  ? $meta['id_field']  : 'id';
         $meta['table']     = array_key_exists('table', $meta)     ? $meta['table']     : table_name(get_class($this));
-        $meta['database']  = array_key_exists('database', $meta) 
+        $meta['database']  = array_key_exists('database', $meta)
             ? $meta['database'] : Backend::getConfig('backend.dbs.default.alias', 'default');
         $meta['provider']  = array_key_exists('provider', $meta)
             ? $meta['provider']  : Backend::getConfig('backend.provider', 'MySQL');
@@ -863,9 +863,9 @@ class DBObject
                     //No break;
                     if ($value !== null) {
                         if (filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT) !== false) {
-                            $value = filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT);
+                            $value = (float)$value;
                         } else if (!empty($value)) {
-                            $this->error_msg = 'Invalid Integer Supplied';
+                            $this->error_msg = 'Invalid Float Supplied';
                             $toret = false;
                         }
                     }
@@ -877,7 +877,7 @@ class DBObject
                 }
 
                 //Set default value
-                if (is_null($value) && array_key_exists('default', $field_options)) {
+                if ($action == 'create' && is_null($value) && array_key_exists('default', $field_options)) {
                     $value = $field_options['default'];
                 }
 
@@ -944,7 +944,7 @@ class DBObject
                         }
                         Backend::addError($message);
                     } else {
-                        $toret[$name] = $_FILES[$name];
+                        $toret[$name] = file_get_contents($_FILES[$name]['tmp_name']);
                     }
                 }
             //Other Types
@@ -1069,7 +1069,7 @@ class DBObject
         } else if (!empty($this->meta['group'])) {
             $query->group($this->meta['group']);
         }
-        
+
         //Check Ownership
         if (array_key_exists('owner_id', $this->meta['fields'])) {
             if ($user = BackendUser::check()) {
@@ -1285,7 +1285,7 @@ class DBObject
         extract($this->meta);
         $query = new DeleteQuery($this);
         $query->filter("`$table`.`$id_field` = :{$table}_id LIMIT 1");
-        
+
         //Check Ownership
         /*
         TODO
