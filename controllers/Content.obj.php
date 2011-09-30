@@ -161,6 +161,8 @@ class Content extends CommentedController {
 			}
 		}
 		if (Backend::getDB('default')) {
+		    //TODO Make some of the content values (such as added and lastmodified) available
+		    //So you can add Last Modified on #lastmodified# to the content.
     		$content = parent::html_display($content);
 		}
 		return $content;
@@ -183,6 +185,7 @@ class Content extends CommentedController {
 			}
 			return $result;
 		} else {
+		    //TODO Use normal table search
 			Backend::addError('Backend Search is not enabled');
 		}
 		return false;

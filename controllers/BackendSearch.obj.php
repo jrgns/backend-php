@@ -5,7 +5,7 @@ class BackendSearch extends TableCtl {
 		if ($object) {
 			$terms  = preg_split('/[ ,]/', $term);
 			$params = array_merge(array($object->getSource()), $terms);
-			$query  = new SelectQuery(__CLASS__);
+			$query  = new SelectQuery(get_called_class());
 			$query
 				->field('DISTINCT `' . $object->getMeta('table') . '`.*')
 				->leftJoin(get_class($controller), '`' . $object->getMeta('table') . '`.`' . $object->getMeta('id_field') . '` = `table_id`')
@@ -31,6 +31,7 @@ class BackendSearch extends TableCtl {
 		if (!is_array($fields)) {
 			$fields = array($fields);
 		}
+		//TODO This is a bad idea. rather use a query and while
 		$object = $controller->get_list('all', 0);
 		$total = false;
 		if ($object->list) {

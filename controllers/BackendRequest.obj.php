@@ -25,7 +25,7 @@ class BackendRequest extends TableCtl {
 		$BR = new BackendRequestObj();
 		return $BR->create($data);
 	}
-	
+
 	public static function userLastSeen($user_id) {
 		$query = new SelectQuery('BackendRequest');
 		$query
@@ -34,7 +34,7 @@ class BackendRequest extends TableCtl {
 			->group('`user_id`');
 		return $query->fetchColumn(array(':user_id' => $user_id));
 	}
-	
+
 	public static function userVisits($user_id) {
 		$query = new SelectQuery('BackendRequest');
 		$query
@@ -46,19 +46,19 @@ class BackendRequest extends TableCtl {
 
 	public static function install(array $options = array()) {
 		$toret = parent::install($options);
-		
+
 		$toret = Hook::add('start', 'pre', __CLASS__, array('global' => true, 'sequence' => 1000)) && $toret;
 		return $toret;
 	}
-	
+
 	public function action_filter ($pageId = 1)
 	{
-		
+
 		$query = new SelectQuery('BackendRequest');
-		
+
 		$query->setFields(array('user_id', 'ip', 'user_agent', 'mode', 'request', 'query', 'COUNT(id) AS `occured`', 'MAX(`added`) AS `last_occured`'));
 		$query->setGroup(array('user_id', 'ip', 'user_agent', 'mode', 'request', 'query'));
-		
+
 		$params = $queryFilter = array();
 		$parameters = Controller::getVar('params');
 		$sort = Controller::getVar('sort');
@@ -80,14 +80,14 @@ class BackendRequest extends TableCtl {
 			$queryFilter[] = "user_agent LIKE('%{$parameters['user_agent']}%')";
 		}
 		$query->filter($queryFilter);
-		
+
 		$count = 10;
-		
+
 		if (!empty($sort['field']))
 		{
 			$query->setOrder(array($sort['field'] . '  ' . $sort['order']));
 		}
-		
+
 		if ($pageId == 1)
 		{
 			$start = 0;
@@ -99,10 +99,10 @@ class BackendRequest extends TableCtl {
 		{
 			$start = floor(($pageId - 1) * $count);
 		}
-		
-		
+
+
 		$pager = array();
-		
+
 		if ($start === 'all') {
 			$limit = 'all';
 		} else if ($start || $count) {
@@ -110,17 +110,17 @@ class BackendRequest extends TableCtl {
 		} else {
 			$limit = false;
 		}
-		
+
 		$query->limit($limit);
-		
-		
+
+
 		$items = $query->fetchAll($params);
-		
+
 		$totalItems = $query->getCount($params);
-		
+
 		$pager = '';
-		
-		if ($start || $count) 
+
+		if ($start || $count)
 		{
 			$pager = array (
 						'currentPage'	=> $pageId,
@@ -129,22 +129,22 @@ class BackendRequest extends TableCtl {
 						'totalPages'	=> round(($totalItems - 1) / $count, 0)
 						);
 		}
-		
+
 		$retArray['pager'] = $pager;
 		$retArray['data'] = $items;
 		$retArray['params'] = $parameters;
 		$retArray['sort'] = $sort;
-		
+
 
 		return $retArray;
 	}
-	
+
 	public function html_filter ($resultArray)
 	{
 		//backend_error.filter.tpl.php
 		Backend::addContent(Render::renderFile('backend_request.filter.tpl.php', array(
-																					'data' => $resultArray['data'], 
-																					'params' => $resultArray['params'], 
+																					'data' => $resultArray['data'],
+																					'params' => $resultArray['params'],
 																					'pager' => $resultArray['pager'],
 																					'sort' => $resultArray['sort'],
 																					)));
