@@ -141,6 +141,13 @@ class Tag extends TableCtl {
 		$query_links
 			->field('`foreign_id`')
 			->filter('`tag_id` = :tag_id');
+		if (array_key_exists('active', $links->getMeta('fields'))) {
+		    $query_links->filter('`active` = 1');
+		}
+		$order = $query_links->getOrder();
+		if (empty($order) && array_key_exists('added', $links->getMeta('fields'))) {
+		    $query_links->order('`added` DESC');
+		}
 
 		$start = array_key_exists('start', $options) ? $options['start'] : 0;
 		$count = array_key_exists('count', $options) ? $options['count'] : Value::get('list_length', 5);
