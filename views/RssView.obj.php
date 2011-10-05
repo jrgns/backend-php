@@ -10,24 +10,26 @@
  * @license http://www.eclipse.org/legal/epl-v10.html Eclipse Public License v1.0
  * @package View
  */
- 
+
 /**
  * Default class to handle RssView specific functions
  */
-class RssView extends View {
-	function __construct() {
-		$this->mode = 'rss';
-		$this->mime_type = 'application/xml';
-		$this->charset = 'utf-8';
-	}
-	
-	public static function hook_output($to_print) {
-		if ($to_print) {
-			$to_print = Render::renderFile('rss2.tpl.php');
-			$to_print = HtmlView::replace($to_print);
-			return trim($to_print);
-		}
-		return '';
-	}
-}
+class RssView extends View
+{
+    function __construct()
+    {
+        $this->mode = 'rss';
+        $this->mime_type = 'application/xml';
+        $this->charset = 'utf-8';
+    }
 
+    public static function hook_output($toPrint)
+    {
+        if ($toPrint) {
+            $toPrint = Render::file('rss2.tpl.php');
+            $toPrint = HtmlView::replace($toPrint);
+            return trim($toPrint);
+        }
+        return '';
+    }
+}

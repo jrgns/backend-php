@@ -10,23 +10,25 @@
  * @license http://www.eclipse.org/legal/epl-v10.html Eclipse Public License v1.0
  * @package View
  */
- 
+
 /**
  * Default class to handle AtomView specific functions
  */
-class AtomView extends View {
-	function __construct() {
-		$this->mode = 'atom';
-		$this->mime_type = 'application/atom+xml';
-	}
-	
-	public static function hook_output($to_print) {
-		if ($to_print) {
-			$to_print = Render::renderFile('atom.tpl.php');
-			$to_print = HtmlView::replace($to_print);
-			return trim($to_print);
-		}
-		return '';
-	}
-}
+class AtomView extends View
+{
+    function __construct()
+    {
+        $this->mode = 'atom';
+        $this->mime_type = 'application/atom+xml';
+    }
 
+    public static function hook_output($toPrint)
+    {
+        if ($toPrint) {
+            $toPrint = Render::file('atom.tpl.php');
+            $toPrint = HtmlView::replace($toPrint);
+            return trim($toPrint);
+        }
+        return '';
+    }
+}
