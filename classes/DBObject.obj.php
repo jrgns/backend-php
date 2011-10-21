@@ -1085,6 +1085,9 @@ class DBObject
     public function getRetrieveSQL()
     {
         list($query, $parameters) = $this->getSelectSQL();
+        if (!($query instanceof Query)) {
+            return false;
+        }
 
         $filter = 'BINARY `' . $this->getMeta('id_field') . '` = :parameter';
         if (array_key_exists('name', $this->meta['fields'])) {
