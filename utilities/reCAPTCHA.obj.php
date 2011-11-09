@@ -1,9 +1,9 @@
 <?php
 class reCAPTCHA {
 	public static $error_msg = false;
-	
+
 	public static function show() {
-		$key = Backend::getConfig('application.recaptcha.public_key');
+		$key = ConfigValue::get('recaptcha.PublicKey');
 		if (!empty(self::$error_msg)) {
 			$key .= '&error=' . self::$error_msg;
 		}
@@ -22,13 +22,13 @@ RecaptchaOptions = {
        height="300" width="500" frameborder="0"></iframe><br>
    <textarea name="recaptcha_challenge_field" rows="3" cols="40">
    </textarea>
-   <input type="hidden" name="recaptcha_response_field" 
+   <input type="hidden" name="recaptcha_response_field"
        value="manual_challenge">
 </noscript>
 
 END;
 	}
-	
+
 	public static function check($challenge, $response) {
 		self::$error_msg = false;
 		if (empty($challenge) || empty($response)) {
@@ -36,7 +36,7 @@ END;
 			return false;
 		}
 		$params = array(
-			'privatekey' => Backend::getConfig('application.recaptcha.private_key'),
+			'privatekey' => ConfigValue::get('recaptcha.PrivateKey'),
 			'remoteip'   => $_SERVER['REMOTE_ADDR'],
 			'challenge'  => $challenge,
 			'response'   => $response,
@@ -53,7 +53,7 @@ END;
 		}
 		return true;
 	}
-	
+
 	public static function translate($error) {
 		switch ($error) {
 		case 'incorrect-captcha-sol':
