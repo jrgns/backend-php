@@ -40,6 +40,7 @@ class BackendSitemap extends AreaCtl {
 			return false;
 		}
 		$controller = new $component();
+		$object     = $component::retrieve();
 		if (!($controller instanceof TableCtl)) {
 			Backend::addError('Could not generate sitemap: Invalid Area. (' . $component . ')');
 			return false;
@@ -76,7 +77,14 @@ class BackendSitemap extends AreaCtl {
 		//Compile Links
 		foreach($list as $row) {
 			$last_date = strtotime($row['modified']) > $last_date ? strtotime($row['modified']) : $last_date;
-			$id        = array_key_exists('name', $row) ? $row['name'] : $row[$$object->getMeta('id')];
+			if (empty($options['id_field'])) {
+    			$id        = !empty($row['name']) ? $row['name'] : $row[$object->getMeta('id_field')];
+			} else {
+			    $id = $row[$options['id_field']];
+		    }
+			if (empty($id)) {
+			    var_dump($id, $row, $object->getMeta('id_field'), $object->getMeta('id')); die;
+		    }
 			if (ConfigValue::get('CleanURLs', false)) {
 				$url = SITE_LINK . '/' . class_for_url($component) . '/' . $id;
 			} else {
