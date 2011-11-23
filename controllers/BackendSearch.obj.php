@@ -2,29 +2,40 @@
 class BackendSearch extends TableCtl {
 	public static function search(TableCtl $controller, $term, $filter = false) {
 		$object = call_user_func(array(get_class($controller), 'getObject'));
-		if ($object) {
-			$terms  = preg_split('/[ ,]/', $term);
-			$params = array_merge(array($object->getSource()), $terms);
-			$query  = new SelectQuery(get_called_class());
-			$query
-				->field('DISTINCT `' . $object->getMeta('table') . '`.*')
-				->leftJoin(get_class($controller), '`' . $object->getMeta('table') . '`.`' . $object->getMeta('id_field') . '` = `table_id`')
-				->filter('`table` = ?')
-				->filter('`word` IN (' . implode(', ', array_fill(0, count($terms), '?')) . ')')
-				->order('`count` DESC, `sequence`');
-			if ($filter) {
-				if (is_array($filter)) {
-					foreach($filter as $one_fil) {
-						$query->filter($one_fil);
-					}
-				} else {
-					$query->filter($filter);
+		if (!$object) {
+		    return false;
+	    }
+		$terms = preg_split('/[ ,]/', $term);
+		if (!count($terms)) {
+		    return false;
+	    }
+        //Check for results containing the word
+        $search = array();
+        foreach($terms as $oneTerm) {
+            $search[] = '`word` LIKE CONCAT("%", ?, "%")';
+        }
+        //Check for results with the exact word
+        $search[] = '`word` IN (' . implode(', ', array_fill(0, count($terms), '?')) . ')';
+        $search = '(' . implode(') OR (', $search) . ')';
+		$params = array_merge(array($object->getSource()), $terms, $terms);
+		$query  = new SelectQuery(get_called_class());
+		$query
+			->field('DISTINCT `' . $object->getMeta('table') . '`.*')
+			->leftJoin(get_class($controller), '`' . $object->getMeta('table') . '`.`' . $object->getMeta('id_field') . '` = `table_id`')
+			->filter('`table` = ?')
+			->filter($search)
+			->order('`count` DESC, `sequence`');
+		if ($filter) {
+			if (is_array($filter)) {
+				foreach($filter as $one_fil) {
+					$query->filter($one_fil);
 				}
+			} else {
+				$query->filter($filter);
 			}
-			$result = $query->fetchAll($params);
-			return $result;
 		}
-		return false;
+		$result = $query->fetchAll($params);
+		return $result;
 	}
 
 	public static function doIndex(TableCtl $controller, $fields = array('content')) {
