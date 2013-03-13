@@ -1,0 +1,20 @@
+{
+    "name": "jrgns/backend-php",
+    "type": "library",
+    "description": "PHP Framework that tries to do it all.",
+    "keywords": ["backend", "framework"],
+    "homepage": "http://backend-php.net",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jurgens du Toit",
+            "email": "jrgns@backend-php.net",
+            "homepage": "http://jrgns.net",
+            "role": "Designer / Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.0.0",
+    },
+    "target-dir": "backend"
+}
