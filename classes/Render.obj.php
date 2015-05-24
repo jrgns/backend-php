@@ -209,7 +209,7 @@ class Render {
 			if (array_key_exists('debug', $variables)) {
 				unset($variables['debug']);
 			}
-			return self::$cache_folder . md5($_SERVER['SCRIPT_NAME'] . $variables . $template_file) . '.' . filemtime($template_file) . '.php';
+			return self::$cache_folder . md5($_SERVER['SCRIPT_NAME'] . implode($variables) . $template_file) . '.' . filemtime($template_file) . '.php';
 		} else {
 			Backend::addError('Render::Template does not exist: ' . $template_file);
 			return false;
