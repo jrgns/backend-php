@@ -126,8 +126,17 @@ class Render {
 	 * @todo TODO Consider caching the template locations for faster lookups?
 	 */
 	public static function checkTemplateFile($filename) {
+		if (is_string($filename)) {
+			$filename = array($filename);
+		}
 		self::init();
-		return Controller::$view->getTemplateLocation($filename);
+		foreach($filename as $single) {
+			$result = Controller::$view->getTemplateLocation($single);
+			if ($result) {
+				return $result;
+			}
+		}
+		return false;
 	}
 
 	/**
